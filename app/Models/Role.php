@@ -47,8 +47,8 @@ class Role extends Model
     public function getPermission(string $moduleName, string $action): ?RolePermission
     {
         $permission = Permission::findByModuleAndAction($moduleName, $action);
-        
-        if (!$permission) {
+
+        if (! $permission) {
             return null;
         }
 

@@ -12,27 +12,26 @@ class EnsureRole
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$roles
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login');
         }
 
         $user = auth()->user();
-        
+
         // Check active role first (for role switching system)
         $activeRole = $user->getActiveRole();
-        
+
         if ($activeRole) {
             // User is using role switching - check active role
-            if (!in_array($activeRole, $roles) || !$user->hasRole($activeRole)) {
+            if (! in_array($activeRole, $roles) || ! $user->hasRole($activeRole)) {
                 abort(403, 'Unauthorized access. Please switch to the correct role.');
             }
         } else {
             // Fallback to old role column for backward compatibility
-            if (!in_array($user->role, $roles)) {
+            if (! in_array($user->role, $roles)) {
                 // Also check if user has any of the required roles
                 $hasRequiredRole = false;
                 foreach ($roles as $role) {
@@ -41,8 +40,8 @@ class EnsureRole
                         break;
                     }
                 }
-                
-                if (!$hasRequiredRole) {
+
+                if (! $hasRequiredRole) {
                     abort(403, 'Unauthorized access.');
                 }
             }

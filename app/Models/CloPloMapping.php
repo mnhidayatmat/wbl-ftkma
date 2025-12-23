@@ -72,11 +72,11 @@ class CloPloMapping extends Model
     public function scopeAllowedForAssessment($query)
     {
         // Check if clo_plo_relationships table exists
-        if (!\Illuminate\Support\Facades\Schema::hasTable('clo_plo_relationships')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('clo_plo_relationships')) {
             // If table doesn't exist, return empty query (will fallback to default CLOs)
             return $query->whereRaw('1 = 0');
         }
-        
+
         return $query->where('is_active', true)
             ->where('allow_for_assessment', true)
             ->whereHas('ploRelationships'); // Must have at least one PLO mapping
@@ -95,8 +95,8 @@ class CloPloMapping extends Model
      */
     public function isEligibleForAssessment(): bool
     {
-        return $this->is_active 
-            && $this->allow_for_assessment 
+        return $this->is_active
+            && $this->allow_for_assessment
             && $this->ploRelationships()->exists();
     }
 }

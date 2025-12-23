@@ -106,9 +106,10 @@ class Moa extends Model
      */
     public function isExpired(): bool
     {
-        if (!$this->end_date) {
+        if (! $this->end_date) {
             return false;
         }
+
         return $this->end_date < now();
     }
 
@@ -117,7 +118,7 @@ class Moa extends Model
      */
     public function getStatusBadgeColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'Signed' => 'green',
             'In Progress' => 'yellow',
             'Draft' => 'gray',

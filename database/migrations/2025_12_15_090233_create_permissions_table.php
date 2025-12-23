@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('sort_order')->default(0);
             $table->timestamps();
-            
+
             $table->unique(['module_name', 'action']);
             $table->index('module_name');
         });

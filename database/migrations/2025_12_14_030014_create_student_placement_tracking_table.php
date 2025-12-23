@@ -23,7 +23,7 @@ return new class extends Migration
                 'OFFER_RECEIVED',
                 'ACCEPTED',
                 'CONFIRMED',
-                'SCL_RELEASED'
+                'SCL_RELEASED',
             ])->default('NOT_APPLIED');
             $table->timestamp('sal_released_at')->nullable();
             $table->foreignId('sal_released_by')->nullable()->constrained('users')->onDelete('set null');
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
-            
+
             $table->index('status');
             $table->index('group_id');
             $table->unique('student_id');

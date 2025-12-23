@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('next_action_date')->nullable();
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
-            
+
             $table->index('company_id');
             $table->index('created_at');
         });

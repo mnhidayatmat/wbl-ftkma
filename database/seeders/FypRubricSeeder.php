@@ -12,12 +12,12 @@ class FypRubricSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Based on FYP Assessment Mapping:
      * - Written Report (55% total): Mid-Term + End-Term
      *   - Mid-Term FYP (Pt. 1): AT = 5%, IC = 15%
      *   - End-Term FYP (Pt. 2): AT = 25%, IC = 10%
-     * 
+     *
      * CLO Mapping:
      * - CLO 1 & 7: Proposed Methodology
      * - CLO 4: Problem Statement, Objectives & Scope
@@ -40,7 +40,7 @@ class FypRubricSeeder extends Seeder
 
     /**
      * Mid-Term Written Report - AT Evaluation (5% total)
-     * 
+     *
      * Weight distribution:
      * - CLO 1 & 7 (Methodology): 2%
      * - CLO 4 (Problem, Objectives, Scope): 1%
@@ -69,14 +69,14 @@ class FypRubricSeeder extends Seeder
             ['code' => 'PS', 'name' => 'Problem Statement', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 0.33],
             ['code' => 'OBJ', 'name' => 'Project Objectives', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 0.33],
             ['code' => 'SCO', 'name' => 'Project Scope', 'clo' => 'CLO4', 'weight' => 6.66, 'contribution' => 0.34],
-            
+
             // CLO 5: Flowchart & Gantt Chart (1% = 20% of 5%)
             ['code' => 'FC', 'name' => 'Project Flowchart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 0.50],
             ['code' => 'GC', 'name' => 'Project Gantt-Chart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 0.50],
-            
+
             // CLO 6: Literature Survey (1% = 20% of 5%)
             ['code' => 'LR', 'name' => 'Literature Survey', 'clo' => 'CLO6', 'weight' => 20.00, 'contribution' => 1.00],
-            
+
             // CLO 1 & 7: Proposed Methodology (2% = 40% of 5%)
             ['code' => 'MTH', 'name' => 'Proposed Methodology', 'clo' => 'CLO1,CLO7', 'weight' => 40.00, 'contribution' => 2.00],
         ];
@@ -86,7 +86,7 @@ class FypRubricSeeder extends Seeder
 
     /**
      * Mid-Term Written Report - IC Evaluation (15% total)
-     * 
+     *
      * Weight distribution:
      * - CLO 1 & 7 (Methodology): 6%
      * - CLO 4 (Problem, Objectives, Scope): 3%
@@ -115,14 +115,14 @@ class FypRubricSeeder extends Seeder
             ['code' => 'PS', 'name' => 'Problem Statement', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 1.00],
             ['code' => 'OBJ', 'name' => 'Project Objectives', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 1.00],
             ['code' => 'SCO', 'name' => 'Project Scope', 'clo' => 'CLO4', 'weight' => 6.66, 'contribution' => 1.00],
-            
+
             // CLO 5: Flowchart & Gantt Chart (3% = 20% of 15%)
             ['code' => 'FC', 'name' => 'Project Flowchart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 1.50],
             ['code' => 'GC', 'name' => 'Project Gantt-Chart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 1.50],
-            
+
             // CLO 6: Literature Survey (3% = 20% of 15%)
             ['code' => 'LR', 'name' => 'Literature Survey', 'clo' => 'CLO6', 'weight' => 20.00, 'contribution' => 3.00],
-            
+
             // CLO 1 & 7: Proposed Methodology (6% = 40% of 15%)
             ['code' => 'MTH', 'name' => 'Proposed Methodology', 'clo' => 'CLO1,CLO7', 'weight' => 40.00, 'contribution' => 6.00],
         ];
@@ -132,7 +132,7 @@ class FypRubricSeeder extends Seeder
 
     /**
      * End-Term (Final) Written Report - AT Evaluation (25% total)
-     * 
+     *
      * Weight distribution:
      * - CLO 1 & 7 (Methodology): 10%
      * - CLO 4 (Problem, Objectives, Scope): 5%
@@ -160,14 +160,14 @@ class FypRubricSeeder extends Seeder
             ['code' => 'PS', 'name' => 'Problem Statement', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 1.67],
             ['code' => 'OBJ', 'name' => 'Project Objectives', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 1.67],
             ['code' => 'SCO', 'name' => 'Project Scope', 'clo' => 'CLO4', 'weight' => 6.66, 'contribution' => 1.66],
-            
+
             // CLO 5: Flowchart & Gantt Chart (5% = 20% of 25%)
             ['code' => 'FC', 'name' => 'Project Flowchart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 2.50],
             ['code' => 'GC', 'name' => 'Project Gantt-Chart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 2.50],
-            
+
             // CLO 6: Literature Survey (5% = 20% of 25%)
             ['code' => 'LR', 'name' => 'Literature Survey', 'clo' => 'CLO6', 'weight' => 20.00, 'contribution' => 5.00],
-            
+
             // CLO 1 & 7: Proposed Methodology (10% = 40% of 25%)
             ['code' => 'MTH', 'name' => 'Proposed Methodology', 'clo' => 'CLO1,CLO7', 'weight' => 40.00, 'contribution' => 10.00],
         ];
@@ -177,7 +177,7 @@ class FypRubricSeeder extends Seeder
 
     /**
      * End-Term (Final) Written Report - IC Evaluation (10% total)
-     * 
+     *
      * Weight distribution:
      * - CLO 1 & 7 (Methodology): 4%
      * - CLO 4 (Problem, Objectives, Scope): 2%
@@ -205,14 +205,14 @@ class FypRubricSeeder extends Seeder
             ['code' => 'PS', 'name' => 'Problem Statement', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 0.67],
             ['code' => 'OBJ', 'name' => 'Project Objectives', 'clo' => 'CLO4', 'weight' => 6.67, 'contribution' => 0.67],
             ['code' => 'SCO', 'name' => 'Project Scope', 'clo' => 'CLO4', 'weight' => 6.66, 'contribution' => 0.66],
-            
+
             // CLO 5: Flowchart & Gantt Chart (2% = 20% of 10%)
             ['code' => 'FC', 'name' => 'Project Flowchart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 1.00],
             ['code' => 'GC', 'name' => 'Project Gantt-Chart', 'clo' => 'CLO5', 'weight' => 10.00, 'contribution' => 1.00],
-            
+
             // CLO 6: Literature Survey (2% = 20% of 10%)
             ['code' => 'LR', 'name' => 'Literature Survey', 'clo' => 'CLO6', 'weight' => 20.00, 'contribution' => 2.00],
-            
+
             // CLO 1 & 7: Proposed Methodology (4% = 40% of 10%)
             ['code' => 'MTH', 'name' => 'Proposed Methodology', 'clo' => 'CLO1,CLO7', 'weight' => 40.00, 'contribution' => 4.00],
         ];

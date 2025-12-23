@@ -36,7 +36,7 @@ class PpeActivityLog extends Model
      */
     public function getActionLabelAttribute(): string
     {
-        return match($this->action) {
+        return match ($this->action) {
             'window_opened' => 'Assessment Window Opened',
             'window_closed' => 'Assessment Window Closed',
             'window_updated' => 'Assessment Window Updated',

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('example_answer')->nullable(); // Optional guidance
             $table->integer('order')->default(0); // For ordering questions
             $table->timestamps();
-            
+
             // Indexes
             $table->index('assessment_id');
             $table->index('order');

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('finalised_by')->constrained('users')->onDelete('cascade');
             $table->timestamp('finalised_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('student_id');
             $table->index('group_id');
             $table->index('is_finalised');

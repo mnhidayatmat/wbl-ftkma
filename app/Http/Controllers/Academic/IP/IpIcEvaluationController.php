@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Academic\IP;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
-use App\Models\AssessmentRubric;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
@@ -18,19 +17,20 @@ use Illuminate\View\View;
 class IpIcEvaluationController extends Controller
 {
     use ChecksAssessmentWindow;
+
     /**
      * Display the list of students for IC evaluation.
      */
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (!auth()->user()->isAdmin() && !auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Get ALL active assessments for IP course that have IC evaluator in assessment_evaluators table
         $icAssessments = Assessment::forCourse('IP')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
@@ -38,23 +38,23 @@ class IpIcEvaluationController extends Controller
             ->get();
 
         // Separate rubric-based and mark-based assessments
-        $rubricAssessments = $icAssessments->filter(fn($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
-        $markAssessments = $icAssessments->filter(fn($a) => !in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
+        $rubricAssessments = $icAssessments->filter(fn ($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
+        $markAssessments = $icAssessments->filter(fn ($a) => ! in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
             $query->where('ic_id', auth()->id());
         }
 
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -68,11 +68,11 @@ class IpIcEvaluationController extends Controller
 
         // Get all rubric marks for these students (only IP IC assessments)
         $allRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'IP')
-                  ->whereHas('evaluators', function($eq) {
-                      $eq->where('evaluator_role', 'ic');
-                  });
+                    ->whereHas('evaluators', function ($eq) {
+                        $eq->where('evaluator_role', 'ic');
+                    });
             })
             ->with('rubric.assessment')
             ->get()
@@ -85,19 +85,19 @@ class IpIcEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate total items (rubric questions + mark-based assessments)
-        $totalRubricQuestions = $rubricAssessments->sum(fn($a) => $a->rubrics->count());
+        $totalRubricQuestions = $rubricAssessments->sum(fn ($a) => $a->rubrics->count());
         $totalMarkAssessments = $markAssessments->count();
         $totalItems = $totalRubricQuestions + $totalMarkAssessments;
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($allRubricMarks, $allMarks, $rubricAssessments, $markAssessments, $totalItems) {
+        $studentsWithStatus = $students->map(function ($student) use ($allRubricMarks, $allMarks, $markAssessments, $totalItems) {
             $studentRubricMarks = $allRubricMarks->get($student->id, collect());
             $studentMarks = $allMarks->get($student->id, collect());
-            
+
             $completedRubrics = $studentRubricMarks->count();
-            $completedMarks = $studentMarks->filter(fn($m) => $m->mark !== null)->count();
+            $completedMarks = $studentMarks->filter(fn ($m) => $m->mark !== null)->count();
             $completedCount = $completedRubrics + $completedMarks;
-            
+
             $totalContribution = 0;
 
             // Calculate contribution from rubric marks
@@ -110,7 +110,7 @@ class IpIcEvaluationController extends Controller
                 if ($mark->mark !== null && $mark->max_mark > 0) {
                     $assessment = $markAssessments->firstWhere('id', $mark->assessment_id);
                     if ($assessment) {
-                         // Use IC evaluator weight instead of full assessment weight if exists
+                        // Use IC evaluator weight instead of full assessment weight if exists
                         $icEvaluator = $assessment->evaluators->firstWhere('evaluator_role', 'ic');
                         $icWeight = $icEvaluator ? $icEvaluator->total_score : $assessment->weight_percentage;
                         $totalContribution += ($mark->mark / $mark->max_mark) * $icWeight;
@@ -150,8 +150,9 @@ class IpIcEvaluationController extends Controller
         $groups = WblGroup::orderBy('name')->get();
 
         // Calculate total IC weight from evaluators table
-        $totalIcWeight = $icAssessments->sum(function($assessment) {
+        $totalIcWeight = $icAssessments->sum(function ($assessment) {
             $icEvaluator = $assessment->evaluators->firstWhere('evaluator_role', 'ic');
+
             return $icEvaluator ? $icEvaluator->total_score : 0;
         });
 
@@ -168,7 +169,7 @@ class IpIcEvaluationController extends Controller
     public function show(Student $student): View
     {
         // Check authorization - Admin can view any, IC can view assigned students
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isIndustry()) {
                 if ($student->ic_id !== auth()->id()) {
                     abort(403, 'You are not authorized to view this student. This student is assigned to a different Industry Coach.');
@@ -177,14 +178,14 @@ class IpIcEvaluationController extends Controller
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Load relationships
         $student->load('academicTutor', 'industryCoach', 'group');
 
         // Get ALL active assessments for IP course that have IC evaluator role
         // Eager load rubrics and components
         $allIcAssessments = Assessment::forCourse('IP')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
@@ -195,11 +196,11 @@ class IpIcEvaluationController extends Controller
 
         // Get existing rubric marks for this student (only IP IC assessments)
         $rubricMarks = StudentAssessmentRubricMark::where('student_id', $student->id)
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'IP')
-                  ->whereHas('evaluators', function($eq) {
-                      $eq->where('evaluator_role', 'ic');
-                  });
+                    ->whereHas('evaluators', function ($eq) {
+                        $eq->where('evaluator_role', 'ic');
+                    });
             })
             ->with('rubric.assessment')
             ->get()
@@ -243,7 +244,7 @@ class IpIcEvaluationController extends Controller
 
         // Get AT marks for read-only display
         $atAssessments = Assessment::forCourse('IP')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'at');
             })
             ->active()
@@ -267,8 +268,9 @@ class IpIcEvaluationController extends Controller
         }
 
         // Calculate total possible IC weight
-        $totalIcWeight = $allIcAssessments->sum(function($assessment) {
+        $totalIcWeight = $allIcAssessments->sum(function ($assessment) {
             $icEvaluator = $assessment->evaluators->firstWhere('evaluator_role', 'ic');
+
             return $icEvaluator ? $icEvaluator->total_score : 0;
         });
 
@@ -293,15 +295,15 @@ class IpIcEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate
-        if (!Gate::allows('edit-ic-marks', $student)) {
+        if (! Gate::allows('edit-ic-marks', $student)) {
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('ic');
         }
-        
+
         // Validate input
         $validated = $request->validate([
             'assessment_id' => ['required', 'exists:assessments,id'],
@@ -318,7 +320,7 @@ class IpIcEvaluationController extends Controller
 
         $assessmentId = $validated['assessment_id'];
         $assessment = Assessment::with(['components', 'rubrics'])->findOrFail($assessmentId);
-        
+
         // Validate assessment belongs to IP and has IC evaluator
         if ($assessment->course_code !== 'IP') {
             return redirect()->back()->with('error', 'Invalid assessment.');
@@ -326,7 +328,7 @@ class IpIcEvaluationController extends Controller
 
         // Check IC evaluator exists for this assessment
         $hasIcEvaluator = $assessment->evaluators()->where('evaluator_role', 'ic')->exists();
-        if (!$hasIcEvaluator) {
+        if (! $hasIcEvaluator) {
             return redirect()->back()->with('error', 'This assessment is not assigned to IC evaluator.');
         }
 
@@ -337,7 +339,9 @@ class IpIcEvaluationController extends Controller
 
             foreach ($validated['component_marks'] as $componentId => $rubricScore) {
                 $component = $assessment->components->find($componentId);
-                if (!$component) continue;
+                if (! $component) {
+                    continue;
+                }
 
                 $componentRemarks = $validated['component_remarks'][$componentId] ?? null;
 
@@ -359,7 +363,7 @@ class IpIcEvaluationController extends Controller
                 $componentWeight = $component->weight_percentage ?? 0;
                 $normalizedScore = $rubricScore / 5;
                 $weightedScore = $normalizedScore * $componentWeight;
-                
+
                 $totalWeightedScore += $weightedScore;
                 $totalWeight += $componentWeight;
             }
@@ -381,14 +385,18 @@ class IpIcEvaluationController extends Controller
                     'evaluated_by' => auth()->id(),
                 ]
             );
-        } 
+        }
         // Case 2: Legacy Rubric-Based Marking
         elseif ($assessment->rubrics->isNotEmpty() && isset($validated['rubric_scores'])) {
             foreach ($validated['rubric_scores'] as $rubricId => $score) {
-                if ($score === null) continue;
-                
+                if ($score === null) {
+                    continue;
+                }
+
                 $rubric = $assessment->rubrics->find($rubricId);
-                if (!$rubric) continue;
+                if (! $rubric) {
+                    continue;
+                }
 
                 // Validate score range
                 if ($score < $rubric->rubric_min || $score > $rubric->rubric_max) {
@@ -406,7 +414,7 @@ class IpIcEvaluationController extends Controller
                     ]
                 );
             }
-            
+
             // For legacy rubrics, sometimes we don't have a single "Overall Mark" in StudentAssessmentMark
             // unless the system expects one. In OSH/PPE refactor, we usually just store the rubric marks.
         }

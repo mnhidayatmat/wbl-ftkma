@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
 use App\Models\Company;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Route;
 
 class SearchController extends Controller
@@ -18,21 +16,21 @@ class SearchController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('q', '');
-        
+
         if (empty($query) || strlen($query) < 2) {
             return response()->json([
                 'results' => [],
-                'message' => 'Please enter at least 2 characters'
+                'message' => 'Please enter at least 2 characters',
             ]);
         }
 
         $results = [];
 
         // Search Students
-        $students = Student::where(function($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('matric_no', 'like', "%{$query}%");
-            })
+        $students = Student::where(function ($q) use ($query) {
+            $q->where('name', 'like', "%{$query}%")
+                ->orWhere('matric_no', 'like', "%{$query}%");
+        })
             ->with(['group', 'company'])
             ->limit(5)
             ->get()
@@ -41,17 +39,17 @@ class SearchController extends Controller
                     'type' => 'student',
                     'id' => $student->id,
                     'title' => $student->name,
-                    'subtitle' => $student->matric_no . ' • ' . ($student->group ? $student->group->name : 'No Group'),
+                    'subtitle' => $student->matric_no.' • '.($student->group ? $student->group->name : 'No Group'),
                     'url' => route('students.show', $student->id),
-                    'icon' => 'user'
+                    'icon' => 'user',
                 ];
             });
 
         // Search Companies
-        $companies = Company::where(function($q) use ($query) {
-                $q->where('company_name', 'like', "%{$query}%")
-                  ->orWhere('email', 'like', "%{$query}%");
-            })
+        $companies = Company::where(function ($q) use ($query) {
+            $q->where('company_name', 'like', "%{$query}%")
+                ->orWhere('email', 'like', "%{$query}%");
+        })
             ->limit(5)
             ->get()
             ->map(function ($company) {
@@ -61,7 +59,7 @@ class SearchController extends Controller
                     'title' => $company->company_name,
                     'subtitle' => $company->email ?? 'No email',
                     'url' => route('companies.show', $company->id),
-                    'icon' => 'building'
+                    'icon' => 'building',
                 ];
             });
 
@@ -77,9 +75,9 @@ class SearchController extends Controller
                         'type' => 'user',
                         'id' => $user->id,
                         'title' => $user->name,
-                        'subtitle' => $user->email . ' • ' . ucfirst($user->role),
+                        'subtitle' => $user->email.' • '.ucfirst($user->role),
                         'url' => '#', // Add user profile route if exists
-                        'icon' => 'user-circle'
+                        'icon' => 'user-circle',
                     ];
                 });
         }
@@ -88,8 +86,7 @@ class SearchController extends Controller
 
         return response()->json([
             'results' => $results->values(),
-            'count' => $results->count()
+            'count' => $results->count(),
         ]);
     }
 }
-

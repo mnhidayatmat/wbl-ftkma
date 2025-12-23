@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('li_result_finalisations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('student_id')->nullable()->constrained('students')->onDelete('cascade');
+            $table->foreignId('group_id')->nullable()->constrained('wbl_groups')->onDelete('cascade');
+            $table->string('finalisation_scope')->default('student'); // student, group, course
+            $table->boolean('is_finalised')->default(false);
+            $table->text('notes')->nullable();
+            $table->foreignId('finalised_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->timestamp('finalised_at')->nullable();
             $table->timestamps();
+
+            $table->unique('student_id');
         });
     }
 

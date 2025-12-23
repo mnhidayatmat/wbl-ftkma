@@ -21,7 +21,7 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('assessments', [IpAssessmentController::class, 'index'])->name('assessments.index');
         // Route::get('summary', [IpSummaryController::class, 'index'])->name('summary.index');
     });
-    
+
     // Student routes for IP overview
     Route::middleware('role:student')->prefix('student/ip')->name('student.ip.')->group(function () {
         Route::get('overview', function () {
@@ -29,4 +29,3 @@ Route::middleware(['auth'])->group(function () {
         })->name('overview');
     });
 });
-

@@ -18,10 +18,10 @@ return new class extends Migration
             $table->decimal('weight_percentage', 5, 2); // Weight percentage for this CLO within the assessment
             $table->integer('order')->default(0); // For ordering CLOs
             $table->timestamps();
-            
+
             // Ensure unique CLO per assessment
             $table->unique(['assessment_id', 'clo_code']);
-            
+
             // Indexes
             $table->index('assessment_id');
             $table->index('order');

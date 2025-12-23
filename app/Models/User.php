@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPassword;
+use App\Notifications\VerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use App\Notifications\VerifyEmail;
-use App\Notifications\ResetPassword;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -116,6 +116,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isActingAs(string $roleName): bool
     {
         $activeRole = $this->getActiveRole();
+
         return $activeRole === $roleName && $this->hasRole($roleName);
     }
 
@@ -128,6 +129,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'admin' && $this->hasRole('admin');
         }
+
         // Fallback to old role column for backward compatibility
         return $this->role === 'admin' || $this->hasRole('admin');
     }
@@ -141,6 +143,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'lecturer' && $this->hasRole('lecturer');
         }
+
         return $this->role === 'lecturer' || $this->hasRole('lecturer');
     }
 
@@ -153,6 +156,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'ic' && $this->hasRole('ic');
         }
+
         return $this->role === 'industry' || $this->hasRole('ic');
     }
 
@@ -165,6 +169,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'student' && $this->hasRole('student');
         }
+
         return $this->role === 'student' || $this->hasRole('student');
     }
 
@@ -177,6 +182,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'supervisor_li' && $this->hasRole('supervisor_li');
         }
+
         return $this->role === 'supervisor_li' || $this->hasRole('supervisor_li');
     }
 
@@ -189,6 +195,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'at' && $this->hasRole('at');
         }
+
         return $this->role === 'at' || $this->hasRole('at');
     }
 
@@ -201,6 +208,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'ic' && $this->hasRole('ic');
         }
+
         return $this->role === 'industry' || $this->hasRole('ic');
     }
 
@@ -213,6 +221,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === 'coordinator' && $this->hasRole('coordinator');
         }
+
         return $this->hasRole('coordinator');
     }
 
@@ -225,6 +234,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($activeRole) {
             return $activeRole === $role && $this->hasRole($role);
         }
+
         return $this->role === $role || $this->hasRole($role);
     }
 

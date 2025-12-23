@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Academic\OSH;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
-use App\Models\OSH\OshModerationRecord;
 use App\Models\OSH\OshAuditLog;
+use App\Models\OSH\OshModerationRecord;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
@@ -19,7 +19,7 @@ class OshModerationController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -42,9 +42,9 @@ class OshModerationController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -76,17 +76,16 @@ class OshModerationController extends Controller
             ->keyBy('student_id');
 
         // Calculate scores for each student
-        $studentsWithScores = $students->map(function($student) use (
+        $studentsWithScores = $students->map(function ($student) use (
             $allLecturerMarks,
             $allIcRubricMarks,
             $lecturerAssessments,
-            $icAssessments,
             $moderationRecords
         ) {
             // Calculate Lecturer marks
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
             $lecturerMarksByAssessment = $lecturerMarks->keyBy('assessment_id');
-            
+
             $lecturerTotal = 0;
             foreach ($lecturerAssessments as $assessment) {
                 $mark = $lecturerMarksByAssessment->get($assessment->id);
@@ -136,7 +135,7 @@ class OshModerationController extends Controller
      */
     public function show(Student $student): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -202,7 +201,7 @@ class OshModerationController extends Controller
      */
     public function store(Request $request, Student $student)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 

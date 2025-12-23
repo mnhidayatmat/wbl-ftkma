@@ -16,7 +16,7 @@ class IpFinalisationController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -26,9 +26,9 @@ class IpFinalisationController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -88,7 +88,7 @@ class IpFinalisationController extends Controller
      */
     public function finaliseStudent(Request $request, Student $student)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -127,7 +127,7 @@ class IpFinalisationController extends Controller
      */
     public function finaliseGroup(Request $request, WblGroup $group)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -153,7 +153,7 @@ class IpFinalisationController extends Controller
                 ->where('is_finalised', true)
                 ->first();
 
-            if (!$existing) {
+            if (! $existing) {
                 IpResultFinalisation::updateOrCreate(
                     ['student_id' => $student->id],
                     [
@@ -178,7 +178,7 @@ class IpFinalisationController extends Controller
      */
     public function finaliseCourse(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -202,7 +202,7 @@ class IpFinalisationController extends Controller
                 ->where('is_finalised', true)
                 ->first();
 
-            if (!$existing) {
+            if (! $existing) {
                 IpResultFinalisation::updateOrCreate(
                     ['student_id' => $student->id],
                     [

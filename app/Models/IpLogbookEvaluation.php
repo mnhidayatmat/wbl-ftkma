@@ -50,7 +50,7 @@ class IpLogbookEvaluation extends Model
             return 'Not Evaluated';
         }
 
-        return match(true) {
+        return match (true) {
             $this->score <= 2 => 'Poor',
             $this->score <= 4 => 'Below Average',
             $this->score <= 6 => 'Average',
@@ -81,7 +81,7 @@ class IpLogbookEvaluation extends Model
     public static function getAverageScore(int $studentId): float
     {
         $evaluations = static::forStudent($studentId)->whereNotNull('score')->get();
-        
+
         if ($evaluations->isEmpty()) {
             return 0;
         }

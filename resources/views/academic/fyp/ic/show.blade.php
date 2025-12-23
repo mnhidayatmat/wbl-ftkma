@@ -1191,13 +1191,10 @@ function updateComponentRowOrder(assessmentId) {
             })
         }).then(response => response.json())
         .then(data => {
-            if (data.success) {
-                // Optional: Show success message
-                console.log('Component order updated');
-            }
+            // Component order updated silently
         })
         .catch(error => {
-            console.error('Error updating component order:', error);
+            // Silent error handling for production
         });
     }
 }

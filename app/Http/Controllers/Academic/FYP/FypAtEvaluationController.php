@@ -13,7 +13,6 @@ use App\Traits\ChecksAssessmentWindow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class FypAtEvaluationController extends Controller
@@ -26,7 +25,7 @@ class FypAtEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Only Admin and AT can access AT evaluation
-        if (!auth()->user()->isAdmin() && !auth()->user()->isAt()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isAt()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -41,18 +40,18 @@ class FypAtEvaluationController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, AT only sees assigned students
-        if (auth()->user()->isAt() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isAt() && ! auth()->user()->isAdmin()) {
             $query->where('at_id', auth()->id());
         }
 
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -71,7 +70,7 @@ class FypAtEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($assessments, $allMarks, $totalWeight) {
+        $studentsWithStatus = $students->map(function ($student) use ($assessments, $allMarks) {
             $studentMarks = $allMarks->get($student->id, collect());
             $marksByAssessment = $studentMarks->keyBy('assessment_id');
 
@@ -137,16 +136,16 @@ class FypAtEvaluationController extends Controller
         $student->load('academicTutor', 'industryCoach', 'group');
 
         // Check authorization: Admin or assigned AT
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isAt()) {
                 if ($student->at_id !== auth()->id()) {
-                    abort(403, "You are not authorized to edit AT marks for this student. This student is assigned to a different AT.");
+                    abort(403, 'You are not authorized to edit AT marks for this student. This student is assigned to a different AT.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Get active assessments for FYP course with AT evaluator role
         $assessments = Assessment::forCourse('FYP')
             ->forEvaluator('at')
@@ -192,21 +191,28 @@ class FypAtEvaluationController extends Controller
 
         // Sort assessments within each phase: Report first, then Oral/Presentation
         foreach ($assessmentsByPhase as $phase => $phaseAssessments) {
-            $assessmentsByPhase[$phase] = $phaseAssessments->sortBy(function($a) {
-                if (str_contains($a->assessment_name, 'Report')) return 1;
-                if (str_contains($a->assessment_name, 'Oral') || str_contains($a->assessment_name, 'Presentation')) return 2;
-                if (str_contains($a->assessment_name, 'Logbook')) return 3;
+            $assessmentsByPhase[$phase] = $phaseAssessments->sortBy(function ($a) {
+                if (str_contains($a->assessment_name, 'Report')) {
+                    return 1;
+                }
+                if (str_contains($a->assessment_name, 'Oral') || str_contains($a->assessment_name, 'Presentation')) {
+                    return 2;
+                }
+                if (str_contains($a->assessment_name, 'Logbook')) {
+                    return 3;
+                }
+
                 return 4;
             })->values();
         }
 
         // Remove empty phases
-        $assessmentsByPhase = $assessmentsByPhase->filter(fn($phase) => $phase->isNotEmpty());
+        $assessmentsByPhase = $assessmentsByPhase->filter(fn ($phase) => $phase->isNotEmpty());
 
         // Group assessments by base name (e.g., "Mid-Term Report" combines all CLOs)
         $groupedAssessments = collect([]);
         foreach ($assessmentsByPhase as $phase => $phaseAssessments) {
-            $grouped = $phaseAssessments->groupBy(function($a) {
+            $grouped = $phaseAssessments->groupBy(function ($a) {
                 // Remove CLO suffix to get base name
                 return preg_replace('/\s*\(CLO\d+\)\s*$/', '', $a->assessment_name);
             });
@@ -225,11 +231,11 @@ class FypAtEvaluationController extends Controller
         $totalAtWeight = $assessments->sum('weight_percentage');
 
         return view('academic.fyp.lecturer.show', compact(
-            'student', 
-            'assessments', 
+            'student',
+            'assessments',
             'assessmentsByPhase',
             'groupedAssessments',
-            'marks', 
+            'marks',
             'totalContribution',
             'totalAtWeight'
         ));
@@ -241,10 +247,10 @@ class FypAtEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isAt()) {
                 if ($student->at_id !== auth()->id()) {
-                    abort(403, "You are not authorized to edit AT marks for this student.");
+                    abort(403, 'You are not authorized to edit AT marks for this student.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
@@ -252,10 +258,10 @@ class FypAtEvaluationController extends Controller
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('at');
         }
-        
+
         $validated = $request->validate([
             'marks' => ['nullable', 'array'],
             'marks.*' => ['nullable', 'numeric', 'min:0'],
@@ -277,7 +283,7 @@ class FypAtEvaluationController extends Controller
         if ($request->has('component_marks') && $request->filled('assessment_id')) {
             $assessmentId = $validated['assessment_id'];
             $assessment = Assessment::with('components')->findOrFail($assessmentId);
-            
+
             // Validate assessment belongs to FYP and AT role
             if ($assessment->course_code !== 'FYP' || $assessment->evaluator_role !== 'at') {
                 return redirect()->back()
@@ -297,7 +303,7 @@ class FypAtEvaluationController extends Controller
                     }
 
                     $component = $assessment->components->find($componentId);
-                    if (!$component) {
+                    if (! $component) {
                         continue;
                     }
 
@@ -321,7 +327,7 @@ class FypAtEvaluationController extends Controller
                     $componentWeight = $component->weight_percentage ?? 0;
                     $normalizedScore = ($rubricScore / 5) * 100; // Convert 1-5 to percentage
                     $weightedScore = ($normalizedScore / 100) * $componentWeight;
-                    
+
                     $totalWeightedScore += $weightedScore;
                     $totalWeight += $componentWeight;
 
@@ -368,62 +374,62 @@ class FypAtEvaluationController extends Controller
             if ($request->has('marks')) {
                 foreach ($validated['marks'] as $assessmentId => $mark) {
                     $assessment = Assessment::findOrFail($assessmentId);
-                    
+
                     // Validate assessment belongs to FYP and AT role
                     if ($assessment->course_code !== 'FYP' || $assessment->evaluator_role !== 'at') {
                         continue; // Skip invalid assessments
-            }
-            
-            $maxMark = $validated['max_marks'][$assessmentId] ?? 100;
-            $remarks = $validated['remarks'][$assessmentId] ?? null;
-            
-            // Validate mark doesn't exceed max_mark
-            if ($mark !== null && $maxMark > 0 && $mark > $maxMark) {
-                return redirect()->back()
-                    ->with('error', "Mark for {$assessment->assessment_name} cannot exceed {$maxMark}.")
-                    ->withInput();
-            }
+                    }
 
-            // Get existing mark for audit log
-            $existingMark = StudentAssessmentMark::where('student_id', $student->id)
-                ->where('assessment_id', $assessmentId)
-                ->first();
+                    $maxMark = $validated['max_marks'][$assessmentId] ?? 100;
+                    $remarks = $validated['remarks'][$assessmentId] ?? null;
 
-            $oldMark = $existingMark?->mark;
-            $isNew = $existingMark === null;
+                    // Validate mark doesn't exceed max_mark
+                    if ($mark !== null && $maxMark > 0 && $mark > $maxMark) {
+                        return redirect()->back()
+                            ->with('error', "Mark for {$assessment->assessment_name} cannot exceed {$maxMark}.")
+                            ->withInput();
+                    }
 
-            StudentAssessmentMark::updateOrCreate(
-                [
-                    'student_id' => $student->id,
-                    'assessment_id' => $assessmentId,
-                ],
-                [
-                    'mark' => $mark ?: null,
-                    'max_mark' => $maxMark,
-                    'remarks' => $remarks,
-                    'evaluated_by' => auth()->id(),
-                ]
-            );
+                    // Get existing mark for audit log
+                    $existingMark = StudentAssessmentMark::where('student_id', $student->id)
+                        ->where('assessment_id', $assessmentId)
+                        ->first();
 
-            $updatedAssessments[] = $assessment->assessment_name;
-            $assessmentDetails[] = [
-                'assessment_id' => $assessmentId,
-                'assessment_name' => $assessment->assessment_name,
-                'old_mark' => $oldMark,
-                'new_mark' => $mark ?: null,
-                'max_mark' => $maxMark,
-                'is_new' => $isNew,
-            ];
+                    $oldMark = $existingMark?->mark;
+                    $isNew = $existingMark === null;
+
+                    StudentAssessmentMark::updateOrCreate(
+                        [
+                            'student_id' => $student->id,
+                            'assessment_id' => $assessmentId,
+                        ],
+                        [
+                            'mark' => $mark ?: null,
+                            'max_mark' => $maxMark,
+                            'remarks' => $remarks,
+                            'evaluated_by' => auth()->id(),
+                        ]
+                    );
+
+                    $updatedAssessments[] = $assessment->assessment_name;
+                    $assessmentDetails[] = [
+                        'assessment_id' => $assessmentId,
+                        'assessment_name' => $assessment->assessment_name,
+                        'old_mark' => $oldMark,
+                        'new_mark' => $mark ?: null,
+                        'max_mark' => $maxMark,
+                        'is_new' => $isNew,
+                    ];
                 }
             }
         }
 
         // Log audit entry
-        if (!empty($updatedAssessments)) {
+        if (! empty($updatedAssessments)) {
             $action = count($updatedAssessments) === 1 ? 'mark_updated' : 'marks_updated';
             $description = count($updatedAssessments) === 1
                 ? "AT evaluation mark updated for {$student->name} ({$student->matric_no}) - {$updatedAssessments[0]}"
-                : "AT evaluation marks updated for {$student->name} ({$student->matric_no}) - " . count($updatedAssessments) . " assessment(s)";
+                : "AT evaluation marks updated for {$student->name} ({$student->matric_no}) - ".count($updatedAssessments).' assessment(s)';
 
             FypAuditLog::log(
                 $action,
@@ -444,4 +450,3 @@ class FypAtEvaluationController extends Controller
             ->with('success', 'Marks saved successfully.');
     }
 }
-

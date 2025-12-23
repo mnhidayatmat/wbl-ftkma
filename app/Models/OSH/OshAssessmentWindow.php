@@ -48,24 +48,24 @@ class OshAssessmentWindow extends Model
      */
     public function getStatusAttribute(): string
     {
-        if (!$this->is_enabled) {
+        if (! $this->is_enabled) {
             return 'disabled';
         }
 
         $now = now();
-        
+
         if ($this->start_at && $now < $this->start_at) {
             return 'upcoming';
         }
-        
+
         if ($this->end_at && $now > $this->end_at) {
             return 'closed';
         }
-        
+
         if ($this->start_at && $this->end_at && $now >= $this->start_at && $now <= $this->end_at) {
             return 'open';
         }
-        
+
         // If no dates set, consider it open if enabled
         return $this->is_enabled ? 'open' : 'closed';
     }
@@ -83,7 +83,7 @@ class OshAssessmentWindow extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'open' => 'Open',
             'closed' => 'Closed',
             'upcoming' => 'Upcoming',

@@ -84,12 +84,13 @@ class FypRubricElement extends Model
     public function calculateWeightedScore(int $level): float
     {
         $descriptor = $this->getDescriptorForLevel($level);
-        if (!$descriptor) {
+        if (! $descriptor) {
             return 0;
         }
-        
+
         // Score = (level_score / max_level_score) * element_weight
         $maxScore = 5; // Fixed max level
+
         return ($descriptor->score_value / $maxScore) * $this->weight_percentage;
     }
 
@@ -107,7 +108,7 @@ class FypRubricElement extends Model
     public function createDefaultDescriptors(): void
     {
         $defaultLabels = FypRubricTemplate::PERFORMANCE_LEVELS;
-        
+
         foreach ($defaultLabels as $level => $label) {
             FypRubricLevelDescriptor::firstOrCreate(
                 [

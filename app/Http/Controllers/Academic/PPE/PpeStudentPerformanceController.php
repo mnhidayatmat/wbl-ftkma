@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Academic\PPE;
 
-use App\Http\Controllers\Controller;
 use App\Exports\StudentPerformanceExport;
+use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\CourseSetting;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
 use App\Models\WblGroup;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PpeStudentPerformanceController extends Controller
 {
@@ -24,7 +24,7 @@ class PpeStudentPerformanceController extends Controller
     public function index(Request $request): View
     {
         // Only Admin and Lecturer can access
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -42,15 +42,15 @@ class PpeStudentPerformanceController extends Controller
             ->get();
 
         $lecturerTotalWeight = $lecturerAssessments->sum('weight_percentage'); // Should be 40%
-        $icTotalWeight = $icAssessments->sum(function($assessment) {
+        $icTotalWeight = $icAssessments->sum(function ($assessment) {
             return $assessment->rubrics->sum('weight_percentage');
         }); // Should be 60%
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, Lecturer sees only students if they are the assigned PPE lecturer
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             // PPE uses single lecturer from course_settings
             $ppeSetting = CourseSetting::where('course_type', 'PPE')->first();
             if ($ppeSetting && $ppeSetting->lecturer_id === auth()->id()) {
@@ -65,9 +65,9 @@ class PpeStudentPerformanceController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -98,16 +98,15 @@ class PpeStudentPerformanceController extends Controller
             ->groupBy('student_id');
 
         // Calculate total rubric questions
-        $totalRubricQuestions = $icAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $icAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
         // Calculate performance for each student
-        $studentsWithPerformance = $students->map(function($student) use (
-            $allLecturerMarks, 
-            $allIcRubricMarks, 
-            $lecturerAssessments, 
-            $icAssessments,
+        $studentsWithPerformance = $students->map(function ($student) use (
+            $allLecturerMarks,
+            $allIcRubricMarks,
+            $lecturerAssessments,
             $totalRubricQuestions,
             $lecturerTotalWeight,
             $icTotalWeight
@@ -115,7 +114,7 @@ class PpeStudentPerformanceController extends Controller
             // Calculate Lecturer marks (40%)
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
             $lecturerMarksByAssessment = $lecturerMarks->keyBy('assessment_id');
-            
+
             $lecturerTotal = 0;
             $lecturerCompletedCount = 0;
             $lecturerLastUpdated = null;
@@ -127,7 +126,7 @@ class PpeStudentPerformanceController extends Controller
                     if ($mark->max_mark > 0) {
                         $lecturerTotal += ($mark->mark / $mark->max_mark) * $assessment->weight_percentage;
                     }
-                    if (!$lecturerLastUpdated || $mark->updated_at > $lecturerLastUpdated) {
+                    if (! $lecturerLastUpdated || $mark->updated_at > $lecturerLastUpdated) {
                         $lecturerLastUpdated = $mark->updated_at;
                     }
                 }
@@ -135,14 +134,14 @@ class PpeStudentPerformanceController extends Controller
 
             // Calculate IC marks (60%)
             $icRubricMarks = $allIcRubricMarks->get($student->id, collect());
-            
+
             $icTotal = 0;
             $icCompletedCount = $icRubricMarks->count();
             $icLastUpdated = null;
 
             foreach ($icRubricMarks as $rubricMark) {
                 $icTotal += $rubricMark->weighted_contribution;
-                if (!$icLastUpdated || $rubricMark->updated_at > $icLastUpdated) {
+                if (! $icLastUpdated || $rubricMark->updated_at > $icLastUpdated) {
                     $icLastUpdated = $rubricMark->updated_at;
                 }
             }
@@ -151,9 +150,9 @@ class PpeStudentPerformanceController extends Controller
             $finalScore = $lecturerTotal + $icTotal;
 
             // Determine overall status
-            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' : 
+            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' :
                             ($lecturerCompletedCount < $lecturerAssessments->count() ? 'in_progress' : 'completed');
-            $icStatus = $icCompletedCount == 0 ? 'not_started' : 
+            $icStatus = $icCompletedCount == 0 ? 'not_started' :
                        ($icCompletedCount < $totalRubricQuestions ? 'in_progress' : 'completed');
 
             if ($lecturerStatus == 'not_started' && $icStatus == 'not_started') {
@@ -219,7 +218,7 @@ class PpeStudentPerformanceController extends Controller
     public function exportExcel(Request $request)
     {
         // Only Admin can export
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -239,7 +238,7 @@ class PpeStudentPerformanceController extends Controller
             'filters' => $request->only(['search', 'programme', 'group', 'status']),
         ]);
 
-        $fileName = 'PPE_Student_Performance_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'PPE_Student_Performance_'.now()->format('Y-m-d_His').'.xlsx';
 
         // Get weights for export
         $lecturerTotalWeight = Assessment::forCourse('PPE')
@@ -253,12 +252,12 @@ class PpeStudentPerformanceController extends Controller
             ->whereIn('assessment_type', ['Oral', 'Rubric'])
             ->with('rubrics')
             ->get()
-            ->sum(function($assessment) {
+            ->sum(function ($assessment) {
                 return $assessment->rubrics->sum('weight_percentage');
             });
 
         return Excel::download(
-            new StudentPerformanceExport($studentsWithPerformance, 'PPE', $lecturerTotalWeight, $icTotalWeight), 
+            new StudentPerformanceExport($studentsWithPerformance, 'PPE', $lecturerTotalWeight, $icTotalWeight),
             $fileName
         );
     }
@@ -269,7 +268,7 @@ class PpeStudentPerformanceController extends Controller
     public function exportPdf(Request $request)
     {
         // Only Admin can export
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -300,7 +299,7 @@ class PpeStudentPerformanceController extends Controller
             ->whereIn('assessment_type', ['Oral', 'Rubric'])
             ->with('rubrics')
             ->get()
-            ->sum(function($assessment) {
+            ->sum(function ($assessment) {
                 return $assessment->rubrics->sum('weight_percentage');
             });
 
@@ -311,13 +310,13 @@ class PpeStudentPerformanceController extends Controller
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-          ->setOption('margin-top', 30)
-          ->setOption('margin-bottom', 30)
-          ->setOption('margin-left', 25)
-          ->setOption('margin-right', 25)
-          ->setOption('enable-local-file-access', true);
+            ->setOption('margin-top', 30)
+            ->setOption('margin-bottom', 30)
+            ->setOption('margin-left', 25)
+            ->setOption('margin-right', 25)
+            ->setOption('enable-local-file-access', true);
 
-        $fileName = 'PPE_Student_Performance_' . now()->format('Y-m-d_His') . '.pdf';
+        $fileName = 'PPE_Student_Performance_'.now()->format('Y-m-d_His').'.pdf';
 
         return $pdf->download($fileName);
     }
@@ -341,15 +340,15 @@ class PpeStudentPerformanceController extends Controller
             ->get();
 
         $lecturerTotalWeight = $lecturerAssessments->sum('weight_percentage');
-        $icTotalWeight = $icAssessments->sum(function($assessment) {
+        $icTotalWeight = $icAssessments->sum(function ($assessment) {
             return $assessment->rubrics->sum('weight_percentage');
         });
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, Lecturer sees only students if they are the assigned PPE lecturer
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             // PPE uses single lecturer from course_settings
             $ppeSetting = CourseSetting::where('course_type', 'PPE')->first();
             if ($ppeSetting && $ppeSetting->lecturer_id === auth()->id()) {
@@ -364,9 +363,9 @@ class PpeStudentPerformanceController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -397,16 +396,15 @@ class PpeStudentPerformanceController extends Controller
             ->groupBy('student_id');
 
         // Calculate total rubric questions
-        $totalRubricQuestions = $icAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $icAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
         // Calculate performance for each student
-        return $students->map(function($student) use (
-            $allLecturerMarks, 
-            $allIcRubricMarks, 
-            $lecturerAssessments, 
-            $icAssessments,
+        return $students->map(function ($student) use (
+            $allLecturerMarks,
+            $allIcRubricMarks,
+            $lecturerAssessments,
             $totalRubricQuestions,
             $lecturerTotalWeight,
             $icTotalWeight,
@@ -415,7 +413,7 @@ class PpeStudentPerformanceController extends Controller
             // Calculate Lecturer marks (40%)
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
             $lecturerMarksByAssessment = $lecturerMarks->keyBy('assessment_id');
-            
+
             $lecturerTotal = 0;
             $lecturerCompletedCount = 0;
             $lecturerLastUpdated = null;
@@ -427,7 +425,7 @@ class PpeStudentPerformanceController extends Controller
                     if ($mark->max_mark > 0) {
                         $lecturerTotal += ($mark->mark / $mark->max_mark) * $assessment->weight_percentage;
                     }
-                    if (!$lecturerLastUpdated || $mark->updated_at > $lecturerLastUpdated) {
+                    if (! $lecturerLastUpdated || $mark->updated_at > $lecturerLastUpdated) {
                         $lecturerLastUpdated = $mark->updated_at;
                     }
                 }
@@ -435,14 +433,14 @@ class PpeStudentPerformanceController extends Controller
 
             // Calculate IC marks (60%)
             $icRubricMarks = $allIcRubricMarks->get($student->id, collect());
-            
+
             $icTotal = 0;
             $icCompletedCount = $icRubricMarks->count();
             $icLastUpdated = null;
 
             foreach ($icRubricMarks as $rubricMark) {
                 $icTotal += $rubricMark->weighted_contribution;
-                if (!$icLastUpdated || $rubricMark->updated_at > $icLastUpdated) {
+                if (! $icLastUpdated || $rubricMark->updated_at > $icLastUpdated) {
                     $icLastUpdated = $rubricMark->updated_at;
                 }
             }
@@ -451,9 +449,9 @@ class PpeStudentPerformanceController extends Controller
             $finalScore = $lecturerTotal + $icTotal;
 
             // Determine overall status
-            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' : 
+            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' :
                             ($lecturerCompletedCount < $lecturerAssessments->count() ? 'in_progress' : 'completed');
-            $icStatus = $icCompletedCount == 0 ? 'not_started' : 
+            $icStatus = $icCompletedCount == 0 ? 'not_started' :
                        ($icCompletedCount < $totalRubricQuestions ? 'in_progress' : 'completed');
 
             if ($lecturerStatus == 'not_started' && $icStatus == 'not_started') {
@@ -499,4 +497,3 @@ class PpeStudentPerformanceController extends Controller
         })->filter();
     }
 }
-

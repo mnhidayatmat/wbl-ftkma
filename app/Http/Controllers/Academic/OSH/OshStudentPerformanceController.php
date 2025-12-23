@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Academic\OSH;
 
-use App\Http\Controllers\Controller;
 use App\Exports\StudentPerformanceExport;
+use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\CourseSetting;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
 use App\Models\WblGroup;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OshStudentPerformanceController extends Controller
 {
@@ -24,7 +24,7 @@ class OshStudentPerformanceController extends Controller
     public function index(Request $request): View
     {
         // Only Admin and Lecturer can access
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -44,15 +44,15 @@ class OshStudentPerformanceController extends Controller
             ->with('rubrics')
             ->get();
 
-        $lecturerRubricTotalWeight = $lecturerRubricAssessments->sum(function($assessment) {
+        $lecturerRubricTotalWeight = $lecturerRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->sum('weight_percentage');
         });
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor']);
-        
+
         // Admin can see all students, Lecturer sees only students if they are the assigned OSH lecturer
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             // OSH uses single lecturer from course_settings
             $oshSetting = CourseSetting::where('course_type', 'OSH')->first();
             if ($oshSetting && $oshSetting->lecturer_id === auth()->id()) {
@@ -70,9 +70,9 @@ class OshStudentPerformanceController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -98,7 +98,7 @@ class OshStudentPerformanceController extends Controller
 
         // Get all lecturer rubric marks
         $allLecturerRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'OSH')->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')
@@ -106,16 +106,15 @@ class OshStudentPerformanceController extends Controller
             ->groupBy('student_id');
 
         // Calculate total rubric questions
-        $totalRubricQuestions = $lecturerRubricAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $lecturerRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
         // Calculate performance for each student
-        $studentsWithPerformance = $students->map(function($student) use (
-            $allLecturerMarks, 
-            $allLecturerRubricMarks, 
+        $studentsWithPerformance = $students->map(function ($student) use (
+            $allLecturerMarks,
+            $allLecturerRubricMarks,
             $lecturerAssessments,
-            $lecturerRubricAssessments,
             $totalRubricQuestions,
             $lecturerTotalWeight,
             $lecturerRubricTotalWeight,
@@ -124,7 +123,7 @@ class OshStudentPerformanceController extends Controller
             // Calculate Lecturer marks
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
             $lecturerMarksByAssessment = $lecturerMarks->keyBy('assessment_id');
-            
+
             $lecturerTotal = 0;
             $lecturerCompletedCount = 0;
             $lecturerLastUpdated = null;
@@ -136,7 +135,7 @@ class OshStudentPerformanceController extends Controller
                     if ($mark->max_mark > 0) {
                         $lecturerTotal += ($mark->mark / $mark->max_mark) * $assessment->weight_percentage;
                     }
-                    if (!$lecturerLastUpdated || $mark->updated_at > $lecturerLastUpdated) {
+                    if (! $lecturerLastUpdated || $mark->updated_at > $lecturerLastUpdated) {
                         $lecturerLastUpdated = $mark->updated_at;
                     }
                 }
@@ -144,14 +143,14 @@ class OshStudentPerformanceController extends Controller
 
             // Calculate Lecturer rubric marks
             $lecturerRubricMarks = $allLecturerRubricMarks->get($student->id, collect());
-            
+
             $lecturerRubricTotal = 0;
             $lecturerRubricCompletedCount = $lecturerRubricMarks->count();
             $lecturerRubricLastUpdated = null;
 
             foreach ($lecturerRubricMarks as $rubricMark) {
                 $lecturerRubricTotal += $rubricMark->weighted_contribution;
-                if (!$lecturerRubricLastUpdated || $rubricMark->updated_at > $lecturerRubricLastUpdated) {
+                if (! $lecturerRubricLastUpdated || $rubricMark->updated_at > $lecturerRubricLastUpdated) {
                     $lecturerRubricLastUpdated = $rubricMark->updated_at;
                 }
             }
@@ -160,9 +159,9 @@ class OshStudentPerformanceController extends Controller
             $finalScore = $lecturerTotal + $lecturerRubricTotal;
 
             // Determine overall status
-            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' : 
+            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' :
                             ($lecturerCompletedCount < $lecturerAssessments->count() ? 'in_progress' : 'completed');
-            $lecturerRubricStatus = $lecturerRubricCompletedCount == 0 ? 'not_started' : 
+            $lecturerRubricStatus = $lecturerRubricCompletedCount == 0 ? 'not_started' :
                                    ($lecturerRubricCompletedCount < $totalRubricQuestions ? 'in_progress' : 'completed');
 
             if ($lecturerStatus == 'not_started' && $lecturerRubricStatus == 'not_started') {
@@ -224,7 +223,7 @@ class OshStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -242,7 +241,8 @@ class OshStudentPerformanceController extends Controller
             'filters' => $request->only(['search', 'programme', 'group', 'status']),
         ]);
 
-        $fileName = 'OSH_Student_Performance_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'OSH_Student_Performance_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance), $fileName);
     }
 
@@ -251,7 +251,7 @@ class OshStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -280,7 +280,7 @@ class OshStudentPerformanceController extends Controller
             ->whereIn('assessment_type', ['Oral', 'Rubric'])
             ->with('rubrics')
             ->get()
-            ->sum(function($assessment) {
+            ->sum(function ($assessment) {
                 return $assessment->rubrics->sum('weight_percentage');
             });
 
@@ -291,13 +291,14 @@ class OshStudentPerformanceController extends Controller
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-          ->setOption('margin-top', 30)
-          ->setOption('margin-bottom', 30)
-          ->setOption('margin-left', 25)
-          ->setOption('margin-right', 25)
-          ->setOption('enable-local-file-access', true);
+            ->setOption('margin-top', 30)
+            ->setOption('margin-bottom', 30)
+            ->setOption('margin-left', 25)
+            ->setOption('margin-right', 25)
+            ->setOption('enable-local-file-access', true);
 
-        $fileName = 'OSH_Student_Performance_' . now()->format('Y-m-d_His') . '.pdf';
+        $fileName = 'OSH_Student_Performance_'.now()->format('Y-m-d_His').'.pdf';
+
         return $pdf->download($fileName);
     }
 
@@ -319,14 +320,14 @@ class OshStudentPerformanceController extends Controller
             ->get();
 
         $lecturerTotalWeight = $lecturerAssessments->sum('weight_percentage');
-        $lecturerRubricTotalWeight = $lecturerRubricAssessments->sum(function($assessment) {
+        $lecturerRubricTotalWeight = $lecturerRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->sum('weight_percentage');
         });
 
         $query = Student::with(['group', 'company', 'academicTutor']);
         $query->inActiveGroups();
 
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             $oshSetting = CourseSetting::where('course_type', 'OSH')->first();
             if ($oshSetting && $oshSetting->lecturer_id === auth()->id()) {
                 // This lecturer is assigned to OSH
@@ -337,9 +338,9 @@ class OshStudentPerformanceController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -360,30 +361,27 @@ class OshStudentPerformanceController extends Controller
             ->groupBy('student_id');
 
         $allLecturerRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'OSH')->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')
             ->get()
             ->groupBy('student_id');
 
-        $totalRubricQuestions = $lecturerRubricAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $lecturerRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
-        return $students->map(function($student) use (
-            $allLecturerMarks, 
-            $allLecturerRubricMarks, 
+        return $students->map(function ($student) use (
+            $allLecturerMarks,
+            $allLecturerRubricMarks,
             $lecturerAssessments,
-            $lecturerRubricAssessments,
             $totalRubricQuestions,
-            $lecturerTotalWeight,
-            $lecturerRubricTotalWeight,
             $request
         ) {
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
             $lecturerMarksByAssessment = $lecturerMarks->keyBy('assessment_id');
-            
+
             $lecturerTotal = 0;
             $lecturerCompletedCount = 0;
 
@@ -407,9 +405,9 @@ class OshStudentPerformanceController extends Controller
 
             $finalScore = $lecturerTotal + $lecturerRubricTotal;
 
-            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' : 
+            $lecturerStatus = $lecturerCompletedCount == 0 ? 'not_started' :
                             ($lecturerCompletedCount < $lecturerAssessments->count() ? 'in_progress' : 'completed');
-            $lecturerRubricStatus = $lecturerRubricCompletedCount == 0 ? 'not_started' : 
+            $lecturerRubricStatus = $lecturerRubricCompletedCount == 0 ? 'not_started' :
                                    ($lecturerRubricCompletedCount < $totalRubricQuestions ? 'in_progress' : 'completed');
 
             if ($lecturerStatus == 'not_started' && $lecturerRubricStatus == 'not_started') {

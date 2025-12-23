@@ -8,9 +8,9 @@ use App\Models\Role;
 use App\Models\RolePermission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PermissionController extends Controller
 {
@@ -19,7 +19,7 @@ class PermissionController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -61,7 +61,7 @@ class PermissionController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -82,7 +82,7 @@ class PermissionController extends Controller
         );
 
         // Clear permission cache
-        Cache::forget('permissions_' . $request->role_id);
+        Cache::forget('permissions_'.$request->role_id);
 
         return response()->json([
             'success' => true,
@@ -95,7 +95,7 @@ class PermissionController extends Controller
      */
     public function bulkUpdate(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -120,7 +120,7 @@ class PermissionController extends Controller
             }
 
             // Clear permission cache for this role
-            Cache::forget('permissions_' . $request->role_id);
+            Cache::forget('permissions_'.$request->role_id);
         });
 
         return redirect()->route('admin.permissions.index', ['role_id' => $request->role_id])
@@ -132,7 +132,7 @@ class PermissionController extends Controller
      */
     public function bulkUpdateModule(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -143,7 +143,7 @@ class PermissionController extends Controller
         ]);
 
         $role = Role::findOrFail($request->role_id);
-        
+
         // Prevent modifying admin role
         if ($role->name === 'admin') {
             return back()->with('error', 'Admin role cannot be modified.');
@@ -165,7 +165,7 @@ class PermissionController extends Controller
                 );
             }
 
-            Cache::forget('permissions_' . $role->id);
+            Cache::forget('permissions_'.$role->id);
         });
 
         return redirect()->route('admin.permissions.index', ['role_id' => $request->role_id])
@@ -177,7 +177,7 @@ class PermissionController extends Controller
      */
     public function grantAll(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -186,7 +186,7 @@ class PermissionController extends Controller
         ]);
 
         $role = Role::findOrFail($request->role_id);
-        
+
         // Prevent modifying admin role
         if ($role->name === 'admin') {
             return back()->with('error', 'Admin role cannot be modified.');
@@ -207,7 +207,7 @@ class PermissionController extends Controller
                 );
             }
 
-            Cache::forget('permissions_' . $role->id);
+            Cache::forget('permissions_'.$role->id);
         });
 
         return redirect()->route('admin.permissions.index', ['role_id' => $role->id])
@@ -219,7 +219,7 @@ class PermissionController extends Controller
      */
     public function setViewOnly(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -228,7 +228,7 @@ class PermissionController extends Controller
         ]);
 
         $role = Role::findOrFail($request->role_id);
-        
+
         // Prevent modifying admin role
         if ($role->name === 'admin') {
             return back()->with('error', 'Admin role cannot be modified.');
@@ -249,7 +249,7 @@ class PermissionController extends Controller
                 );
             }
 
-            Cache::forget('permissions_' . $role->id);
+            Cache::forget('permissions_'.$role->id);
         });
 
         return redirect()->route('admin.permissions.index', ['role_id' => $role->id])
@@ -261,7 +261,7 @@ class PermissionController extends Controller
      */
     public function revokeAll(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -270,14 +270,14 @@ class PermissionController extends Controller
         ]);
 
         $role = Role::findOrFail($request->role_id);
-        
+
         // Prevent modifying admin role
         if ($role->name === 'admin') {
             return back()->with('error', 'Admin role cannot be modified.');
         }
 
         RolePermission::where('role_id', $role->id)->delete();
-        Cache::forget('permissions_' . $role->id);
+        Cache::forget('permissions_'.$role->id);
 
         return redirect()->route('admin.permissions.index', ['role_id' => $role->id])
             ->with('success', "All permissions revoked for {$role->display_name}.");

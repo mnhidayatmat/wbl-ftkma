@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('descriptor'); // Detailed text describing performance at this level
             $table->decimal('score_value', 5, 2); // Numeric score for this level (e.g., 1.0, 2.0, 3.0, 4.0, 5.0)
             $table->timestamps();
-            
+
             // Indexes
             $table->index('rubric_element_id');
             $table->unique(['rubric_element_id', 'level']);

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('assignment_id')->constrained('ppe_assessment_settings')->onDelete('cascade');
             $table->decimal('mark', 5, 2)->nullable();
             $table->timestamps();
-            
+
             $table->unique(['student_id', 'assignment_id']);
         });
     }
@@ -30,4 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('ppe_student_at_marks');
     }
 };
-

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,7 +17,7 @@ class UserVerificationController extends Controller
     public function index(Request $request): View
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -35,9 +35,9 @@ class UserVerificationController extends Controller
         // Search
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -47,7 +47,7 @@ class UserVerificationController extends Controller
         $totalUsers = User::count();
         $verifiedUsers = User::whereNotNull('email_verified_at')->count();
         $unverifiedUsers = User::whereNull('email_verified_at')->count();
-        
+
         // Get all available roles for the edit modal
         $allRoles = Role::orderBy('display_name')->get();
 
@@ -66,7 +66,7 @@ class UserVerificationController extends Controller
     public function sendVerificationEmail(User $user): RedirectResponse
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -87,7 +87,7 @@ class UserVerificationController extends Controller
     public function sendToAllUnverified(): RedirectResponse
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -112,7 +112,7 @@ class UserVerificationController extends Controller
     public function updateRoles(Request $request, User $user): RedirectResponse
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 

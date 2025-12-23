@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\Student;
 use App\Models\WblGroup;
-use App\Models\Company;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -26,9 +26,9 @@ class StudentController extends Controller
         // Search functionality
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -38,20 +38,20 @@ class StudentController extends Controller
 
         // Validate sort column
         $allowedSortColumns = ['name', 'matric_no', 'programme', 'company_id'];
-        if (!in_array($sortBy, $allowedSortColumns)) {
+        if (! in_array($sortBy, $allowedSortColumns)) {
             $sortBy = 'name';
         }
 
         // Validate sort direction
-        if (!in_array($sortDirection, ['asc', 'desc'])) {
+        if (! in_array($sortDirection, ['asc', 'desc'])) {
             $sortDirection = 'asc';
         }
 
         // Handle company sorting (relationship)
         if ($sortBy === 'company_id') {
             $query->leftJoin('companies', 'students.company_id', '=', 'companies.id')
-                  ->select('students.*')
-                  ->orderBy('companies.company_name', $sortDirection);
+                ->select('students.*')
+                ->orderBy('companies.company_name', $sortDirection);
         } else {
             $query->orderBy($sortBy, $sortDirection);
         }
@@ -70,20 +70,20 @@ class StudentController extends Controller
 
         // Get groups for tabs based on role
         $groupsQuery = WblGroup::orderBy('name');
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             $groupsQuery->where('status', 'ACTIVE');
         }
         $groups = $groupsQuery->get();
 
         // Build tabs array
         $tabs = [
-            ['label' => 'All', 'value' => null]
+            ['label' => 'All', 'value' => null],
         ];
 
         foreach ($groups as $group) {
             $tabs[] = [
                 'label' => $group->name,
-                'value' => $group->id
+                'value' => $group->id,
             ];
         }
 
@@ -144,9 +144,9 @@ class StudentController extends Controller
     public function edit(Student $student): View
     {
         // Only show active groups for assignment (or current group if completed)
-        $groups = WblGroup::where(function($q) use ($student) {
+        $groups = WblGroup::where(function ($q) use ($student) {
             $q->where('status', 'ACTIVE')
-              ->orWhere('id', $student->group_id); // Include current group even if completed
+                ->orWhere('id', $student->group_id); // Include current group even if completed
         })->orderBy('name')->get();
         $companies = Company::all();
         $lecturers = \App\Models\User::where('role', 'lecturer')->orderBy('name')->get();
@@ -169,7 +169,7 @@ class StudentController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'matric_no' => ['required', 'string', 'max:50', 'unique:students,matric_no,' . $student->id],
+            'matric_no' => ['required', 'string', 'max:50', 'unique:students,matric_no,'.$student->id],
             'programme' => ['required', 'string', 'max:255'],
             'group_id' => ['required', 'exists:wbl_groups,id'],
             'company_id' => ['nullable', 'exists:companies,id'],
@@ -178,8 +178,8 @@ class StudentController extends Controller
         ]);
 
         // Safely extract values with null fallback
-        $atId = !empty($validated['at_id']) ? $validated['at_id'] : null;
-        $icId = !empty($validated['ic_id']) ? $validated['ic_id'] : null;
+        $atId = ! empty($validated['at_id']) ? $validated['at_id'] : null;
+        $icId = ! empty($validated['ic_id']) ? $validated['ic_id'] : null;
 
         // Update with null-safe values
         $student->update([
@@ -187,7 +187,7 @@ class StudentController extends Controller
             'matric_no' => $validated['matric_no'],
             'programme' => $validated['programme'],
             'group_id' => $validated['group_id'],
-            'company_id' => !empty($validated['company_id']) ? $validated['company_id'] : null,
+            'company_id' => ! empty($validated['company_id']) ? $validated['company_id'] : null,
             'at_id' => $atId,
             'ic_id' => $icId,
         ]);

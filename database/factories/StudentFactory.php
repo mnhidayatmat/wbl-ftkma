@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Company;
 use App\Models\Student;
 use App\Models\WblGroup;
-use App\Models\Company;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -36,4 +36,3 @@ class StudentFactory extends Factory
         ];
     }
 }
-

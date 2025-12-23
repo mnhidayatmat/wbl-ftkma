@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Http\Controllers\Academic\LI;
 
 use App\Http\Controllers\Controller;
@@ -32,25 +34,25 @@ class LiStudentPerformanceController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all, Lecturers/Industry might have restricted views if needed
         // For performance index, usually Admin-only or restricted to ATs/ICs
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             // If they are a supervisor_li (stored via StudentCourseAssignment)
             $assignedStudentIds = \App\Models\StudentCourseAssignment::where('lecturer_id', auth()->id())
                 ->where('course_type', 'Industrial Training')
                 ->pluck('student_id');
             $query->whereIn('id', $assignedStudentIds);
-        } elseif (auth()->user()->isIndustry() && !auth()->user()->isAdmin()) {
+        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
             $query->where('ic_id', auth()->id());
         }
 
         // Apply filters
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -68,16 +70,14 @@ class LiStudentPerformanceController extends Controller
             ->groupBy('student_id');
 
         // Calculate performance
-        $studentsWithPerformance = $students->map(function($student) use (
-            $allMarks, 
-            $supervisorAssessments, 
+        $studentsWithPerformance = $students->map(function ($student) use (
+            $allMarks,
+            $supervisorAssessments,
             $icAssessments,
-            $supervisorWeight,
-            $icWeight,
             $totalWeight
         ) {
             $studentMarks = $allMarks->get($student->id, collect())->keyBy('assessment_id');
-            
+
             $supervisorTotal = 0;
             $icTotal = 0;
             $completedCount = 0;
@@ -134,7 +134,7 @@ class LiStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -157,9 +157,10 @@ class LiStudentPerformanceController extends Controller
         $supervisorWeight = $supervisorAssessments->sum('weight_percentage');
         $icWeight = $icAssessments->sum('weight_percentage');
 
-        $fileName = 'LI_Student_Performance_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'LI_Student_Performance_'.now()->format('Y-m-d_His').'.xlsx';
+
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\StudentPerformanceExport($studentsWithPerformance, 'LI', $supervisorWeight, $icWeight), 
+            new \App\Exports\StudentPerformanceExport($studentsWithPerformance, 'LI', $supervisorWeight, $icWeight),
             $fileName
         );
     }
@@ -169,7 +170,7 @@ class LiStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -202,7 +203,8 @@ class LiStudentPerformanceController extends Controller
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape');
 
-        $fileName = 'LI_Student_Performance_' . now()->format('Y-m-d_His') . '.pdf';
+        $fileName = 'LI_Student_Performance_'.now()->format('Y-m-d_His').'.pdf';
+
         return $pdf->download($fileName);
     }
 
@@ -227,21 +229,21 @@ class LiStudentPerformanceController extends Controller
         $totalWeight = $supervisorWeight + $icWeight;
 
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             $assignedStudentIds = \App\Models\StudentCourseAssignment::where('lecturer_id', auth()->id())
                 ->where('course_type', 'Industrial Training')
                 ->pluck('student_id');
             $query->whereIn('id', $assignedStudentIds);
-        } elseif (auth()->user()->isIndustry() && !auth()->user()->isAdmin()) {
+        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
             $query->where('ic_id', auth()->id());
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -256,16 +258,14 @@ class LiStudentPerformanceController extends Controller
             ->get()
             ->groupBy('student_id');
 
-        return $students->map(function($student) use (
-            $allMarks, 
-            $supervisorAssessments, 
+        return $students->map(function ($student) use (
+            $allMarks,
+            $supervisorAssessments,
             $icAssessments,
-            $supervisorWeight,
-            $icWeight,
             $totalWeight
         ) {
             $studentMarks = $allMarks->get($student->id, collect())->keyBy('assessment_id');
-            
+
             $supervisorTotal = 0;
             $icTotal = 0;
             $completedCount = 0;

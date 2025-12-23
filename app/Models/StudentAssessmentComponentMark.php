@@ -60,12 +60,13 @@ class StudentAssessmentComponentMark extends Model
      */
     public function getWeightedContributionAttribute(): float
     {
-        if (!$this->component || $this->rubric_score === null) {
+        if (! $this->component || $this->rubric_score === null) {
             return 0;
         }
-        
+
         // Normalize score (1-5) to percentage, then multiply by component weight
         $normalizedScore = ($this->rubric_score / 5) * 100;
+
         return ($normalizedScore / 100) * ($this->component->weight_percentage ?? 0);
     }
 }

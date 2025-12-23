@@ -18,7 +18,7 @@ class FypProgressController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -48,16 +48,16 @@ class FypProgressController extends Controller
 
         // Get all IC rubric marks
         $allIcRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')
-                  ->where('evaluator_role', 'ic');
+                    ->where('evaluator_role', 'ic');
             })
             ->with('rubric.assessment')
             ->get()
             ->groupBy('student_id');
 
         // Calculate total rubric questions for IC
-        $totalIcRubricQuestions = $icAssessments->sum(function($assessment) {
+        $totalIcRubricQuestions = $icAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
@@ -68,10 +68,10 @@ class FypProgressController extends Controller
 
         foreach ($students as $student) {
             $atMarks = $allAtMarks->get($student->id, collect());
-            $atCompletedCount = $atMarks->filter(function($mark) {
+            $atCompletedCount = $atMarks->filter(function ($mark) {
                 return $mark->mark !== null;
             })->count();
-            
+
             // Student is complete for AT if all assessment marks are done
             if ($atCompletedCount === $atAssessments->count() && $atAssessments->count() > 0) {
                 $atCompleted++;
@@ -91,7 +91,7 @@ class FypProgressController extends Controller
 
         // Group breakdown
         $groups = WblGroup::with('students')->get();
-        $groupStats = $groups->map(function($group) use ($allAtMarks, $allIcRubricMarks, $atAssessments, $totalIcRubricQuestions) {
+        $groupStats = $groups->map(function ($group) use ($allAtMarks, $allIcRubricMarks, $atAssessments, $totalIcRubricQuestions) {
             $groupStudents = $group->students;
             $groupTotal = $groupStudents->count();
             $groupAtCompleted = 0;
@@ -99,10 +99,10 @@ class FypProgressController extends Controller
 
             foreach ($groupStudents as $student) {
                 $atMarks = $allAtMarks->get($student->id, collect());
-                $atCompletedCount = $atMarks->filter(function($mark) {
+                $atCompletedCount = $atMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($atCompletedCount === $atAssessments->count() && $atAssessments->count() > 0) {
                     $groupAtCompleted++;
                 }
@@ -125,7 +125,7 @@ class FypProgressController extends Controller
 
         // Programme breakdown
         $programmes = Student::distinct()->pluck('programme')->filter();
-        $programmeStats = $programmes->map(function($programme) use ($allAtMarks, $allIcRubricMarks, $atAssessments, $totalIcRubricQuestions) {
+        $programmeStats = $programmes->map(function ($programme) use ($allAtMarks, $allIcRubricMarks, $atAssessments, $totalIcRubricQuestions) {
             $programmeStudents = Student::where('programme', $programme)->get();
             $programmeTotal = $programmeStudents->count();
             $programmeAtCompleted = 0;
@@ -133,10 +133,10 @@ class FypProgressController extends Controller
 
             foreach ($programmeStudents as $student) {
                 $atMarks = $allAtMarks->get($student->id, collect());
-                $atCompletedCount = $atMarks->filter(function($mark) {
+                $atCompletedCount = $atMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($atCompletedCount === $atAssessments->count() && $atAssessments->count() > 0) {
                     $programmeAtCompleted++;
                 }
@@ -159,7 +159,7 @@ class FypProgressController extends Controller
 
         // Company breakdown
         $companies = Student::whereNotNull('company_id')->with('company')->get()->groupBy('company_id');
-        $companyStats = $companies->map(function($companyStudents, $companyId) use ($allAtMarks, $allIcRubricMarks, $atAssessments, $totalIcRubricQuestions) {
+        $companyStats = $companies->map(function ($companyStudents, $companyId) use ($allAtMarks, $allIcRubricMarks, $atAssessments, $totalIcRubricQuestions) {
             $company = $companyStudents->first()->company;
             $companyTotal = $companyStudents->count();
             $companyAtCompleted = 0;
@@ -167,10 +167,10 @@ class FypProgressController extends Controller
 
             foreach ($companyStudents as $student) {
                 $atMarks = $allAtMarks->get($student->id, collect());
-                $atCompletedCount = $atMarks->filter(function($mark) {
+                $atCompletedCount = $atMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($atCompletedCount === $atAssessments->count() && $atAssessments->count() > 0) {
                     $companyAtCompleted++;
                 }

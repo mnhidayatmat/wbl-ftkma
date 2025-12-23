@@ -39,7 +39,9 @@ class FypRubricOverallFeedback extends Model
      * Status constants
      */
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_SUBMITTED = 'submitted';
+
     public const STATUS_RELEASED = 'released';
 
     /**
@@ -93,13 +95,13 @@ class FypRubricOverallFeedback extends Model
             ->get();
 
         $this->total_score = $evaluations->sum('weighted_score');
-        
+
         // Get max possible score (100% would mean all elements at level 5)
         $template = $this->template;
         if ($template) {
             $maxPossible = $template->elements()->sum('weight_percentage');
-            $this->percentage_score = $maxPossible > 0 
-                ? ($this->total_score / $maxPossible) * 100 
+            $this->percentage_score = $maxPossible > 0
+                ? ($this->total_score / $maxPossible) * 100
                 : 0;
         }
     }
@@ -123,9 +125,9 @@ class FypRubricOverallFeedback extends Model
         $this->status = self::STATUS_RELEASED;
         $this->released_at = now();
         $this->save();
-        
+
         // Lock the template if not already locked
-        if ($this->template && !$this->template->is_locked) {
+        if ($this->template && ! $this->template->is_locked) {
             $this->template->update(['is_locked' => true]);
         }
     }
@@ -135,7 +137,7 @@ class FypRubricOverallFeedback extends Model
      */
     public function isComplete(): bool
     {
-        if (!$this->template) {
+        if (! $this->template) {
             return false;
         }
 
@@ -153,7 +155,7 @@ class FypRubricOverallFeedback extends Model
      */
     public function getCompletionPercentageAttribute(): float
     {
-        if (!$this->template) {
+        if (! $this->template) {
             return 0;
         }
 

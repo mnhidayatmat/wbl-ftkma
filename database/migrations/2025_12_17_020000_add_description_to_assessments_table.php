@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('assessments', 'description')) {
+        if (! Schema::hasColumn('assessments', 'description')) {
             Schema::table('assessments', function (Blueprint $table) {
                 $table->string('description', 500)->nullable()->after('assessment_name');
             });
@@ -30,6 +30,3 @@ return new class extends Migration
         }
     }
 };
-
-
-

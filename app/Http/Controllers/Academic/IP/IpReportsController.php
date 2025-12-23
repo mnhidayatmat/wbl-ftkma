@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Academic\IP;
 
-use App\Http\Controllers\Controller;
 use App\Exports\StudentPerformanceExport;
+use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\Company;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
 use App\Models\WblGroup;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class IpReportsController extends Controller
 {
@@ -23,7 +23,7 @@ class IpReportsController extends Controller
      */
     public function index(): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -44,7 +44,7 @@ class IpReportsController extends Controller
      */
     public function exportCohort(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -70,7 +70,8 @@ class IpReportsController extends Controller
             return $this->exportPdf($studentsWithPerformance, 'IP Full Cohort Results');
         }
 
-        $fileName = 'IP_Cohort_Results_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'IP_Cohort_Results_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance), $fileName);
     }
 
@@ -79,7 +80,7 @@ class IpReportsController extends Controller
      */
     public function exportGroup(Request $request, WblGroup $group)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -108,7 +109,8 @@ class IpReportsController extends Controller
             return $this->exportPdf($studentsWithPerformance, "IP Results - {$group->name}");
         }
 
-        $fileName = 'IP_Group_' . str_replace(' ', '_', $group->name) . '_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'IP_Group_'.str_replace(' ', '_', $group->name).'_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance), $fileName);
     }
 
@@ -117,7 +119,7 @@ class IpReportsController extends Controller
      */
     public function exportCompany(Request $request, Company $company)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -146,7 +148,8 @@ class IpReportsController extends Controller
             return $this->exportPdf($studentsWithPerformance, "IP Results - {$company->company_name}");
         }
 
-        $fileName = 'IP_Company_' . str_replace(' ', '_', $company->company_name) . '_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'IP_Company_'.str_replace(' ', '_', $company->company_name).'_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance), $fileName);
     }
 
@@ -155,7 +158,7 @@ class IpReportsController extends Controller
      */
     private function getStudentsWithPerformance($students = null)
     {
-        if (!$students) {
+        if (! $students) {
             $students = Student::with(['group', 'company'])->get();
         }
 
@@ -183,18 +186,18 @@ class IpReportsController extends Controller
         $icAssessmentIds = $icAssessments->pluck('id');
         $allIcRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
             ->with('rubric.assessment')
-            ->whereHas('rubric', function($query) use ($icAssessmentIds) {
+            ->whereHas('rubric', function ($query) use ($icAssessmentIds) {
                 $query->whereIn('assessment_id', $icAssessmentIds);
             })
             ->get()
             ->groupBy('student_id');
 
         // Calculate performance for each student
-        return $students->map(function($student) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments) {
+        return $students->map(function ($student) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments) {
             // Calculate Lecturer marks
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
             $lecturerMarksByAssessment = $lecturerMarks->keyBy('assessment_id');
-            
+
             $lecturerTotal = 0;
             foreach ($lecturerAssessments as $assessment) {
                 $mark = $lecturerMarksByAssessment->get($assessment->id);
@@ -237,7 +240,7 @@ class IpReportsController extends Controller
             ->whereIn('assessment_type', ['Oral', 'Rubric'])
             ->with('rubrics')
             ->get()
-            ->sum(function($assessment) {
+            ->sum(function ($assessment) {
                 return $assessment->rubrics->sum('weight_percentage');
             });
 
@@ -248,13 +251,14 @@ class IpReportsController extends Controller
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-          ->setOption('margin-top', 30)
-          ->setOption('margin-bottom', 30)
-          ->setOption('margin-left', 25)
-          ->setOption('margin-right', 25)
-          ->setOption('enable-local-file-access', true);
+            ->setOption('margin-top', 30)
+            ->setOption('margin-bottom', 30)
+            ->setOption('margin-left', 25)
+            ->setOption('margin-right', 25)
+            ->setOption('enable-local-file-access', true);
 
-        $fileName = str_replace(' ', '_', $title) . '_' . now()->format('Y-m-d_His') . '.pdf';
+        $fileName = str_replace(' ', '_', $title).'_'.now()->format('Y-m-d_His').'.pdf';
+
         return $pdf->download($fileName);
     }
 }

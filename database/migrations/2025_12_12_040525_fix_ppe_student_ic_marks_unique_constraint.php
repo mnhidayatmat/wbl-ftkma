@@ -17,7 +17,7 @@ return new class extends Migration
             // This allows multiple questions per CLO (e.g., Q1 and Q2 both for CLO2)
             $table->unique(['student_id', 'clo', 'question_no'], 'ppe_student_ic_marks_student_clo_question_unique');
         });
-        
+
         // Now drop the old unique constraint using raw SQL
         // We do this separately because MySQL may have issues if done in the same transaction
         try {
@@ -35,7 +35,7 @@ return new class extends Migration
     {
         // Drop the new unique constraint
         DB::statement('ALTER TABLE ppe_student_ic_marks DROP INDEX ppe_student_ic_marks_student_clo_question_unique');
-        
+
         // Restore the old unique constraint
         Schema::table('ppe_student_ic_marks', function (Blueprint $table) {
             $table->unique(['student_id', 'clo']);

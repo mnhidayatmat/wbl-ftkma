@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->index('company_id');
             $table->index('document_type');
         });

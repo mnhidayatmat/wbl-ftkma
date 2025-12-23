@@ -66,7 +66,7 @@ class WblGroup extends Model
      */
     public function getStatusBadgeColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'ACTIVE' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
             'COMPLETED' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
             default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
@@ -78,7 +78,7 @@ class WblGroup extends Model
      */
     public function getStatusDisplayAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'ACTIVE' => 'Active',
             'COMPLETED' => 'Completed',
             default => 'Unknown',
@@ -101,4 +101,3 @@ class WblGroup extends Model
         return $query->where('status', 'COMPLETED');
     }
 }
-

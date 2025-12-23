@@ -11,8 +11,6 @@ use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class PpeAssessmentSettingController extends Controller
@@ -23,7 +21,7 @@ class PpeAssessmentSettingController extends Controller
     public function index(): View
     {
         // Only Admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -46,13 +44,13 @@ class PpeAssessmentSettingController extends Controller
 
         // Calculate progress statistics
         $totalStudents = Student::count();
-        
+
         // Lecturer progress
         $lecturerAssessments = Assessment::forCourse('PPE')
             ->forEvaluator('lecturer')
             ->active()
             ->get();
-        
+
         $lecturerTotalWeight = $lecturerAssessments->sum('weight_percentage');
         $lecturerCompleted = StudentAssessmentMark::whereIn('assessment_id', $lecturerAssessments->pluck('id'))
             ->whereNotNull('mark')
@@ -67,18 +65,18 @@ class PpeAssessmentSettingController extends Controller
             ->whereIn('assessment_type', ['Oral', 'Rubric'])
             ->with('rubrics')
             ->get();
-        
-        $totalRubricQuestions = $icAssessments->sum(function($assessment) {
+
+        $totalRubricQuestions = $icAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
-        
-        $icCompleted = StudentAssessmentRubricMark::whereHas('rubric.assessment', function($query) {
+
+        $icCompleted = StudentAssessmentRubricMark::whereHas('rubric.assessment', function ($query) {
             $query->where('course_code', 'PPE')
-                  ->where('evaluator_role', 'ic');
+                ->where('evaluator_role', 'ic');
         })
-        ->distinct('student_id')
-        ->count('student_id');
-        
+            ->distinct('student_id')
+            ->count('student_id');
+
         $icProgress = $totalStudents > 0 ? ($icCompleted / $totalStudents) * 100 : 0;
 
         // Pending evaluations (students with incomplete evaluations)
@@ -110,7 +108,7 @@ class PpeAssessmentSettingController extends Controller
      */
     public function updateWindow(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -129,8 +127,8 @@ class PpeAssessmentSettingController extends Controller
             ['evaluator_role' => $validated['evaluator_role']],
             [
                 'is_enabled' => $isEnabled,
-                'start_at' => !empty($validated['start_at']) ? $validated['start_at'] : null,
-                'end_at' => !empty($validated['end_at']) ? $validated['end_at'] : null,
+                'start_at' => ! empty($validated['start_at']) ? $validated['start_at'] : null,
+                'end_at' => ! empty($validated['end_at']) ? $validated['end_at'] : null,
                 'notes' => $validated['notes'] ?? null,
                 'updated_by' => auth()->id(),
             ]
@@ -165,7 +163,7 @@ class PpeAssessmentSettingController extends Controller
      */
     public function sendReminder(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -176,7 +174,7 @@ class PpeAssessmentSettingController extends Controller
         $role = $validated['evaluator_role'];
         $window = PpeAssessmentWindow::where('evaluator_role', $role)->first();
 
-        if (!$window || !$window->is_enabled) {
+        if (! $window || ! $window->is_enabled) {
             return redirect()->route('academic.ppe.settings.index')
                 ->with('error', "Assessment window for {$role} is not enabled.");
         }
@@ -187,12 +185,12 @@ class PpeAssessmentSettingController extends Controller
                 ->forEvaluator('lecturer')
                 ->active()
                 ->get();
-            
+
             $studentsWithMarks = StudentAssessmentMark::whereIn('assessment_id', $assessments->pluck('id'))
                 ->whereNotNull('mark')
                 ->distinct('student_id')
                 ->pluck('student_id');
-            
+
             $pendingStudents = Student::whereNotIn('id', $studentsWithMarks)->get();
         } else {
             $icAssessments = Assessment::forCourse('PPE')
@@ -201,20 +199,20 @@ class PpeAssessmentSettingController extends Controller
                 ->whereIn('assessment_type', ['Oral', 'Rubric'])
                 ->with('rubrics')
                 ->get();
-            
-            $totalRubricQuestions = $icAssessments->sum(function($assessment) {
+
+            $totalRubricQuestions = $icAssessments->sum(function ($assessment) {
                 return $assessment->rubrics->count();
             });
-            
-            $studentsWithAllRubrics = StudentAssessmentRubricMark::whereHas('rubric.assessment', function($query) {
+
+            $studentsWithAllRubrics = StudentAssessmentRubricMark::whereHas('rubric.assessment', function ($query) {
                 $query->where('course_code', 'PPE')
-                      ->where('evaluator_role', 'ic');
+                    ->where('evaluator_role', 'ic');
             })
-            ->select('student_id')
-            ->groupBy('student_id')
-            ->havingRaw('COUNT(DISTINCT assessment_rubric_id) = ?', [$totalRubricQuestions])
-            ->pluck('student_id');
-            
+                ->select('student_id')
+                ->groupBy('student_id')
+                ->havingRaw('COUNT(DISTINCT assessment_rubric_id) = ?', [$totalRubricQuestions])
+                ->pluck('student_id');
+
             $pendingStudents = Student::whereNotIn('id', $studentsWithAllRubrics)->get();
         }
 

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->boolean('is_locked')->default(false); // Lock when marks have been released
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
-            
+
             // Indexes
             $table->index('course_code');
             $table->index(['assessment_type', 'phase']);

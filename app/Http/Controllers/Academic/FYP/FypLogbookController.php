@@ -22,24 +22,24 @@ class FypLogbookController extends Controller
     public function index(Request $request): View
     {
         // Authorization: Admin or IC can access
-        if (!auth()->user()->isAdmin() && !auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Build query for students
         $query = Student::with(['group', 'company', 'industryCoach']);
-        
+
         // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
             $query->where('ic_id', auth()->id());
         }
 
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -57,7 +57,7 @@ class FypLogbookController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($allEvaluations) {
+        $studentsWithStatus = $students->map(function ($student) use ($allEvaluations) {
             $studentEvaluations = $allEvaluations->get($student->id, collect());
             $completedMonths = $studentEvaluations->whereNotNull('score')->count();
             $totalScore = $studentEvaluations->sum('score');
@@ -106,7 +106,7 @@ class FypLogbookController extends Controller
     public function show(Student $student): View
     {
         // Check authorization - Admin can view any, IC can view assigned students
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isIndustry()) {
                 if ($student->ic_id !== auth()->id()) {
                     abort(403, 'You are not authorized to view this student. This student is assigned to a different Industry Coach.');
@@ -115,7 +115,7 @@ class FypLogbookController extends Controller
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Load relationships
         $student->load('industryCoach', 'group', 'company');
 
@@ -146,14 +146,14 @@ class FypLogbookController extends Controller
 
         // Get Logbook assessment weight for IC evaluator
         $logbookAssessment = \App\Models\Assessment::forCourse('FYP')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
             ->where('assessment_name', 'like', '%Logbook%')
             ->with('evaluators')
             ->first();
-        
+
         // Get IC evaluator weight for this assessment
         $assessmentWeight = 0;
         if ($logbookAssessment) {
@@ -182,15 +182,15 @@ class FypLogbookController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate
-        if (!Gate::allows('edit-ic-marks', $student)) {
+        if (! Gate::allows('edit-ic-marks', $student)) {
             abort(403, 'You are not authorized to evaluate this student\'s logbook.');
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('ic');
         }
-        
+
         // Validate input
         $validated = $request->validate([
             'scores' => ['required', 'array'],
@@ -224,6 +224,3 @@ class FypLogbookController extends Controller
             ->with('success', 'Logbook evaluation saved successfully.');
     }
 }
-
-
-

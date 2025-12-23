@@ -17,6 +17,7 @@ use Illuminate\View\View;
 class PpeAtEvaluationController extends Controller
 {
     use ChecksAssessmentWindow;
+
     /**
      * Display the list of students for Lecturer evaluation.
      * Note: In PPE context, "AT" refers to Lecturer (Course Lecturer) evaluation.
@@ -24,7 +25,7 @@ class PpeAtEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Only Admin and Lecturer can access Lecturer evaluation
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -38,9 +39,9 @@ class PpeAtEvaluationController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, Lecturer sees only students if they are the assigned PPE lecturer
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             // PPE uses single lecturer from course_settings
             $ppeSetting = CourseSetting::where('course_type', 'PPE')->first();
             if ($ppeSetting && $ppeSetting->lecturer_id === auth()->id()) {
@@ -55,9 +56,9 @@ class PpeAtEvaluationController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -76,7 +77,7 @@ class PpeAtEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($assessments, $allMarks, $totalWeight) {
+        $studentsWithStatus = $students->map(function ($student) use ($assessments, $allMarks) {
             $studentMarks = $allMarks->get($student->id, collect());
             $marksByAssessment = $studentMarks->keyBy('assessment_id');
 
@@ -142,18 +143,18 @@ class PpeAtEvaluationController extends Controller
         $student->load('academicTutor', 'industryCoach', 'group');
 
         // Check authorization: Admin or assigned PPE lecturer
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isLecturer()) {
                 // PPE uses single lecturer from course_settings
                 $ppeSetting = CourseSetting::where('course_type', 'PPE')->first();
-                if (!$ppeSetting || $ppeSetting->lecturer_id !== auth()->id()) {
-                    abort(403, "You are not authorized to edit Lecturer marks for PPE. You are not the assigned PPE lecturer. Please contact an administrator.");
+                if (! $ppeSetting || $ppeSetting->lecturer_id !== auth()->id()) {
+                    abort(403, 'You are not authorized to edit Lecturer marks for PPE. You are not the assigned PPE lecturer. Please contact an administrator.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Get active assessments for PPE course with lecturer evaluator role
         $assessments = Assessment::forCourse('PPE')
             ->forEvaluator('lecturer')
@@ -186,11 +187,11 @@ class PpeAtEvaluationController extends Controller
         }
 
         return view('academic.ppe.lecturer.show', compact(
-            'student', 
-            'assessments', 
+            'student',
+            'assessments',
             'assessmentsByClo',
             'marks',
-            'componentMarks', 
+            'componentMarks',
             'totalContribution'
         ));
     }
@@ -201,19 +202,19 @@ class PpeAtEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate (this handles all role checks)
-        if (!Gate::allows('edit-at-marks', $student)) {
+        if (! Gate::allows('edit-at-marks', $student)) {
             $student->load('academicTutor');
-            $assignedTo = $student->academicTutor ? $student->academicTutor->name . ' (ID: ' . $student->academicTutor->id . ')' : 'No one';
-            $currentUser = auth()->user()->name . ' (ID: ' . auth()->user()->id . ')';
+            $assignedTo = $student->academicTutor ? $student->academicTutor->name.' (ID: '.$student->academicTutor->id.')' : 'No one';
+            $currentUser = auth()->user()->name.' (ID: '.auth()->user()->id.')';
             $studentAtId = $student->at_id ?? 'NULL';
             abort(403, "You are not authorized to edit Lecturer marks for this student. You are logged in as: {$currentUser}. This student ({$student->name}) is currently assigned to: {$assignedTo} (Student's at_id: {$studentAtId}). Please make sure you are logged in as the correct Lecturer, or contact an administrator to assign this student to you via the 'Assign Students' page.");
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('lecturer');
         }
-        
+
         $validated = $request->validate([
             'assessment_id' => ['required', 'exists:assessments,id'],
             'component_marks' => ['nullable', 'array'],
@@ -225,7 +226,7 @@ class PpeAtEvaluationController extends Controller
 
         $assessmentId = $validated['assessment_id'];
         $assessment = Assessment::with('components')->findOrFail($assessmentId);
-        
+
         // Validate assessment belongs to PPE and lecturer role
         if ($assessment->course_code !== 'PPE' || $assessment->evaluator_role !== 'lecturer') {
             return redirect()->back()->with('error', 'Invalid assessment.');
@@ -238,7 +239,9 @@ class PpeAtEvaluationController extends Controller
 
             foreach ($validated['component_marks'] as $componentId => $score) {
                 $component = $assessment->components->find($componentId);
-                if (!$component) continue;
+                if (! $component) {
+                    continue;
+                }
 
                 $remarks = $validated['component_remarks'][$componentId] ?? null;
 
@@ -261,14 +264,14 @@ class PpeAtEvaluationController extends Controller
                 // Contribution = Normalized * Weight
                 $normalizedScore = $score / 5;
                 $weightedScore = $normalizedScore * $component->weight_percentage;
-                
+
                 $totalWeightedScore += $weightedScore;
                 $totalWeight += $component->weight_percentage;
             }
 
             // Calculate overall mark for this assessment (0-5 scale)
             $overallMark = $totalWeight > 0 ? ($totalWeightedScore / $totalWeight) * 5 : 0;
-            
+
             // Save overall mark
             StudentAssessmentMark::updateOrCreate(
                 [
@@ -284,7 +287,7 @@ class PpeAtEvaluationController extends Controller
             );
 
         } else {
-             return redirect()->back()->with('error', 'This assessment does not have components configured for rubric grading.');
+            return redirect()->back()->with('error', 'This assessment does not have components configured for rubric grading.');
         }
 
         return redirect()->route('academic.ppe.lecturer.show', $student)

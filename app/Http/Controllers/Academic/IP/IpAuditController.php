@@ -14,7 +14,7 @@ class IpAuditController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -74,7 +74,7 @@ class IpAuditController extends Controller
      */
     public function export(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -108,15 +108,15 @@ class IpAuditController extends Controller
         $auditLogs = $query->orderBy('created_at', 'desc')->get();
 
         // Generate CSV
-        $filename = 'ip_audit_log_' . now()->format('Y-m-d_His') . '.csv';
+        $filename = 'ip_audit_log_'.now()->format('Y-m-d_His').'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function() use ($auditLogs) {
+        $callback = function () use ($auditLogs) {
             $file = fopen('php://output', 'w');
-            
+
             // Header row
             fputcsv($file, [
                 'Date & Time',
@@ -134,7 +134,7 @@ class IpAuditController extends Controller
             foreach ($auditLogs as $log) {
                 $studentInfo = 'N/A';
                 if ($log->student) {
-                    $studentInfo = $log->student->name . ' (' . $log->student->matric_no . ')';
+                    $studentInfo = $log->student->name.' ('.$log->student->matric_no.')';
                 }
 
                 fputcsv($file, [

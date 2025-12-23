@@ -50,17 +50,18 @@ class StudentAssessmentRubricMark extends Model
      */
     public function getWeightedContributionAttribute(): float
     {
-        if (!$this->rubric) {
+        if (! $this->rubric) {
             return 0;
         }
-        
+
         $rubricRange = $this->rubric->rubric_max - $this->rubric->rubric_min;
         if ($rubricRange == 0) {
             return 0;
         }
-        
+
         // Normalize score to 0-1 range, then multiply by weight
         $normalizedScore = ($this->rubric_score - $this->rubric->rubric_min) / $rubricRange;
+
         return $normalizedScore * $this->rubric->weight_percentage;
     }
 }

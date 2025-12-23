@@ -56,7 +56,7 @@ class StudentAssessmentMark extends Model
         if ($this->mark === null || $this->max_mark == 0) {
             return 0;
         }
-        
+
         return ($this->mark / $this->max_mark) * $this->assessment->weight_percentage;
     }
 }

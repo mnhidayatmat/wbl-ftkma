@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Academic\LI;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
-use App\Models\AssessmentRubric;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
-use App\Models\StudentAssessmentRubricMark;
 use App\Models\WblGroup;
 use App\Traits\ChecksAssessmentWindow;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +23,7 @@ class LiIcEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (!auth()->user()->isAdmin() && !auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -39,18 +37,18 @@ class LiIcEvaluationController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
             $query->where('ic_id', auth()->id());
         }
 
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -69,7 +67,7 @@ class LiIcEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($icAssessments, $allMarks, $totalWeight) {
+        $studentsWithStatus = $students->map(function ($student) use ($icAssessments, $allMarks) {
             $studentMarks = $allMarks->get($student->id, collect());
             $marksByAssessment = $studentMarks->keyBy('assessment_id');
 
@@ -131,10 +129,10 @@ class LiIcEvaluationController extends Controller
     public function show(Student $student): View
     {
         // Check authorization using Gate
-        if (!Gate::allows('edit-li-ic-marks', $student)) {
+        if (! Gate::allows('edit-li-ic-marks', $student)) {
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
-        
+
         // Load relationships
         $student->load('academicTutor', 'industryCoach', 'group', 'company');
 
@@ -171,9 +169,9 @@ class LiIcEvaluationController extends Controller
         $totalContribution = 0;
         foreach ($marks as $mark) {
             if ($mark->mark !== null && $mark->max_mark > 0) {
-                 $assessment = $icAssessments->find($mark->assessment_id);
-                 $weight = $assessment ? $assessment->weight_percentage : 0;
-                 $totalContribution += ($mark->mark / $mark->max_mark) * $weight;
+                $assessment = $icAssessments->find($mark->assessment_id);
+                $weight = $assessment ? $assessment->weight_percentage : 0;
+                $totalContribution += ($mark->mark / $mark->max_mark) * $weight;
             }
         }
 
@@ -193,9 +191,9 @@ class LiIcEvaluationController extends Controller
         $supervisorTotalContribution = 0;
         foreach ($supervisorMarks as $mark) {
             if ($mark->mark !== null && $mark->max_mark > 0) {
-                 $assessment = $supervisorAssessments->find($mark->assessment_id);
-                 $weight = $assessment ? $assessment->weight_percentage : 0;
-                 $supervisorTotalContribution += ($mark->mark / $mark->max_mark) * $weight;
+                $assessment = $supervisorAssessments->find($mark->assessment_id);
+                $weight = $assessment ? $assessment->weight_percentage : 0;
+                $supervisorTotalContribution += ($mark->mark / $mark->max_mark) * $weight;
             }
         }
 
@@ -219,15 +217,15 @@ class LiIcEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate
-        if (!Gate::allows('edit-li-ic-marks', $student)) {
+        if (! Gate::allows('edit-li-ic-marks', $student)) {
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('ic');
         }
-        
+
         $validated = $request->validate([
             'assessment_id' => ['required', 'exists:assessments,id'],
             'component_marks' => ['nullable', 'array'],
@@ -242,17 +240,21 @@ class LiIcEvaluationController extends Controller
         ]);
 
         $assessment = Assessment::with(['components', 'rubrics'])->findOrFail($validated['assessment_id']);
-        
+
         // Handle component-based marking (1-5 scale)
         if ($assessment->components->isNotEmpty() && isset($validated['component_marks'])) {
             $totalWeightedScore = 0;
             $totalWeight = 0;
 
             foreach ($validated['component_marks'] as $componentId => $score) {
-                if ($score === null) continue;
-                
+                if ($score === null) {
+                    continue;
+                }
+
                 $component = $assessment->components->find($componentId);
-                if (!$component) continue;
+                if (! $component) {
+                    continue;
+                }
 
                 $cRemarks = $validated['component_remarks'][$componentId] ?? null;
 
@@ -275,7 +277,7 @@ class LiIcEvaluationController extends Controller
             }
 
             $overallMark = $totalWeight > 0 ? ($totalWeightedScore / $totalWeight) * 5 : 0;
-            
+
             StudentAssessmentMark::updateOrCreate(
                 ['student_id' => $student->id, 'assessment_id' => $assessment->id],
                 [
@@ -289,14 +291,16 @@ class LiIcEvaluationController extends Controller
         } elseif ($assessment->rubrics->isNotEmpty() && isset($validated['rubric_scores'])) {
             // Handle legacy rubric marking
             foreach ($validated['rubric_scores'] as $rubricId => $score) {
-                if ($score === null) continue;
-                
+                if ($score === null) {
+                    continue;
+                }
+
                 \App\Models\StudentAssessmentRubricMark::updateOrCreate(
                     ['student_id' => $student->id, 'assessment_rubric_id' => $rubricId],
                     ['rubric_score' => $score, 'evaluated_by' => auth()->id()]
                 );
             }
-            
+
         } elseif (isset($validated['mark'])) {
             // Handle simple mark-based
             StudentAssessmentMark::updateOrCreate(
@@ -315,21 +319,3 @@ class LiIcEvaluationController extends Controller
             ->with('last_saved', now()->format('H:i:s'));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

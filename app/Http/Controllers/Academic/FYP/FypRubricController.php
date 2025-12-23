@@ -20,7 +20,7 @@ class FypRubricController extends Controller
     public function index(Request $request): View
     {
         // Only Admin can manage rubric templates
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -66,7 +66,7 @@ class FypRubricController extends Controller
      */
     public function create(): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -88,7 +88,7 @@ class FypRubricController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -121,12 +121,12 @@ class FypRubricController extends Controller
      */
     public function show(FypRubricTemplate $rubric): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
         $rubric->load(['elements.levelDescriptors', 'creator']);
-        
+
         $totalWeight = $rubric->calculateTotalWeight();
         $isWeightValid = $rubric->isWeightValid();
         $elementsByClo = $rubric->getElementsByClo();
@@ -144,7 +144,7 @@ class FypRubricController extends Controller
      */
     public function edit(FypRubricTemplate $rubric): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -154,7 +154,7 @@ class FypRubricController extends Controller
         }
 
         $rubric->load(['elements.levelDescriptors']);
-        
+
         $assessmentTypes = FypRubricTemplate::ASSESSMENT_TYPES;
         $phases = FypRubricTemplate::PHASES;
         $performanceLevels = FypRubricTemplate::PERFORMANCE_LEVELS;
@@ -178,7 +178,7 @@ class FypRubricController extends Controller
      */
     public function update(Request $request, FypRubricTemplate $rubric): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -189,7 +189,7 @@ class FypRubricController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:50', 'unique:fyp_rubric_templates,code,' . $rubric->id],
+            'code' => ['required', 'string', 'max:50', 'unique:fyp_rubric_templates,code,'.$rubric->id],
             'assessment_type' => ['required', 'in:Written,Oral'],
             'phase' => ['required', 'in:Mid-Term,Final'],
             'description' => ['nullable', 'string', 'max:1000'],
@@ -214,7 +214,7 @@ class FypRubricController extends Controller
      */
     public function destroy(FypRubricTemplate $rubric): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -240,7 +240,7 @@ class FypRubricController extends Controller
      */
     public function addElement(Request $request, FypRubricTemplate $rubric): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -299,7 +299,7 @@ class FypRubricController extends Controller
      */
     public function updateElement(Request $request, FypRubricTemplate $rubric, FypRubricElement $element): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -328,7 +328,7 @@ class FypRubricController extends Controller
         if (($currentTotal + $validated['weight_percentage']) > 100.01) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', "Updating this element would exceed 100% total weight.");
+                ->with('error', 'Updating this element would exceed 100% total weight.');
         }
 
         $element->update($validated);
@@ -342,7 +342,7 @@ class FypRubricController extends Controller
      */
     public function deleteElement(FypRubricTemplate $rubric, FypRubricElement $element): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -368,7 +368,7 @@ class FypRubricController extends Controller
      */
     public function updateDescriptors(Request $request, FypRubricTemplate $rubric, FypRubricElement $element): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -410,7 +410,7 @@ class FypRubricController extends Controller
      */
     public function reorderElements(Request $request, FypRubricTemplate $rubric): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -439,15 +439,15 @@ class FypRubricController extends Controller
      */
     public function duplicate(FypRubricTemplate $rubric): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
         DB::transaction(function () use ($rubric, &$newTemplate) {
             // Create new template
             $newTemplate = $rubric->replicate();
-            $newTemplate->name = $rubric->name . ' (Copy)';
-            $newTemplate->code = $rubric->code . '_COPY_' . time();
+            $newTemplate->name = $rubric->name.' (Copy)';
+            $newTemplate->code = $rubric->code.'_COPY_'.time();
             $newTemplate->is_locked = false;
             $newTemplate->created_by = auth()->id();
             $newTemplate->save();

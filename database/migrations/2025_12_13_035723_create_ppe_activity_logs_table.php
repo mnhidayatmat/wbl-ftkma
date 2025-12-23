@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('admin_user_id')->constrained('users')->onDelete('cascade');
             $table->json('metadata')->nullable(); // Store additional data like student count, etc.
             $table->timestamps();
-            
+
             $table->index(['action', 'created_at']);
             $table->index('evaluator_role');
         });

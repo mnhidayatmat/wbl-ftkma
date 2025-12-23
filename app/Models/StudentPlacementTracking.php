@@ -108,7 +108,7 @@ class StudentPlacementTracking extends Model
     public function getStatusDisplayAttribute(): string
     {
         // ACCEPTED status - show as "Accepted" (confirmation proof is separate)
-        return match($this->status) {
+        return match ($this->status) {
             'NOT_APPLIED' => 'Resume Recommended',
             'SAL_RELEASED' => 'SAL Released',
             'APPLIED' => 'Applied',
@@ -125,7 +125,7 @@ class StudentPlacementTracking extends Model
      */
     public function getStatusBadgeColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'NOT_APPLIED' => 'bg-gray-100 text-gray-800',
             'SAL_RELEASED' => 'bg-blue-100 text-blue-800',
             'APPLIED' => 'bg-yellow-100 text-yellow-800',
@@ -150,7 +150,7 @@ class StudentPlacementTracking extends Model
      */
     public function canReleaseScl(): bool
     {
-        return $this->status === 'ACCEPTED' && !empty($this->confirmation_proof_path);
+        return $this->status === 'ACCEPTED' && ! empty($this->confirmation_proof_path);
     }
 
     /**
@@ -174,7 +174,7 @@ class StudentPlacementTracking extends Model
      */
     public function hasApplicationData(): bool
     {
-        return $this->companies_applied_count > 0 && !empty($this->first_application_date);
+        return $this->companies_applied_count > 0 && ! empty($this->first_application_date);
     }
 
     /**
@@ -182,9 +182,10 @@ class StudentPlacementTracking extends Model
      */
     public function getDaysSinceAppliedAttribute(): ?int
     {
-        if (!$this->applied_status_set_at) {
+        if (! $this->applied_status_set_at) {
             return null;
         }
+
         return now()->diffInDays($this->applied_status_set_at);
     }
 

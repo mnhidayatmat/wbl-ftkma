@@ -19,17 +19,17 @@ class PpeFinalScoreController extends Controller
     public function index(Request $request): View|RedirectResponse
     {
         $groupId = $request->query('group');
-        
-        if (!$groupId) {
+
+        if (! $groupId) {
             return redirect()->route('academic.ppe.groups.index');
         }
 
         $group = \App\Models\WblGroup::findOrFail($groupId);
         $query = Student::where('group_id', $groupId);
-        
+
         // Filter based on role
         $user = auth()->user();
-        if ($user->isIndustry() && !$user->isAdmin()) {
+        if ($user->isIndustry() && ! $user->isAdmin()) {
             // IC can only see assigned students
             $query->where('ic_id', $user->id);
         } elseif ($user->isStudent()) {
@@ -37,11 +37,11 @@ class PpeFinalScoreController extends Controller
             $query->where('user_id', $user->id);
         }
         // Admin and Lecturer can see all students in group
-        
+
         $students = $query->with(['group', 'company'])
             ->orderBy('name')
             ->get();
-        
+
         return view('academic.ppe.final.index', compact('students', 'group'));
     }
 
@@ -52,7 +52,7 @@ class PpeFinalScoreController extends Controller
     {
         // Check authorization - all roles can view final scores
         $this->authorize('view', $student);
-        
+
         // Lecturer Marks (40%)
         $atSettings = PpeAssessmentSetting::where('clo', 'CLO1')->orderBy('id')->get();
         $atMarks = PpeStudentAtMark::where('student_id', $student->id)
@@ -80,8 +80,8 @@ class PpeFinalScoreController extends Controller
         // Q1 (CLO2 - 15%), Q2 (CLO2 - 15%), Q3 (CLO3 - 15%), Q4 (CLO4 - 15%)
         $icMarks = PpeStudentIcMark::where('student_id', $student->id)
             ->get()
-            ->keyBy(function($item) {
-                return $item->question_no . '_' . $item->clo;
+            ->keyBy(function ($item) {
+                return $item->question_no.'_'.$item->clo;
             });
 
         $q1Mark = $icMarks->get('1_CLO2');
@@ -99,7 +99,7 @@ class PpeFinalScoreController extends Controller
         $q2Contribution = ($q2Rubric / 5) * 15; // Q2 - CLO2 (15%)
         $q3Contribution = ($q3Rubric / 5) * 15; // Q3 - CLO3 (15%)
         $q4Contribution = ($q4Rubric / 5) * 15; // Q4 - CLO4 (15%)
-        
+
         $icTotalContribution = $q1Contribution + $q2Contribution + $q3Contribution + $q4Contribution;
 
         $icBreakdown = [
@@ -154,4 +154,3 @@ class PpeFinalScoreController extends Controller
         ));
     }
 }
-

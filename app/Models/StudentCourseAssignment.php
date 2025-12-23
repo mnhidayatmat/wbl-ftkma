@@ -37,7 +37,7 @@ class StudentCourseAssignment extends Model
      */
     public function getCourseTypeDisplayAttribute(): string
     {
-        return match($this->course_type) {
+        return match ($this->course_type) {
             'FYP' => 'Final Year Project',
             'IP' => 'Internship Preparation',
             'OSH' => 'Occupational Safety & Health',

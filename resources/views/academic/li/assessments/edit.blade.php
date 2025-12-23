@@ -369,34 +369,11 @@
                     <div id="componentsContainer" class="space-y-4">
                         @if($components && $components->count() > 0)
                             @foreach($components as $index => $component)
-                                <div class="component-item border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50 cursor-move" 
+                                <div class="component-item border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50"
                                      data-order="{{ $index }}"
-                                     draggable="true">
+                                     draggable="false">
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex items-center gap-2">
-                                            <div class="flex flex-col gap-1">
-                                                <button type="button" 
-                                                        onclick="moveComponentUp(this)"
-                                                        class="text-[#0084C5] hover:text-[#003A6C] disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-                                                        {{ $index === 0 ? 'disabled' : '' }}
-                                                        title="Move Up">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button" 
-                                                        onclick="moveComponentDown(this)"
-                                                        class="text-[#0084C5] hover:text-[#003A6C] disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-                                                        {{ $index === $components->count() - 1 ? 'disabled' : '' }}
-                                                        title="Move Down">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                                            </svg>
                                             <span class="text-sm font-semibold text-[#003A6C] dark:text-[#0084C5]">Component {{ $index + 1 }}</span>
                                         </div>
                                         <button type="button" 
@@ -1267,34 +1244,12 @@ function addComponent() {
     const currentCount = container.querySelectorAll('.component-item').length;
     const totalCloWeight = parseFloat(document.getElementById('totalCloWeight')?.textContent?.replace('%', '') || 100);
     const componentDiv = document.createElement('div');
-    componentDiv.className = 'component-item border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50 cursor-move';
-    componentDiv.setAttribute('draggable', 'true');
+    componentDiv.className = 'component-item border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50';
+    componentDiv.setAttribute('draggable', 'false');
     componentDiv.setAttribute('data-order', currentCount);
     componentDiv.innerHTML = `
         <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
-                <div class="flex flex-col gap-1">
-                    <button type="button" 
-                            onclick="moveComponentUp(this)"
-                            class="text-[#0084C5] hover:text-[#003A6C] disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-                            ${currentCount === 0 ? 'disabled' : ''}
-                            title="Move Up">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                        </svg>
-                    </button>
-                    <button type="button" 
-                            onclick="moveComponentDown(this)"
-                            class="text-[#0084C5] hover:text-[#003A6C] disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-                            title="Move Down">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                </div>
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                </svg>
                 <span class="text-sm font-semibold text-[#003A6C] dark:text-[#0084C5]">Component ${currentCount + 1}</span>
             </div>
             <button type="button" onclick="removeComponent(this)" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">

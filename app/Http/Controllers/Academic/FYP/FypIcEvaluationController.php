@@ -18,19 +18,20 @@ use Illuminate\View\View;
 class FypIcEvaluationController extends Controller
 {
     use ChecksAssessmentWindow;
+
     /**
      * Display the list of students for IC evaluation.
      */
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (!auth()->user()->isAdmin() && !auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Get ALL active assessments for FYP course that have IC evaluator in assessment_evaluators table
         $icAssessments = Assessment::forCourse('FYP')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
@@ -38,23 +39,23 @@ class FypIcEvaluationController extends Controller
             ->get();
 
         // Separate rubric-based and mark-based assessments
-        $rubricAssessments = $icAssessments->filter(fn($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
-        $markAssessments = $icAssessments->filter(fn($a) => !in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
+        $rubricAssessments = $icAssessments->filter(fn ($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
+        $markAssessments = $icAssessments->filter(fn ($a) => ! in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
             $query->where('ic_id', auth()->id());
         }
 
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -68,11 +69,11 @@ class FypIcEvaluationController extends Controller
 
         // Get all rubric marks for these students (only FYP IC assessments)
         $allRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')
-                  ->whereHas('evaluators', function($eq) {
-                      $eq->where('evaluator_role', 'ic');
-                  });
+                    ->whereHas('evaluators', function ($eq) {
+                        $eq->where('evaluator_role', 'ic');
+                    });
             })
             ->with('rubric.assessment')
             ->get()
@@ -85,19 +86,19 @@ class FypIcEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate total items (rubric questions + mark-based assessments)
-        $totalRubricQuestions = $rubricAssessments->sum(fn($a) => $a->rubrics->count());
+        $totalRubricQuestions = $rubricAssessments->sum(fn ($a) => $a->rubrics->count());
         $totalMarkAssessments = $markAssessments->count();
         $totalItems = $totalRubricQuestions + $totalMarkAssessments;
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($allRubricMarks, $allMarks, $rubricAssessments, $markAssessments, $totalItems) {
+        $studentsWithStatus = $students->map(function ($student) use ($allRubricMarks, $allMarks, $markAssessments, $totalItems) {
             $studentRubricMarks = $allRubricMarks->get($student->id, collect());
             $studentMarks = $allMarks->get($student->id, collect());
-            
+
             $completedRubrics = $studentRubricMarks->count();
-            $completedMarks = $studentMarks->filter(fn($m) => $m->mark !== null)->count();
+            $completedMarks = $studentMarks->filter(fn ($m) => $m->mark !== null)->count();
             $completedCount = $completedRubrics + $completedMarks;
-            
+
             $totalContribution = 0;
 
             // Calculate contribution from rubric marks
@@ -147,8 +148,9 @@ class FypIcEvaluationController extends Controller
         $groups = WblGroup::orderBy('name')->get();
 
         // Calculate total IC weight from evaluators table
-        $totalIcWeight = $icAssessments->sum(function($assessment) {
+        $totalIcWeight = $icAssessments->sum(function ($assessment) {
             $icEvaluator = $assessment->evaluators->firstWhere('evaluator_role', 'ic');
+
             return $icEvaluator ? $icEvaluator->total_score : 0;
         });
 
@@ -165,7 +167,7 @@ class FypIcEvaluationController extends Controller
     public function show(Student $student): View
     {
         // Check authorization - Admin can view any, IC can view assigned students
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isIndustry()) {
                 if ($student->ic_id !== auth()->id()) {
                     abort(403, 'You are not authorized to view this student. This student is assigned to a different Industry Coach.');
@@ -174,13 +176,13 @@ class FypIcEvaluationController extends Controller
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Load relationships
         $student->load('academicTutor', 'industryCoach', 'group');
 
         // Get ALL active assessments for FYP course that have IC evaluator in assessment_evaluators table
         $allIcAssessments = Assessment::forCourse('FYP')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
@@ -188,16 +190,16 @@ class FypIcEvaluationController extends Controller
             ->get();
 
         // Separate rubric-based and mark-based assessments
-        $rubricAssessments = $allIcAssessments->filter(fn($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
-        $markAssessments = $allIcAssessments->filter(fn($a) => !in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
+        $rubricAssessments = $allIcAssessments->filter(fn ($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
+        $markAssessments = $allIcAssessments->filter(fn ($a) => ! in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
 
         // Get existing rubric marks for this student (only FYP IC assessments)
         $rubricMarks = StudentAssessmentRubricMark::where('student_id', $student->id)
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')
-                  ->whereHas('evaluators', function($eq) {
-                      $eq->where('evaluator_role', 'ic');
-                  });
+                    ->whereHas('evaluators', function ($eq) {
+                        $eq->where('evaluator_role', 'ic');
+                    });
             })
             ->with('rubric.assessment')
             ->get()
@@ -231,21 +233,28 @@ class FypIcEvaluationController extends Controller
 
         // Sort assessments within each phase: Report first, then Oral/Presentation
         foreach ($assessmentsByPhase as $phase => $phaseAssessments) {
-            $assessmentsByPhase[$phase] = $phaseAssessments->sortBy(function($a) {
-                if (str_contains($a->assessment_name, 'Report')) return 1;
-                if (str_contains($a->assessment_name, 'Oral') || str_contains($a->assessment_name, 'Presentation')) return 2;
-                if (str_contains($a->assessment_name, 'Logbook')) return 3;
+            $assessmentsByPhase[$phase] = $phaseAssessments->sortBy(function ($a) {
+                if (str_contains($a->assessment_name, 'Report')) {
+                    return 1;
+                }
+                if (str_contains($a->assessment_name, 'Oral') || str_contains($a->assessment_name, 'Presentation')) {
+                    return 2;
+                }
+                if (str_contains($a->assessment_name, 'Logbook')) {
+                    return 3;
+                }
+
                 return 4;
             })->values();
         }
 
         // Remove empty phases
-        $assessmentsByPhase = $assessmentsByPhase->filter(fn($phase) => $phase->isNotEmpty());
+        $assessmentsByPhase = $assessmentsByPhase->filter(fn ($phase) => $phase->isNotEmpty());
 
         // Group assessments by base name (e.g., "Mid-Term Report" combines all CLOs)
         $groupedAssessments = collect([]);
         foreach ($assessmentsByPhase as $phase => $phaseAssessments) {
-            $grouped = $phaseAssessments->groupBy(function($a) {
+            $grouped = $phaseAssessments->groupBy(function ($a) {
                 // Remove CLO suffix to get base name
                 return preg_replace('/\s*\(CLO\d+\)\s*$/', '', $a->assessment_name);
             });
@@ -296,8 +305,9 @@ class FypIcEvaluationController extends Controller
         }
 
         // Calculate total IC weight from evaluators table
-        $totalIcWeight = $allIcAssessments->sum(function($assessment) {
+        $totalIcWeight = $allIcAssessments->sum(function ($assessment) {
             $icEvaluator = $assessment->evaluators->firstWhere('evaluator_role', 'ic');
+
             return $icEvaluator ? $icEvaluator->total_score : 0;
         });
 
@@ -325,18 +335,18 @@ class FypIcEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate
-        if (!Gate::allows('edit-ic-marks', $student)) {
+        if (! Gate::allows('edit-ic-marks', $student)) {
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('ic');
         }
-        
+
         // Get all IC assessments (via assessment_evaluators table)
         $allIcAssessments = Assessment::forCourse('FYP')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
@@ -344,8 +354,8 @@ class FypIcEvaluationController extends Controller
             ->get();
 
         // Separate rubric-based and mark-based assessments
-        $rubricAssessments = $allIcAssessments->filter(fn($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
-        $markAssessments = $allIcAssessments->filter(fn($a) => !in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
+        $rubricAssessments = $allIcAssessments->filter(fn ($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
+        $markAssessments = $allIcAssessments->filter(fn ($a) => ! in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
 
         $allRubricIds = $rubricAssessments->flatMap->rubrics->pluck('id');
         $allMarkAssessmentIds = $markAssessments->pluck('id');
@@ -371,7 +381,7 @@ class FypIcEvaluationController extends Controller
         if ($request->has('component_marks') && $request->filled('assessment_id')) {
             $assessmentId = $validated['assessment_id'];
             $assessment = Assessment::with('components')->findOrFail($assessmentId);
-            
+
             // Validate assessment belongs to FYP and has IC evaluator
             if ($assessment->course_code !== 'FYP') {
                 return redirect()->back()
@@ -381,7 +391,7 @@ class FypIcEvaluationController extends Controller
 
             // Check IC evaluator exists for this assessment
             $hasIcEvaluator = $assessment->evaluators()->where('evaluator_role', 'ic')->exists();
-            if (!$hasIcEvaluator) {
+            if (! $hasIcEvaluator) {
                 return redirect()->back()
                     ->with('error', 'This assessment is not assigned to IC evaluator.')
                     ->withInput();
@@ -392,12 +402,12 @@ class FypIcEvaluationController extends Controller
 
             foreach ($validated['component_marks'] as $componentId => $rubricScore) {
                 // Handle temporary component IDs (for components without database entries)
-                if (str_starts_with((string)$componentId, 'temp_')) {
+                if (str_starts_with((string) $componentId, 'temp_')) {
                     continue; // Skip temporary components
                 }
 
                 $component = $assessment->components->find($componentId);
-                if (!$component) {
+                if (! $component) {
                     continue;
                 }
 
@@ -421,7 +431,7 @@ class FypIcEvaluationController extends Controller
                 $componentWeight = $component->weight_percentage ?? 0;
                 $normalizedScore = ($rubricScore / 5) * 100; // Convert 1-5 to percentage
                 $weightedScore = ($normalizedScore / 100) * $componentWeight;
-                
+
                 $totalWeightedScore += $weightedScore;
                 $totalWeight += $componentWeight;
             }
@@ -453,17 +463,19 @@ class FypIcEvaluationController extends Controller
         }
 
         // Save rubric scores
-        if (!empty($validated['rubric_scores'])) {
+        if (! empty($validated['rubric_scores'])) {
             foreach ($validated['rubric_scores'] as $rubricId => $score) {
-                if ($score === null) continue;
-                
+                if ($score === null) {
+                    continue;
+                }
+
                 // Verify rubric belongs to IC assessment
-                if (!$allRubricIds->contains($rubricId)) {
+                if (! $allRubricIds->contains($rubricId)) {
                     continue;
                 }
 
                 $rubric = AssessmentRubric::findOrFail($rubricId);
-                
+
                 // Validate score is within rubric range
                 if ($score < $rubric->rubric_min || $score > $rubric->rubric_max) {
                     return redirect()->back()
@@ -485,10 +497,10 @@ class FypIcEvaluationController extends Controller
         }
 
         // Save mark-based assessment scores
-        if (!empty($validated['marks'])) {
+        if (! empty($validated['marks'])) {
             foreach ($validated['marks'] as $assessmentId => $mark) {
                 // Verify assessment belongs to IC assessments
-                if (!$allIcAssessments->pluck('id')->contains($assessmentId)) {
+                if (! $allIcAssessments->pluck('id')->contains($assessmentId)) {
                     continue;
                 }
 
@@ -529,7 +541,7 @@ class FypIcEvaluationController extends Controller
     public function rubric(Student $student, Assessment $assessment): View
     {
         // Check authorization
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isIndustry()) {
                 if ($student->ic_id !== auth()->id()) {
                     abort(403, 'You are not authorized to view this student.');
@@ -579,12 +591,12 @@ class FypIcEvaluationController extends Controller
     public function storeRubric(Request $request, Student $student, Assessment $assessment): RedirectResponse
     {
         // Check authorization
-        if (!Gate::allows('edit-ic-marks', $student)) {
+        if (! Gate::allows('edit-ic-marks', $student)) {
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('ic');
         }
 
@@ -601,10 +613,12 @@ class FypIcEvaluationController extends Controller
         $rubricIds = $assessment->rubrics->pluck('id');
 
         foreach ($validated['rubric_scores'] as $rubricId => $score) {
-            if ($score === null) continue;
+            if ($score === null) {
+                continue;
+            }
 
             // Verify rubric belongs to this assessment
-            if (!$rubricIds->contains($rubricId)) {
+            if (! $rubricIds->contains($rubricId)) {
                 continue;
             }
 

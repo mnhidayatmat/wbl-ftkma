@@ -29,10 +29,9 @@ class WblGroupFactory extends Factory
                 'Group C',
                 'Group D',
                 'Group E',
-            ]) . ' - ' . fake()->year(),
+            ]).' - '.fake()->year(),
             'start_date' => $startDate,
             'end_date' => $endDate,
         ];
     }
 }
-

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
-use App\Models\StudentPlacementTracking;
 use App\Models\PlacementApplicationEvidence;
 use App\Models\PlacementCompanyApplication;
+use App\Models\Student;
+use App\Models\StudentPlacementTracking;
 use App\Models\WblGroup;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -23,14 +23,14 @@ class StudentPlacementController extends Controller
     {
         // Check access: Admin, Coordinator (full), Lecturer/AT/IC/Supervisor LI (read-only)
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator() && !$user->isLecturer() && 
-            !$user->isAt() && !$user->isIc() && !$user->isSupervisorLi()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator() && ! $user->isLecturer() &&
+            ! $user->isAt() && ! $user->isIc() && ! $user->isSupervisorLi()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Get groups for filter based on role
         $groupsQuery = WblGroup::orderBy('status')->orderBy('name');
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             // Lecturer/AT/IC/Supervisor LI can only see active groups
             $groupsQuery->where('status', 'ACTIVE');
         }
@@ -38,20 +38,20 @@ class StudentPlacementController extends Controller
 
         // Build query for students
         $query = Student::with([
-            'placementTracking.applicationEvidence', 
+            'placementTracking.applicationEvidence',
             'placementTracking.companyApplications',
-            'resumeInspection', 
-            'group', 
-            'company'
+            'resumeInspection',
+            'group',
+            'company',
         ])
             ->orderBy('name');
-        
+
         // Filter by group status based on role
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             // Lecturer/AT/IC/Supervisor LI can only see students in active groups
             $query->inActiveGroups();
         }
-        
+
         // Optional: Filter by group status if requested (Admin/Coordinator only)
         if (($user->isAdmin() || $user->isCoordinator()) && $request->filled('group_status')) {
             if ($request->group_status === 'active') {
@@ -64,23 +64,24 @@ class StudentPlacementController extends Controller
         // Filter by group - validate that non-admin/coordinator users can only filter by active groups
         if ($request->filled('group')) {
             $requestedGroup = WblGroup::find($request->group);
-            
+
             // For lecturers/AT/IC/Supervisor LI, only allow filtering by active groups
-            if (!$user->isAdmin() && !$user->isCoordinator()) {
-                if (!$requestedGroup || $requestedGroup->status !== 'ACTIVE') {
+            if (! $user->isAdmin() && ! $user->isCoordinator()) {
+                if (! $requestedGroup || $requestedGroup->status !== 'ACTIVE') {
                     // Invalid group selection - ignore it and redirect without the group parameter
                     // Preserve all other query parameters (search, placement_status, resume_status, etc.)
                     $queryParams = $request->except('group')->all();
+
                     return redirect()->route('placement.index', $queryParams);
                 }
             }
-            
+
             $query->where('group_id', $request->group);
         }
 
         // Filter by placement status
         if ($request->filled('placement_status')) {
-            $query->whereHas('placementTracking', function($q) use ($request) {
+            $query->whereHas('placementTracking', function ($q) use ($request) {
                 $q->where('status', $request->placement_status);
             });
         }
@@ -89,19 +90,19 @@ class StudentPlacementController extends Controller
         if ($request->filled('resume_status')) {
             if ($request->resume_status === 'NOT_STARTED') {
                 $query->whereDoesntHave('resumeInspection')
-                    ->orWhereHas('resumeInspection', function($q) {
+                    ->orWhereHas('resumeInspection', function ($q) {
                         $q->whereNull('resume_file_path');
                     });
             } elseif ($request->resume_status === 'PENDING') {
-                $query->whereHas('resumeInspection', function($q) {
+                $query->whereHas('resumeInspection', function ($q) {
                     $q->where('status', 'PENDING');
                 });
             } elseif ($request->resume_status === 'RECOMMENDED') {
-                $query->whereHas('resumeInspection', function($q) {
+                $query->whereHas('resumeInspection', function ($q) {
                     $q->where('status', 'PASSED');
                 });
             } elseif ($request->resume_status === 'REVISION_REQUIRED') {
-                $query->whereHas('resumeInspection', function($q) {
+                $query->whereHas('resumeInspection', function ($q) {
                     $q->where('status', 'REVISION_REQUIRED');
                 });
             }
@@ -110,9 +111,9 @@ class StudentPlacementController extends Controller
         // Search by name or matric
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -120,7 +121,7 @@ class StudentPlacementController extends Controller
 
         // Ensure tracking record exists for each student
         foreach ($students as $student) {
-            if (!$student->placementTracking) {
+            if (! $student->placementTracking) {
                 StudentPlacementTracking::create([
                     'student_id' => $student->id,
                     'group_id' => $student->group_id,
@@ -134,14 +135,14 @@ class StudentPlacementController extends Controller
         // Calculate statistics
         $stats = [
             'total' => Student::count(),
-            'resume_recommended' => Student::whereHas('resumeInspection', function($q) {
+            'resume_recommended' => Student::whereHas('resumeInspection', function ($q) {
                 $q->where('status', 'PASSED');
             })->count(),
             'sal_released' => StudentPlacementTracking::where('status', 'SAL_RELEASED')->count(),
             'applied' => StudentPlacementTracking::where('status', 'APPLIED')->count(),
-            'pending_sal' => Student::whereHas('resumeInspection', function($q) {
+            'pending_sal' => Student::whereHas('resumeInspection', function ($q) {
                 $q->where('status', 'PASSED');
-            })->whereHas('placementTracking', function($q) {
+            })->whereHas('placementTracking', function ($q) {
                 $q->where('status', 'NOT_APPLIED');
             })->count(),
         ];
@@ -155,8 +156,8 @@ class StudentPlacementController extends Controller
     public function showGroup(WblGroup $group): View
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator() && !$user->isLecturer() && 
-            !$user->isAt() && !$user->isIc() && !$user->isSupervisorLi()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator() && ! $user->isLecturer() &&
+            ! $user->isAt() && ! $user->isIc() && ! $user->isSupervisorLi()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -168,7 +169,7 @@ class StudentPlacementController extends Controller
 
         // Ensure tracking record exists for each student
         foreach ($students as $student) {
-            if (!$student->placementTracking) {
+            if (! $student->placementTracking) {
                 StudentPlacementTracking::create([
                     'student_id' => $student->id,
                     'group_id' => $group->id,
@@ -182,19 +183,18 @@ class StudentPlacementController extends Controller
         // Calculate statistics
         $stats = [
             'total' => $students->count(),
-            'not_applied' => $students->filter(fn($s) => $s->placementTracking->status === 'NOT_APPLIED')->count(),
-            'sal_released' => $students->filter(fn($s) => $s->placementTracking->status === 'SAL_RELEASED')->count(),
-            'applied' => $students->filter(fn($s) => $s->placementTracking->status === 'APPLIED')->count(),
-            'interviewed' => $students->filter(fn($s) => $s->placementTracking->status === 'INTERVIEWED')->count(),
-            'offer_received' => $students->filter(fn($s) => $s->placementTracking->status === 'OFFER_RECEIVED')->count(),
-            'accepted' => $students->filter(fn($s) => $s->placementTracking->status === 'ACCEPTED')->count(),
+            'not_applied' => $students->filter(fn ($s) => $s->placementTracking->status === 'NOT_APPLIED')->count(),
+            'sal_released' => $students->filter(fn ($s) => $s->placementTracking->status === 'SAL_RELEASED')->count(),
+            'applied' => $students->filter(fn ($s) => $s->placementTracking->status === 'APPLIED')->count(),
+            'interviewed' => $students->filter(fn ($s) => $s->placementTracking->status === 'INTERVIEWED')->count(),
+            'offer_received' => $students->filter(fn ($s) => $s->placementTracking->status === 'OFFER_RECEIVED')->count(),
+            'accepted' => $students->filter(fn ($s) => $s->placementTracking->status === 'ACCEPTED')->count(),
             // Count ACCEPTED with proof as "confirmed" (confirmation proof indicates completion)
-            'confirmed' => $students->filter(fn($s) => 
-                $s->placementTracking && 
-                $s->placementTracking->status === 'ACCEPTED' && 
+            'confirmed' => $students->filter(fn ($s) => $s->placementTracking &&
+                $s->placementTracking->status === 'ACCEPTED' &&
                 $s->placementTracking->confirmation_proof_path
             )->count(),
-            'scl_released' => $students->filter(fn($s) => $s->placementTracking->status === 'SCL_RELEASED')->count(),
+            'scl_released' => $students->filter(fn ($s) => $s->placementTracking->status === 'SCL_RELEASED')->count(),
         ];
 
         return view('placement.group', compact('group', 'students', 'stats'));
@@ -206,7 +206,7 @@ class StudentPlacementController extends Controller
     public function updateStatus(Request $request, Student $student): RedirectResponse
     {
         $user = auth()->user();
-        
+
         // Students can update their own status (with restrictions)
         // Admin/Coordinator can update any status
         if ($user->isStudent() && $user->id !== $student->user_id) {
@@ -218,7 +218,7 @@ class StudentPlacementController extends Controller
         ]);
 
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             $tracking = StudentPlacementTracking::create([
                 'student_id' => $student->id,
                 'group_id' => $student->group_id,
@@ -251,12 +251,12 @@ class StudentPlacementController extends Controller
     public function releaseSal(Student $student): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Only Admin and Coordinator can release SAL.');
         }
 
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             $tracking = StudentPlacementTracking::create([
                 'student_id' => $student->id,
                 'group_id' => $student->group_id,
@@ -266,8 +266,8 @@ class StudentPlacementController extends Controller
 
         // Generate SAL PDF
         $pdf = $this->generateSalPdf($student);
-        $fileName = 'SAL_' . $student->matric_no . '_' . now()->format('Y-m-d_His') . '.pdf';
-        $filePath = 'placement/sal/' . $fileName;
+        $fileName = 'SAL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
+        $filePath = 'placement/sal/'.$fileName;
         Storage::put($filePath, $pdf->output());
 
         // Update tracking
@@ -296,16 +296,16 @@ class StudentPlacementController extends Controller
     public function bulkReleaseSal(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Only Admin and Coordinator can release SAL.');
         }
 
         // Get all students with Resume Recommended status who haven't received SAL
-        $students = Student::whereHas('resumeInspection', function($q) {
-                $q->where('status', 'PASSED');
-            })
-            ->where(function($q) {
-                $q->whereHas('placementTracking', function($subQ) {
+        $students = Student::whereHas('resumeInspection', function ($q) {
+            $q->where('status', 'PASSED');
+        })
+            ->where(function ($q) {
+                $q->whereHas('placementTracking', function ($subQ) {
                     $subQ->where('status', 'NOT_APPLIED');
                 })->orWhereDoesntHave('placementTracking');
             })
@@ -316,7 +316,7 @@ class StudentPlacementController extends Controller
         foreach ($students as $student) {
             // Double-check eligibility
             $resumeInspection = $student->resumeInspection;
-            if (!$resumeInspection || $resumeInspection->status !== 'PASSED') {
+            if (! $resumeInspection || $resumeInspection->status !== 'PASSED') {
                 continue;
             }
 
@@ -325,7 +325,7 @@ class StudentPlacementController extends Controller
                 continue; // Already has SAL or beyond
             }
 
-            if (!$tracking) {
+            if (! $tracking) {
                 $tracking = StudentPlacementTracking::create([
                     'student_id' => $student->id,
                     'group_id' => $student->group_id,
@@ -335,8 +335,8 @@ class StudentPlacementController extends Controller
 
             // Generate SAL PDF
             $pdf = $this->generateSalPdf($student);
-            $fileName = 'SAL_' . $student->matric_no . '_' . now()->format('Y-m-d_His') . '.pdf';
-            $filePath = 'placement/sal/' . $fileName;
+            $fileName = 'SAL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
+            $filePath = 'placement/sal/'.$fileName;
             Storage::put($filePath, $pdf->output());
 
             $tracking->update([
@@ -365,24 +365,24 @@ class StudentPlacementController extends Controller
     public function releaseScl(Student $student): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Only Admin and Coordinator can release SCL.');
         }
 
         $tracking = $student->placementTracking;
         // Check if student has accepted offer and uploaded proof (step 6 completed)
-        $isStep6Complete = $tracking && 
-            $tracking->status === 'ACCEPTED' && 
+        $isStep6Complete = $tracking &&
+            $tracking->status === 'ACCEPTED' &&
             $tracking->confirmation_proof_path;
-        
-        if (!$isStep6Complete) {
+
+        if (! $isStep6Complete) {
             return redirect()->back()->with('error', 'Student must have accepted the offer and uploaded confirmation proof before SCL can be released.');
         }
 
         // Generate SCL PDF
         $pdf = $this->generateSclPdf($student);
-        $fileName = 'SCL_' . $student->matric_no . '_' . now()->format('Y-m-d_His') . '.pdf';
-        $filePath = 'placement/scl/' . $fileName;
+        $fileName = 'SCL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
+        $filePath = 'placement/scl/'.$fileName;
         Storage::put($filePath, $pdf->output());
 
         // Update tracking
@@ -420,7 +420,7 @@ class StudentPlacementController extends Controller
         ]);
 
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             $tracking = StudentPlacementTracking::create([
                 'student_id' => $student->id,
                 'group_id' => $student->group_id,
@@ -442,12 +442,12 @@ class StudentPlacementController extends Controller
             'status' => 'ACCEPTED',
             'updated_by' => auth()->id(),
         ];
-        
+
         // Set confirmed_at timestamp when proof is uploaded
-        if (!$tracking->confirmed_at) {
+        if (! $tracking->confirmed_at) {
             $updateData['confirmed_at'] = now()->startOfDay();
         }
-        
+
         $tracking->update($updateData);
 
         Log::info('Confirmation Proof Uploaded', [
@@ -466,7 +466,7 @@ class StudentPlacementController extends Controller
     public function downloadSal(Student $student)
     {
         $tracking = $student->placementTracking;
-        if (!$tracking || !$tracking->sal_file_path || !Storage::exists($tracking->sal_file_path)) {
+        if (! $tracking || ! $tracking->sal_file_path || ! Storage::exists($tracking->sal_file_path)) {
             abort(404, 'SAL not found.');
         }
 
@@ -479,7 +479,7 @@ class StudentPlacementController extends Controller
     public function downloadScl(Student $student)
     {
         $tracking = $student->placementTracking;
-        if (!$tracking || !$tracking->scl_file_path || !Storage::exists($tracking->scl_file_path)) {
+        if (! $tracking || ! $tracking->scl_file_path || ! Storage::exists($tracking->scl_file_path)) {
             abort(404, 'SCL not found.');
         }
 
@@ -493,17 +493,17 @@ class StudentPlacementController extends Controller
     {
         // Get WBL duration from settings (you may need to create a settings table)
         $wblDuration = '6 months'; // Default, can be fetched from settings
-        
+
         $pdf = Pdf::loadView('placement.pdf.sal', [
             'student' => $student,
             'wblDuration' => $wblDuration,
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait')
-          ->setOption('margin-top', 25)
-          ->setOption('margin-bottom', 25)
-          ->setOption('margin-left', 25)
-          ->setOption('margin-right', 25)
-          ->setOption('enable-local-file-access', true);
+            ->setOption('margin-top', 25)
+            ->setOption('margin-bottom', 25)
+            ->setOption('margin-left', 25)
+            ->setOption('margin-right', 25)
+            ->setOption('enable-local-file-access', true);
 
         return $pdf;
     }
@@ -515,18 +515,18 @@ class StudentPlacementController extends Controller
     {
         $tracking = $student->placementTracking;
         $group = $student->group;
-        
+
         $pdf = Pdf::loadView('placement.pdf.scl', [
             'student' => $student,
             'tracking' => $tracking,
             'group' => $group,
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait')
-          ->setOption('margin-top', 25)
-          ->setOption('margin-bottom', 25)
-          ->setOption('margin-left', 25)
-          ->setOption('margin-right', 25)
-          ->setOption('enable-local-file-access', true);
+            ->setOption('margin-top', 25)
+            ->setOption('margin-bottom', 25)
+            ->setOption('margin-left', 25)
+            ->setOption('margin-right', 25)
+            ->setOption('enable-local-file-access', true);
 
         return $pdf;
     }
@@ -537,12 +537,12 @@ class StudentPlacementController extends Controller
     public function studentView(): View
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access. This page is for students only.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             return view('placement.student.no-profile');
         }
 
@@ -562,7 +562,7 @@ class StudentPlacementController extends Controller
     {
         $user = auth()->user();
         // Allow admin, coordinator, or the student themselves
-        if (!$user->isAdmin() && !$user->isCoordinator() && (!$user->isStudent() || $user->id !== $student->user_id)) {
+        if (! $user->isAdmin() && ! $user->isCoordinator() && (! $user->isStudent() || $user->id !== $student->user_id)) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -576,7 +576,7 @@ class StudentPlacementController extends Controller
     {
         // Get or create placement tracking
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             $tracking = StudentPlacementTracking::create([
                 'student_id' => $student->id,
                 'group_id' => $student->group_id,
@@ -593,7 +593,7 @@ class StudentPlacementController extends Controller
 
         // Determine Step 1 label based on resume inspection status
         $step1Label = $this->getStep1LabelFromResumeInspection($resumeInspection);
-        
+
         // Get Step 1 date from resume inspection if approved
         $step1Date = null;
         if ($resumeInspection && $resumeInspection->isPassed() && $resumeInspection->approved_at) {
@@ -639,12 +639,12 @@ class StudentPlacementController extends Controller
     public function studentUpdateStatus(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student profile not found.');
         }
 
@@ -668,7 +668,7 @@ class StudentPlacementController extends Controller
         ]);
 
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             // Create new tracking with NOT_APPLIED status (students cannot set initial status)
             $tracking = StudentPlacementTracking::create([
                 'student_id' => $student->id,
@@ -677,45 +677,46 @@ class StudentPlacementController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'updated_by' => auth()->id(),
             ]);
+
             return redirect()->back()->with('success', 'Notes updated successfully. Status is determined by your resume inspection.');
         } else {
             $oldStatus = $tracking->status;
-            
+
             // Students cannot change NOT_APPLIED status (it's controlled by resume inspection)
             if ($oldStatus === 'NOT_APPLIED' && $validated['status'] !== 'NOT_APPLIED') {
                 return redirect()->back()->withErrors([
-                    'status' => 'You cannot change this status. Step 1 status is determined by your resume inspection status. Please ensure your resume is approved first.'
+                    'status' => 'You cannot change this status. Step 1 status is determined by your resume inspection status. Please ensure your resume is approved first.',
                 ]);
             }
-            
+
             // Students cannot set SAL_RELEASED or SCL_RELEASED (admin only)
             if (in_array($validated['status'], ['SAL_RELEASED', 'SCL_RELEASED'])) {
                 return redirect()->back()->with('error', 'You cannot set this status. Please contact administrator.');
             }
-            
+
             // Define valid status progression
             $statusOrder = ['NOT_APPLIED', 'SAL_RELEASED', 'APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED'];
             $oldIndex = array_search($oldStatus, $statusOrder);
             $newIndex = array_search($validated['status'], $statusOrder);
-            
+
             // Allow forward progression only (students can move forward but not backward)
             if ($newIndex !== false && $oldIndex !== false && $newIndex <= $oldIndex && $oldStatus !== 'NOT_APPLIED') {
                 return redirect()->back()->withErrors([
-                    'status' => 'You can only progress forward in the placement process. Please select a status that comes after your current status.'
+                    'status' => 'You can only progress forward in the placement process. Please select a status that comes after your current status.',
                 ]);
             }
-            
+
             // Ensure student has SAL released before they can apply
-            if ($validated['status'] === 'APPLIED' && $oldStatus !== 'SAL_RELEASED' && !$tracking->sal_file_path) {
+            if ($validated['status'] === 'APPLIED' && $oldStatus !== 'SAL_RELEASED' && ! $tracking->sal_file_path) {
                 return redirect()->back()->withErrors([
-                    'status' => 'You must have SAL released before you can mark yourself as Applied. Please wait for coordinator to release your SAL.'
+                    'status' => 'You must have SAL released before you can mark yourself as Applied. Please wait for coordinator to release your SAL.',
                 ]);
             }
 
             // Prevent moving to Interviewed without application data
-            if ($validated['status'] === 'INTERVIEWED' && $oldStatus === 'APPLIED' && !$tracking->hasApplicationData()) {
+            if ($validated['status'] === 'INTERVIEWED' && $oldStatus === 'APPLIED' && ! $tracking->hasApplicationData()) {
                 return redirect()->back()->withErrors([
-                    'status' => 'Please complete your application data (number of companies applied and first application date) before moving to Interviewed status.'
+                    'status' => 'Please complete your application data (number of companies applied and first application date) before moving to Interviewed status.',
                 ]);
             }
 
@@ -723,12 +724,12 @@ class StudentPlacementController extends Controller
             if ($validated['status'] === 'APPLIED') {
                 if (empty($validated['companies_applied_count']) || $validated['companies_applied_count'] < 1) {
                     return redirect()->back()->withErrors([
-                        'companies_applied_count' => 'Please enter the number of companies you have applied to (minimum 1).'
+                        'companies_applied_count' => 'Please enter the number of companies you have applied to (minimum 1).',
                     ]);
                 }
                 if (empty($validated['first_application_date'])) {
                     return redirect()->back()->withErrors([
-                        'first_application_date' => 'Please provide the date of your first application.'
+                        'first_application_date' => 'Please provide the date of your first application.',
                     ]);
                 }
             }
@@ -742,14 +743,14 @@ class StudentPlacementController extends Controller
 
             // Set status date when moving to a new status (always update to today's date)
             if ($oldStatus !== $validated['status']) {
-                $statusDateField = match($validated['status']) {
+                $statusDateField = match ($validated['status']) {
                     'APPLIED' => 'applied_at',
                     'INTERVIEWED' => 'interviewed_at',
                     'OFFER_RECEIVED' => 'offer_received_at',
                     'ACCEPTED' => 'accepted_at',
                     default => null,
                 };
-                
+
                 // Always set to today's date when status changes
                 if ($statusDateField) {
                     $updateData[$statusDateField] = now()->startOfDay();
@@ -765,12 +766,12 @@ class StudentPlacementController extends Controller
 
                 // Update application tracking data
                 $updateData['companies_applied_count'] = $validated['companies_applied_count'] ?? $tracking->companies_applied_count ?? 0;
-                
+
                 // Ensure count doesn't decrease
                 if ($oldStatus === 'APPLIED' && $tracking->companies_applied_count > 0) {
                     if ($updateData['companies_applied_count'] < $tracking->companies_applied_count) {
                         return redirect()->back()->withErrors([
-                            'companies_applied_count' => 'The number of companies applied cannot decrease. Please enter a number equal to or greater than ' . $tracking->companies_applied_count . '.'
+                            'companies_applied_count' => 'The number of companies applied cannot decrease. Please enter a number equal to or greater than '.$tracking->companies_applied_count.'.',
                         ]);
                     }
                 }
@@ -787,9 +788,9 @@ class StudentPlacementController extends Controller
             // Handle evidence file uploads
             if ($validated['status'] === 'APPLIED' && $request->hasFile('evidence_files')) {
                 foreach ($request->file('evidence_files') as $file) {
-                    $fileName = 'evidence_' . $student->matric_no . '_' . time() . '_' . $file->getClientOriginalName();
+                    $fileName = 'evidence_'.$student->matric_no.'_'.time().'_'.$file->getClientOriginalName();
                     $filePath = $file->storeAs('placement/evidence', $fileName, 'public');
-                    
+
                     PlacementApplicationEvidence::create([
                         'placement_tracking_id' => $tracking->id,
                         'file_path' => $filePath,
@@ -824,17 +825,17 @@ class StudentPlacementController extends Controller
     public function addCompany(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student profile not found.');
         }
 
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             abort(404, 'Placement tracking not found.');
         }
 
@@ -867,17 +868,17 @@ class StudentPlacementController extends Controller
     public function deleteCompany(PlacementCompanyApplication $application): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student profile not found.');
         }
 
         $tracking = $student->placementTracking;
-        if (!$tracking || $application->placement_tracking_id != $tracking->id) {
+        if (! $tracking || $application->placement_tracking_id != $tracking->id) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -897,17 +898,17 @@ class StudentPlacementController extends Controller
     public function markAsInterviewed(PlacementCompanyApplication $application): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student profile not found.');
         }
 
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             abort(404, 'Placement tracking not found.');
         }
 
@@ -919,7 +920,7 @@ class StudentPlacementController extends Controller
         // Only allow if current status is APPLIED
         if ($tracking->status !== 'APPLIED') {
             return redirect()->back()->withErrors([
-                'status' => 'You can only mark as interviewed when your status is "Applied".'
+                'status' => 'You can only mark as interviewed when your status is "Applied".',
             ]);
         }
 
@@ -948,24 +949,24 @@ class StudentPlacementController extends Controller
     public function studentUploadProof(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student profile not found.');
         }
 
         $tracking = $student->placementTracking;
-        if (!$tracking) {
+        if (! $tracking) {
             abort(404, 'Placement tracking not found.');
         }
 
         // Only allow if current status is ACCEPTED
         if ($tracking->status !== 'ACCEPTED') {
             return redirect()->back()->withErrors([
-                'proof' => 'You can only upload confirmation proof when your status is "Accepted".'
+                'proof' => 'You can only upload confirmation proof when your status is "Accepted".',
             ]);
         }
 
@@ -979,7 +980,7 @@ class StudentPlacementController extends Controller
         }
 
         // Store new proof
-        $fileName = 'confirmation_proof_' . $student->matric_no . '_' . time() . '.' . $validated['proof']->getClientOriginalExtension();
+        $fileName = 'confirmation_proof_'.$student->matric_no.'_'.time().'.'.$validated['proof']->getClientOriginalExtension();
         $filePath = $validated['proof']->storeAs('placement/proofs', $fileName);
 
         // Update tracking - keep status as ACCEPTED, confirmation proof is separate
@@ -1005,19 +1006,19 @@ class StudentPlacementController extends Controller
     public function viewProof(Student $student)
     {
         $user = auth()->user();
-        
+
         // Check authorization: Admin, Coordinator, or the student themselves
-        if (!$user->isAdmin() && !$user->isCoordinator() && (!$user->isStudent() || $user->id !== $student->user_id)) {
+        if (! $user->isAdmin() && ! $user->isCoordinator() && (! $user->isStudent() || $user->id !== $student->user_id)) {
             abort(403, 'Unauthorized access.');
         }
 
         $tracking = $student->placementTracking;
-        if (!$tracking || !$tracking->confirmation_proof_path) {
+        if (! $tracking || ! $tracking->confirmation_proof_path) {
             abort(404, 'Confirmation proof not found.');
         }
 
         // Check if file exists
-        if (!Storage::exists($tracking->confirmation_proof_path)) {
+        if (! Storage::exists($tracking->confirmation_proof_path)) {
             abort(404, 'Confirmation proof file not found.');
         }
 
@@ -1028,7 +1029,7 @@ class StudentPlacementController extends Controller
         // Return file response
         return Storage::response($tracking->confirmation_proof_path, $fileName, [
             'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . $fileName . '"',
+            'Content-Disposition' => 'inline; filename="'.$fileName.'"',
         ]);
     }
 
@@ -1038,22 +1039,22 @@ class StudentPlacementController extends Controller
     public function studentViewProof()
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access. This page is for students only.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student profile not found.');
         }
 
         $tracking = $student->placementTracking;
-        if (!$tracking || !$tracking->confirmation_proof_path) {
+        if (! $tracking || ! $tracking->confirmation_proof_path) {
             abort(404, 'Confirmation proof not found.');
         }
 
         // Check if file exists
-        if (!Storage::exists($tracking->confirmation_proof_path)) {
+        if (! Storage::exists($tracking->confirmation_proof_path)) {
             abort(404, 'Confirmation proof file not found.');
         }
 
@@ -1064,7 +1065,7 @@ class StudentPlacementController extends Controller
         // Return file response
         return Storage::response($tracking->confirmation_proof_path, $fileName, [
             'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . $fileName . '"',
+            'Content-Disposition' => 'inline; filename="'.$fileName.'"',
         ]);
     }
 
@@ -1074,12 +1075,12 @@ class StudentPlacementController extends Controller
     public function reset(Student $student): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             abort(403, 'Only Admin can reset placement tracking.');
         }
 
         $tracking = $student->placementTracking;
-        
+
         if ($tracking) {
             // Delete associated files
             if ($tracking->sal_file_path && Storage::exists($tracking->sal_file_path)) {
@@ -1091,11 +1092,11 @@ class StudentPlacementController extends Controller
             if ($tracking->confirmation_proof_path && Storage::exists($tracking->confirmation_proof_path)) {
                 Storage::delete($tracking->confirmation_proof_path);
             }
-            
+
             // Delete company applications and application evidence
             $tracking->companyApplications()->delete();
             $tracking->applicationEvidence()->delete();
-            
+
             // Reset all tracking fields to initial state
             $tracking->update([
                 'status' => 'NOT_APPLIED',
@@ -1130,7 +1131,7 @@ class StudentPlacementController extends Controller
             'reset_by_name' => auth()->user()->name,
         ]);
 
-        return redirect()->back()->with('success', 'Placement tracking reset successfully for ' . $student->name . '.');
+        return redirect()->back()->with('success', 'Placement tracking reset successfully for '.$student->name.'.');
     }
 
     /**
@@ -1139,12 +1140,12 @@ class StudentPlacementController extends Controller
     private function getStep1LabelFromResumeInspection($resumeInspection): string
     {
         // If no resume inspection record exists or no resume file uploaded
-        if (!$resumeInspection || empty($resumeInspection->resume_file_path)) {
+        if (! $resumeInspection || empty($resumeInspection->resume_file_path)) {
             return 'Not started Resume Preparation';
         }
 
         // Map resume inspection status to Step 1 label
-        return match($resumeInspection->status) {
+        return match ($resumeInspection->status) {
             'PENDING' => 'Pending Review',
             'PASSED' => 'Resume Recommended',
             'REVISION_REQUIRED' => 'Pending Review', // Needs revision, so still pending

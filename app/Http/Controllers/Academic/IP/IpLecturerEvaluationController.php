@@ -11,20 +11,19 @@ use App\Models\WblGroup;
 use App\Traits\ChecksAssessmentWindow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class IpLecturerEvaluationController extends Controller
 {
     use ChecksAssessmentWindow;
-    
+
     /**
      * Display the list of students for Lecturer evaluation.
      */
     public function index(Request $request): View
     {
         // Only Admin and Lecturer can access Lecturer evaluation
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -38,9 +37,9 @@ class IpLecturerEvaluationController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, Lecturer sees only students if they are the assigned IP lecturer
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             // IP uses single lecturer from course_settings
             $ipSetting = CourseSetting::where('course_type', 'IP')->first();
             if ($ipSetting && $ipSetting->lecturer_id === auth()->id()) {
@@ -58,9 +57,9 @@ class IpLecturerEvaluationController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -79,7 +78,7 @@ class IpLecturerEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($assessments, $allMarks, $totalWeight) {
+        $studentsWithStatus = $students->map(function ($student) use ($assessments, $allMarks) {
             $studentMarks = $allMarks->get($student->id, collect());
             $marksByAssessment = $studentMarks->keyBy('assessment_id');
 
@@ -148,18 +147,18 @@ class IpLecturerEvaluationController extends Controller
         $student->load('academicTutor', 'industryCoach', 'group');
 
         // Check authorization: Admin or assigned IP lecturer
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isLecturer()) {
                 // IP uses single lecturer from course_settings
                 $ipSetting = CourseSetting::where('course_type', 'IP')->first();
-                if (!$ipSetting || $ipSetting->lecturer_id !== auth()->id()) {
-                    abort(403, "You are not authorized to edit Lecturer marks for IP. You are not the assigned IP lecturer. Please contact an administrator.");
+                if (! $ipSetting || $ipSetting->lecturer_id !== auth()->id()) {
+                    abort(403, 'You are not authorized to edit Lecturer marks for IP. You are not the assigned IP lecturer. Please contact an administrator.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Get active assessments for IP course with lecturer evaluator role
         $assessments = Assessment::forCourse('IP')
             ->forEvaluator('lecturer')
@@ -192,11 +191,11 @@ class IpLecturerEvaluationController extends Controller
         }
 
         return view('academic.ip.lecturer.show', compact(
-            'student', 
-            'assessments', 
+            'student',
+            'assessments',
             'assessmentsByClo',
             'marks',
-            'componentMarks', 
+            'componentMarks',
             'totalContribution'
         ));
     }
@@ -207,11 +206,11 @@ class IpLecturerEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization: Admin or assigned IP lecturer
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isLecturer()) {
                 $ipSetting = CourseSetting::where('course_type', 'IP')->first();
-                if (!$ipSetting || $ipSetting->lecturer_id !== auth()->id()) {
-                    abort(403, "You are not authorized to edit Lecturer marks for IP.");
+                if (! $ipSetting || $ipSetting->lecturer_id !== auth()->id()) {
+                    abort(403, 'You are not authorized to edit Lecturer marks for IP.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
@@ -219,10 +218,10 @@ class IpLecturerEvaluationController extends Controller
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('lecturer', 'IP');
         }
-        
+
         $validated = $request->validate([
             'assessment_id' => ['required', 'exists:assessments,id'],
             'component_marks' => ['nullable', 'array'],
@@ -234,7 +233,7 @@ class IpLecturerEvaluationController extends Controller
 
         $assessmentId = $validated['assessment_id'];
         $assessment = Assessment::with('components')->findOrFail($assessmentId);
-        
+
         // Validate assessment belongs to IP and lecturer role
         if ($assessment->course_code !== 'IP' || $assessment->evaluator_role !== 'lecturer') {
             return redirect()->back()->with('error', 'Invalid assessment.');
@@ -247,7 +246,9 @@ class IpLecturerEvaluationController extends Controller
 
             foreach ($validated['component_marks'] as $componentId => $score) {
                 $component = $assessment->components->find($componentId);
-                if (!$component) continue;
+                if (! $component) {
+                    continue;
+                }
 
                 $remarks = $validated['component_remarks'][$componentId] ?? null;
 
@@ -270,7 +271,7 @@ class IpLecturerEvaluationController extends Controller
                 // Contribution = Normalized * Weight
                 $normalizedScore = $score / 5;
                 $weightedScore = $normalizedScore * $component->weight_percentage;
-                
+
                 $totalWeightedScore += $weightedScore;
                 $totalWeight += $component->weight_percentage;
             }
@@ -278,7 +279,7 @@ class IpLecturerEvaluationController extends Controller
             // Calculate overall mark for this assessment (0-5 scale)
             // If total weight is 0 (shouldn't happen), avoid division by zero
             $overallMark = $totalWeight > 0 ? ($totalWeightedScore / $totalWeight) * 5 : 0;
-            
+
             // Save overall mark
             StudentAssessmentMark::updateOrCreate(
                 [
@@ -296,7 +297,7 @@ class IpLecturerEvaluationController extends Controller
         } else {
             // Fallback for legacy simple marks (if any)
             // But with new UI, we should primarily rely on components.
-            // If strictly no components, maybe handle direct mark? 
+            // If strictly no components, maybe handle direct mark?
             // For now, assuming sticking to component plan as requested by FYP similarity.
             // If the user submits without component marks but has them, it might be an issue.
             // But let's assume the form ensures data.

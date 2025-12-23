@@ -53,4 +53,3 @@ class CourseSetting extends Model
         );
     }
 }
-

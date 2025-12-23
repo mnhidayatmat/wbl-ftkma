@@ -27,22 +27,22 @@ class StudentPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Lecturer can view students assigned to them
         if ($user->isLecturer()) {
             return $student->at_id === $user->id;
         }
-        
+
         // IC can only view students assigned to them
         if ($user->isIndustry()) {
             return $student->ic_id === $user->id;
         }
-        
+
         // Student can only view their own profile
         if ($user->isStudent()) {
             return $student->user_id === $user->id;
         }
-        
+
         return false;
     }
 
@@ -65,12 +65,12 @@ class StudentPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Student can only update their own profile
         if ($user->isStudent()) {
             return $student->user_id === $user->id;
         }
-        
+
         return false;
     }
 

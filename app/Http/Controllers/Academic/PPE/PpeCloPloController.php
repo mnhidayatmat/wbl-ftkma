@@ -8,12 +8,13 @@ use App\Models\CloPloRelationship;
 use App\Models\CourseCloSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PpeCloPloController extends Controller
 {
     private const COURSE_CODE = 'PPE';
+
     private const COURSE_NAME = 'Professional Practice & Ethics';
 
     /**
@@ -22,7 +23,7 @@ class PpeCloPloController extends Controller
     public function index(): View
     {
         // Only Admin, Coordinator, and Lecturer can access
-        if (!auth()->user()->isAdmin() && !auth()->user()->isCoordinator() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isCoordinator() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -37,10 +38,10 @@ class PpeCloPloController extends Controller
 
         // Get all available CLO codes for this course (from database settings)
         $availableCloCodes = CourseCloSetting::getCloCodes(self::COURSE_CODE);
-        
+
         // Get existing CLO codes
         $existingCloCodes = $cloMappings->pluck('clo_code')->toArray();
-        
+
         // Find missing CLOs that need to be initialized
         $missingCloCodes = array_diff($availableCloCodes, $existingCloCodes);
 
@@ -62,7 +63,7 @@ class PpeCloPloController extends Controller
      */
     public function updateCount(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -77,7 +78,7 @@ class PpeCloPloController extends Controller
         );
 
         return redirect()->route('academic.ppe.clo-plo.index')
-            ->with('success', 'CLO count updated successfully to ' . $validated['clo_count'] . '.');
+            ->with('success', 'CLO count updated successfully to '.$validated['clo_count'].'.');
     }
 
     /**
@@ -86,7 +87,7 @@ class PpeCloPloController extends Controller
     public function store(Request $request): RedirectResponse
     {
         // Only Admin can create/edit
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -122,7 +123,7 @@ class PpeCloPloController extends Controller
             // Create new PLO relationships with descriptions
             $ploCodes = $validated['plo_codes'];
             $ploDescriptions = $validated['plo_descriptions'] ?? [];
-            
+
             foreach ($ploCodes as $index => $ploCode) {
                 CloPloRelationship::create([
                     'clo_plo_mapping_id' => $mapping->id,
@@ -142,7 +143,7 @@ class PpeCloPloController extends Controller
     public function update(Request $request, CloPloMapping $cloPloMapping): RedirectResponse
     {
         // Only Admin can update
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -176,7 +177,7 @@ class PpeCloPloController extends Controller
             // plo_codes comes as an array from the form (plo_codes[0], plo_codes[1], etc.)
             $ploCodes = $validated['plo_codes'];
             $ploDescriptions = $validated['plo_descriptions'] ?? [];
-            
+
             foreach ($ploCodes as $index => $ploCode) {
                 CloPloRelationship::create([
                     'clo_plo_mapping_id' => $cloPloMapping->id,
@@ -191,12 +192,34 @@ class PpeCloPloController extends Controller
     }
 
     /**
+     * Delete a CLO mapping.
+     */
+    public function destroy(CloPloMapping $cloPloMapping): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        if ($cloPloMapping->course_code !== self::COURSE_CODE) {
+            abort(403, 'Invalid CLO mapping for this course.');
+        }
+
+        DB::transaction(function () use ($cloPloMapping) {
+            $cloPloMapping->ploRelationships()->delete();
+            $cloPloMapping->delete();
+        });
+
+        return redirect()->route('academic.ppe.clo-plo.index')
+            ->with('success', 'CLO-PLO mapping deleted successfully.');
+    }
+
+    /**
      * Get all PLO codes (PLO1 to PLO12).
      */
     private function getPloCodes(): array
     {
         return array_map(function ($i) {
-            return 'PLO' . $i;
+            return 'PLO'.$i;
         }, range(1, 12));
     }
 }

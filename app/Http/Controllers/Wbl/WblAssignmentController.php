@@ -21,11 +21,11 @@ class WblAssignmentController extends Controller
     public function index(Request $request): View
     {
         $user = auth()->user();
-        
+
         // Detect course from route name
         $routeName = $request->route()->getName();
         $activeCourse = null;
-        
+
         // Map route names to course codes
         if (str_contains($routeName, 'ppe.assign-students')) {
             $activeCourse = 'PPE';
@@ -43,7 +43,7 @@ class WblAssignmentController extends Controller
             // Fallback: use course from request or default
             $courses = $this->getAvailableCourses($user);
             $activeCourse = $request->get('course', array_key_first($courses));
-            if (!isset($courses[$activeCourse])) {
+            if (! isset($courses[$activeCourse])) {
                 $activeCourse = array_key_first($courses);
             }
         }
@@ -59,9 +59,9 @@ class WblAssignmentController extends Controller
         // Search
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -72,7 +72,7 @@ class WblAssignmentController extends Controller
 
         // Get assignment data based on active course
         $assignmentData = $this->getAssignmentData($activeCourse, $students);
-        
+
         // For module-specific pages, we only show one course (no tabs)
         $courses = [$activeCourse => $this->getCourseDisplayName($activeCourse)];
 
@@ -85,13 +85,13 @@ class WblAssignmentController extends Controller
             'user'
         ));
     }
-    
+
     /**
      * Get course display name.
      */
     private function getCourseDisplayName(string $courseCode): string
     {
-        return match($courseCode) {
+        return match ($courseCode) {
             'PPE' => 'Professional Practice & Ethics',
             'FYP' => 'Final Year Project',
             'IP' => 'Internship Preparation',
@@ -105,9 +105,9 @@ class WblAssignmentController extends Controller
     /**
      * Update student assignment for a specific course.
      */
-    public function update(Request $request, Student $student = null): RedirectResponse
+    public function update(Request $request, ?Student $student = null): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -129,14 +129,16 @@ class WblAssignmentController extends Controller
         if (in_array($courseType, ['IP', 'OSH', 'PPE'])) {
             // Single lecturer assignment for entire course
             $this->assignSingleLecturer($courseType, $assigneeId);
+
             return redirect()->back()
-                ->with('success', ucfirst($courseType) . " lecturer assigned successfully.");
+                ->with('success', ucfirst($courseType).' lecturer assigned successfully.');
         } else {
             // Individual assignment per student
-            if (!$student) {
+            if (! $student) {
                 abort(404, 'Student not found.');
             }
             $this->assignStudentToCourse($student, $courseType, $assigneeId);
+
             return redirect()->back()
                 ->with('success', "Assignment updated for {$student->name}.");
         }
@@ -145,9 +147,9 @@ class WblAssignmentController extends Controller
     /**
      * Remove student assignment.
      */
-    public function remove(Request $request, Student $student = null): RedirectResponse
+    public function remove(Request $request, ?Student $student = null): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -166,14 +168,16 @@ class WblAssignmentController extends Controller
                     'updated_by' => auth()->id(),
                 ]);
             }
+
             return redirect()->back()
-                ->with('success', ucfirst($courseType) . " lecturer removed successfully.");
+                ->with('success', ucfirst($courseType).' lecturer removed successfully.');
         } else {
             // Remove individual student assignment
-            if (!$student) {
+            if (! $student) {
                 abort(404, 'Student not found.');
             }
             $this->removeStudentAssignment($student, $courseType);
+
             return redirect()->back()
                 ->with('success', "Assignment removed for {$student->name}.");
         }
@@ -249,9 +253,9 @@ class WblAssignmentController extends Controller
                 $data['assignees'] = User::where('role', 'lecturer')
                     ->orderBy('name')
                     ->get();
-                
+
                 // Get AT assignments (at_id) - map student_id => at_id
-                $data['assignments'] = $students->mapWithKeys(function($student) {
+                $data['assignments'] = $students->mapWithKeys(function ($student) {
                     return [$student->id => $student->at_id];
                 })->toArray();
                 break;
@@ -264,7 +268,7 @@ class WblAssignmentController extends Controller
                 $data['assignees'] = User::where('role', 'lecturer')
                     ->orderBy('name')
                     ->get();
-                
+
                 // Get course setting for single lecturer
                 $courseSetting = CourseSetting::where('course_type', $courseType)->first();
                 $data['current_lecturer'] = $courseSetting?->lecturer_id;
@@ -276,7 +280,7 @@ class WblAssignmentController extends Controller
                 $data['assignees'] = User::whereIn('role', ['supervisor_li', 'lecturer'])
                     ->orderBy('name')
                     ->get();
-                
+
                 // Get LI assignments from student_course_assignments table
                 $studentIds = $students->pluck('id');
                 $studentAssignments = StudentCourseAssignment::with('lecturer')
@@ -286,7 +290,7 @@ class WblAssignmentController extends Controller
                     ->keyBy('student_id');
 
                 // Map student_id => lecturer_id (supervisor_li_id stored as lecturer_id in this table)
-                $data['assignments'] = $studentAssignments->mapWithKeys(function($assignment) {
+                $data['assignments'] = $studentAssignments->mapWithKeys(function ($assignment) {
                     return [$assignment->student_id => $assignment->lecturer_id];
                 })->toArray();
                 break;
@@ -297,9 +301,9 @@ class WblAssignmentController extends Controller
                 $data['assignees'] = User::where('role', 'industry')
                     ->orderBy('name')
                     ->get();
-                
+
                 // Get IC assignments (ic_id) - map student_id => ic_id
-                $data['assignments'] = $students->mapWithKeys(function($student) {
+                $data['assignments'] = $students->mapWithKeys(function ($student) {
                     return [$student->id => $student->ic_id];
                 })->toArray();
                 break;
@@ -313,7 +317,7 @@ class WblAssignmentController extends Controller
      */
     private function validateAssigneeRole(User $assignee, string $courseType): void
     {
-        $validRoles = match($courseType) {
+        $validRoles = match ($courseType) {
             'FYP' => ['lecturer'], // AT is a lecturer
             'IP', 'OSH', 'PPE' => ['lecturer'],
             'LI' => ['supervisor_li', 'lecturer'], // Can be supervisor_li or lecturer (stored as lecturer_id)
@@ -321,7 +325,7 @@ class WblAssignmentController extends Controller
             default => [],
         };
 
-        if (!in_array($assignee->role, $validRoles)) {
+        if (! in_array($assignee->role, $validRoles)) {
             abort(422, "Invalid assignee role for {$courseType}.");
         }
     }

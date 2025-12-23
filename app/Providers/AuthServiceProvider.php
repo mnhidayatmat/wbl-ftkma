@@ -63,25 +63,32 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->isIndustry() && $student) {
                 return $student->ic_id === $user->id;
             }
+
             return false;
         });
 
         Gate::define('edit-supervisor-li-marks', function ($user, $student) {
-            if ($user->isAdmin()) return true;
+            if ($user->isAdmin()) {
+                return true;
+            }
             if ($user->isSupervisorLi()) {
                 return \App\Models\StudentCourseAssignment::where('student_id', $student->id)
                     ->where('lecturer_id', $user->id)
                     ->where('course_type', 'Industrial Training')
                     ->exists();
             }
+
             return false;
         });
 
         Gate::define('edit-li-ic-marks', function ($user, $student) {
-            if ($user->isAdmin()) return true;
+            if ($user->isAdmin()) {
+                return true;
+            }
             if ($user->isIndustry()) {
                 return $student->ic_id === $user->id;
             }
+
             return false;
         });
 
@@ -102,6 +109,7 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->isStudent()) {
                 return $student->user_id === $user->id;
             }
+
             return false;
         });
 
@@ -109,7 +117,6 @@ class AuthServiceProvider extends ServiceProvider
             // Only Admin can manage PPE settings
             return $user->isAdmin();
         });
-
 
         Gate::define('edit-student-profile', function ($user, $student) {
             // Admin can edit any student profile
@@ -120,6 +127,7 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->isStudent()) {
                 return $student->user_id === $user->id;
             }
+
             return false;
         });
     }

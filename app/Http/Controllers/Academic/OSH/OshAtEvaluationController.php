@@ -17,7 +17,7 @@ use Illuminate\View\View;
 class OshAtEvaluationController extends Controller
 {
     use ChecksAssessmentWindow;
-    
+
     /**
      * Display the list of students for Lecturer evaluation.
      * Note: In OSH context, "AT" refers to Lecturer (Course Lecturer) evaluation.
@@ -25,7 +25,7 @@ class OshAtEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Only Admin and Lecturer can access Lecturer evaluation
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -39,9 +39,9 @@ class OshAtEvaluationController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, Lecturer sees only students if they are the assigned OSH lecturer
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             // OSH uses single lecturer from course_settings
             $oshSetting = CourseSetting::where('course_type', 'OSH')->first();
             if ($oshSetting && $oshSetting->lecturer_id === auth()->id()) {
@@ -56,9 +56,9 @@ class OshAtEvaluationController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -77,7 +77,7 @@ class OshAtEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($assessments, $allMarks, $totalWeight) {
+        $studentsWithStatus = $students->map(function ($student) use ($assessments, $allMarks) {
             $studentMarks = $allMarks->get($student->id, collect());
             $marksByAssessment = $studentMarks->keyBy('assessment_id');
 
@@ -143,18 +143,18 @@ class OshAtEvaluationController extends Controller
         $student->load('academicTutor', 'industryCoach', 'group');
 
         // Check authorization: Admin or assigned OSH lecturer
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isLecturer()) {
                 // OSH uses single lecturer from course_settings
                 $oshSetting = CourseSetting::where('course_type', 'OSH')->first();
-                if (!$oshSetting || $oshSetting->lecturer_id !== auth()->id()) {
-                    abort(403, "You are not authorized to edit Lecturer marks for OSH. You are not the assigned OSH lecturer. Please contact an administrator.");
+                if (! $oshSetting || $oshSetting->lecturer_id !== auth()->id()) {
+                    abort(403, 'You are not authorized to edit Lecturer marks for OSH. You are not the assigned OSH lecturer. Please contact an administrator.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Get active assessments for OSH course with lecturer evaluator role
         $assessments = Assessment::forCourse('OSH')
             ->forEvaluator('lecturer')
@@ -187,11 +187,11 @@ class OshAtEvaluationController extends Controller
         }
 
         return view('academic.osh.lecturer.show', compact(
-            'student', 
-            'assessments', 
+            'student',
+            'assessments',
             'assessmentsByClo',
             'marks',
-            'componentMarks', 
+            'componentMarks',
             'totalContribution'
         ));
     }
@@ -202,19 +202,19 @@ class OshAtEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate (this handles all role checks)
-        if (!Gate::allows('edit-at-marks', $student)) {
+        if (! Gate::allows('edit-at-marks', $student)) {
             $student->load('academicTutor');
-            $assignedTo = $student->academicTutor ? $student->academicTutor->name . ' (ID: ' . $student->academicTutor->id . ')' : 'No one';
-            $currentUser = auth()->user()->name . ' (ID: ' . auth()->user()->id . ')';
+            $assignedTo = $student->academicTutor ? $student->academicTutor->name.' (ID: '.$student->academicTutor->id.')' : 'No one';
+            $currentUser = auth()->user()->name.' (ID: '.auth()->user()->id.')';
             $studentAtId = $student->at_id ?? 'NULL';
             abort(403, "You are not authorized to edit Lecturer marks for this student. You are logged in as: {$currentUser}. This student ({$student->name}) is currently assigned to: {$assignedTo} (Student's at_id: {$studentAtId}). Please make sure you are logged in as the correct Lecturer, or contact an administrator to assign this student to you via the 'Assign Students' page.");
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('lecturer', 'OSH');
         }
-        
+
         $validated = $request->validate([
             'assessment_id' => ['required', 'exists:assessments,id'],
             'component_marks' => ['nullable', 'array'],
@@ -226,7 +226,7 @@ class OshAtEvaluationController extends Controller
 
         $assessmentId = $validated['assessment_id'];
         $assessment = Assessment::with('components')->findOrFail($assessmentId);
-        
+
         // Validate assessment belongs to OSH and lecturer role
         if ($assessment->course_code !== 'OSH' || $assessment->evaluator_role !== 'lecturer') {
             return redirect()->back()->with('error', 'Invalid assessment.');
@@ -239,7 +239,9 @@ class OshAtEvaluationController extends Controller
 
             foreach ($validated['component_marks'] as $componentId => $score) {
                 $component = $assessment->components->find($componentId);
-                if (!$component) continue;
+                if (! $component) {
+                    continue;
+                }
 
                 $remarks = $validated['component_remarks'][$componentId] ?? null;
 
@@ -262,7 +264,7 @@ class OshAtEvaluationController extends Controller
                 // Contribution = Normalized * Weight
                 $normalizedScore = $score / 5;
                 $weightedScore = $normalizedScore * $component->weight_percentage;
-                
+
                 $totalWeightedScore += $weightedScore;
                 $totalWeight += $component->weight_percentage;
             }
@@ -270,7 +272,7 @@ class OshAtEvaluationController extends Controller
             // Calculate overall mark for this assessment (0-5 scale)
             // If total weight is 0 (shouldn't happen), avoid division by zero
             $overallMark = $totalWeight > 0 ? ($totalWeightedScore / $totalWeight) * 5 : 0;
-            
+
             // Save overall mark
             StudentAssessmentMark::updateOrCreate(
                 [
@@ -287,7 +289,7 @@ class OshAtEvaluationController extends Controller
 
         } else {
             // Fallback: If no components, we can't really do much with this specific new route structure
-            // unless we maintained the "bulk save" route. 
+            // unless we maintained the "bulk save" route.
             // However, the new UI submits Per-Assessment.
             // If the assessment has NO components, we should probably allow direct mark entry in the modal?
             // For now, let's assume all assessments will be migrated to components as per the "Unified" goal.

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\LecturerCourseAssignment;
 use App\Models\Student;
 use App\Models\StudentCourseAssignment;
-use App\Models\WblGroup;
 use App\Models\User;
+use App\Models\WblGroup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,16 +20,16 @@ class StudentProfileController extends Controller
     public function show(): View|RedirectResponse
     {
         $user = auth()->user();
-        
+
         // Ensure user is a student
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Only students can access this page.');
         }
-        
+
         $student = $user->student;
-        
+
         // If no student profile exists, redirect to create form
-        if (!$student) {
+        if (! $student) {
             return redirect()->route('students.profile.create');
         }
 
@@ -46,12 +46,12 @@ class StudentProfileController extends Controller
         $atOptions = User::where('role', 'at')->orWhere('role', 'lecturer')->orderBy('name')->get();
         $icOptions = User::where('role', 'industry')->orderBy('name')->get();
         $supervisorLiOptions = User::where('role', 'supervisor_li')->orderBy('name')->get();
-        
+
         // Get lecturers assigned to each course
         $ipLecturers = LecturerCourseAssignment::where('course_type', 'IP')->with('lecturer')->get()->pluck('lecturer')->filter();
         $oshLecturers = LecturerCourseAssignment::where('course_type', 'OSH')->with('lecturer')->get()->pluck('lecturer')->filter();
         $ppeLecturers = LecturerCourseAssignment::where('course_type', 'PPE')->with('lecturer')->get()->pluck('lecturer')->filter();
-        
+
         // If no lecturers assigned to course, show all lecturers
         $allLecturers = User::where('role', 'lecturer')->orderBy('name')->get();
         if ($ipLecturers->isEmpty()) {
@@ -65,7 +65,7 @@ class StudentProfileController extends Controller
         }
 
         return view('students.profile.show', compact(
-            'student', 
+            'student',
             'courseAssignments',
             'atOptions',
             'icOptions',
@@ -116,7 +116,7 @@ class StudentProfileController extends Controller
         }
 
         // Safely extract ic_id with null fallback
-        $icId = !empty($validated['ic_id']) ? $validated['ic_id'] : null;
+        $icId = ! empty($validated['ic_id']) ? $validated['ic_id'] : null;
 
         Student::create([
             'name' => $validated['name'],
@@ -143,22 +143,22 @@ class StudentProfileController extends Controller
 
         $groups = WblGroup::orderBy('name')->get();
         $industryCoaches = User::where('role', 'industry')->orderBy('name')->get();
-        
+
         // Get course assignments - ensure it's always a collection
         $courseAssignments = $student->courseAssignments()->with('lecturer')->get()->keyBy('course_type');
-        
+
         // Get available options for each assignment type
         $atOptions = User::where('role', 'at')->orWhere('role', 'lecturer')->orderBy('name')->get();
-        
+
         // Get all lecturers (used for Academic Advisor and as fallback for course assignments)
         $allLecturers = User::where('role', 'lecturer')->orderBy('name')->get();
-        
+
         // Get lecturers assigned to each course
         $ipLecturers = LecturerCourseAssignment::where('course_type', 'IP')->with('lecturer')->get()->pluck('lecturer')->filter();
         $oshLecturers = LecturerCourseAssignment::where('course_type', 'OSH')->with('lecturer')->get()->pluck('lecturer')->filter();
         $ppeLecturers = LecturerCourseAssignment::where('course_type', 'PPE')->with('lecturer')->get()->pluck('lecturer')->filter();
         $supervisorLiLecturers = LecturerCourseAssignment::where('course_type', 'Industrial Training')->with('lecturer')->get()->pluck('lecturer')->filter();
-        
+
         // If no lecturers assigned to course, show all lecturers
         if ($ipLecturers->isEmpty()) {
             $ipLecturers = $allLecturers;
@@ -175,7 +175,7 @@ class StudentProfileController extends Controller
         } else {
             $supervisorLiOptions = $supervisorLiLecturers;
         }
-        
+
         // Academic Advisor should come from lecturers only
         $academicAdvisorOptions = $allLecturers;
 
@@ -183,8 +183,8 @@ class StudentProfileController extends Controller
         $student->load('resumeInspection');
 
         return view('students.profile.edit', compact(
-            'student', 
-            'groups', 
+            'student',
+            'groups',
             'industryCoaches',
             'courseAssignments',
             'atOptions',
@@ -211,7 +211,7 @@ class StudentProfileController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'matric_no' => ['required', 'string', 'max:255', 'unique:students,matric_no,' . $student->id],
+            'matric_no' => ['required', 'string', 'max:255', 'unique:students,matric_no,'.$student->id],
             'programme' => ['required', 'string', 'max:255'],
             'cgpa' => ['nullable', 'numeric', 'min:0', 'max:4.00'],
             'group_id' => ['required', 'exists:wbl_groups,id'],
@@ -249,9 +249,9 @@ class StudentProfileController extends Controller
         }
 
         // Safely extract ids with null fallback
-        $icId = !empty($validated['ic_id']) ? $validated['ic_id'] : null;
-        $atId = !empty($validated['at_id']) ? $validated['at_id'] : null;
-        $academicAdvisorId = !empty($validated['academic_advisor_id']) ? $validated['academic_advisor_id'] : null;
+        $icId = ! empty($validated['ic_id']) ? $validated['ic_id'] : null;
+        $atId = ! empty($validated['at_id']) ? $validated['at_id'] : null;
+        $academicAdvisorId = ! empty($validated['academic_advisor_id']) ? $validated['academic_advisor_id'] : null;
 
         // Update with null-safe values
         $updateData = [
@@ -270,7 +270,7 @@ class StudentProfileController extends Controller
         if (isset($validated['image_path'])) {
             $updateData['image_path'] = $validated['image_path'];
         }
-        
+
         if (isset($validated['resume_pdf_path'])) {
             $updateData['resume_pdf_path'] = $validated['resume_pdf_path'];
         }
@@ -279,7 +279,7 @@ class StudentProfileController extends Controller
 
         // Update course assignments
         // Supervisor LI for Industrial Training
-        if (!empty($validated['supervisor_li_id'])) {
+        if (! empty($validated['supervisor_li_id'])) {
             StudentCourseAssignment::updateOrCreate(
                 ['student_id' => $student->id, 'course_type' => 'Industrial Training'],
                 ['lecturer_id' => $validated['supervisor_li_id']]
@@ -291,7 +291,7 @@ class StudentProfileController extends Controller
         }
 
         // IP Lecturer
-        if (!empty($validated['ip_lecturer_id'])) {
+        if (! empty($validated['ip_lecturer_id'])) {
             StudentCourseAssignment::updateOrCreate(
                 ['student_id' => $student->id, 'course_type' => 'IP'],
                 ['lecturer_id' => $validated['ip_lecturer_id']]
@@ -303,7 +303,7 @@ class StudentProfileController extends Controller
         }
 
         // OSH Lecturer
-        if (!empty($validated['osh_lecturer_id'])) {
+        if (! empty($validated['osh_lecturer_id'])) {
             StudentCourseAssignment::updateOrCreate(
                 ['student_id' => $student->id, 'course_type' => 'OSH'],
                 ['lecturer_id' => $validated['osh_lecturer_id']]
@@ -315,7 +315,7 @@ class StudentProfileController extends Controller
         }
 
         // PPE Lecturer
-        if (!empty($validated['ppe_lecturer_id'])) {
+        if (! empty($validated['ppe_lecturer_id'])) {
             StudentCourseAssignment::updateOrCreate(
                 ['student_id' => $student->id, 'course_type' => 'PPE'],
                 ['lecturer_id' => $validated['ppe_lecturer_id']]
@@ -327,7 +327,7 @@ class StudentProfileController extends Controller
         }
 
         // FYP AT Assignment
-        if (!empty($atId)) {
+        if (! empty($atId)) {
             StudentCourseAssignment::updateOrCreate(
                 ['student_id' => $student->id, 'course_type' => 'FYP'],
                 ['lecturer_id' => $atId]

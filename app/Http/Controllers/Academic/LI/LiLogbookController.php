@@ -22,24 +22,24 @@ class LiLogbookController extends Controller
     public function index(Request $request): View
     {
         // Authorization: Admin or IC can access
-        if (!auth()->user()->isAdmin() && !auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Build query for students
         $query = Student::with(['group', 'company', 'industryCoach']);
-        
+
         // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
             $query->where('ic_id', auth()->id());
         }
 
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -53,16 +53,16 @@ class LiLogbookController extends Controller
 
         // Get the logbook assessment to determine total periods
         $logbookAssessment = \App\Models\Assessment::forCourse('LI')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
             ->where('assessment_type', 'Logbook')
-            ->with(['components' => function($query) {
+            ->with(['components' => function ($query) {
                 $query->whereNotNull('duration_label')->orderBy('order');
             }])
             ->first();
-        
+
         $totalPeriods = $logbookAssessment ? $logbookAssessment->components->whereNotNull('duration_label')->count() : 6;
 
         // Get all logbook evaluations for these students
@@ -71,7 +71,7 @@ class LiLogbookController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($allEvaluations, $totalPeriods) {
+        $studentsWithStatus = $students->map(function ($student) use ($allEvaluations, $totalPeriods) {
             $studentEvaluations = $allEvaluations->get($student->id, collect());
             $completedPeriods = $studentEvaluations->whereNotNull('score')->count();
             $totalScore = $studentEvaluations->sum('score');
@@ -121,7 +121,7 @@ class LiLogbookController extends Controller
     public function show(Student $student): View
     {
         // Check authorization - Admin can view any, IC can view assigned students
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isIndustry()) {
                 if ($student->ic_id !== auth()->id()) {
                     abort(403, 'You are not authorized to view this student. This student is assigned to a different Industry Coach.');
@@ -130,29 +130,29 @@ class LiLogbookController extends Controller
                 abort(403, 'Unauthorized access.');
             }
         }
-        
+
         // Load relationships
         $student->load('industryCoach', 'group', 'company');
 
         // Get Logbook assessment for IC evaluator
         $logbookAssessment = \App\Models\Assessment::forCourse('LI')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
             ->where('assessment_type', 'Logbook')
-            ->with(['evaluators', 'components' => function($query) {
+            ->with(['evaluators', 'components' => function ($query) {
                 $query->whereNotNull('duration_label')->orderBy('order');
             }])
             ->first();
-        
-        if (!$logbookAssessment) {
+
+        if (! $logbookAssessment) {
             abort(404, 'Logbook assessment not found. Please create a Logbook assessment for Industrial Training.');
         }
 
         // Get logbook components (these define the periods - weeks or months)
         $logbookComponents = $logbookAssessment->components->whereNotNull('duration_label')->sortBy('order');
-        
+
         if ($logbookComponents->isEmpty()) {
             abort(404, 'Logbook assessment has no components configured. Please configure the logbook periods.');
         }
@@ -167,7 +167,7 @@ class LiLogbookController extends Controller
         foreach ($logbookComponents as $index => $component) {
             $periodIndex = $component->order; // Use component order as period index
             $evaluation = $evaluations->get($periodIndex);
-            
+
             $periods->push([
                 'period_index' => $periodIndex,
                 'component_id' => $component->id,
@@ -215,34 +215,34 @@ class LiLogbookController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate
-        if (!Gate::allows('edit-ic-marks', $student)) {
+        if (! Gate::allows('edit-ic-marks', $student)) {
             abort(403, 'You are not authorized to evaluate this student\'s logbook.');
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('ic');
         }
-        
+
         // Get the logbook assessment to validate period indices
         $logbookAssessment = \App\Models\Assessment::forCourse('LI')
-            ->whereHas('evaluators', function($query) {
+            ->whereHas('evaluators', function ($query) {
                 $query->where('evaluator_role', 'ic');
             })
             ->active()
             ->where('assessment_type', 'Logbook')
-            ->with(['components' => function($query) {
+            ->with(['components' => function ($query) {
                 $query->whereNotNull('duration_label')->orderBy('order');
             }])
             ->first();
-        
-        if (!$logbookAssessment) {
+
+        if (! $logbookAssessment) {
             abort(404, 'Logbook assessment not found.');
         }
 
         $logbookComponents = $logbookAssessment->components->whereNotNull('duration_label')->sortBy('order');
         $validPeriodIndices = $logbookComponents->pluck('order')->toArray();
-        
+
         // Validate input
         $validated = $request->validate([
             'scores' => ['required', 'array'],

@@ -20,7 +20,7 @@ class StudentAssignmentController extends Controller
     public function index(Request $request): View
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -34,9 +34,9 @@ class StudentAssignmentController extends Controller
         // Search
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -70,9 +70,9 @@ class StudentAssignmentController extends Controller
 
         // Get active course tab from request
         $activeCourse = $request->get('course', 'FYP');
-        
+
         // Validate course
-        if (!in_array($activeCourse, array_keys($courses))) {
+        if (! in_array($activeCourse, array_keys($courses))) {
             $activeCourse = 'FYP';
         }
 
@@ -98,9 +98,9 @@ class StudentAssignmentController extends Controller
         }
 
         return view('admin.students.assign', compact(
-            'students', 
-            'lecturers', 
-            'industryCoaches', 
+            'students',
+            'lecturers',
+            'industryCoaches',
             'groups',
             'lecturerAssignments',
             'courses',
@@ -116,7 +116,7 @@ class StudentAssignmentController extends Controller
     public function update(Request $request, Student $student): RedirectResponse
     {
         // Only admin can update
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -136,7 +136,7 @@ class StudentAssignmentController extends Controller
         $icId = $validated['ic_id'] ?? null;
 
         // Verify that at_id is a lecturer if provided
-        if (!empty($atId)) {
+        if (! empty($atId)) {
             $at = User::findOrFail($atId);
             if ($at->role !== 'lecturer') {
                 return redirect()->back()
@@ -145,7 +145,7 @@ class StudentAssignmentController extends Controller
         }
 
         // Verify that ic_id is an industry coach if provided
-        if (!empty($icId)) {
+        if (! empty($icId)) {
             $ic = User::findOrFail($icId);
             if ($ic->role !== 'industry') {
                 return redirect()->back()
@@ -169,7 +169,7 @@ class StudentAssignmentController extends Controller
     public function bulkUpdate(Request $request): RedirectResponse
     {
         // Only admin can update
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -183,7 +183,7 @@ class StudentAssignmentController extends Controller
         $updated = 0;
         foreach ($validated['students'] as $studentData) {
             $student = Student::findOrFail($studentData['id']);
-            
+
             // Verify roles
             if (isset($studentData['at_id']) && $studentData['at_id']) {
                 $at = User::findOrFail($studentData['at_id']);
@@ -216,7 +216,7 @@ class StudentAssignmentController extends Controller
     public function storeLecturerAssignment(Request $request): RedirectResponse
     {
         // Only admin can update
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -254,13 +254,13 @@ class StudentAssignmentController extends Controller
     public function removeLecturerAssignment(LecturerCourseAssignment $assignment): RedirectResponse
     {
         // Only admin can remove
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
         $courseType = $assignment->course_type;
         $lecturerName = $assignment->lecturer->name;
-        
+
         $assignment->delete();
 
         return redirect()->back()
@@ -273,7 +273,7 @@ class StudentAssignmentController extends Controller
     public function updateStudentCourseAssignment(Request $request, Student $student): RedirectResponse
     {
         // Only admin can update
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -283,7 +283,7 @@ class StudentAssignmentController extends Controller
         ]);
 
         // Verify that lecturer_id is a lecturer if provided
-        if (!empty($validated['lecturer_id'])) {
+        if (! empty($validated['lecturer_id'])) {
             $lecturer = User::findOrFail($validated['lecturer_id']);
             if ($lecturer->role !== 'lecturer') {
                 return redirect()->back()
@@ -312,13 +312,13 @@ class StudentAssignmentController extends Controller
     public function removeStudentCourseAssignment(StudentCourseAssignment $assignment): RedirectResponse
     {
         // Only admin can remove
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
         $studentName = $assignment->student->name;
         $courseType = $assignment->course_type;
-        
+
         $assignment->delete();
 
         return redirect()->back()

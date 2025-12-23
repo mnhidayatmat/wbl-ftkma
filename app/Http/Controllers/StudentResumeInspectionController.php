@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ResumeInspectionHistory;
 use App\Models\Student;
 use App\Models\StudentResumeInspection;
-use App\Models\ResumeInspectionHistory;
 use App\Models\WblGroup;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class StudentResumeInspectionController extends Controller
@@ -20,12 +20,12 @@ class StudentResumeInspectionController extends Controller
     public function studentIndex(): View
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             // Check if user is an admin who switched to student role but doesn't have a student profile
             if ($user->hasRole('admin') && $user->getActiveRole() === 'student') {
                 abort(403, 'You need to have a student profile to access this page. Please switch back to admin role or contact the administrator.');
@@ -37,7 +37,7 @@ class StudentResumeInspectionController extends Controller
         $isInCompletedGroup = $student->isInCompletedGroup();
 
         $inspection = $student->resumeInspection;
-        if (!$inspection) {
+        if (! $inspection) {
             // Students in completed groups cannot create new inspections
             if ($isInCompletedGroup) {
                 return view('resume-inspection.student.index', [
@@ -65,12 +65,12 @@ class StudentResumeInspectionController extends Controller
     public function studentUploadDocument(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             // Check if user is an admin who switched to student role but doesn't have a student profile
             if ($user->hasRole('admin') && $user->getActiveRole() === 'student') {
                 abort(403, 'You need to have a student profile to access this page. Please switch back to admin role or contact the administrator.');
@@ -99,7 +99,7 @@ class StudentResumeInspectionController extends Controller
         }
 
         $inspection = $student->resumeInspection;
-        if (!$inspection) {
+        if (! $inspection) {
             $inspection = StudentResumeInspection::create([
                 'student_id' => $student->id,
                 'status' => 'PENDING',
@@ -107,7 +107,7 @@ class StudentResumeInspectionController extends Controller
         }
 
         // Check if checklist is complete
-        if (!$inspection->isChecklistComplete()) {
+        if (! $inspection->isChecklistComplete()) {
             return redirect()->back()
                 ->with('error', 'Please complete all compliance declaration checklist items before submitting your document.')
                 ->withInput();
@@ -124,8 +124,8 @@ class StudentResumeInspectionController extends Controller
         try {
             // Store new combined document (using resume_file_path to store the combined file)
             $path = $request->file('document')->store('resumes', 'public');
-            
-            if (!$path) {
+
+            if (! $path) {
                 throw new \Exception('Failed to store the file. Please try again.');
             }
 
@@ -168,7 +168,7 @@ class StudentResumeInspectionController extends Controller
             ]);
 
             return redirect()->back()
-                ->with('error', 'Failed to upload document: ' . $e->getMessage())
+                ->with('error', 'Failed to upload document: '.$e->getMessage())
                 ->withInput();
         }
     }
@@ -179,12 +179,12 @@ class StudentResumeInspectionController extends Controller
     public function saveChecklist(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student profile not found.');
         }
 
@@ -207,7 +207,7 @@ class StudentResumeInspectionController extends Controller
         ]);
 
         $inspection = $student->resumeInspection;
-        if (!$inspection) {
+        if (! $inspection) {
             $inspection = StudentResumeInspection::create([
                 'student_id' => $student->id,
                 'status' => 'PENDING',
@@ -242,12 +242,12 @@ class StudentResumeInspectionController extends Controller
     public function studentReply(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             // Check if user is an admin who switched to student role but doesn't have a student profile
             if ($user->hasRole('admin') && $user->getActiveRole() === 'student') {
                 abort(403, 'You need to have a student profile to access this page. Please switch back to admin role or contact the administrator.');
@@ -260,11 +260,11 @@ class StudentResumeInspectionController extends Controller
         ]);
 
         $inspection = $student->resumeInspection;
-        if (!$inspection) {
+        if (! $inspection) {
             abort(404, 'Resume inspection not found.');
         }
 
-        if (!$inspection->coordinator_comment) {
+        if (! $inspection->coordinator_comment) {
             return redirect()->back()->with('error', 'No coordinator comment to reply to.');
         }
 
@@ -288,7 +288,7 @@ class StudentResumeInspectionController extends Controller
     public function coordinatorIndex(Request $request): View
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -303,9 +303,9 @@ class StudentResumeInspectionController extends Controller
         // Search by name or matric number
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -314,10 +314,11 @@ class StudentResumeInspectionController extends Controller
         // Filter by status (if provided)
         if ($request->filled('status')) {
             $status = $request->status;
-            $students = $students->filter(function($student) use ($status) {
-                if (!$student->resumeInspection) {
+            $students = $students->filter(function ($student) use ($status) {
+                if (! $student->resumeInspection) {
                     return $status === 'NOT_SUBMITTED';
                 }
+
                 return $student->resumeInspection->status === $status;
             });
         }
@@ -329,7 +330,7 @@ class StudentResumeInspectionController extends Controller
         $allInspections = StudentResumeInspection::with('student')->get();
         $stats = [
             'total' => Student::count(),
-            'not_submitted' => Student::whereDoesntHave('resumeInspection', function($q) {
+            'not_submitted' => Student::whereDoesntHave('resumeInspection', function ($q) {
                 $q->whereNotNull('resume_file_path');
             })->count(),
             'pending' => $allInspections->where('status', 'PENDING')->count(),
@@ -355,12 +356,12 @@ class StudentResumeInspectionController extends Controller
     public function coordinatorReview(StudentResumeInspection $inspection): View
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         $inspection->load(['student.group', 'reviewer']);
-        
+
         // Load history logs ordered by most recent first
         $history = ResumeInspectionHistory::where('inspection_id', $inspection->id)
             ->with('reviewer')
@@ -380,7 +381,7 @@ class StudentResumeInspectionController extends Controller
     public function review(Request $request, StudentResumeInspection $inspection): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -392,8 +393,8 @@ class StudentResumeInspectionController extends Controller
         // Store previous values for history
         $previousStatus = $inspection->status;
         $previousComment = $inspection->coordinator_comment;
-        $isNewComment = empty($previousComment) && !empty($validated['comment']);
-        $isUpdatedComment = !empty($previousComment) && !empty($validated['comment']) && $previousComment !== $validated['comment'];
+        $isNewComment = empty($previousComment) && ! empty($validated['comment']);
+        $isUpdatedComment = ! empty($previousComment) && ! empty($validated['comment']) && $previousComment !== $validated['comment'];
 
         $updateData = [
             'status' => $validated['status'],
@@ -419,7 +420,7 @@ class StudentResumeInspectionController extends Controller
         } elseif ($validated['status'] === 'REVISION_REQUIRED') {
             $action = 'REVISION_REQUESTED';
         }
-        
+
         // Log comment changes separately if applicable
         if ($isNewComment) {
             $action = 'COMMENT_ADDED';
@@ -442,7 +443,7 @@ class StudentResumeInspectionController extends Controller
         );
 
         $actionLabel = $validated['status'] === 'PASSED' ? 'Approved' : 'Requested Revision';
-        
+
         Log::info('Resume Inspection Reviewed', [
             'inspection_id' => $inspection->id,
             'student_id' => $inspection->student_id,
@@ -453,7 +454,7 @@ class StudentResumeInspectionController extends Controller
             'reviewed_by_name' => auth()->user()->name,
         ]);
 
-        $message = $validated['status'] === 'PASSED' 
+        $message = $validated['status'] === 'PASSED'
             ? 'Resume approved successfully. Student can now apply for placements.'
             : 'Revision requested. Student will be notified to resubmit.';
 
@@ -467,7 +468,7 @@ class StudentResumeInspectionController extends Controller
     public function reset(StudentResumeInspection $inspection): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -538,11 +539,11 @@ class StudentResumeInspectionController extends Controller
     public function viewDocument(StudentResumeInspection $inspection)
     {
         $user = auth()->user();
-        
+
         // Student can view their own, Coordinator/Admin can view any
         if ($user->isStudent()) {
             // Check if user has a student profile
-            if (!$user->student) {
+            if (! $user->student) {
                 // Check if user is an admin who switched to student role but doesn't have a student profile
                 if ($user->hasRole('admin') && $user->getActiveRole() === 'student') {
                     abort(403, 'You need to have a student profile to access this page. Please switch back to admin role or contact the administrator.');
@@ -552,29 +553,29 @@ class StudentResumeInspectionController extends Controller
             if ($user->student->id !== $inspection->student_id) {
                 abort(403, 'Unauthorized access.');
             }
-        } elseif (!$user->isAdmin() && !$user->isCoordinator()) {
+        } elseif (! $user->isAdmin() && ! $user->isCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
-        if (!$inspection->resume_file_path) {
+        if (! $inspection->resume_file_path) {
             abort(404, 'Document file not found.');
         }
 
         // Check if file exists in public disk
-        if (!Storage::disk('public')->exists($inspection->resume_file_path)) {
+        if (! Storage::disk('public')->exists($inspection->resume_file_path)) {
             Log::error('Resume file not found', [
                 'inspection_id' => $inspection->id,
                 'file_path' => $inspection->resume_file_path,
-                'storage_path' => storage_path('app/public/' . $inspection->resume_file_path),
+                'storage_path' => storage_path('app/public/'.$inspection->resume_file_path),
             ]);
-            abort(404, 'Document file not found at: ' . $inspection->resume_file_path);
+            abort(404, 'Document file not found at: '.$inspection->resume_file_path);
         }
 
         $filePath = Storage::disk('public')->path($inspection->resume_file_path);
-        
+
         return response()->file($filePath, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . basename($inspection->resume_file_path) . '"',
+            'Content-Disposition' => 'inline; filename="'.basename($inspection->resume_file_path).'"',
         ]);
     }
 
@@ -584,11 +585,11 @@ class StudentResumeInspectionController extends Controller
     public function downloadDocument(StudentResumeInspection $inspection)
     {
         $user = auth()->user();
-        
+
         // Student can download their own, Coordinator/Admin can download any
         if ($user->isStudent()) {
             // Check if user has a student profile
-            if (!$user->student) {
+            if (! $user->student) {
                 // Check if user is an admin who switched to student role but doesn't have a student profile
                 if ($user->hasRole('admin') && $user->getActiveRole() === 'student') {
                     abort(403, 'You need to have a student profile to access this page. Please switch back to admin role or contact the administrator.');
@@ -600,24 +601,24 @@ class StudentResumeInspectionController extends Controller
             }
         }
 
-        if (!$inspection->resume_file_path) {
+        if (! $inspection->resume_file_path) {
             abort(404, 'Document file not found.');
         }
 
         // Check if file exists in public disk
-        if (!Storage::disk('public')->exists($inspection->resume_file_path)) {
+        if (! Storage::disk('public')->exists($inspection->resume_file_path)) {
             Log::error('Resume file not found', [
                 'inspection_id' => $inspection->id,
                 'file_path' => $inspection->resume_file_path,
-                'storage_path' => storage_path('app/public/' . $inspection->resume_file_path),
+                'storage_path' => storage_path('app/public/'.$inspection->resume_file_path),
             ]);
-            abort(404, 'Document file not found at: ' . $inspection->resume_file_path);
+            abort(404, 'Document file not found at: '.$inspection->resume_file_path);
         }
 
         // Get the original filename or generate one
         $filename = basename($inspection->resume_file_path);
         if (empty($filename) || $filename === 'resumes') {
-            $filename = 'resume_portfolio_' . $inspection->student_id . '_' . now()->format('Y-m-d') . '.pdf';
+            $filename = 'resume_portfolio_'.$inspection->student_id.'_'.now()->format('Y-m-d').'.pdf';
         }
 
         return Storage::disk('public')->download($inspection->resume_file_path, $filename);
@@ -629,12 +630,12 @@ class StudentResumeInspectionController extends Controller
     public function studentDeleteDocument(): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             // Check if user is an admin who switched to student role but doesn't have a student profile
             if ($user->hasRole('admin') && $user->getActiveRole() === 'student') {
                 abort(403, 'You need to have a student profile to access this page. Please switch back to admin role or contact the administrator.');
@@ -643,11 +644,11 @@ class StudentResumeInspectionController extends Controller
         }
 
         $inspection = $student->resumeInspection;
-        if (!$inspection) {
+        if (! $inspection) {
             return redirect()->back()->with('error', 'No document found to delete.');
         }
 
-        if (!$inspection->resume_file_path) {
+        if (! $inspection->resume_file_path) {
             return redirect()->back()->with('error', 'No document uploaded.');
         }
 
@@ -686,7 +687,8 @@ class StudentResumeInspectionController extends Controller
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
-        return round($bytes, $precision) . ' ' . $units[$pow];
+
+        return round($bytes, $precision).' '.$units[$pow];
     }
 
     /**
@@ -695,7 +697,7 @@ class StudentResumeInspectionController extends Controller
     public function downloadSample(int $sample)
     {
         $user = auth()->user();
-        if (!$user->isStudent()) {
+        if (! $user->isStudent()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -706,17 +708,17 @@ class StudentResumeInspectionController extends Controller
             3 => 'samples/sample-3-achievement-contribution.pdf',
         ];
 
-        if (!isset($samples[$sample])) {
+        if (! isset($samples[$sample])) {
             abort(404, 'Sample not found.');
         }
 
         $filePath = public_path($samples[$sample]);
 
         // If file doesn't exist, return a placeholder message
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             // Create samples directory if it doesn't exist
             $samplesDir = public_path('samples');
-            if (!is_dir($samplesDir)) {
+            if (! is_dir($samplesDir)) {
                 mkdir($samplesDir, 0755, true);
             }
 
@@ -727,4 +729,3 @@ class StudentResumeInspectionController extends Controller
         return response()->download($filePath, basename($samples[$sample]));
     }
 }
-

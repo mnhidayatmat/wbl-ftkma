@@ -22,4 +22,3 @@ Route::middleware(['auth', 'role:industry,admin'])->group(function () {
         Route::get('students', [MyStudentsController::class, 'index'])->name('students.index');
     });
 });
-

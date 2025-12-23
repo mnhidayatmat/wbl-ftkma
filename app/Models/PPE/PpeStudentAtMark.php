@@ -37,4 +37,3 @@ class PpeStudentAtMark extends Model
         return $this->belongsTo(PpeAssessmentSetting::class, 'assignment_id');
     }
 }
-

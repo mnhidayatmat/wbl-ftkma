@@ -2,22 +2,25 @@
 
 namespace App\Exports;
 
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Illuminate\Support\Collection;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StudentPerformanceExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithTitle
+class StudentPerformanceExport implements FromCollection, WithColumnWidths, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $students;
+
     protected $courseCode;
+
     protected $lecturerWeight;
+
     protected $icWeight;
 
     public function __construct(Collection $students, string $courseCode = 'PPE', float $lecturerWeight = 40, float $icWeight = 60)
@@ -36,9 +39,6 @@ class StudentPerformanceExport implements FromCollection, WithHeadings, WithMapp
         return $this->students;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         return [
@@ -46,8 +46,8 @@ class StudentPerformanceExport implements FromCollection, WithHeadings, WithMapp
             'Matric No',
             'Programme',
             'Group',
-            'Lecturer Score (out of ' . number_format($this->lecturerWeight, 0) . '%)',
-            'IC Score (out of ' . number_format($this->icWeight, 0) . '%)',
+            'Lecturer Score (out of '.number_format($this->lecturerWeight, 0).'%)',
+            'IC Score (out of '.number_format($this->icWeight, 0).'%)',
             'Final Score (out of 100%)',
             'Status',
             'Last Updated',
@@ -55,8 +55,7 @@ class StudentPerformanceExport implements FromCollection, WithHeadings, WithMapp
     }
 
     /**
-     * @param mixed $student
-     * @return array
+     * @param  mixed  $student
      */
     public function map($student): array
     {
@@ -65,25 +64,19 @@ class StudentPerformanceExport implements FromCollection, WithHeadings, WithMapp
             $student->matric_no ?? '',
             $student->programme ?? '',
             $student->group->name ?? '',
-            number_format($student->lecturer_score ?? 0, 2) . '%',
-            number_format($student->ic_score ?? 0, 2) . '%',
-            number_format($student->final_score ?? 0, 2) . '%',
+            number_format($student->lecturer_score ?? 0, 2).'%',
+            number_format($student->ic_score ?? 0, 2).'%',
+            number_format($student->final_score ?? 0, 2).'%',
             $student->overall_status_label ?? 'Not Started',
             $student->last_updated ? $student->last_updated->format('Y-m-d H:i:s') : 'N/A',
         ];
     }
 
-    /**
-     * @return string
-     */
     public function title(): string
     {
-        return 'Student Performance – ' . $this->courseCode;
+        return 'Student Performance – '.$this->courseCode;
     }
 
-    /**
-     * @return array
-     */
     public function columnWidths(): array
     {
         return [
@@ -100,7 +93,6 @@ class StudentPerformanceExport implements FromCollection, WithHeadings, WithMapp
     }
 
     /**
-     * @param Worksheet $sheet
      * @return array
      */
     public function styles(Worksheet $sheet)
@@ -124,4 +116,3 @@ class StudentPerformanceExport implements FromCollection, WithHeadings, WithMapp
         ];
     }
 }
-

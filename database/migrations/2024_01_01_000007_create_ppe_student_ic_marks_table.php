@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('clo'); // CLO2, CLO3, CLO4
             $table->decimal('mark', 5, 2)->nullable();
             $table->timestamps();
-            
+
             $table->unique(['student_id', 'clo']);
         });
     }
@@ -30,4 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('ppe_student_ic_marks');
     }
 };
-

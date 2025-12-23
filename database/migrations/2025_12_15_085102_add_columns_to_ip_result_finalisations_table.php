@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('notes')->nullable()->after('is_finalised');
             $table->foreignId('finalised_by')->after('notes')->constrained('users')->onDelete('cascade');
             $table->timestamp('finalised_at')->nullable()->after('finalised_by');
-            
+
             $table->index('student_id');
             $table->index('group_id');
             $table->index('is_finalised');
@@ -47,7 +47,7 @@ return new class extends Migration
                 'is_finalised',
                 'notes',
                 'finalised_by',
-                'finalised_at'
+                'finalised_at',
             ]);
         });
     }

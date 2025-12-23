@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('application_deadline')->nullable();
             $table->string('application_method'); // job_portal, company_website, email, career_fair, referral
             $table->timestamps();
-            
+
             $table->index('placement_tracking_id');
         });
     }

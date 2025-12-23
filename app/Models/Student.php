@@ -156,7 +156,7 @@ class Student extends Model
      */
     public function scopeInActiveGroups($query)
     {
-        return $query->whereHas('group', function($q) {
+        return $query->whereHas('group', function ($q) {
             $q->where('status', 'ACTIVE');
         });
     }
@@ -166,9 +166,8 @@ class Student extends Model
      */
     public function scopeInCompletedGroups($query)
     {
-        return $query->whereHas('group', function($q) {
+        return $query->whereHas('group', function ($q) {
             $q->where('status', 'COMPLETED');
         });
     }
 }
-

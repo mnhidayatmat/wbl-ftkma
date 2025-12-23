@@ -6,12 +6,10 @@ use App\Models\Assessment;
 use App\Models\CloPloMapping;
 use App\Models\Company;
 use App\Models\CompanyAgreement;
-use App\Models\PPE\PpeAssessmentSetting;
 use App\Models\PPE\PpeStudentAtMark;
 use App\Models\PPE\PpeStudentIcMark;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
-use App\Models\StudentCourseAssignment;
 use App\Models\StudentPlacementTracking;
 use App\Models\StudentResumeInspection;
 use App\Models\WblGroup;
@@ -52,7 +50,7 @@ class DashboardController extends Controller
         // =====================================================
         // 1. TOP KPI SUMMARY CARDS
         // =====================================================
-        
+
         // Total Students (with comparison)
         $totalStudents = Student::count();
         $activeStudents = Student::inActiveGroups()->count();
@@ -284,10 +282,10 @@ class DashboardController extends Controller
             ->limit(10)
             ->get()
             ->map(function ($tracking) {
-                $daysStuck = $tracking->applied_at 
-                    ? now()->diffInDays($tracking->applied_at) 
+                $daysStuck = $tracking->applied_at
+                    ? now()->diffInDays($tracking->applied_at)
                     : ($tracking->applied_status_set_at ? now()->diffInDays($tracking->applied_status_set_at) : 0);
-                
+
                 return [
                     'student_name' => $tracking->student->name ?? 'Unknown',
                     'matric_no' => $tracking->student->matric_no ?? '',
@@ -334,6 +332,7 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($agreement) {
                 $daysRemaining = $agreement->days_until_expiry;
+
                 return [
                     'company' => $agreement->company->company_name ?? 'Unknown',
                     'type' => $agreement->agreement_type,
@@ -355,17 +354,17 @@ class DashboardController extends Controller
         foreach ($courses as $course) {
             // Get total CLOs defined for this course
             $totalClos = CloPloMapping::forCourse($course)->count();
-            
+
             // Get CLOs with PLO mappings
             $mappedClos = CloPloMapping::forCourse($course)
                 ->whereHas('ploRelationships')
                 ->count();
-            
+
             // Get CLOs allowed for assessment
             $assessmentClos = CloPloMapping::forCourse($course)
                 ->where('allow_for_assessment', true)
                 ->count();
-            
+
             // Get CLOs actually used in assessments
             $usedInAssessments = Assessment::forCourse($course)
                 ->active()
@@ -394,11 +393,11 @@ class DashboardController extends Controller
 
         foreach ($courses as $course) {
             $assessments = Assessment::forCourse($course)->active()->count();
-            
+
             // Get total possible marks (assessments × students)
             $totalStudents = Student::inActiveGroups()->count();
             $totalPossible = $assessments * $totalStudents;
-            
+
             // Get submitted marks
             $submittedMarks = StudentAssessmentMark::whereHas('assessment', function ($q) use ($course) {
                 $q->where('course_code', $course)->where('is_active', true);
@@ -466,7 +465,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $groupFilter = $request->get('group_filter', 'all');
-        
+
         // Basic stats
         $stats = [
             'students' => Student::count(),
@@ -494,7 +493,7 @@ class DashboardController extends Controller
         $studentsByGroup = $groupsQuery->orderBy('status')->orderBy('name')->get();
 
         $barChartData = [
-            'labels' => $studentsByGroup->map(fn($g) => $g->name . ($g->isCompleted() ? ' (Completed)' : ''))->toArray(),
+            'labels' => $studentsByGroup->map(fn ($g) => $g->name.($g->isCompleted() ? ' (Completed)' : ''))->toArray(),
             'data' => $studentsByGroup->pluck('students_count')->toArray(),
         ];
 
@@ -524,7 +523,7 @@ class DashboardController extends Controller
         // Programme and Group chart
         $groups = WblGroup::orderBy('status')->orderBy('name')->get();
         $programmes = Student::distinct()->pluck('programme')->filter()->sort()->values();
-        
+
         $studentsByProgramAndGroup = [];
         foreach ($programmes as $programme) {
             $programmeData = [];
@@ -536,7 +535,7 @@ class DashboardController extends Controller
             }
             $studentsByProgramAndGroup[$programme] = $programmeData;
         }
-        
+
         $colors = [
             ['bg' => '#003A6C', 'border' => '#003A6C'],
             ['bg' => '#0084C5', 'border' => '#0084C5'],
@@ -544,12 +543,12 @@ class DashboardController extends Controller
             ['bg' => '#002244', 'border' => '#002244'],
             ['bg' => '#E6ECF2', 'border' => '#003A6C'],
         ];
-        
+
         $programGroupChartData = [
             'labels' => $groups->pluck('name')->toArray(),
-            'datasets' => []
+            'datasets' => [],
         ];
-        
+
         $colorIndex = 0;
         foreach ($studentsByProgramAndGroup as $programme => $data) {
             $color = $colors[$colorIndex % count($colors)];
@@ -559,7 +558,7 @@ class DashboardController extends Controller
                 'backgroundColor' => $color['bg'],
                 'borderColor' => $color['border'],
                 'borderWidth' => 1,
-                'borderRadius' => 4
+                'borderRadius' => 4,
             ];
             $colorIndex++;
         }
@@ -581,17 +580,17 @@ class DashboardController extends Controller
     private function studentDashboard(): View|RedirectResponse
     {
         $user = auth()->user();
-        
+
         $student = $user->student;
-        if (!$student) {
+        if (! $student) {
             $student = Student::where('user_id', $user->id)->first();
         }
-        
-        if (!$student) {
+
+        if (! $student) {
             $student = Student::where('name', $user->name)->first();
         }
 
-        if (!$student) {
+        if (! $student) {
             return view('dashboard-student', [
                 'student' => null,
                 'assignedAt' => null,
@@ -619,8 +618,8 @@ class DashboardController extends Controller
                 'needsProfile' => true,
             ]);
         }
-        
-        if (!$student->user_id) {
+
+        if (! $student->user_id) {
             $student->user_id = $user->id;
             $student->save();
         }
@@ -630,7 +629,7 @@ class DashboardController extends Controller
             'company',
             'academicTutor',
             'industryCoach',
-            'courseAssignments.lecturer'
+            'courseAssignments.lecturer',
         ]);
 
         $courseAssignments = $student->courseAssignments()->with('lecturer')->get()->keyBy('course_type');
@@ -646,7 +645,7 @@ class DashboardController extends Controller
         $ppeAtMarks = PpeStudentAtMark::where('student_id', $student->id)
             ->with('assessment')
             ->get();
-        
+
         $ppeAtTotal = 0;
         $ppeAtMax = 0;
         foreach ($ppeAtMarks as $mark) {

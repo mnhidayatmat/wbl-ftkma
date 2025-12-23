@@ -8,17 +8,18 @@ use App\Models\CloPloRelationship;
 use App\Models\CourseCloSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class LiCloPloController extends Controller
 {
     private const COURSE_CODE = 'LI';
+
     private const COURSE_NAME = 'Industrial Training';
 
     public function index(): View
     {
-        if (!auth()->user()->isAdmin() && !auth()->user()->isCoordinator() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isCoordinator() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -26,7 +27,7 @@ class LiCloPloController extends Controller
         $cloCount = CourseCloSetting::getCloCount(self::COURSE_CODE);
 
         $cloMappings = CloPloMapping::forCourse(self::COURSE_CODE)
-            ->with(['ploRelationships' => function($query) {
+            ->with(['ploRelationships' => function ($query) {
                 $query->orderBy('plo_code');
             }])
             ->orderBy('clo_code')
@@ -35,7 +36,7 @@ class LiCloPloController extends Controller
         $availableCloCodes = CourseCloSetting::getCloCodes(self::COURSE_CODE);
         $existingCloCodes = $cloMappings->pluck('clo_code')->toArray();
         $missingCloCodes = array_diff($availableCloCodes, $existingCloCodes);
-        $ploCodes = array_map(fn($i) => 'PLO' . $i, range(1, 12));
+        $ploCodes = array_map(fn ($i) => 'PLO'.$i, range(1, 12));
 
         return view('academic.clo-plo.index', [
             'cloMappings' => $cloMappings,
@@ -52,7 +53,7 @@ class LiCloPloController extends Controller
      */
     public function updateCount(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -67,12 +68,12 @@ class LiCloPloController extends Controller
         );
 
         return redirect()->route('academic.li.clo-plo.index')
-            ->with('success', 'CLO count updated successfully to ' . $validated['clo_count'] . '.');
+            ->with('success', 'CLO count updated successfully to '.$validated['clo_count'].'.');
     }
 
     public function store(Request $request): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -102,7 +103,7 @@ class LiCloPloController extends Controller
             $mapping->ploRelationships()->delete();
             $ploCodes = $validated['plo_codes'];
             $ploDescriptions = $validated['plo_descriptions'] ?? [];
-            
+
             foreach ($ploCodes as $index => $ploCode) {
                 CloPloRelationship::create([
                     'clo_plo_mapping_id' => $mapping->id,
@@ -118,7 +119,7 @@ class LiCloPloController extends Controller
 
     public function update(Request $request, CloPloMapping $cloPloMapping): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -147,7 +148,7 @@ class LiCloPloController extends Controller
             $cloPloMapping->ploRelationships()->delete();
             $ploCodes = $validated['plo_codes'];
             $ploDescriptions = $validated['plo_descriptions'] ?? [];
-            
+
             foreach ($ploCodes as $index => $ploCode) {
                 CloPloRelationship::create([
                     'clo_plo_mapping_id' => $cloPloMapping->id,
@@ -159,5 +160,24 @@ class LiCloPloController extends Controller
 
         return redirect()->route('academic.li.clo-plo.index')
             ->with('success', 'CLO-PLO mapping updated successfully.');
+    }
+
+    public function destroy(CloPloMapping $cloPloMapping): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        if ($cloPloMapping->course_code !== self::COURSE_CODE) {
+            abort(403, 'Invalid CLO mapping for this course.');
+        }
+
+        DB::transaction(function () use ($cloPloMapping) {
+            $cloPloMapping->ploRelationships()->delete();
+            $cloPloMapping->delete();
+        });
+
+        return redirect()->route('academic.li.clo-plo.index')
+            ->with('success', 'CLO-PLO mapping deleted successfully.');
     }
 }

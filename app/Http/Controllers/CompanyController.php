@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\CompanyContact;
-use App\Models\CompanyNote;
 use App\Models\CompanyDocument;
-use App\Models\Mou;
+use App\Models\CompanyNote;
 use App\Models\Moa;
-use App\Models\Student;
+use App\Models\Mou;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -58,25 +57,25 @@ class CompanyController extends Controller
         if ($request->has('position_other') && $request->position_other) {
             $validated['position'] = $request->position_other;
         }
-        
+
         // Handle category_other field
         if ($request->has('category_other') && $request->category_other) {
             $validated['category'] = $request->category_other;
         }
 
         $company = Company::create($validated);
-        
+
         // If position is HR, link IC users from the same company
         if ($validated['position'] === 'HR' || strtolower($validated['position'] ?? '') === 'hr') {
             // Find IC users with matching email domain
-            $emailDomain = substr(strrchr($company->email, "@"), 1);
-            
-            $icUsers = \App\Models\User::whereHas('roles', function($query) {
+            $emailDomain = substr(strrchr($company->email, '@'), 1);
+
+            $icUsers = \App\Models\User::whereHas('roles', function ($query) {
                 $query->where('name', 'ic');
             })
-            ->where('email', 'like', "%@{$emailDomain}")
-            ->get();
-            
+                ->where('email', 'like', "%@{$emailDomain}")
+                ->get();
+
             // Link IC users to this company
             foreach ($icUsers as $icUser) {
                 $icUser->update(['company_id' => $company->id]);
@@ -138,25 +137,25 @@ class CompanyController extends Controller
         }
 
         $company->update($validated);
-        
+
         // If position is HR, link IC users from the same company
         if ($validated['position'] === 'HR' || strtolower($validated['position'] ?? '') === 'hr') {
             // Find IC users with matching email domain
-            $emailDomain = substr(strrchr($company->email, "@"), 1);
-            
-            $icUsers = \App\Models\User::whereHas('roles', function($query) {
+            $emailDomain = substr(strrchr($company->email, '@'), 1);
+
+            $icUsers = \App\Models\User::whereHas('roles', function ($query) {
                 $query->where('name', 'ic');
             })
-            ->where(function($query) use ($company, $emailDomain) {
-                // Match by email domain
-                $query->where('email', 'like', "%@{$emailDomain}")
-                      ->orWhere(function($q) use ($company) {
-                          // Or if already linked to this company
-                          $q->where('company_id', $company->id);
-                      });
-            })
-            ->get();
-            
+                ->where(function ($query) use ($company, $emailDomain) {
+                    // Match by email domain
+                    $query->where('email', 'like', "%@{$emailDomain}")
+                        ->orWhere(function ($q) use ($company) {
+                            // Or if already linked to this company
+                            $q->where('company_id', $company->id);
+                        });
+                })
+                ->get();
+
             // Link IC users to this company
             foreach ($icUsers as $icUser) {
                 $icUser->update(['company_id' => $company->id]);
@@ -185,7 +184,7 @@ class CompanyController extends Controller
      */
     public function storeContact(Request $request, Company $company): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -213,7 +212,7 @@ class CompanyController extends Controller
      */
     public function updateContact(Request $request, Company $company, CompanyContact $contact): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -241,7 +240,7 @@ class CompanyController extends Controller
      */
     public function destroyContact(Company $company, CompanyContact $contact): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -258,7 +257,7 @@ class CompanyController extends Controller
      */
     public function storeNote(Request $request, Company $company): RedirectResponse
     {
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -281,12 +280,12 @@ class CompanyController extends Controller
      */
     public function destroyNote(Company $company, CompanyNote $note): RedirectResponse
     {
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Only allow deletion by creator or admin
-        if ($note->created_by !== auth()->id() && !auth()->user()->isAdmin()) {
+        if ($note->created_by !== auth()->id() && ! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -303,7 +302,7 @@ class CompanyController extends Controller
      */
     public function storeDocument(Request $request, Company $company): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -337,7 +336,7 @@ class CompanyController extends Controller
      */
     public function downloadDocument(Company $company, CompanyDocument $document)
     {
-        if (!Storage::disk('public')->exists($document->file_path)) {
+        if (! Storage::disk('public')->exists($document->file_path)) {
             abort(404, 'File not found.');
         }
 
@@ -349,7 +348,7 @@ class CompanyController extends Controller
      */
     public function destroyDocument(Company $company, CompanyDocument $document): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -367,7 +366,7 @@ class CompanyController extends Controller
      */
     public function storeMou(Request $request, Company $company): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -392,7 +391,7 @@ class CompanyController extends Controller
         }
 
         $validated['updated_by'] = auth()->id();
-        if (!$mou->exists) {
+        if (! $mou->exists) {
             $validated['created_by'] = auth()->id();
         }
 
@@ -409,7 +408,7 @@ class CompanyController extends Controller
      */
     public function storeMoa(Request $request, Company $company): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -451,7 +450,7 @@ class CompanyController extends Controller
      */
     public function updateMoa(Request $request, Company $company, Moa $moa): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -496,7 +495,7 @@ class CompanyController extends Controller
      */
     public function destroyMoa(Company $company, Moa $moa): RedirectResponse
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 

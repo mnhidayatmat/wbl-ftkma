@@ -26,22 +26,22 @@ class FypRubricEvaluationController extends Controller
     private function getEvaluatorRole(): string
     {
         $user = auth()->user();
-        
+
         // Admin can act as AT by default, but can view both
         if ($user->isAdmin()) {
             return request()->get('role', 'at');
         }
-        
+
         // AT users evaluate as AT
         if ($user->isAt()) {
             return 'at';
         }
-        
+
         // Industry users evaluate as IC
         if ($user->isIndustry()) {
             return 'ic';
         }
-        
+
         return 'at'; // Default
     }
 
@@ -51,9 +51,9 @@ class FypRubricEvaluationController extends Controller
     public function index(Request $request): View
     {
         $user = auth()->user();
-        
+
         // Check access
-        if (!$user->isAdmin() && !$user->isAt() && !$user->isIndustry()) {
+        if (! $user->isAdmin() && ! $user->isAt() && ! $user->isIndustry()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -77,32 +77,32 @@ class FypRubricEvaluationController extends Controller
 
         // Get selected assessment
         $selectedAssessmentId = $request->get('assessment');
-        $selectedAssessment = $selectedAssessmentId 
-            ? $assessments->firstWhere('id', $selectedAssessmentId) 
+        $selectedAssessment = $selectedAssessmentId
+            ? $assessments->firstWhere('id', $selectedAssessmentId)
             : $assessments->first();
 
         // Get selected template (for backward compatibility)
         $selectedTemplateId = $request->get('template');
-        $selectedTemplate = $selectedTemplateId 
-            ? $templates->firstWhere('id', $selectedTemplateId) 
+        $selectedTemplate = $selectedTemplateId
+            ? $templates->firstWhere('id', $selectedTemplateId)
             : $templates->first();
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Filter based on role
-        if ($evaluatorRole === 'at' && $user->isAt() && !$user->isAdmin()) {
+        if ($evaluatorRole === 'at' && $user->isAt() && ! $user->isAdmin()) {
             $query->where('at_id', $user->id);
-        } elseif ($evaluatorRole === 'ic' && $user->isIndustry() && !$user->isAdmin()) {
+        } elseif ($evaluatorRole === 'ic' && $user->isIndustry() && ! $user->isAdmin()) {
             $query->where('ic_id', $user->id);
         }
 
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -117,7 +117,7 @@ class FypRubricEvaluationController extends Controller
         // Get evaluation status for each student
         if ($selectedTemplate) {
             $totalElements = $selectedTemplate->elements()->active()->count();
-            
+
             // Get all evaluations for this template
             $evaluations = FypRubricEvaluation::where('rubric_template_id', $selectedTemplate->id)
                 ->whereIn('student_id', $students->pluck('id'))
@@ -135,13 +135,13 @@ class FypRubricEvaluationController extends Controller
                 $studentEvaluations = $evaluations->get($student->id, collect());
                 $completedCount = $studentEvaluations->count();
                 $totalScore = $studentEvaluations->sum('weighted_score');
-                
+
                 // Calculate contribution to grade (based on component_marks)
                 $componentMarks = $selectedTemplate->component_marks;
                 $contributionScore = $totalScore * ($componentMarks / 100);
-                
+
                 $feedback = $feedbacks->get($student->id);
-                
+
                 // Determine status
                 if ($completedCount === 0) {
                     $status = 'not_started';
@@ -196,14 +196,14 @@ class FypRubricEvaluationController extends Controller
         $evaluatorRole = $this->getEvaluatorRole();
 
         // Check authorization based on role
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             if ($evaluatorRole === 'at' && $user->isAt()) {
                 if ($student->at_id !== $user->id) {
-                    abort(403, "You are not authorized to evaluate this student.");
+                    abort(403, 'You are not authorized to evaluate this student.');
                 }
             } elseif ($evaluatorRole === 'ic' && $user->isIndustry()) {
                 if ($student->ic_id !== $user->id) {
-                    abort(403, "You are not authorized to evaluate this student.");
+                    abort(403, 'You are not authorized to evaluate this student.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
@@ -215,7 +215,7 @@ class FypRubricEvaluationController extends Controller
 
         // Get selected template for this evaluator role
         $templateId = $request->get('template');
-        
+
         if ($templateId) {
             $template = FypRubricTemplate::forCourse('FYP')
                 ->forEvaluator($evaluatorRole)
@@ -229,8 +229,8 @@ class FypRubricEvaluationController extends Controller
                 ->active()
                 ->with(['elements.levelDescriptors'])
                 ->first();
-                
-            if (!$template) {
+
+            if (! $template) {
                 abort(404, 'No rubric template configured for this evaluator role.');
             }
         }
@@ -254,7 +254,7 @@ class FypRubricEvaluationController extends Controller
         $totalScore = $evaluations->sum('weighted_score');
         $totalWeight = $template->calculateTotalWeight();
         $percentageScore = $totalWeight > 0 ? ($totalScore / $totalWeight) * 100 : 0;
-        
+
         // Calculate contribution to overall grade
         $componentMarks = $template->component_marks;
         $contributionToGrade = $totalScore * ($componentMarks / 100);
@@ -268,7 +268,7 @@ class FypRubricEvaluationController extends Controller
             ->get();
 
         // Check if user can edit
-        $canEdit = $user->isAdmin() || 
+        $canEdit = $user->isAdmin() ||
             ($evaluatorRole === 'at' && $user->isAt() && $student->at_id == $user->id) ||
             ($evaluatorRole === 'ic' && $user->isIndustry() && $student->ic_id == $user->id);
 
@@ -298,14 +298,14 @@ class FypRubricEvaluationController extends Controller
         $evaluatorRole = $this->getEvaluatorRole();
 
         // Check authorization
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             if ($evaluatorRole === 'at' && $user->isAt()) {
                 if ($student->at_id !== $user->id) {
-                    abort(403, "You are not authorized to evaluate this student.");
+                    abort(403, 'You are not authorized to evaluate this student.');
                 }
             } elseif ($evaluatorRole === 'ic' && $user->isIndustry()) {
                 if ($student->ic_id !== $user->id) {
-                    abort(403, "You are not authorized to evaluate this student.");
+                    abort(403, 'You are not authorized to evaluate this student.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
@@ -313,7 +313,7 @@ class FypRubricEvaluationController extends Controller
         }
 
         // Check assessment window
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $this->requireOpenWindow($evaluatorRole);
         }
 
@@ -331,7 +331,7 @@ class FypRubricEvaluationController extends Controller
         $template = FypRubricTemplate::findOrFail($validated['template_id']);
 
         // Verify template matches evaluator role
-        if ($template->evaluator_role !== $evaluatorRole && !$user->isAdmin()) {
+        if ($template->evaluator_role !== $evaluatorRole && ! $user->isAdmin()) {
             abort(403, 'This rubric template is not for your evaluator role.');
         }
 
@@ -344,12 +344,12 @@ class FypRubricEvaluationController extends Controller
             $updatedElements = [];
 
             foreach ($validated['evaluations'] as $evalData) {
-                if (!isset($evalData['level']) || $evalData['level'] === null) {
+                if (! isset($evalData['level']) || $evalData['level'] === null) {
                     continue;
                 }
 
                 $element = $template->elements()->find($evalData['element_id']);
-                if (!$element) {
+                if (! $element) {
                     continue;
                 }
 
@@ -388,7 +388,7 @@ class FypRubricEvaluationController extends Controller
             );
 
             // Log audit
-            if (!empty($updatedElements)) {
+            if (! empty($updatedElements)) {
                 $roleLabel = $template->evaluator_role === 'at' ? 'AT' : 'IC';
                 FypAuditLog::log(
                     'rubric_evaluation_updated',
@@ -421,14 +421,14 @@ class FypRubricEvaluationController extends Controller
         $evaluatorRole = $this->getEvaluatorRole();
 
         // Check authorization
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             if ($evaluatorRole === 'at' && $user->isAt()) {
                 if ($student->at_id !== $user->id) {
-                    abort(403, "You are not authorized to submit evaluation for this student.");
+                    abort(403, 'You are not authorized to submit evaluation for this student.');
                 }
             } elseif ($evaluatorRole === 'ic' && $user->isIndustry()) {
                 if ($student->ic_id !== $user->id) {
-                    abort(403, "You are not authorized to submit evaluation for this student.");
+                    abort(403, 'You are not authorized to submit evaluation for this student.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
@@ -485,7 +485,7 @@ class FypRubricEvaluationController extends Controller
     public function release(Request $request, Student $student, FypRubricTemplate $template): RedirectResponse
     {
         // Only Admin can release
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Only administrators can release evaluations.');
         }
 
@@ -493,7 +493,7 @@ class FypRubricEvaluationController extends Controller
             ->where('rubric_template_id', $template->id)
             ->first();
 
-        if (!$feedback) {
+        if (! $feedback) {
             return redirect()->back()
                 ->with('error', 'No evaluation found for this student.');
         }

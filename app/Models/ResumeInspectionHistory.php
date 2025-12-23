@@ -51,7 +51,7 @@ class ResumeInspectionHistory extends Model
      */
     public function getActionLabelAttribute(): string
     {
-        return match($this->action) {
+        return match ($this->action) {
             'REVIEWED' => 'Reviewed',
             'APPROVED' => 'Approved',
             'REVISION_REQUESTED' => 'Revision Requested',
@@ -67,7 +67,7 @@ class ResumeInspectionHistory extends Model
      */
     public function getActionIconColorAttribute(): string
     {
-        return match($this->action) {
+        return match ($this->action) {
             'APPROVED' => 'text-green-600 dark:text-green-400',
             'REVISION_REQUESTED' => 'text-orange-600 dark:text-orange-400',
             'COMMENT_ADDED', 'COMMENT_UPDATED' => 'text-blue-600 dark:text-blue-400',
@@ -81,7 +81,7 @@ class ResumeInspectionHistory extends Model
      */
     public function getStatusBadgeColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'PENDING' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
             'PASSED' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
             'FAILED' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',

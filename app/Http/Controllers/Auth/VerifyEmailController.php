@@ -30,7 +30,7 @@ class VerifyEmailController extends Controller
         // Mark email as verified
         $user->markEmailAsVerified();
         event(new Verified($user));
-        
+
         // Refresh the user model to ensure the change is reflected
         $user->refresh();
 

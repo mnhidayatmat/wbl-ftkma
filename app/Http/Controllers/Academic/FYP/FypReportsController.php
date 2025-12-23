@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Academic\FYP;
 
-use App\Http\Controllers\Controller;
 use App\Exports\StudentPerformanceExport;
+use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\Company;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
 use App\Models\WblGroup;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FypReportsController extends Controller
 {
@@ -23,7 +23,7 @@ class FypReportsController extends Controller
      */
     public function index(): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -44,7 +44,7 @@ class FypReportsController extends Controller
      */
     public function exportCohort(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -71,9 +71,10 @@ class FypReportsController extends Controller
         }
 
         // Get weights for export
-        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
-        $fileName = 'FYP_Cohort_Results_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'FYP_Cohort_Results_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance, 'FYP', $atTotalWeight, $icTotalWeight), $fileName);
     }
 
@@ -82,7 +83,7 @@ class FypReportsController extends Controller
      */
     public function exportGroup(Request $request, WblGroup $group)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -112,9 +113,10 @@ class FypReportsController extends Controller
         }
 
         // Get weights for export
-        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
-        $fileName = 'FYP_Group_' . str_replace(' ', '_', $group->name) . '_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'FYP_Group_'.str_replace(' ', '_', $group->name).'_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance, 'FYP', $atTotalWeight, $icTotalWeight), $fileName);
     }
 
@@ -123,7 +125,7 @@ class FypReportsController extends Controller
      */
     public function exportCompany(Request $request, Company $company)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -153,9 +155,10 @@ class FypReportsController extends Controller
         }
 
         // Get weights for export
-        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
-        $fileName = 'FYP_Company_' . str_replace(' ', '_', $company->company_name) . '_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'FYP_Company_'.str_replace(' ', '_', $company->company_name).'_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance, 'FYP', $atTotalWeight, $icTotalWeight), $fileName);
     }
 
@@ -164,7 +167,7 @@ class FypReportsController extends Controller
      */
     private function getStudentsWithPerformance($students = null)
     {
-        if (!$students) {
+        if (! $students) {
             $students = Student::with(['group', 'company'])->get();
         }
 
@@ -190,7 +193,7 @@ class FypReportsController extends Controller
 
         // Get all IC rubric marks
         $allIcRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')->where('evaluator_role', 'ic');
             })
             ->with('rubric.assessment')
@@ -198,11 +201,11 @@ class FypReportsController extends Controller
             ->groupBy('student_id');
 
         // Calculate performance for each student
-        return $students->map(function($student) use ($allAtMarks, $allIcRubricMarks, $atAssessments) {
+        return $students->map(function ($student) use ($allAtMarks, $allIcRubricMarks, $atAssessments) {
             // Calculate AT marks
             $atMarks = $allAtMarks->get($student->id, collect());
             $atMarksByAssessment = $atMarks->keyBy('assessment_id');
-            
+
             $atTotal = 0;
             foreach ($atAssessments as $assessment) {
                 $mark = $atMarksByAssessment->get($assessment->id);
@@ -226,7 +229,7 @@ class FypReportsController extends Controller
             $student->lecturer_score = round($atTotal, 2); // For Excel export compatibility
             $student->ic_score = round($icTotal, 2);
             $student->final_score = round($finalScore, 2);
-            
+
             // Set status for export
             if ($finalScore >= 80) {
                 $student->overall_status = 'completed';
@@ -238,7 +241,7 @@ class FypReportsController extends Controller
                 $student->overall_status = 'not_started';
                 $student->overall_status_label = 'Not Started';
             }
-            
+
             // Set last_updated for export
             $student->last_updated = $student->updated_at;
 
@@ -262,7 +265,7 @@ class FypReportsController extends Controller
             ->whereIn('assessment_type', ['Oral', 'Rubric'])
             ->with('rubrics')
             ->get()
-            ->sum(function($assessment) {
+            ->sum(function ($assessment) {
                 return $assessment->rubrics->sum('weight_percentage');
             });
 
@@ -274,7 +277,7 @@ class FypReportsController extends Controller
      */
     private function exportPdf($students, $title)
     {
-        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
         $pdf = Pdf::loadView('academic.fyp.performance.export-pdf', [
             'students' => $students,
@@ -283,13 +286,14 @@ class FypReportsController extends Controller
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-          ->setOption('margin-top', 30)
-          ->setOption('margin-bottom', 30)
-          ->setOption('margin-left', 25)
-          ->setOption('margin-right', 25)
-          ->setOption('enable-local-file-access', true);
+            ->setOption('margin-top', 30)
+            ->setOption('margin-bottom', 30)
+            ->setOption('margin-left', 25)
+            ->setOption('margin-right', 25)
+            ->setOption('enable-local-file-access', true);
 
-        $fileName = str_replace(' ', '_', $title) . '_' . now()->format('Y-m-d_His') . '.pdf';
+        $fileName = str_replace(' ', '_', $title).'_'.now()->format('Y-m-d_His').'.pdf';
+
         return $pdf->download($fileName);
     }
 }

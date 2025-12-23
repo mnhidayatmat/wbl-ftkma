@@ -18,7 +18,7 @@ class AssessmentController extends Controller
     public function index(Request $request): View
     {
         $courseCode = $request->query('course', 'PPE');
-        
+
         $assessments = Assessment::where('course_code', $courseCode)
             ->with('creator')
             ->orderBy('clo_code')
@@ -44,11 +44,11 @@ class AssessmentController extends Controller
     public function create(Request $request): View
     {
         $courseCode = $request->query('course', 'PPE');
-        
+
         $courseCodes = Assessment::getCourseCodes();
         $assessmentTypes = Assessment::getAssessmentTypes();
         $evaluatorRoles = Assessment::getEvaluatorRoles();
-        
+
         // Get approved CLO codes from CLO-PLO mappings (only those allowed for assessment)
         // Use try-catch to handle cases where tables don't exist yet
         try {
@@ -59,11 +59,11 @@ class AssessmentController extends Controller
         } catch (\Exception $e) {
             $approvedCloCodes = [];
         }
-        
+
         // Fallback to all CLO codes if no mappings exist yet
         $allCloCodes = Assessment::getCloCodes($courseCode);
-        $cloCodes = !empty($approvedCloCodes) ? $approvedCloCodes : $allCloCodes;
-        
+        $cloCodes = ! empty($approvedCloCodes) ? $approvedCloCodes : $allCloCodes;
+
         // Get all CLO mappings for JavaScript
         $allCloMappings = [];
         foreach ($courseCodes as $code => $name) {
@@ -72,7 +72,7 @@ class AssessmentController extends Controller
                     ->allowedForAssessment()
                     ->pluck('clo_code')
                     ->toArray();
-                $allCloMappings[$code] = !empty($approved) ? $approved : Assessment::getCloCodes($code);
+                $allCloMappings[$code] = ! empty($approved) ? $approved : Assessment::getCloCodes($code);
             } catch (\Exception $e) {
                 $allCloMappings[$code] = Assessment::getCloCodes($code);
             }
@@ -94,7 +94,7 @@ class AssessmentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $isFyp = $request->input('course_code') === 'FYP';
-        
+
         $validated = $request->validate([
             'course_code' => ['required', 'string', 'in:PPE,IP,OSH,FYP,LI'],
             'assessment_name' => ['required', 'string', 'max:255'],
@@ -116,35 +116,35 @@ class AssessmentController extends Controller
         if (($existingTotal + $validated['weight_percentage']) > 100) {
             return back()
                 ->withInput()
-                ->withErrors(['weight_percentage' => 'Total percentage for this course cannot exceed 100%. Current total: ' . $existingTotal . '%']);
+                ->withErrors(['weight_percentage' => 'Total percentage for this course cannot exceed 100%. Current total: '.$existingTotal.'%']);
         }
 
         // Validate CLO codes
         $validClos = Assessment::getCloCodes($validated['course_code']);
-        
+
         if ($isFyp && $request->has('clos')) {
             // Validate multiple CLOs for FYP
             $clos = $request->input('clos', []);
             $totalCloWeight = 0;
             $usedClos = [];
-            
+
             foreach ($clos as $index => $clo) {
-                if (!in_array($clo['clo_code'], $validClos)) {
+                if (! in_array($clo['clo_code'], $validClos)) {
                     return back()
                         ->withInput()
-                        ->withErrors(["clos.{$index}.clo_code" => 'Invalid CLO code: ' . $clo['clo_code']]);
+                        ->withErrors(["clos.{$index}.clo_code" => 'Invalid CLO code: '.$clo['clo_code']]);
                 }
-                
+
                 if (in_array($clo['clo_code'], $usedClos)) {
                     return back()
                         ->withInput()
-                        ->withErrors(["clos.{$index}.clo_code" => 'Duplicate CLO code: ' . $clo['clo_code']]);
+                        ->withErrors(["clos.{$index}.clo_code" => 'Duplicate CLO code: '.$clo['clo_code']]);
                 }
-                
+
                 $usedClos[] = $clo['clo_code'];
                 $totalCloWeight += floatval($clo['weight_percentage']);
             }
-            
+
             // Validate that CLO weights sum to assessment weight
             if (abs($totalCloWeight - $validated['weight_percentage']) > 0.01) {
                 return back()
@@ -153,7 +153,7 @@ class AssessmentController extends Controller
             }
         } else {
             // Validate single CLO for other courses
-            if (!in_array($validated['clo_code'], $validClos)) {
+            if (! in_array($validated['clo_code'], $validClos)) {
                 return back()
                     ->withInput()
                     ->withErrors(['clo_code' => 'Invalid CLO code. Only approved CLOs can be used in assessments.']);
@@ -162,9 +162,9 @@ class AssessmentController extends Controller
 
         $validated['created_by'] = auth()->id();
         $validated['is_active'] = $request->has('is_active');
-        
+
         // For FYP, set a default CLO code (first one) for backward compatibility
-        if ($isFyp && !isset($validated['clo_code']) && $request->has('clos')) {
+        if ($isFyp && ! isset($validated['clo_code']) && $request->has('clos')) {
             $validated['clo_code'] = $request->input('clos.0.clo_code');
         }
 
@@ -200,7 +200,7 @@ class AssessmentController extends Controller
         $courseCodes = Assessment::getCourseCodes();
         $assessmentTypes = Assessment::getAssessmentTypes();
         $evaluatorRoles = Assessment::getEvaluatorRoles();
-        
+
         // Get approved CLO codes from CLO-PLO mappings
         // Use try-catch to handle cases where tables don't exist yet
         try {
@@ -211,10 +211,10 @@ class AssessmentController extends Controller
         } catch (\Exception $e) {
             $approvedCloCodes = [];
         }
-        
+
         $allCloCodes = Assessment::getCloCodes($assessment->course_code);
-        $cloCodes = !empty($approvedCloCodes) ? $approvedCloCodes : $allCloCodes;
-        
+        $cloCodes = ! empty($approvedCloCodes) ? $approvedCloCodes : $allCloCodes;
+
         // Get all CLO mappings for JavaScript
         $allCloMappings = [];
         foreach ($courseCodes as $code => $name) {
@@ -223,15 +223,15 @@ class AssessmentController extends Controller
                     ->allowedForAssessment()
                     ->pluck('clo_code')
                     ->toArray();
-                $allCloMappings[$code] = !empty($approved) ? $approved : Assessment::getCloCodes($code);
+                $allCloMappings[$code] = ! empty($approved) ? $approved : Assessment::getCloCodes($code);
             } catch (\Exception $e) {
                 $allCloMappings[$code] = Assessment::getCloCodes($code);
             }
         }
-        
+
         // Load rubric questions if applicable
         $rubrics = $assessment->rubrics;
-        
+
         // Load existing CLOs for FYP assessments
         $existingClos = $assessment->clos;
 
@@ -253,7 +253,7 @@ class AssessmentController extends Controller
     public function update(Request $request, Assessment $assessment): RedirectResponse
     {
         $isFyp = $request->input('course_code') === 'FYP' || $assessment->course_code === 'FYP';
-        
+
         $validated = $request->validate([
             'course_code' => ['required', 'string', 'in:PPE,IP,OSH,FYP,LI'],
             'assessment_name' => ['required', 'string', 'max:255'],
@@ -276,7 +276,7 @@ class AssessmentController extends Controller
         if (($existingTotal + $validated['weight_percentage']) > 100) {
             return back()
                 ->withInput()
-                ->withErrors(['weight_percentage' => 'Total percentage for this course cannot exceed 100%. Current total (excluding this): ' . $existingTotal . '%']);
+                ->withErrors(['weight_percentage' => 'Total percentage for this course cannot exceed 100%. Current total (excluding this): '.$existingTotal.'%']);
         }
 
         // Get approved CLO codes from CLO-PLO mappings
@@ -284,33 +284,33 @@ class AssessmentController extends Controller
             ->allowedForAssessment()
             ->pluck('clo_code')
             ->toArray();
-        
+
         $allCloCodes = Assessment::getCloCodes($validated['course_code']);
-        $validClos = !empty($approvedCloCodes) ? $approvedCloCodes : $allCloCodes;
-        
+        $validClos = ! empty($approvedCloCodes) ? $approvedCloCodes : $allCloCodes;
+
         if ($isFyp && $request->has('clos')) {
             // Validate multiple CLOs for FYP
             $clos = $request->input('clos', []);
             $totalCloWeight = 0;
             $usedClos = [];
-            
+
             foreach ($clos as $index => $clo) {
-                if (!in_array($clo['clo_code'], $validClos)) {
+                if (! in_array($clo['clo_code'], $validClos)) {
                     return back()
                         ->withInput()
-                        ->withErrors(["clos.{$index}.clo_code" => 'Invalid CLO code: ' . $clo['clo_code'] . '. Only approved CLOs can be used in assessments.']);
+                        ->withErrors(["clos.{$index}.clo_code" => 'Invalid CLO code: '.$clo['clo_code'].'. Only approved CLOs can be used in assessments.']);
                 }
-                
+
                 if (in_array($clo['clo_code'], $usedClos)) {
                     return back()
                         ->withInput()
-                        ->withErrors(["clos.{$index}.clo_code" => 'Duplicate CLO code: ' . $clo['clo_code']]);
+                        ->withErrors(["clos.{$index}.clo_code" => 'Duplicate CLO code: '.$clo['clo_code']]);
                 }
-                
+
                 $usedClos[] = $clo['clo_code'];
                 $totalCloWeight += floatval($clo['weight_percentage']);
             }
-            
+
             // Validate that CLO weights sum to assessment weight
             if (abs($totalCloWeight - $validated['weight_percentage']) > 0.01) {
                 return back()
@@ -319,7 +319,7 @@ class AssessmentController extends Controller
             }
         } else {
             // Validate single CLO for other courses
-            if (!in_array($validated['clo_code'], $validClos)) {
+            if (! in_array($validated['clo_code'], $validClos)) {
                 return back()
                     ->withInput()
                     ->withErrors(['clo_code' => 'Invalid CLO code. Only approved CLOs can be used in assessments.']);
@@ -327,9 +327,9 @@ class AssessmentController extends Controller
         }
 
         $validated['is_active'] = $request->has('is_active');
-        
+
         // For FYP, set a default CLO code (first one) for backward compatibility
-        if ($isFyp && !isset($validated['clo_code']) && $request->has('clos')) {
+        if ($isFyp && ! isset($validated['clo_code']) && $request->has('clos')) {
             $validated['clo_code'] = $request->input('clos.0.clo_code');
         }
 
@@ -339,7 +339,7 @@ class AssessmentController extends Controller
         if ($isFyp && $request->has('clos')) {
             // Delete existing CLOs
             $assessment->clos()->delete();
-            
+
             // Create new CLOs
             foreach ($request->input('clos', []) as $index => $clo) {
                 AssessmentClo::create([
@@ -388,7 +388,7 @@ class AssessmentController extends Controller
      */
     public function toggleActive(Assessment $assessment): RedirectResponse
     {
-        $assessment->update(['is_active' => !$assessment->is_active]);
+        $assessment->update(['is_active' => ! $assessment->is_active]);
 
         return redirect()
             ->route('admin.assessments.index', ['course' => $assessment->course_code])
@@ -401,17 +401,17 @@ class AssessmentController extends Controller
     private function saveRubrics(Assessment $assessment, array $rubrics, float $assessmentWeight): void
     {
         // Filter out empty rubrics
-        $rubrics = array_filter($rubrics, function($rubric) {
-            return !empty($rubric['question_title']);
+        $rubrics = array_filter($rubrics, function ($rubric) {
+            return ! empty($rubric['question_title']);
         });
-        
+
         if (empty($rubrics)) {
             return; // No rubrics to save
         }
-        
+
         // Validate rubric weights sum to assessment weight
         $totalRubricWeight = array_sum(array_column($rubrics, 'weight_percentage'));
-        
+
         if (abs($totalRubricWeight - $assessmentWeight) > 0.01) {
             throw new \Exception("Sum of rubric weights ({$totalRubricWeight}%) must equal assessment weight ({$assessmentWeight}%).");
         }
@@ -435,12 +435,12 @@ class AssessmentController extends Controller
             // For FYP, use default CLO if not provided
             $cloCode = $rubricData['clo_code'] ?? $defaultCloCode;
             if (empty($cloCode)) {
-                throw new \Exception("CLO code is required for rubric questions.");
+                throw new \Exception('CLO code is required for rubric questions.');
             }
 
             AssessmentRubric::create([
                 'assessment_id' => $assessment->id,
-                'question_code' => $rubricData['question_code'] ?? 'Q' . ($index + 1),
+                'question_code' => $rubricData['question_code'] ?? 'Q'.($index + 1),
                 'question_title' => $rubricData['question_title'],
                 'question_description' => $rubricData['question_description'] ?? null,
                 'clo_code' => $cloCode,

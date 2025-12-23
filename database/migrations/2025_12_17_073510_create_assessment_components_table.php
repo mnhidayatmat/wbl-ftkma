@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('weight_percentage', 5, 2); // e.g., 1.70
             $table->integer('order')->default(0); // For ordering components
             $table->timestamps();
-            
+
             $table->index(['assessment_id', 'order']);
         });
     }

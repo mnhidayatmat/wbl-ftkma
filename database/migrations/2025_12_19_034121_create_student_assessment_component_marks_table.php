@@ -20,10 +20,10 @@ return new class extends Migration
             $table->text('remarks')->nullable(); // Optional remarks per component
             $table->foreignId('evaluated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
-            
+
             // Ensure one mark per student per component
             $table->unique(['student_id', 'assessment_id', 'component_id']);
-            
+
             // Indexes for performance
             $table->index('student_id');
             $table->index('assessment_id');

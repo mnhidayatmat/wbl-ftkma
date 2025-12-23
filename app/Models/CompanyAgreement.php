@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 class CompanyAgreement extends Model
 {
@@ -117,9 +116,10 @@ class CompanyAgreement extends Model
      */
     public function isExpired(): bool
     {
-        if (!$this->end_date) {
+        if (! $this->end_date) {
             return false;
         }
+
         return $this->end_date->isPast();
     }
 
@@ -128,9 +128,10 @@ class CompanyAgreement extends Model
      */
     public function isExpiringSoon(): bool
     {
-        if (!$this->end_date || $this->status !== 'Active') {
+        if (! $this->end_date || $this->status !== 'Active') {
             return false;
         }
+
         return $this->end_date->isBetween(now(), now()->addMonths(3));
     }
 
@@ -139,9 +140,10 @@ class CompanyAgreement extends Model
      */
     public function getDaysUntilExpiryAttribute(): ?int
     {
-        if (!$this->end_date) {
+        if (! $this->end_date) {
             return null;
         }
+
         return now()->diffInDays($this->end_date, false);
     }
 
@@ -158,7 +160,7 @@ class CompanyAgreement extends Model
      */
     public function getStatusBadgeColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'Active' => 'green',
             'Expired' => 'red',
             'Terminated' => 'gray',
@@ -173,7 +175,7 @@ class CompanyAgreement extends Model
      */
     public function getTypeBadgeColorAttribute(): string
     {
-        return match($this->agreement_type) {
+        return match ($this->agreement_type) {
             'MoU' => 'blue',
             'MoA' => 'purple',
             'LOI' => 'orange',
@@ -207,4 +209,3 @@ class CompanyAgreement extends Model
         ];
     }
 }
-

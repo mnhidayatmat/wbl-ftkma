@@ -42,8 +42,8 @@ class PlacementCompanyApplication extends Model
         if ($this->application_method === 'other' && $this->application_method_other) {
             return $this->application_method_other;
         }
-        
-        return match($this->application_method) {
+
+        return match ($this->application_method) {
             'through_coordinator' => 'Through Coordinator',
             'job_portal' => 'Job Portal',
             'company_website' => 'Company Website',

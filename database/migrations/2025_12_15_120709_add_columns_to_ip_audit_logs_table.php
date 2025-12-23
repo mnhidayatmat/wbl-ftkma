@@ -22,7 +22,7 @@ return new class extends Migration
             $table->json('metadata')->nullable()->after('description');
             $table->string('ip_address')->nullable()->after('metadata');
             $table->string('user_agent')->nullable()->after('ip_address');
-            
+
             $table->index('action');
             $table->index('action_type');
             $table->index('user_id');
@@ -55,7 +55,7 @@ return new class extends Migration
                 'description',
                 'metadata',
                 'ip_address',
-                'user_agent'
+                'user_agent',
             ]);
         });
     }

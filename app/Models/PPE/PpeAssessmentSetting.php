@@ -30,4 +30,3 @@ class PpeAssessmentSetting extends Model
         return $this->hasMany(PpeStudentAtMark::class, 'assignment_id');
     }
 }
-

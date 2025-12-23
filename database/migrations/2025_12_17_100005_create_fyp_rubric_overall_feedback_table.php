@@ -25,12 +25,12 @@ return new class extends Migration
             $table->timestamp('submitted_at')->nullable();
             $table->timestamp('released_at')->nullable();
             $table->timestamps();
-            
+
             // Indexes
             $table->index('student_id');
             $table->index('rubric_template_id');
             $table->index('status');
-            
+
             // One feedback per student per rubric template
             $table->unique(['student_id', 'rubric_template_id'], 'student_rubric_feedback_unique');
         });

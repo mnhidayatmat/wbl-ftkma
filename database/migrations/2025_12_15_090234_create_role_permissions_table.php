@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('permission_id')->constrained('permissions')->onDelete('cascade');
             $table->enum('access_level', ['full', 'view', 'none'])->default('none');
             $table->timestamps();
-            
+
             $table->unique(['role_id', 'permission_id']);
             $table->index('role_id');
             $table->index('permission_id');

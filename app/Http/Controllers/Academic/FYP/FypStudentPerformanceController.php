@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Academic\FYP;
 
-use App\Http\Controllers\Controller;
 use App\Exports\StudentPerformanceExport;
+use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
 use App\Models\WblGroup;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FypStudentPerformanceController extends Controller
 {
@@ -23,7 +23,7 @@ class FypStudentPerformanceController extends Controller
     public function index(Request $request): View
     {
         // Only Admin and AT can access
-        if (!auth()->user()->isAdmin() && !auth()->user()->isAt()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isAt()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -43,15 +43,15 @@ class FypStudentPerformanceController extends Controller
             ->with('rubrics')
             ->get();
 
-        $atRubricTotalWeight = $atRubricAssessments->sum(function($assessment) {
+        $atRubricTotalWeight = $atRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->sum('weight_percentage');
         });
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor']);
-        
+
         // Admin can see all students, AT sees only assigned students
-        if (auth()->user()->isAt() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isAt() && ! auth()->user()->isAdmin()) {
             $query->where('at_id', auth()->id());
         }
 
@@ -61,9 +61,9 @@ class FypStudentPerformanceController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -89,7 +89,7 @@ class FypStudentPerformanceController extends Controller
 
         // Get all AT rubric marks
         $allAtRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')
@@ -97,16 +97,15 @@ class FypStudentPerformanceController extends Controller
             ->groupBy('student_id');
 
         // Calculate total rubric questions
-        $totalRubricQuestions = $atRubricAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $atRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
         // Calculate performance for each student
-        $studentsWithPerformance = $students->map(function($student) use (
-            $allAtMarks, 
-            $allAtRubricMarks, 
+        $studentsWithPerformance = $students->map(function ($student) use (
+            $allAtMarks,
+            $allAtRubricMarks,
             $atAssessments,
-            $atRubricAssessments,
             $totalRubricQuestions,
             $atTotalWeight,
             $atRubricTotalWeight,
@@ -115,7 +114,7 @@ class FypStudentPerformanceController extends Controller
             // Calculate AT marks
             $atMarks = $allAtMarks->get($student->id, collect());
             $atMarksByAssessment = $atMarks->keyBy('assessment_id');
-            
+
             $atTotal = 0;
             $atCompletedCount = 0;
             $atLastUpdated = null;
@@ -127,7 +126,7 @@ class FypStudentPerformanceController extends Controller
                     if ($mark->max_mark > 0) {
                         $atTotal += ($mark->mark / $mark->max_mark) * $assessment->weight_percentage;
                     }
-                    if (!$atLastUpdated || $mark->updated_at > $atLastUpdated) {
+                    if (! $atLastUpdated || $mark->updated_at > $atLastUpdated) {
                         $atLastUpdated = $mark->updated_at;
                     }
                 }
@@ -135,14 +134,14 @@ class FypStudentPerformanceController extends Controller
 
             // Calculate AT rubric marks
             $atRubricMarks = $allAtRubricMarks->get($student->id, collect());
-            
+
             $atRubricTotal = 0;
             $atRubricCompletedCount = $atRubricMarks->count();
             $atRubricLastUpdated = null;
 
             foreach ($atRubricMarks as $rubricMark) {
                 $atRubricTotal += $rubricMark->weighted_contribution;
-                if (!$atRubricLastUpdated || $rubricMark->updated_at > $atRubricLastUpdated) {
+                if (! $atRubricLastUpdated || $rubricMark->updated_at > $atRubricLastUpdated) {
                     $atRubricLastUpdated = $rubricMark->updated_at;
                 }
             }
@@ -151,9 +150,9 @@ class FypStudentPerformanceController extends Controller
             $finalScore = $atTotal + $atRubricTotal;
 
             // Determine overall status
-            $atStatus = $atCompletedCount == 0 ? 'not_started' : 
+            $atStatus = $atCompletedCount == 0 ? 'not_started' :
                         ($atCompletedCount < $atAssessments->count() ? 'in_progress' : 'completed');
-            $atRubricStatus = $atRubricCompletedCount == 0 ? 'not_started' : 
+            $atRubricStatus = $atRubricCompletedCount == 0 ? 'not_started' :
                              ($atRubricCompletedCount < $totalRubricQuestions ? 'in_progress' : 'completed');
 
             if ($atStatus == 'not_started' && $atRubricStatus == 'not_started') {
@@ -215,7 +214,7 @@ class FypStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -233,7 +232,8 @@ class FypStudentPerformanceController extends Controller
             'filters' => $request->only(['search', 'programme', 'group', 'status']),
         ]);
 
-        $fileName = 'FYP_Student_Performance_' . now()->format('Y-m-d_His') . '.xlsx';
+        $fileName = 'FYP_Student_Performance_'.now()->format('Y-m-d_His').'.xlsx';
+
         return Excel::download(new StudentPerformanceExport($studentsWithPerformance), $fileName);
     }
 
@@ -242,7 +242,7 @@ class FypStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -271,7 +271,7 @@ class FypStudentPerformanceController extends Controller
             ->whereIn('assessment_type', ['Oral', 'Rubric'])
             ->with('rubrics')
             ->get()
-            ->sum(function($assessment) {
+            ->sum(function ($assessment) {
                 return $assessment->rubrics->sum('weight_percentage');
             });
 
@@ -282,13 +282,14 @@ class FypStudentPerformanceController extends Controller
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-          ->setOption('margin-top', 30)
-          ->setOption('margin-bottom', 30)
-          ->setOption('margin-left', 25)
-          ->setOption('margin-right', 25)
-          ->setOption('enable-local-file-access', true);
+            ->setOption('margin-top', 30)
+            ->setOption('margin-bottom', 30)
+            ->setOption('margin-left', 25)
+            ->setOption('margin-right', 25)
+            ->setOption('enable-local-file-access', true);
 
-        $fileName = 'FYP_Student_Performance_' . now()->format('Y-m-d_His') . '.pdf';
+        $fileName = 'FYP_Student_Performance_'.now()->format('Y-m-d_His').'.pdf';
+
         return $pdf->download($fileName);
     }
 
@@ -310,7 +311,7 @@ class FypStudentPerformanceController extends Controller
             ->get();
 
         $atTotalWeight = $atAssessments->sum('weight_percentage');
-        $atRubricTotalWeight = $atRubricAssessments->sum(function($assessment) {
+        $atRubricTotalWeight = $atRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->sum('weight_percentage');
         });
 
@@ -319,9 +320,9 @@ class FypStudentPerformanceController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -342,30 +343,27 @@ class FypStudentPerformanceController extends Controller
             ->groupBy('student_id');
 
         $allAtRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')
             ->get()
             ->groupBy('student_id');
 
-        $totalRubricQuestions = $atRubricAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $atRubricAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
-        return $students->map(function($student) use (
-            $allAtMarks, 
-            $allAtRubricMarks, 
+        return $students->map(function ($student) use (
+            $allAtMarks,
+            $allAtRubricMarks,
             $atAssessments,
-            $atRubricAssessments,
             $totalRubricQuestions,
-            $atTotalWeight,
-            $atRubricTotalWeight,
             $request
         ) {
             $atMarks = $allAtMarks->get($student->id, collect());
             $atMarksByAssessment = $atMarks->keyBy('assessment_id');
-            
+
             $atTotal = 0;
             $atCompletedCount = 0;
 
@@ -389,9 +387,9 @@ class FypStudentPerformanceController extends Controller
 
             $finalScore = $atTotal + $atRubricTotal;
 
-            $atStatus = $atCompletedCount == 0 ? 'not_started' : 
+            $atStatus = $atCompletedCount == 0 ? 'not_started' :
                         ($atCompletedCount < $atAssessments->count() ? 'in_progress' : 'completed');
-            $atRubricStatus = $atRubricCompletedCount == 0 ? 'not_started' : 
+            $atRubricStatus = $atRubricCompletedCount == 0 ? 'not_started' :
                              ($atRubricCompletedCount < $totalRubricQuestions ? 'in_progress' : 'completed');
 
             if ($atStatus == 'not_started' && $atRubricStatus == 'not_started') {

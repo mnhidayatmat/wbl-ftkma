@@ -21,16 +21,16 @@ class RoleSwitchController extends Controller
         $requestedRole = $request->input('role');
 
         // Verify user has this role
-        if (!$user->hasRole($requestedRole)) {
+        if (! $user->hasRole($requestedRole)) {
             return redirect()->back()->withErrors([
-                'role' => 'You do not have permission to switch to this role.'
+                'role' => 'You do not have permission to switch to this role.',
             ]);
         }
 
         // For student role, verify user has a student profile
-        if ($requestedRole === 'student' && !$user->student) {
+        if ($requestedRole === 'student' && ! $user->student) {
             return redirect()->back()->withErrors([
-                'role' => 'You need to have a student profile to switch to student role. Please contact the administrator if you believe this is an error.'
+                'role' => 'You need to have a student profile to switch to student role. Please contact the administrator if you believe this is an error.',
             ]);
         }
 
@@ -49,6 +49,7 @@ class RoleSwitchController extends Controller
     public function getAvailableRoles()
     {
         $user = Auth::user();
+
         return response()->json([
             'roles' => $user->roles()->get(['id', 'name', 'display_name']),
             'active_role' => $user->getActiveRole(),

@@ -2,10 +2,9 @@
 
 namespace App\Traits;
 
-use App\Models\PPE\PpeAssessmentWindow;
-use App\Models\OSH\OshAssessmentWindow;
 use App\Models\IP\IpAssessmentWindow;
-use Illuminate\Http\RedirectResponse;
+use App\Models\OSH\OshAssessmentWindow;
+use App\Models\PPE\PpeAssessmentWindow;
 
 trait ChecksAssessmentWindow
 {
@@ -21,11 +20,11 @@ trait ChecksAssessmentWindow
         } else {
             $window = PpeAssessmentWindow::where('evaluator_role', $evaluatorRole)->first();
         }
-        
-        if (!$window || !$window->is_enabled) {
+
+        if (! $window || ! $window->is_enabled) {
             return false;
         }
-        
+
         return $window->isOpen();
     }
 
@@ -34,7 +33,7 @@ trait ChecksAssessmentWindow
      */
     protected function requireOpenWindow(string $evaluatorRole, string $course = 'PPE'): void
     {
-        if (!$this->checkAssessmentWindow($evaluatorRole, $course)) {
+        if (! $this->checkAssessmentWindow($evaluatorRole, $course)) {
             if ($course === 'OSH') {
                 $window = OshAssessmentWindow::where('evaluator_role', $evaluatorRole)->first();
             } elseif ($course === 'IP') {
@@ -42,9 +41,9 @@ trait ChecksAssessmentWindow
             } else {
                 $window = PpeAssessmentWindow::where('evaluator_role', $evaluatorRole)->first();
             }
-            
+
             $status = $window ? $window->status_label : 'Closed';
-            
+
             abort(403, "Assessment window is currently {$status}. Please contact an administrator.");
         }
     }

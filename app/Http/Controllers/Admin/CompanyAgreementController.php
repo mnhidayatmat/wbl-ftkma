@@ -40,12 +40,12 @@ class CompanyAgreementController extends Controller
         // Search by title or reference
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('agreement_title', 'like', "%{$search}%")
-                  ->orWhere('reference_no', 'like', "%{$search}%")
-                  ->orWhereHas('company', function($cq) use ($search) {
-                      $cq->where('company_name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('reference_no', 'like', "%{$search}%")
+                    ->orWhereHas('company', function ($cq) use ($search) {
+                        $cq->where('company_name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -69,7 +69,7 @@ class CompanyAgreementController extends Controller
     {
         $companies = Company::orderBy('company_name')->get();
         $selectedCompanyId = $request->company_id;
-        
+
         return view('admin.agreements.create', compact('companies', 'selectedCompanyId'));
     }
 
@@ -129,6 +129,7 @@ class CompanyAgreementController extends Controller
     public function show(CompanyAgreement $agreement): View
     {
         $agreement->load(['company', 'creator', 'updater']);
+
         return view('admin.agreements.show', compact('agreement'));
     }
 
@@ -138,6 +139,7 @@ class CompanyAgreementController extends Controller
     public function edit(CompanyAgreement $agreement): View
     {
         $companies = Company::orderBy('company_name')->get();
+
         return view('admin.agreements.edit', compact('agreement', 'companies'));
     }
 
@@ -240,15 +242,15 @@ class CompanyAgreementController extends Controller
 
             // Get header row
             $headers = array_shift($rows);
-            
+
             // Check if headers are empty
             if (empty($headers) || count(array_filter($headers)) === 0) {
                 return redirect()->back()
                     ->with('error', 'No column headers found in the file. Please ensure your file has headers in the first row.');
             }
-            
+
             $originalHeaders = $headers;
-            $headers = array_map(function($h) {
+            $headers = array_map(function ($h) {
                 return strtolower(trim($h ?? ''));
             }, $headers);
 
@@ -257,16 +259,16 @@ class CompanyAgreementController extends Controller
 
             // Check for required columns
             $missingRequired = [];
-            if (!isset($columnMap['company_name'])) {
+            if (! isset($columnMap['company_name'])) {
                 $missingRequired[] = 'Company Name';
             }
-            if (!isset($columnMap['agreement_type'])) {
+            if (! isset($columnMap['agreement_type'])) {
                 $missingRequired[] = 'Agreement Type';
             }
 
-            if (!empty($missingRequired)) {
+            if (! empty($missingRequired)) {
                 return redirect()->back()
-                    ->with('error', 'Required columns not found: ' . implode(', ', $missingRequired) . '. Your file headers are: ' . implode(', ', array_filter($originalHeaders)));
+                    ->with('error', 'Required columns not found: '.implode(', ', $missingRequired).'. Your file headers are: '.implode(', ', array_filter($originalHeaders)));
             }
 
             // Check if there's any data rows
@@ -276,8 +278,8 @@ class CompanyAgreementController extends Controller
             }
 
             // Filter out completely empty rows
-            $rows = array_filter($rows, function($row) {
-                return count(array_filter($row, function($cell) {
+            $rows = array_filter($rows, function ($row) {
+                return count(array_filter($row, function ($cell) {
                     return $cell !== null && $cell !== '';
                 })) > 0;
             });
@@ -325,8 +327,9 @@ class CompanyAgreementController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()->back()
-                ->with('error', 'Error reading file: ' . $e->getMessage());
+                ->with('error', 'Error reading file: '.$e->getMessage());
         }
     }
 
@@ -372,9 +375,11 @@ class CompanyAgreementController extends Controller
                 if ($exists) {
                     if ($skipInvalid) {
                         $skipped++;
+
                         continue;
                     } else {
                         $errors[] = "Row {$row['row_number']}: Duplicate agreement exists.";
+
                         continue;
                     }
                 }
@@ -414,8 +419,9 @@ class CompanyAgreementController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->route('admin.agreements.import')
-                ->with('error', 'Import failed: ' . $e->getMessage());
+                ->with('error', 'Import failed: '.$e->getMessage());
         }
     }
 
@@ -442,14 +448,14 @@ class CompanyAgreementController extends Controller
             'Remarks',
         ];
 
-        $callback = function() use ($headers) {
+        $callback = function () use ($headers) {
             $file = fopen('php://output', 'w');
-            
+
             // Add BOM for Excel to recognize UTF-8
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+
             fputcsv($file, $headers);
-            
+
             // Sample row 1
             fputcsv($file, [
                 'ABC Company Sdn Bhd',
@@ -506,7 +512,7 @@ class CompanyAgreementController extends Controller
                 'Ahmad Ali',
                 'Initial discussion for partnership',
             ]);
-            
+
             fclose($file);
         };
 
@@ -541,23 +547,26 @@ class CompanyAgreementController extends Controller
         ];
 
         // Normalize headers by removing special characters and extra whitespace
-        $normalizedHeaders = array_map(function($header) {
+        $normalizedHeaders = array_map(function ($header) {
             $header = strtolower(trim($header ?? ''));
             $header = preg_replace('/[^a-z0-9\s_]/', '', $header);
             $header = preg_replace('/\s+/', ' ', $header);
+
             return $header;
         }, $headers);
 
         foreach ($expectedColumns as $field => $possibleNames) {
             foreach ($normalizedHeaders as $index => $header) {
-                if (empty($header)) continue;
-                
+                if (empty($header)) {
+                    continue;
+                }
+
                 // Direct match
                 if (in_array($header, $possibleNames)) {
                     $map[$field] = $index;
                     break;
                 }
-                
+
                 // Partial match (contains)
                 foreach ($possibleNames as $possibleName) {
                     if (str_contains($header, $possibleName) || str_contains($possibleName, $header)) {
@@ -586,13 +595,14 @@ class CompanyAgreementController extends Controller
         $data = [];
         foreach ($columnMap as $field => $index) {
             $value = $row[$index] ?? null;
-            
+
             // Handle empty values
             if ($value === null || $value === '') {
                 $data[$field] = null;
+
                 continue;
             }
-            
+
             // Parse dates
             if (in_array($field, ['start_date', 'end_date', 'signed_date'])) {
                 $data[$field] = $this->parseDate($value);
@@ -608,6 +618,7 @@ class CompanyAgreementController extends Controller
                 $data[$field] = is_string($value) ? trim($value) : $value;
             }
         }
+
         return $data;
     }
 
@@ -624,6 +635,7 @@ class CompanyAgreementController extends Controller
         if (is_numeric($value)) {
             try {
                 $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value);
+
                 return $date->format('Y-m-d');
             } catch (\Exception $e) {
                 return null;
@@ -653,18 +665,18 @@ class CompanyAgreementController extends Controller
         // Agreement type must be valid
         $validTypes = ['MoU', 'MoA', 'LOI', 'mou', 'moa', 'loi', 'MOU', 'MOA'];
         $agreementType = $row['agreement_type'] ?? null;
-        
+
         if (empty($agreementType)) {
             $errors[] = 'Agreement type is required.';
-        } elseif (!in_array($agreementType, $validTypes)) {
+        } elseif (! in_array($agreementType, $validTypes)) {
             $errors[] = "Agreement type '{$agreementType}' is invalid. Must be MoU, MoA, or LOI.";
         }
 
         // End date must be after start date
-        if (!empty($row['start_date']) && !empty($row['end_date'])) {
+        if (! empty($row['start_date']) && ! empty($row['end_date'])) {
             $startTimestamp = strtotime($row['start_date']);
             $endTimestamp = strtotime($row['end_date']);
-            
+
             if ($startTimestamp && $endTimestamp && $startTimestamp > $endTimestamp) {
                 $errors[] = 'End date must be after start date.';
             }
@@ -678,7 +690,7 @@ class CompanyAgreementController extends Controller
      */
     private function determineStatus(array $row): string
     {
-        if (!empty($row['status'])) {
+        if (! empty($row['status'])) {
             $status = ucfirst(strtolower($row['status']));
             if (in_array($status, ['Active', 'Expired', 'Terminated', 'Pending', 'Draft'])) {
                 return $status;
@@ -686,11 +698,11 @@ class CompanyAgreementController extends Controller
         }
 
         // Auto-determine based on dates
-        if (!empty($row['end_date']) && strtotime($row['end_date']) < time()) {
+        if (! empty($row['end_date']) && strtotime($row['end_date']) < time()) {
             return 'Expired';
         }
 
-        if (!empty($row['signed_date'])) {
+        if (! empty($row['signed_date'])) {
             return 'Active';
         }
 
@@ -715,4 +727,3 @@ class CompanyAgreementController extends Controller
             ->with('success', 'Agreement status updated successfully.');
     }
 }
-

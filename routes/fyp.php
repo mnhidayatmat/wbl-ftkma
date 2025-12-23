@@ -31,4 +31,3 @@ Route::middleware(['auth', 'role:student'])->group(function () {
         return view('student.fyp.overview');
     })->name('student.fyp.overview');
 });
-

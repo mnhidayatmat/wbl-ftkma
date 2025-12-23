@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Academic\FYP;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
-use App\Models\FYP\FypModerationRecord;
 use App\Models\FYP\FypAuditLog;
+use App\Models\FYP\FypModerationRecord;
 use App\Models\Student;
 use App\Models\StudentAssessmentMark;
 use App\Models\StudentAssessmentRubricMark;
@@ -19,7 +19,7 @@ class FypModerationController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -43,9 +43,9 @@ class FypModerationController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -66,7 +66,7 @@ class FypModerationController extends Controller
 
         // Get all AT rubric marks
         $allAtRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')
@@ -80,17 +80,16 @@ class FypModerationController extends Controller
             ->keyBy('student_id');
 
         // Calculate scores for each student
-        $studentsWithScores = $students->map(function($student) use (
+        $studentsWithScores = $students->map(function ($student) use (
             $allAtMarks,
             $allAtRubricMarks,
             $atAssessments,
-            $atRubricAssessments,
             $moderationRecords
         ) {
             // Calculate AT marks
             $atMarks = $allAtMarks->get($student->id, collect());
             $atMarksByAssessment = $atMarks->keyBy('assessment_id');
-            
+
             $atTotal = 0;
             foreach ($atAssessments as $assessment) {
                 $mark = $atMarksByAssessment->get($assessment->id);
@@ -133,7 +132,7 @@ class FypModerationController extends Controller
      */
     public function show(Student $student): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -158,7 +157,7 @@ class FypModerationController extends Controller
             ->keyBy('assessment_id');
 
         $allAtRubricMarks = StudentAssessmentRubricMark::where('student_id', $student->id)
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')
@@ -196,7 +195,7 @@ class FypModerationController extends Controller
      */
     public function store(Request $request, Student $student)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -229,7 +228,7 @@ class FypModerationController extends Controller
             ->keyBy('assessment_id');
 
         $allAtRubricMarks = StudentAssessmentRubricMark::where('student_id', $student->id)
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'FYP')->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('course_type', ['FYP', 'IP', 'OSH', 'PPE', 'Industrial Training', 'IC'])->comment('Course type: FYP, IP, OSH, PPE, Industrial Training, IC');
             $table->foreignId('lecturer_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
-            
+
             // Ensure a student can only have one lecturer assignment per course type
             $table->unique(['student_id', 'course_type'], 'student_course_unique');
         });

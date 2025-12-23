@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Add status column to companies if not exists
-        if (!Schema::hasColumn('companies', 'status')) {
+        if (! Schema::hasColumn('companies', 'status')) {
             Schema::table('companies', function (Blueprint $table) {
                 $table->enum('status', ['Active', 'Inactive', 'Archived'])->default('Active')->after('website');
             });
@@ -35,14 +35,14 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
-            
+
             // Indexes for performance
             $table->index('company_id');
             $table->index('agreement_type');
             $table->index('status');
             $table->index('end_date');
             $table->index(['company_id', 'agreement_type']);
-            
+
             // Prevent duplicate: same company + same type + same reference number
             $table->unique(['company_id', 'agreement_type', 'reference_no'], 'unique_company_agreement');
         });
@@ -54,7 +54,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('company_agreements');
-        
+
         if (Schema::hasColumn('companies', 'status')) {
             Schema::table('companies', function (Blueprint $table) {
                 $table->dropColumn('status');

@@ -136,9 +136,10 @@ class Company extends Model
      */
     public function isMouExpired(): bool
     {
-        if (!$this->mou || !$this->mou->end_date) {
+        if (! $this->mou || ! $this->mou->end_date) {
             return false;
         }
+
         return $this->mou->end_date < now();
     }
 
@@ -148,7 +149,7 @@ class Company extends Model
     public function industryCoaches(): HasMany
     {
         return $this->hasMany(User::class, 'company_id')
-            ->whereHas('roles', function($query) {
+            ->whereHas('roles', function ($query) {
                 $query->where('name', 'ic');
             });
     }
@@ -161,4 +162,3 @@ class Company extends Model
         return $this->industryCoaches()->count();
     }
 }
-

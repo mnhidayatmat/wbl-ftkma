@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
-            
+
             $table->index('placement_tracking_id');
         });
     }

@@ -15,11 +15,11 @@ class GroupController extends Controller
     public function index(Request $request): View
     {
         $user = auth()->user();
-        
+
         // Admin and Coordinator can view all groups
         // Others can only view active groups
         $query = WblGroup::withCount('students');
-        
+
         if ($user->isAdmin() || $user->isCoordinator()) {
             // Filter by status if provided
             if ($request->has('status') && in_array($request->status, ['ACTIVE', 'COMPLETED'])) {
@@ -29,9 +29,9 @@ class GroupController extends Controller
             // Lecturer/AT/IC/Supervisor LI can only see active groups
             $query->where('status', 'ACTIVE');
         }
-        
+
         $groups = $query->orderBy('status')->orderBy('end_date', 'desc')->paginate(15)->withQueryString();
-        
+
         // Statistics
         $stats = [
             'total' => WblGroup::count(),
@@ -48,7 +48,7 @@ class GroupController extends Controller
     public function create(): View
     {
         // Only admin can create groups
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Only administrators can create groups.');
         }
 
@@ -61,7 +61,7 @@ class GroupController extends Controller
     public function store(Request $request): RedirectResponse
     {
         // Only admin can create groups
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Only administrators can create groups.');
         }
 
@@ -85,15 +85,15 @@ class GroupController extends Controller
     public function show(WblGroup $group): View
     {
         $user = auth()->user();
-        
+
         // Check access based on role
-        if (!$user->isAdmin() && !$user->isCoordinator()) {
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
             // Lecturer/AT/IC/Supervisor LI can only view active groups
-            if (!$group->isActive()) {
+            if (! $group->isActive()) {
                 abort(403, 'You can only view active groups.');
             }
         }
-        
+
         $group->load('students.company');
 
         return view('groups.show', compact('group'));
@@ -105,7 +105,7 @@ class GroupController extends Controller
     public function edit(WblGroup $group): View
     {
         // Only admin can edit groups
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Only administrators can edit groups.');
         }
 
@@ -124,7 +124,7 @@ class GroupController extends Controller
     public function update(Request $request, WblGroup $group): RedirectResponse
     {
         // Only admin can update groups
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Only administrators can update groups.');
         }
 
@@ -146,7 +146,7 @@ class GroupController extends Controller
     public function destroy(WblGroup $group): RedirectResponse
     {
         // Only admin can delete groups
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Only administrators can delete groups.');
         }
 
@@ -162,7 +162,7 @@ class GroupController extends Controller
     public function markCompleted(WblGroup $group): RedirectResponse
     {
         // Only admin can mark groups as completed
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Only administrators can close groups.');
         }
 
@@ -184,7 +184,7 @@ class GroupController extends Controller
     public function reopen(WblGroup $group): RedirectResponse
     {
         // Only admin can reopen groups
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access. Only administrators can reopen groups.');
         }
 
@@ -200,4 +200,3 @@ class GroupController extends Controller
         return back()->with('success', "Group '{$group->name}' has been reopened and is now active.");
     }
 }
-

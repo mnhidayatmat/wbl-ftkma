@@ -35,7 +35,7 @@
                      return parentData.sidebarOpen === true;
                  }
              } catch(e) {
-                 console.warn('Could not access parent scope:', e);
+                 // Silent fail - fallback to default behavior
              }
              // Fallback: check window width and assume expanded/open
              return window.innerWidth >= 1024;
@@ -52,7 +52,7 @@
                      return parentData.sidebarOpen === false;
                  }
              } catch(e) {
-                 console.warn('Could not access parent scope:', e);
+                 // Silent fail - fallback to default behavior
              }
              return false;
          },
@@ -329,7 +329,11 @@
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.reports.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Reports
                 </a>
-                <a href="{{ route('academic.fyp.audit.index') }}" 
+                <a href="{{ route('academic.fyp.proposals.index') }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Project Proposals
+                </a>
+                <a href="{{ route('academic.fyp.audit.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.audit.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Audit Log
                 </a>
@@ -810,9 +814,13 @@
             
             <!-- Submenu Items -->
             <div x-show="coursesMenuOpen && sidebarTextVisible" x-transition class="ml-6 mt-2 space-y-1">
-                <a href="{{ Route::has('student.fyp.overview') ? route('student.fyp.overview') : '#' }}" 
+                <a href="{{ Route::has('student.fyp.overview') ? route('student.fyp.overview') : '#' }}"
                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.fyp.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <span class="text-sm">FYP</span>
+                </a>
+                <a href="{{ route('academic.fyp.project-proposal.edit') }}"
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('academic.fyp.project-proposal.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    <span class="text-sm">FYP Project Proposal</span>
                 </a>
                 <a href="{{ Route::has('student.ip.overview') ? route('student.ip.overview') : '#' }}" 
                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.ip.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">

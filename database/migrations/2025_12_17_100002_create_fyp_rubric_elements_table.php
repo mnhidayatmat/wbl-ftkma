@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('order')->default(0); // Display order
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            
+
             // Indexes
             $table->index('rubric_template_id');
             $table->index('clo_code');

@@ -18,7 +18,7 @@ class PpeProgressController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -52,7 +52,7 @@ class PpeProgressController extends Controller
             ->groupBy('student_id');
 
         // Calculate total rubric questions
-        $totalRubricQuestions = $icAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $icAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
@@ -63,10 +63,10 @@ class PpeProgressController extends Controller
 
         foreach ($students as $student) {
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-            $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+            $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                 return $mark->mark !== null;
             })->count();
-            
+
             if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                 $lecturerCompleted++;
             }
@@ -84,7 +84,7 @@ class PpeProgressController extends Controller
 
         // Group breakdown
         $groups = WblGroup::with('students')->get();
-        $groupStats = $groups->map(function($group) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
+        $groupStats = $groups->map(function ($group) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
             $groupStudents = $group->students;
             $groupTotal = $groupStudents->count();
             $groupLecturerCompleted = 0;
@@ -92,10 +92,10 @@ class PpeProgressController extends Controller
 
             foreach ($groupStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                     $groupLecturerCompleted++;
                 }
@@ -118,7 +118,7 @@ class PpeProgressController extends Controller
 
         // Programme breakdown
         $programmes = Student::distinct()->pluck('programme')->filter();
-        $programmeStats = $programmes->map(function($programme) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
+        $programmeStats = $programmes->map(function ($programme) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
             $programmeStudents = Student::where('programme', $programme)->get();
             $programmeTotal = $programmeStudents->count();
             $programmeLecturerCompleted = 0;
@@ -126,10 +126,10 @@ class PpeProgressController extends Controller
 
             foreach ($programmeStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                     $programmeLecturerCompleted++;
                 }
@@ -152,7 +152,7 @@ class PpeProgressController extends Controller
 
         // Company breakdown
         $companies = Student::whereNotNull('company_id')->with('company')->get()->groupBy('company_id');
-        $companyStats = $companies->map(function($companyStudents, $companyId) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
+        $companyStats = $companies->map(function ($companyStudents, $companyId) use ($allLecturerMarks, $allIcRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
             $company = $companyStudents->first()->company;
             $companyTotal = $companyStudents->count();
             $companyLecturerCompleted = 0;
@@ -160,10 +160,10 @@ class PpeProgressController extends Controller
 
             foreach ($companyStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                     $companyLecturerCompleted++;
                 }

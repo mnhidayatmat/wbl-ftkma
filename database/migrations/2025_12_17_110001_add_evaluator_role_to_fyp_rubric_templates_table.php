@@ -16,7 +16,7 @@ return new class extends Migration
             $table->enum('evaluator_role', ['at', 'ic'])->default('at')->after('phase');
             // Add component marks percentage (the total marks this rubric contributes to overall grade)
             $table->decimal('component_marks', 5, 2)->default(0)->after('total_weight');
-            
+
             // Update unique constraint to allow same code with different evaluator roles
             $table->dropUnique('fyp_rubric_templates_code_unique');
             $table->unique(['code', 'evaluator_role'], 'fyp_rubric_templates_code_role_unique');

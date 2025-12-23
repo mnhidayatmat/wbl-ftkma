@@ -141,12 +141,25 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 @if(auth()->user()->isAdmin())
-                                    <button type="button"
-                                            x-data
-                                            @click="$dispatch('open-edit-modal', { id: {{ $mapping->id }} })"
-                                            class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white text-sm font-semibold rounded-lg transition-colors">
-                                        Edit
-                                    </button>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button type="button"
+                                                x-data
+                                                @click="$dispatch('open-edit-modal', { id: {{ $mapping->id }} })"
+                                                class="px-3 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white text-sm font-semibold rounded-lg transition-colors">
+                                            Edit
+                                        </button>
+                                        <form action="{{ route('academic.' . strtolower($courseCode) . '.clo-plo.destroy', $mapping) }}"
+                                              method="POST"
+                                              class="inline"
+                                              onsubmit="return confirm('Are you sure you want to delete {{ $mapping->clo_code }}? This action cannot be undone.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 @else
                                     <span class="text-sm text-gray-400">View only</span>
                                 @endif

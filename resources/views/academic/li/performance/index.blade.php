@@ -77,7 +77,7 @@
 
         <!-- Filters -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
-            <form method="GET" action="{{ route('academic.li.student-performance.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <form method="GET" action="{{ route('academic.li.performance.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Search -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Search</label>
@@ -108,7 +108,7 @@
                             class="flex-1 px-4 py-2 sm:py-2.5 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors min-h-[44px]">
                         Apply Filters
                     </button>
-                    <a href="{{ route('academic.li.student-performance.index') }}" 
+                    <a href="{{ route('academic.li.performance.index') }}"
                        class="px-4 py-2 sm:py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-colors min-h-[44px] flex items-center justify-center">
                         Clear
                     </a>

@@ -26,7 +26,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->foreignId('moderated_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
-            
+
             $table->unique('student_id');
         });
     }

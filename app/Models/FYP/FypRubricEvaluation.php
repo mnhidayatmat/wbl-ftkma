@@ -93,19 +93,21 @@ class FypRubricEvaluation extends Model
      */
     public function calculateWeightedScore(): void
     {
-        if (!$this->element || !$this->selected_level) {
+        if (! $this->element || ! $this->selected_level) {
             $this->weighted_score = 0;
+
             return;
         }
 
         $descriptor = $this->element->getDescriptorForLevel($this->selected_level);
-        if (!$descriptor) {
+        if (! $descriptor) {
             $this->weighted_score = 0;
+
             return;
         }
 
         $this->score = $descriptor->score_value;
-        
+
         // Weighted score = (score / max_score) * element_weight
         $maxScore = 5; // Fixed max level
         $this->weighted_score = ($this->score / $maxScore) * $this->element->weight_percentage;
@@ -120,8 +122,8 @@ class FypRubricEvaluation extends Model
 
         static::saving(function ($evaluation) {
             $evaluation->calculateWeightedScore();
-            
-            if ($evaluation->selected_level && !$evaluation->evaluated_at) {
+
+            if ($evaluation->selected_level && ! $evaluation->evaluated_at) {
                 $evaluation->evaluated_at = now();
             }
         });
@@ -132,10 +134,10 @@ class FypRubricEvaluation extends Model
      */
     public function getLevelLabelAttribute(): ?string
     {
-        if (!$this->selected_level) {
+        if (! $this->selected_level) {
             return null;
         }
-        
+
         return FypRubricTemplate::PERFORMANCE_LEVELS[$this->selected_level] ?? null;
     }
 }

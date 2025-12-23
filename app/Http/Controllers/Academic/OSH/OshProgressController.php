@@ -18,7 +18,7 @@ class OshProgressController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -40,16 +40,16 @@ class OshProgressController extends Controller
 
         // Get all lecturer rubric marks (if any)
         $allLecturerRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
-            ->whereHas('rubric.assessment', function($q) {
+            ->whereHas('rubric.assessment', function ($q) {
                 $q->where('course_code', 'OSH')
-                  ->where('evaluator_role', 'lecturer');
+                    ->where('evaluator_role', 'lecturer');
             })
             ->with('rubric.assessment')
             ->get()
             ->groupBy('student_id');
 
         // Calculate total rubric questions
-        $totalRubricQuestions = $lecturerAssessments->sum(function($assessment) {
+        $totalRubricQuestions = $lecturerAssessments->sum(function ($assessment) {
             return $assessment->rubrics->count();
         });
 
@@ -59,15 +59,15 @@ class OshProgressController extends Controller
 
         foreach ($students as $student) {
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-            $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+            $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                 return $mark->mark !== null;
             })->count();
-            
+
             $lecturerRubricMarks = $allLecturerRubricMarks->get($student->id, collect());
             $lecturerRubricCompleted = $lecturerRubricMarks->count();
-            
+
             // Student is complete if all assessment marks are done AND all rubric marks (if any) are done
-            if ($lecturerCompletedCount === $lecturerAssessments->count() && 
+            if ($lecturerCompletedCount === $lecturerAssessments->count() &&
                 $lecturerAssessments->count() > 0 &&
                 ($totalRubricQuestions === 0 || $lecturerRubricCompleted === $totalRubricQuestions)) {
                 $lecturerCompleted++;
@@ -79,21 +79,21 @@ class OshProgressController extends Controller
 
         // Group breakdown
         $groups = WblGroup::where('status', 'ACTIVE')->with('students')->get();
-        $groupStats = $groups->map(function($group) use ($allLecturerMarks, $allLecturerRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
+        $groupStats = $groups->map(function ($group) use ($allLecturerMarks, $allLecturerRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
             $groupStudents = $group->students;
             $groupTotal = $groupStudents->count();
             $groupLecturerCompleted = 0;
 
             foreach ($groupStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 $lecturerRubricMarks = $allLecturerRubricMarks->get($student->id, collect());
                 $lecturerRubricCompleted = $lecturerRubricMarks->count();
-                
-                if ($lecturerCompletedCount === $lecturerAssessments->count() && 
+
+                if ($lecturerCompletedCount === $lecturerAssessments->count() &&
                     $lecturerAssessments->count() > 0 &&
                     ($totalRubricQuestions === 0 || $lecturerRubricCompleted === $totalRubricQuestions)) {
                     $groupLecturerCompleted++;
@@ -110,21 +110,21 @@ class OshProgressController extends Controller
 
         // Programme breakdown
         $programmes = Student::distinct()->pluck('programme')->filter();
-        $programmeStats = $programmes->map(function($programme) use ($allLecturerMarks, $allLecturerRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
+        $programmeStats = $programmes->map(function ($programme) use ($allLecturerMarks, $allLecturerRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
             $programmeStudents = Student::where('programme', $programme)->inActiveGroups()->get();
             $programmeTotal = $programmeStudents->count();
             $programmeLecturerCompleted = 0;
 
             foreach ($programmeStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 $lecturerRubricMarks = $allLecturerRubricMarks->get($student->id, collect());
                 $lecturerRubricCompleted = $lecturerRubricMarks->count();
-                
-                if ($lecturerCompletedCount === $lecturerAssessments->count() && 
+
+                if ($lecturerCompletedCount === $lecturerAssessments->count() &&
                     $lecturerAssessments->count() > 0 &&
                     ($totalRubricQuestions === 0 || $lecturerRubricCompleted === $totalRubricQuestions)) {
                     $programmeLecturerCompleted++;
@@ -141,21 +141,21 @@ class OshProgressController extends Controller
 
         // Company breakdown
         $companies = Student::whereNotNull('company_id')->inActiveGroups()->with('company')->get()->groupBy('company_id');
-        $companyStats = $companies->map(function($companyStudents, $companyId) use ($allLecturerMarks, $allLecturerRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
+        $companyStats = $companies->map(function ($companyStudents, $companyId) use ($allLecturerMarks, $allLecturerRubricMarks, $lecturerAssessments, $totalRubricQuestions) {
             $company = $companyStudents->first()->company;
             $companyTotal = $companyStudents->count();
             $companyLecturerCompleted = 0;
 
             foreach ($companyStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 $lecturerRubricMarks = $allLecturerRubricMarks->get($student->id, collect());
                 $lecturerRubricCompleted = $lecturerRubricMarks->count();
-                
-                if ($lecturerCompletedCount === $lecturerAssessments->count() && 
+
+                if ($lecturerCompletedCount === $lecturerAssessments->count() &&
                     $lecturerAssessments->count() > 0 &&
                     ($totalRubricQuestions === 0 || $lecturerRubricCompleted === $totalRubricQuestions)) {
                     $companyLecturerCompleted++;

@@ -24,13 +24,13 @@ return new class extends Migration
             $table->foreignId('evaluated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('evaluated_at')->nullable();
             $table->timestamps();
-            
+
             // Indexes
             $table->index('student_id');
             $table->index('rubric_template_id');
             $table->index('rubric_element_id');
             $table->index('evaluated_by');
-            
+
             // One evaluation per student per element
             $table->unique(['student_id', 'rubric_element_id'], 'student_rubric_element_unique');
         });

@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -23,7 +23,7 @@ return new class extends Migration
                 AND CONSTRAINT_TYPE = 'UNIQUE'
                 AND CONSTRAINT_NAME = 'student_rubric_unique'
             ");
-            
+
             if (empty($constraints)) {
                 Schema::table('student_assessment_rubric_marks', function (Blueprint $table) {
                     $table->unique(['student_id', 'assessment_rubric_id'], 'student_rubric_unique');

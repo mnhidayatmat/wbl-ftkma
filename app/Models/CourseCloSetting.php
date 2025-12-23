@@ -34,7 +34,7 @@ class CourseCloSetting extends Model
     public static function getCloCount(string $courseCode): int
     {
         $setting = static::where('course_code', $courseCode)->first();
-        
+
         if ($setting) {
             return $setting->clo_count;
         }
@@ -58,11 +58,11 @@ class CourseCloSetting extends Model
     {
         $count = static::getCloCount($courseCode);
         $clos = [];
-        
+
         for ($i = 1; $i <= $count; $i++) {
-            $clos[] = 'CLO' . $i;
+            $clos[] = 'CLO'.$i;
         }
-        
+
         return $clos;
     }
 

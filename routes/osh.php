@@ -21,7 +21,7 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('evaluations', [OshEvaluationController::class, 'index'])->name('evaluations.index');
         // Route::get('summary', [OshSummaryController::class, 'index'])->name('summary.index');
     });
-    
+
     // Student routes for OSH overview
     Route::middleware('role:student')->prefix('student/osh')->name('student.osh.')->group(function () {
         Route::get('overview', function () {
@@ -29,4 +29,3 @@ Route::middleware(['auth'])->group(function () {
         })->name('overview');
     });
 });
-

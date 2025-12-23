@@ -16,18 +16,18 @@ class GroupVisibilityController extends Controller
     public function toggle(): RedirectResponse
     {
         // Only admin can toggle
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
         $currentMode = Cache::get('system.group_visibility_mode', 'all');
         $newMode = $currentMode === 'active_only' ? 'all' : 'active_only';
-        
+
         // Store in cache (persists until cache is cleared or expires)
         Cache::forever('system.group_visibility_mode', $newMode);
 
-        $message = $newMode === 'active_only' 
-            ? 'Group visibility set to Active Only. All users will only see active groups.' 
+        $message = $newMode === 'active_only'
+            ? 'Group visibility set to Active Only. All users will only see active groups.'
             : 'Group visibility set to All Groups. Users will see groups based on their role permissions.';
 
         return redirect()->back()->with('success', $message);

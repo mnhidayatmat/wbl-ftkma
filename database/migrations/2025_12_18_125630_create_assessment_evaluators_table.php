@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('total_score', 5, 2); // Total score percentage for this evaluator
             $table->integer('order')->default(0); // For ordering evaluators
             $table->timestamps();
-            
+
             // Indexes
             $table->index('assessment_id');
             $table->index('evaluator_role');

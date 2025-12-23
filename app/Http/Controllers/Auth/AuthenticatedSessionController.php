@@ -39,6 +39,7 @@ class AuthenticatedSessionController extends Controller
         // Check if email is verified for all users
         if (! Auth::user()->hasVerifiedEmail()) {
             Auth::logout();
+
             return redirect()->route('login')
                 ->withErrors(['email' => 'Please verify your email address before logging in. Check your inbox for the verification link.'])
                 ->withInput($request->only('email'));
@@ -61,4 +62,3 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 }
-

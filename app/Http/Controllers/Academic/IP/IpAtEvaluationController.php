@@ -16,14 +16,14 @@ use Illuminate\View\View;
 class IpAtEvaluationController extends Controller
 {
     use ChecksAssessmentWindow;
-    
+
     /**
      * Display the list of students for AT evaluation.
      */
     public function index(Request $request): View
     {
         // Authorization: Admin and AT (Academic Tutor) can access
-        if (!auth()->user()->isAdmin() && !auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -37,9 +37,9 @@ class IpAtEvaluationController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
-        
+
         // Admin can see all students, AT only sees assigned students
-        if (auth()->user()->isLecturer() && !auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
             $query->where('at_id', auth()->id());
         }
 
@@ -49,9 +49,9 @@ class IpAtEvaluationController extends Controller
         // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 
@@ -70,7 +70,7 @@ class IpAtEvaluationController extends Controller
             ->groupBy('student_id');
 
         // Calculate evaluation status for each student
-        $studentsWithStatus = $students->map(function($student) use ($atAssessments, $allMarks, $totalWeight) {
+        $studentsWithStatus = $students->map(function ($student) use ($atAssessments, $allMarks) {
             $studentMarks = $allMarks->get($student->id, collect());
             $marksByAssessment = $studentMarks->keyBy('assessment_id');
 
@@ -136,10 +136,10 @@ class IpAtEvaluationController extends Controller
     public function show(Student $student): View
     {
         // Check authorization - all authenticated users can view, but only assigned AT can edit
-        if (!Gate::allows('view', $student)) {
+        if (! Gate::allows('view', $student)) {
             abort(403, 'You are not authorized to view this student.');
         }
-        
+
         // Load relationships
         $student->load('academicTutor', 'industryCoach', 'group');
 
@@ -212,19 +212,19 @@ class IpAtEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization using gate
-        if (!Gate::allows('edit-at-marks', $student)) {
+        if (! Gate::allows('edit-at-marks', $student)) {
             $student->load('academicTutor');
-            $assignedTo = $student->academicTutor ? $student->academicTutor->name . ' (ID: ' . $student->academicTutor->id . ')' : 'No one';
-            $currentUser = auth()->user()->name . ' (ID: ' . auth()->user()->id . ')';
+            $assignedTo = $student->academicTutor ? $student->academicTutor->name.' (ID: '.$student->academicTutor->id.')' : 'No one';
+            $currentUser = auth()->user()->name.' (ID: '.auth()->user()->id.')';
             $studentAtId = $student->at_id ?? 'NULL';
             abort(403, "You are not authorized to edit AT marks for this student. You are logged in as: {$currentUser}. This student ({$student->name}) is currently assigned to: {$assignedTo} (Student's at_id: {$studentAtId}). Please make sure you are logged in as the correct Academic Tutor, or contact an administrator to assign this student to you via the 'Assign Students' page.");
         }
 
         // Check if assessment window is open (Admin can bypass)
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             $this->requireOpenWindow('at', 'IP');
         }
-        
+
         $validated = $request->validate([
             'assessment_id' => ['required', 'exists:assessments,id'],
             'component_marks' => ['nullable', 'array'],
@@ -236,7 +236,7 @@ class IpAtEvaluationController extends Controller
 
         $assessmentId = $validated['assessment_id'];
         $assessment = Assessment::with('components')->findOrFail($assessmentId);
-        
+
         // Validate assessment belongs to IP and AT role
         if ($assessment->course_code !== 'IP' || $assessment->evaluator_role !== 'at') {
             return redirect()->back()->with('error', 'Invalid assessment.');
@@ -249,7 +249,9 @@ class IpAtEvaluationController extends Controller
 
             foreach ($validated['component_marks'] as $componentId => $score) {
                 $component = $assessment->components->find($componentId);
-                if (!$component) continue;
+                if (! $component) {
+                    continue;
+                }
 
                 $remarks = $validated['component_remarks'][$componentId] ?? null;
 
@@ -272,14 +274,14 @@ class IpAtEvaluationController extends Controller
                 // Contribution = Normalized * Weight
                 $normalizedScore = $score / 5;
                 $weightedScore = $normalizedScore * $component->weight_percentage;
-                
+
                 $totalWeightedScore += $weightedScore;
                 $totalWeight += $component->weight_percentage;
             }
 
             // Calculate overall mark for this assessment (0-5 scale)
             $overallMark = $totalWeight > 0 ? ($totalWeightedScore / $totalWeight) * 5 : 0;
-            
+
             // Save overall mark
             StudentAssessmentMark::updateOrCreate(
                 [
@@ -295,12 +297,10 @@ class IpAtEvaluationController extends Controller
             );
 
         } else {
-             return redirect()->back()->with('error', 'This assessment does not have components configured for rubric grading.');
+            return redirect()->back()->with('error', 'This assessment does not have components configured for rubric grading.');
         }
 
         return redirect()->route('academic.ip.at.show', $student)
             ->with('success', 'Assessment marks saved successfully.');
     }
 }
-
-

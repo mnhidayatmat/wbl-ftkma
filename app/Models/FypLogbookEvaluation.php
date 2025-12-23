@@ -48,7 +48,7 @@ class FypLogbookEvaluation extends Model
             return 'Not Evaluated';
         }
 
-        return match(true) {
+        return match (true) {
             $this->score <= 2 => 'Poor',
             $this->score <= 4 => 'Below Average',
             $this->score <= 6 => 'Average',
@@ -87,7 +87,7 @@ class FypLogbookEvaluation extends Model
     public static function getAverageScore(int $studentId): float
     {
         $evaluations = static::forStudent($studentId)->whereNotNull('score')->get();
-        
+
         if ($evaluations->isEmpty()) {
             return 0;
         }
@@ -101,7 +101,7 @@ class FypLogbookEvaluation extends Model
     public static function getCompletionStatus(int $studentId): array
     {
         $evaluations = static::forStudent($studentId)->whereNotNull('score')->count();
-        
+
         return [
             'completed' => $evaluations,
             'total' => 6,

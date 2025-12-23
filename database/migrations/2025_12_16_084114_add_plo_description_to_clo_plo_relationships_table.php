@@ -13,7 +13,7 @@ return new class extends Migration
     {
         if (Schema::hasTable('clo_plo_relationships')) {
             Schema::table('clo_plo_relationships', function (Blueprint $table) {
-                if (!Schema::hasColumn('clo_plo_relationships', 'plo_description')) {
+                if (! Schema::hasColumn('clo_plo_relationships', 'plo_description')) {
                     $table->text('plo_description')->nullable()->after('plo_code');
                 }
             });

@@ -15,4 +15,3 @@ class CompanySeeder extends Seeder
         Company::factory()->count(5)->create();
     }
 }
-

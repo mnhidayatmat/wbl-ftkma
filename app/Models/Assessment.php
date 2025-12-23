@@ -164,7 +164,7 @@ class Assessment extends Model
 
     /**
      * Get CLO codes for a course.
-     * 
+     *
      * Now uses database-driven CLO counts from course_clo_settings table.
      * Admins can configure the number of CLOs per course via the CLO-PLO settings page.
      */
@@ -172,7 +172,7 @@ class Assessment extends Model
     {
         return CourseCloSetting::getCloCodes($courseCode);
     }
-    
+
     /**
      * Get CLO count for a course.
      */
@@ -183,16 +183,17 @@ class Assessment extends Model
 
     /**
      * Generate CLO codes dynamically (helper method for future use).
-     * 
-     * @param int $count Number of CLOs to generate
+     *
+     * @param  int  $count  Number of CLOs to generate
      * @return array Array of CLO codes
      */
     public static function generateCloCodes(int $count): array
     {
         $clos = [];
         for ($i = 1; $i <= $count; $i++) {
-            $clos[] = 'CLO' . $i;
+            $clos[] = 'CLO'.$i;
         }
+
         return $clos;
     }
 }

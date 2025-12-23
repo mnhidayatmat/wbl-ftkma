@@ -16,7 +16,7 @@ class MyStudentsController extends Controller
     public function index(Request $request): View
     {
         // Only lecturer can access
-        if (!auth()->user()->isLecturer()) {
+        if (! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -32,9 +32,9 @@ class MyStudentsController extends Controller
         // Search
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('matric_no', 'like', "%{$search}%");
+                    ->orWhere('matric_no', 'like', "%{$search}%");
             });
         }
 

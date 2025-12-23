@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('ip_address')->nullable();
             $table->string('user_agent')->nullable();
             $table->timestamps();
-            
+
             $table->index('inspection_id');
             $table->index('reviewed_by');
             $table->index('action');

@@ -21,7 +21,7 @@ class ResendVerificationController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             throw ValidationException::withMessages([
                 'email' => ['We could not find a user with that email address.'],
             ]);

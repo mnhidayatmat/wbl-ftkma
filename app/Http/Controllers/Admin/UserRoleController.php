@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,7 +17,7 @@ class UserRoleController extends Controller
     public function index(Request $request): View
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -26,9 +26,9 @@ class UserRoleController extends Controller
         // Search
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -36,7 +36,7 @@ class UserRoleController extends Controller
 
         // Count statistics
         $totalUsers = User::count();
-        
+
         // Get all available roles for the edit modal, sorted by user count (least users first)
         $allRoles = Role::withCount('users')
             ->orderBy('users_count', 'asc') // Roles with fewer users first
@@ -56,7 +56,7 @@ class UserRoleController extends Controller
     public function updateRoles(Request $request, User $user): RedirectResponse
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -77,7 +77,7 @@ class UserRoleController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         // Only admin can access
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -87,7 +87,7 @@ class UserRoleController extends Controller
         }
 
         // Prevent deleting the last admin user
-        $adminCount = User::whereHas('roles', function($query) {
+        $adminCount = User::whereHas('roles', function ($query) {
             $query->where('name', 'admin');
         })->count();
 
@@ -96,12 +96,12 @@ class UserRoleController extends Controller
         }
 
         $userName = $user->name;
-        
+
         // Check for important relationships before deletion
         $hasStudentProfile = $user->student()->exists();
         $assignedAsIc = $user->assignedStudents()->exists();
         $assignedAsAt = $user->assignedStudentsAsAt()->exists();
-        
+
         // Delete user (cascade will handle related records if foreign keys are set up)
         // - Student profile will be deleted (cascade)
         // - IC/AT assignments will be set to null (set null)
@@ -109,7 +109,7 @@ class UserRoleController extends Controller
         $user->delete();
 
         $message = "User account '{$userName}' has been deleted successfully.";
-        
+
         // Add information about what was affected
         $affectedItems = [];
         if ($hasStudentProfile) {
@@ -121,9 +121,9 @@ class UserRoleController extends Controller
         if ($assignedAsAt) {
             $affectedItems[] = 'Academic Tutor assignments';
         }
-        
-        if (!empty($affectedItems)) {
-            $message .= ' Related ' . implode(', ', $affectedItems) . ' have been removed or updated.';
+
+        if (! empty($affectedItems)) {
+            $message .= ' Related '.implode(', ', $affectedItems).' have been removed or updated.';
         }
 
         return back()->with('success', $message);

@@ -51,4 +51,3 @@ class PpeAssessmentSettingPolicy
         return $user->isAdmin();
     }
 }
-

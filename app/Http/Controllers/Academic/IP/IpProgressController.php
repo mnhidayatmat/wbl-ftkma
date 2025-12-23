@@ -17,7 +17,7 @@ class IpProgressController extends Controller
      */
     public function index(Request $request): View
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -58,20 +58,20 @@ class IpProgressController extends Controller
         foreach ($students as $student) {
             // Check Lecturer completion
             $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-            $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+            $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                 return $mark->mark !== null;
             })->count();
-            
+
             if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                 $lecturerCompleted++;
             }
 
             // Check IC completion (using marks from StudentAssessmentMark)
             $icMarks = $allIcMarks->get($student->id, collect());
-            $icCompletedCount = $icMarks->filter(function($mark) {
+            $icCompletedCount = $icMarks->filter(function ($mark) {
                 return $mark->mark !== null;
             })->count();
-            
+
             if ($icCompletedCount === $icAssessments->count() && $icAssessments->count() > 0) {
                 $icCompleted++;
             }
@@ -84,7 +84,7 @@ class IpProgressController extends Controller
 
         // Group breakdown
         $groups = WblGroup::with('students')->get();
-        $groupStats = $groups->map(function($group) use ($allLecturerMarks, $allIcMarks, $lecturerAssessments, $icAssessments) {
+        $groupStats = $groups->map(function ($group) use ($allLecturerMarks, $allIcMarks, $lecturerAssessments, $icAssessments) {
             $groupStudents = $group->students;
             $groupTotal = $groupStudents->count();
             $groupLecturerCompleted = 0;
@@ -92,19 +92,19 @@ class IpProgressController extends Controller
 
             foreach ($groupStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                     $groupLecturerCompleted++;
                 }
 
                 $icMarks = $allIcMarks->get($student->id, collect());
-                $icCompletedCount = $icMarks->filter(function($mark) {
+                $icCompletedCount = $icMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($icCompletedCount === $icAssessments->count() && $icAssessments->count() > 0) {
                     $groupIcCompleted++;
                 }
@@ -122,7 +122,7 @@ class IpProgressController extends Controller
 
         // Programme breakdown
         $programmes = Student::distinct()->pluck('programme')->filter();
-        $programmeStats = $programmes->map(function($programme) use ($allLecturerMarks, $allIcMarks, $lecturerAssessments, $icAssessments) {
+        $programmeStats = $programmes->map(function ($programme) use ($allLecturerMarks, $allIcMarks, $lecturerAssessments, $icAssessments) {
             $programmeStudents = Student::where('programme', $programme)->get();
             $programmeTotal = $programmeStudents->count();
             $programmeLecturerCompleted = 0;
@@ -130,19 +130,19 @@ class IpProgressController extends Controller
 
             foreach ($programmeStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                     $programmeLecturerCompleted++;
                 }
 
                 $icMarks = $allIcMarks->get($student->id, collect());
-                $icCompletedCount = $icMarks->filter(function($mark) {
+                $icCompletedCount = $icMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($icCompletedCount === $icAssessments->count() && $icAssessments->count() > 0) {
                     $programmeIcCompleted++;
                 }
@@ -160,7 +160,7 @@ class IpProgressController extends Controller
 
         // Company breakdown
         $companies = Student::whereNotNull('company_id')->with('company')->get()->groupBy('company_id');
-        $companyStats = $companies->map(function($companyStudents, $companyId) use ($allLecturerMarks, $allIcMarks, $lecturerAssessments, $icAssessments) {
+        $companyStats = $companies->map(function ($companyStudents, $companyId) use ($allLecturerMarks, $allIcMarks, $lecturerAssessments, $icAssessments) {
             $company = $companyStudents->first()->company;
             $companyTotal = $companyStudents->count();
             $companyLecturerCompleted = 0;
@@ -168,19 +168,19 @@ class IpProgressController extends Controller
 
             foreach ($companyStudents as $student) {
                 $lecturerMarks = $allLecturerMarks->get($student->id, collect());
-                $lecturerCompletedCount = $lecturerMarks->filter(function($mark) {
+                $lecturerCompletedCount = $lecturerMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($lecturerCompletedCount === $lecturerAssessments->count() && $lecturerAssessments->count() > 0) {
                     $companyLecturerCompleted++;
                 }
 
                 $icMarks = $allIcMarks->get($student->id, collect());
-                $icCompletedCount = $icMarks->filter(function($mark) {
+                $icCompletedCount = $icMarks->filter(function ($mark) {
                     return $mark->mark !== null;
                 })->count();
-                
+
                 if ($icCompletedCount === $icAssessments->count() && $icAssessments->count() > 0) {
                     $companyIcCompleted++;
                 }

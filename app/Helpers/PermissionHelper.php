@@ -2,11 +2,11 @@
 
 namespace App\Helpers;
 
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
 use App\Models\RolePermission;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PermissionHelper
 {
@@ -16,8 +16,8 @@ class PermissionHelper
     public static function canAccess(string $moduleName, string $action, ?string $accessLevel = 'view'): bool
     {
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return false;
         }
 
@@ -28,23 +28,23 @@ class PermissionHelper
 
         // Get user's roles
         $roles = $user->roles;
-        
+
         if ($roles->isEmpty()) {
             return false;
         }
 
         // Get permission
         $permission = Permission::findByModuleAndAction($moduleName, $action);
-        
-        if (!$permission) {
+
+        if (! $permission) {
             return false;
         }
 
         // Check if any of user's roles have the required access level
         foreach ($roles as $role) {
             $rolePermission = self::getRolePermission($role->id, $permission->id);
-            
-            if (!$rolePermission) {
+
+            if (! $rolePermission) {
                 continue;
             }
 
@@ -85,7 +85,7 @@ class PermissionHelper
     protected static function getRolePermission(int $roleId, int $permissionId): ?RolePermission
     {
         $cacheKey = "permission_{$roleId}_{$permissionId}";
-        
+
         return Cache::remember($cacheKey, 3600, function () use ($roleId, $permissionId) {
             return RolePermission::where('role_id', $roleId)
                 ->where('permission_id', $permissionId)
@@ -99,16 +99,11 @@ class PermissionHelper
     public static function clearCache(int $roleId): void
     {
         $permissions = Permission::all();
-        
+
         foreach ($permissions as $permission) {
             Cache::forget("permission_{$roleId}_{$permission->id}");
         }
-        
+
         Cache::forget("permissions_{$roleId}");
     }
 }
-
-
-
-
-
