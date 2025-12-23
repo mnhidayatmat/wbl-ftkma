@@ -1,0 +1,295 @@
+<?php
+
+namespace App\Http\Controllers\Academic\FYP;
+
+use App\Http\Controllers\Controller;
+use App\Exports\StudentPerformanceExport;
+use App\Models\Assessment;
+use App\Models\Company;
+use App\Models\Student;
+use App\Models\StudentAssessmentMark;
+use App\Models\StudentAssessmentRubricMark;
+use App\Models\WblGroup;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+class FypReportsController extends Controller
+{
+    /**
+     * Display reports overview page.
+     */
+    public function index(): View
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Get statistics
+        $totalStudents = Student::count();
+        $totalGroups = WblGroup::count();
+        $totalCompanies = Company::whereHas('students')->distinct()->count();
+
+        return view('academic.fyp.reports.index', compact(
+            'totalStudents',
+            'totalGroups',
+            'totalCompanies'
+        ));
+    }
+
+    /**
+     * Export full cohort results.
+     */
+    public function exportCohort(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $format = $request->query('format', 'excel');
+
+        // Get all students with performance data
+        $studentsWithPerformance = $this->getStudentsWithPerformance();
+
+        if ($studentsWithPerformance->isEmpty()) {
+            return redirect()->back()
+                ->with('error', 'No student data available for export.');
+        }
+
+        // Log export
+        Log::info('FYP Cohort Report Export', [
+            'admin_id' => auth()->id(),
+            'admin_name' => auth()->user()->name,
+            'format' => $format,
+            'exported_count' => $studentsWithPerformance->count(),
+        ]);
+
+        if ($format === 'pdf') {
+            return $this->exportPdf($studentsWithPerformance, 'FYP Full Cohort Results');
+        }
+
+        // Get weights for export
+        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+
+        $fileName = 'FYP_Cohort_Results_' . now()->format('Y-m-d_His') . '.xlsx';
+        return Excel::download(new StudentPerformanceExport($studentsWithPerformance, 'FYP', $atTotalWeight, $icTotalWeight), $fileName);
+    }
+
+    /**
+     * Export group-wise results.
+     */
+    public function exportGroup(Request $request, WblGroup $group)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $format = $request->query('format', 'excel');
+
+        // Get students in this group
+        $students = $group->students;
+        $studentsWithPerformance = $this->getStudentsWithPerformance($students);
+
+        if ($studentsWithPerformance->isEmpty()) {
+            return redirect()->back()
+                ->with('error', 'No student data available for this group.');
+        }
+
+        // Log export
+        Log::info('FYP Group Report Export', [
+            'admin_id' => auth()->id(),
+            'admin_name' => auth()->user()->name,
+            'format' => $format,
+            'group_id' => $group->id,
+            'group_name' => $group->name,
+            'exported_count' => $studentsWithPerformance->count(),
+        ]);
+
+        if ($format === 'pdf') {
+            return $this->exportPdf($studentsWithPerformance, "FYP Results - {$group->name}");
+        }
+
+        // Get weights for export
+        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+
+        $fileName = 'FYP_Group_' . str_replace(' ', '_', $group->name) . '_' . now()->format('Y-m-d_His') . '.xlsx';
+        return Excel::download(new StudentPerformanceExport($studentsWithPerformance, 'FYP', $atTotalWeight, $icTotalWeight), $fileName);
+    }
+
+    /**
+     * Export company-wise results.
+     */
+    public function exportCompany(Request $request, Company $company)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $format = $request->query('format', 'excel');
+
+        // Get students in this company
+        $students = $company->students;
+        $studentsWithPerformance = $this->getStudentsWithPerformance($students);
+
+        if ($studentsWithPerformance->isEmpty()) {
+            return redirect()->back()
+                ->with('error', 'No student data available for this company.');
+        }
+
+        // Log export
+        Log::info('FYP Company Report Export', [
+            'admin_id' => auth()->id(),
+            'admin_name' => auth()->user()->name,
+            'format' => $format,
+            'company_id' => $company->id,
+            'company_name' => $company->company_name,
+            'exported_count' => $studentsWithPerformance->count(),
+        ]);
+
+        if ($format === 'pdf') {
+            return $this->exportPdf($studentsWithPerformance, "FYP Results - {$company->company_name}");
+        }
+
+        // Get weights for export
+        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+
+        $fileName = 'FYP_Company_' . str_replace(' ', '_', $company->company_name) . '_' . now()->format('Y-m-d_His') . '.xlsx';
+        return Excel::download(new StudentPerformanceExport($studentsWithPerformance, 'FYP', $atTotalWeight, $icTotalWeight), $fileName);
+    }
+
+    /**
+     * Get students with performance data (shared logic).
+     */
+    private function getStudentsWithPerformance($students = null)
+    {
+        if (!$students) {
+            $students = Student::with(['group', 'company'])->get();
+        }
+
+        // Get active assessments - FYP uses AT (Academic Tutor) as evaluator
+        $atAssessments = Assessment::forCourse('FYP')
+            ->forEvaluator('lecturer')
+            ->active()
+            ->get();
+
+        $icAssessments = Assessment::forCourse('FYP')
+            ->forEvaluator('ic')
+            ->active()
+            ->whereIn('assessment_type', ['Oral', 'Rubric'])
+            ->with('rubrics')
+            ->get();
+
+        // Get all AT marks
+        $allAtMarks = StudentAssessmentMark::whereIn('student_id', $students->pluck('id'))
+            ->whereIn('assessment_id', $atAssessments->pluck('id'))
+            ->with('assessment')
+            ->get()
+            ->groupBy('student_id');
+
+        // Get all IC rubric marks
+        $allIcRubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
+            ->whereHas('rubric.assessment', function($q) {
+                $q->where('course_code', 'FYP')->where('evaluator_role', 'ic');
+            })
+            ->with('rubric.assessment')
+            ->get()
+            ->groupBy('student_id');
+
+        // Calculate performance for each student
+        return $students->map(function($student) use ($allAtMarks, $allIcRubricMarks, $atAssessments) {
+            // Calculate AT marks
+            $atMarks = $allAtMarks->get($student->id, collect());
+            $atMarksByAssessment = $atMarks->keyBy('assessment_id');
+            
+            $atTotal = 0;
+            foreach ($atAssessments as $assessment) {
+                $mark = $atMarksByAssessment->get($assessment->id);
+                if ($mark && $mark->mark !== null && $mark->max_mark > 0) {
+                    $atTotal += ($mark->mark / $mark->max_mark) * $assessment->weight_percentage;
+                }
+            }
+
+            // Calculate IC marks
+            $icRubricMarks = $allIcRubricMarks->get($student->id, collect());
+            $icTotal = 0;
+            foreach ($icRubricMarks as $rubricMark) {
+                $icTotal += $rubricMark->weighted_contribution;
+            }
+
+            // Calculate final score
+            $finalScore = $atTotal + $icTotal;
+
+            // Set both at_score and lecturer_score for compatibility
+            $student->at_score = round($atTotal, 2);
+            $student->lecturer_score = round($atTotal, 2); // For Excel export compatibility
+            $student->ic_score = round($icTotal, 2);
+            $student->final_score = round($finalScore, 2);
+            
+            // Set status for export
+            if ($finalScore >= 80) {
+                $student->overall_status = 'completed';
+                $student->overall_status_label = 'Completed';
+            } elseif ($atTotal > 0 || $icTotal > 0) {
+                $student->overall_status = 'in_progress';
+                $student->overall_status_label = 'In Progress';
+            } else {
+                $student->overall_status = 'not_started';
+                $student->overall_status_label = 'Not Started';
+            }
+            
+            // Set last_updated for export
+            $student->last_updated = $student->updated_at;
+
+            return $student;
+        });
+    }
+
+    /**
+     * Get assessment weights (shared logic).
+     */
+    private function getAssessmentWeights(): array
+    {
+        $atTotalWeight = Assessment::forCourse('FYP')
+            ->forEvaluator('lecturer')
+            ->active()
+            ->sum('weight_percentage');
+
+        $icTotalWeight = Assessment::forCourse('FYP')
+            ->forEvaluator('ic')
+            ->active()
+            ->whereIn('assessment_type', ['Oral', 'Rubric'])
+            ->with('rubrics')
+            ->get()
+            ->sum(function($assessment) {
+                return $assessment->rubrics->sum('weight_percentage');
+            });
+
+        return [$atTotalWeight, $icTotalWeight];
+    }
+
+    /**
+     * Export to PDF.
+     */
+    private function exportPdf($students, $title)
+    {
+        list($atTotalWeight, $icTotalWeight) = $this->getAssessmentWeights();
+
+        $pdf = Pdf::loadView('academic.fyp.performance.export-pdf', [
+            'students' => $students,
+            'atTotalWeight' => $atTotalWeight,
+            'icTotalWeight' => $icTotalWeight,
+            'adminName' => auth()->user()->name,
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'landscape')
+          ->setOption('margin-top', 30)
+          ->setOption('margin-bottom', 30)
+          ->setOption('margin-left', 25)
+          ->setOption('margin-right', 25)
+          ->setOption('enable-local-file-access', true);
+
+        $fileName = str_replace(' ', '_', $title) . '_' . now()->format('Y-m-d_His') . '.pdf';
+        return $pdf->download($fileName);
+    }
+}

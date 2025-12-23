@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /* UMPSA Button Styles */
+    .btn-umpsa-primary {
+        @apply bg-umpsa-teal text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+    }
+    
+    .btn-umpsa-primary:hover {
+        @apply bg-umpsa-royal-blue;
+    }
+    
+    .btn-umpsa-primary:focus {
+        @apply outline-none ring-2 ring-umpsa-teal ring-offset-2;
+    }
+    
+    /* UMPSA Card Styles */
+    .card-umpsa {
+        @apply bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700;
+    }
+    
+    .card-umpsa-header {
+        @apply bg-umpsa-teal dark:bg-umpsa-teal text-white px-6 py-4 rounded-t-lg font-semibold;
+    }
+    
+    /* UMPSA Sidebar Styles */
+    .sidebar-umpsa {
+        @apply bg-umpsa-deep-blue text-white;
+    }
+    
+    .sidebar-umpsa-link {
+        @apply flex items-center px-4 py-2 text-white transition-colors duration-200;
+    }
+    
+    .sidebar-umpsa-link:hover {
+        @apply bg-[#0084C5];
+    }
+    
+    .sidebar-umpsa-link.active {
+        @apply bg-[#0084C5];
+    }
+    
+    /* Sidebar collapsed state - center icons */
+    .sidebar-collapsed .sidebar-umpsa-link {
+        @apply justify-center px-2;
+    }
+    
+    /* UMPSA Heading Styles */
+    .heading-umpsa {
+        @apply text-umpsa-deep-blue dark:text-gray-200 font-bold;
+    }
+    
+    /* UMPSA Badge/Warning Styles */
+    .badge-umpsa-yellow {
+        @apply bg-umpsa-yellow text-umpsa-deep-blue px-3 py-1 rounded-full text-sm font-semibold;
+    }
+    
+    /* Accessibility: Ensure proper contrast */
+    .text-umpsa-deep-blue {
+        color: #003B73;
+    }
+    
+    .text-umpsa-teal {
+        color: #009E9A;
+    }
+    
+    .text-umpsa-royal-blue {
+        color: #005AA7;
+    }
+}
+
+@layer utilities {
+    /* Custom utilities for UMPSA colors */
+    .bg-umpsa-teal {
+        background-color: #009E9A;
+    }
+    
+    .bg-umpsa-deep-blue {
+        background-color: #003B73;
+    }
+    
+    .bg-umpsa-royal-blue {
+        background-color: #005AA7;
+    }
+    
+    .bg-umpsa-yellow {
+        background-color: #F4D03F;
+    }
+    
+    .text-umpsa-teal {
+        color: #009E9A;
+    }
+    
+    .text-umpsa-deep-blue {
+        color: #003B73;
+    }
+    
+    .text-umpsa-royal-blue {
+        color: #005AA7;
+    }
+    
+    .text-umpsa-yellow {
+        color: #F4D03F;
+    }
+    
+    .border-umpsa-teal {
+        border-color: #009E9A;
+    }
+    
+    .border-umpsa-deep-blue {
+        border-color: #003B73;
+    }
+    
+    .border-umpsa-royal-blue {
+        border-color: #005AA7;
+    }
+    
+    /* New UMPSA Theme Colors */
+    .bg-umpsa-primary {
+        background-color: #003A6C;
+    }
+    
+    .bg-umpsa-secondary {
+        background-color: #0084C5;
+    }
+    
+    .bg-umpsa-accent {
+        background-color: #00AEEF;
+    }
+    
+    .text-umpsa-primary {
+        color: #003A6C;
+    }
+    
+    .text-umpsa-secondary {
+        color: #0084C5;
+    }
+    
+    .text-umpsa-accent {
+        color: #00AEEF;
+    }
+    
+    .border-umpsa-primary {
+        border-color: #003A6C;
+    }
+    
+    .border-umpsa-secondary {
+        border-color: #0084C5;
+    }
+    
+    .border-umpsa-accent {
+        border-color: #00AEEF;
+    }
+    
+    /* New UMPSA Official Colors */
+    .bg-umpsa-primary {
+        background-color: #003A6C;
+    }
+    
+    .bg-umpsa-secondary {
+        background-color: #0084C5;
+    }
+    
+    .bg-umpsa-accent {
+        background-color: #00AEEF;
+    }
+    
+    .bg-umpsa-dark-navy {
+        background-color: #002244;
+    }
+    
+    .bg-umpsa-soft-gray {
+        background-color: #F4F7FC;
+    }
+    
+    .bg-umpsa-neutral-gray {
+        background-color: #E6ECF2;
+    }
+    
+    .bg-umpsa-success {
+        background-color: #28A745;
+    }
+    
+    .bg-umpsa-danger {
+        background-color: #DC3545;
+    }
+    
+    .text-umpsa-primary {
+        color: #003A6C;
+    }
+    
+    .text-umpsa-secondary {
+        color: #0084C5;
+    }
+    
+    .text-umpsa-accent {
+        color: #00AEEF;
+    }
+    
+    .text-umpsa-dark-navy {
+        color: #002244;
+    }
+    
+    .text-umpsa-soft-gray {
+        color: #F4F7FC;
+    }
+    
+    .text-umpsa-neutral-gray {
+        color: #E6ECF2;
+    }
+    
+    .text-umpsa-success {
+        color: #28A745;
+    }
+    
+    .text-umpsa-danger {
+        color: #DC3545;
+    }
+}
