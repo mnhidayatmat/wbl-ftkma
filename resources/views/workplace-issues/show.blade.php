@@ -160,37 +160,16 @@
 
         <!-- Sidebar -->
         <div class="space-y-6">
-            <!-- Student Information (Hidden for Students viewing their own report) -->
-            @if(!Auth::user()->isStudent())
-                <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Student Information</h2>
-                    <div class="space-y-3">
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Matric Number</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->matric_no }}</p>
-                        </div>
-                        @if($workplaceIssue->student->company)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Company</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->company->name }}</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            @endif
-
-            <!-- Student Help Panel (Only for Students) -->
             @if(Auth::user()->isStudent())
+                {{-- STUDENT VIEW - Read Only --}}
+
+                <!-- Student Help Panel -->
                 <div class="card-umpsa p-6 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500">
-                    <div class="flex gap-3 mb-3">
+                    <div class="flex gap-3">
                         <svg class="w-6 h-6 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <div>
+                        <div class="flex-1">
                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Report Submitted</h3>
                             <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                                 <p>Your workplace issue report has been successfully submitted and is being reviewed by the WBL coordinator.</p>
@@ -218,7 +197,7 @@
                                 @elseif($workplaceIssue->isResolved())
                                     <div class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded border border-green-300 dark:border-green-700">
                                         <p class="text-sm text-green-800 dark:text-green-200">
-                                            <strong>Status: Resolved</strong> - Your issue has been resolved. Please review the coordinator's response.
+                                            <strong>Status: Resolved</strong> - Your issue has been resolved. Please review the coordinator's response below.
                                         </p>
                                     </div>
                                 @elseif($workplaceIssue->isClosed())
@@ -232,101 +211,190 @@
                         </div>
                     </div>
                 </div>
-            @endif
 
-            <!-- Report Details -->
-            <div class="card-umpsa p-6">
-                <h2 class="text-lg font-semibold heading-umpsa mb-4">Report Details</h2>
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Submitted</p>
-                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y, H:i') }}</p>
-                    </div>
-                    @if($workplaceIssue->reviewed_at)
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->reviewed_at->format('d M Y, H:i') }}</p>
-                        </div>
-                    @endif
-                    @if($workplaceIssue->in_progress_at)
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">In Progress Since</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->in_progress_at->format('d M Y, H:i') }}</p>
-                        </div>
-                    @endif
-                    @if($workplaceIssue->resolved_at)
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Resolved</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->resolved_at->format('d M Y, H:i') }}</p>
-                        </div>
-                    @endif
-                    @if($workplaceIssue->closed_at)
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Closed</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->closed_at->format('d M Y, H:i') }}</p>
-                        </div>
-                    @endif
-                    @if($workplaceIssue->assignedTo)
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Assigned To</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->assignedTo->name }}</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Update Status (Admin/Coordinator Only) -->
-            @if(Auth::user()->isAdmin() || Auth::user()->hasRole('coordinator'))
+                <!-- Report Timeline -->
                 <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Update Report</h2>
-
-                    <form action="{{ route('workplace-issues.update', $workplaceIssue) }}" method="POST" class="space-y-4">
-                        @csrf
-                        @method('PUT')
-
+                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Report Timeline</h2>
+                    <div class="space-y-3">
                         <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-                            <select
-                                id="status"
-                                name="status"
-                                required
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
-                            >
-                                <option value="new" {{ $workplaceIssue->status === 'new' ? 'selected' : '' }}>New</option>
-                                <option value="under_review" {{ $workplaceIssue->status === 'under_review' ? 'selected' : '' }}>Under Review</option>
-                                <option value="in_progress" {{ $workplaceIssue->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                <option value="resolved" {{ $workplaceIssue->status === 'resolved' ? 'selected' : '' }}>Resolved</option>
-                                <option value="closed" {{ $workplaceIssue->status === 'closed' ? 'selected' : '' }}>Closed</option>
-                            </select>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Submitted</p>
+                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y, H:i') }}</p>
                         </div>
-
-                        <div>
-                            <label for="coordinator_comment" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comment</label>
-                            <textarea
-                                id="coordinator_comment"
-                                name="coordinator_comment"
-                                rows="4"
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
-                                placeholder="Add your comment or response..."
-                            >{{ old('coordinator_comment', $workplaceIssue->coordinator_comment) }}</textarea>
-                        </div>
-
-                        <div>
-                            <label for="resolution_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resolution Notes</label>
-                            <textarea
-                                id="resolution_notes"
-                                name="resolution_notes"
-                                rows="3"
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
-                                placeholder="Document the resolution (if applicable)..."
-                            >{{ old('resolution_notes', $workplaceIssue->resolution_notes) }}</textarea>
-                        </div>
-
-                        <button type="submit" class="w-full btn-umpsa-primary">
-                            Update Report
-                        </button>
-                    </form>
+                        @if($workplaceIssue->reviewed_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->reviewed_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->in_progress_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">In Progress Since</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->in_progress_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->resolved_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Resolved</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->resolved_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->closed_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Closed</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->closed_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
+
+                <!-- Coordinator Response (Read-Only for Students) -->
+                @if($workplaceIssue->coordinator_comment || $workplaceIssue->resolution_notes)
+                    <div class="card-umpsa p-6 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500">
+                        <h2 class="text-lg font-semibold heading-umpsa mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Coordinator Response
+                        </h2>
+
+                        @if($workplaceIssue->coordinator_comment)
+                            <div class="mb-4">
+                                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Comment</p>
+                                <div class="p-3 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-800">
+                                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $workplaceIssue->coordinator_comment }}</p>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($workplaceIssue->resolution_notes)
+                            <div>
+                                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Resolution Notes</p>
+                                <div class="p-3 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-800">
+                                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $workplaceIssue->resolution_notes }}</p>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+            @else
+                {{-- COORDINATOR/ADMIN VIEW - Full Management Access --}}
+
+                <!-- Student Information -->
+                <div class="card-umpsa p-6">
+                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Student Information</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
+                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Matric Number</p>
+                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->matric_no }}</p>
+                        </div>
+                        @if($workplaceIssue->student->company)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Company</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->company->name }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Report Details -->
+                <div class="card-umpsa p-6">
+                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Report Timeline</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Submitted</p>
+                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y, H:i') }}</p>
+                        </div>
+                        @if($workplaceIssue->reviewed_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->reviewed_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->in_progress_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">In Progress Since</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->in_progress_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->resolved_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Resolved</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->resolved_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->closed_at)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Closed</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->closed_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->assignedTo)
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Assigned To</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->assignedTo->name }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Update Report Form (Admin/Coordinator Only) -->
+                @if(Auth::user()->isAdmin() || Auth::user()->hasRole('coordinator'))
+                    <div class="card-umpsa p-6">
+                        <h2 class="text-lg font-semibold heading-umpsa mb-4">Update Report</h2>
+
+                        <form action="{{ route('workplace-issues.update', $workplaceIssue) }}" method="POST" class="space-y-4">
+                            @csrf
+                            @method('PUT')
+
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                                <select
+                                    id="status"
+                                    name="status"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
+                                >
+                                    <option value="new" {{ $workplaceIssue->status === 'new' ? 'selected' : '' }}>New</option>
+                                    <option value="under_review" {{ $workplaceIssue->status === 'under_review' ? 'selected' : '' }}>Under Review</option>
+                                    <option value="in_progress" {{ $workplaceIssue->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                    <option value="resolved" {{ $workplaceIssue->status === 'resolved' ? 'selected' : '' }}>Resolved</option>
+                                    <option value="closed" {{ $workplaceIssue->status === 'closed' ? 'selected' : '' }}>Closed</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="coordinator_comment" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comment</label>
+                                <textarea
+                                    id="coordinator_comment"
+                                    name="coordinator_comment"
+                                    rows="4"
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
+                                    placeholder="Add your comment or response..."
+                                >{{ old('coordinator_comment', $workplaceIssue->coordinator_comment) }}</textarea>
+                            </div>
+
+                            <div>
+                                <label for="resolution_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resolution Notes</label>
+                                <textarea
+                                    id="resolution_notes"
+                                    name="resolution_notes"
+                                    rows="3"
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
+                                    placeholder="Document the resolution (if applicable)..."
+                                >{{ old('resolution_notes', $workplaceIssue->resolution_notes) }}</textarea>
+                            </div>
+
+                            <button type="submit" class="w-full btn-umpsa-primary">
+                                Update Report
+                            </button>
+                        </form>
+                    </div>
+                @endif
             @endif
         </div>
     </div>
