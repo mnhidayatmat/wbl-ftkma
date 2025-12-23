@@ -8,6 +8,8 @@ use App\Http\Controllers\Lecturer\MyStudentsController as LecturerMyStudentsCont
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentProfileController;
+use App\Http\Controllers\WorkplaceIssueReportController;
+use App\Models\WorkplaceIssueAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -139,6 +141,33 @@ Route::middleware('auth')->group(function () {
     // Lecturer Routes - My Students
     Route::middleware('role:lecturer')->prefix('lecturer')->name('lecturer.')->group(function () {
         Route::get('students', [LecturerMyStudentsController::class, 'index'])->name('students.index');
+    });
+
+    // Workplace Issue Reporting Routes
+    Route::prefix('workplace-issues')->name('workplace-issues.')->group(function () {
+        // Public routes (all authenticated users)
+        Route::get('/', [WorkplaceIssueReportController::class, 'index'])->name('index');
+        Route::get('{workplaceIssue}', [WorkplaceIssueReportController::class, 'show'])->name('show');
+        Route::get('attachments/{attachment}/download', [WorkplaceIssueReportController::class, 'downloadAttachment'])
+            ->name('attachments.download')
+            ->whereNumber('attachment');
+
+        // Student-only routes (create and submit reports)
+        Route::get('create', [WorkplaceIssueReportController::class, 'create'])
+            ->name('create')
+            ->middleware('role:student');
+        Route::post('/', [WorkplaceIssueReportController::class, 'store'])
+            ->name('store')
+            ->middleware('role:student');
+
+        // Admin/Coordinator-only routes (update and delete)
+        Route::put('{workplaceIssue}', [WorkplaceIssueReportController::class, 'update'])
+            ->name('update')
+            ->middleware('role:admin,coordinator');
+        Route::delete('attachments/{attachment}', [WorkplaceIssueReportController::class, 'deleteAttachment'])
+            ->name('attachments.delete')
+            ->middleware('role:admin,coordinator')
+            ->whereNumber('attachment');
     });
 
     // Industry Coach Routes - My Students (moved to routes/industry.php)

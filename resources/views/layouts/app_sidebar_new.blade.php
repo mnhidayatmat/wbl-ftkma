@@ -215,7 +215,7 @@
         </a>
         @endif
         
-        <a href="{{ route('placement.index') }}" 
+        <a href="{{ route('placement.index') }}"
            class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('placement.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
            :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
            :title="isSidebarCollapsed ? 'Student Placement' : ''">
@@ -225,6 +225,18 @@
                 </svg>
             </div>
             <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Student Placement</span>
+        </a>
+
+        <a href="{{ route('workplace-issues.index') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('workplace-issues.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Workplace Issues' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Workplace Issues</span>
         </a>
     </div>
     @endif
@@ -272,9 +284,13 @@
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
                 @if($isAdmin)
-                <a href="{{ route('fyp.assign-students') }}" 
+                <a href="{{ route('fyp.assign-students') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('fyp.assign-students') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
+                </a>
+                <a href="{{ route('academic.fyp.proposals.index') }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Project Proposals
                 </a>
                 <a href="{{ route('academic.fyp.assessments.index') }}" 
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -325,13 +341,9 @@
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.finalisation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Result Finalisation
                 </a>
-                <a href="{{ route('academic.fyp.reports.index') }}" 
+                <a href="{{ route('academic.fyp.reports.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.reports.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Reports
-                </a>
-                <a href="{{ route('academic.fyp.proposals.index') }}"
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    Project Proposals
                 </a>
                 <a href="{{ route('academic.fyp.audit.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.audit.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -781,7 +793,7 @@
         </a>
         
         <!-- Placement Tracking -->
-        <a href="{{ route('student.placement.index') }}" 
+        <a href="{{ route('student.placement.index') }}"
            class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('student.placement.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
            :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
            :title="isSidebarCollapsed ? 'Placement Tracking' : ''">
@@ -792,7 +804,20 @@
             </div>
             <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Placement Tracking</span>
         </a>
-        
+
+        <!-- Workplace Issue Reporting -->
+        <a href="{{ route('workplace-issues.index') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('workplace-issues.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Workplace Issues' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Workplace Issues</span>
+        </a>
+
         <!-- My Courses (Collapsible Parent) -->
         <div x-data="{ coursesMenuOpen: {{ request()->routeIs('student.fyp.*') || request()->routeIs('student.ppe.*') || request()->routeIs('student.osh.*') || request()->routeIs('student.ip.*') || request()->routeIs('student.li.*') ? 'true' : 'false' }} }">
             <button @click="coursesMenuOpen = !coursesMenuOpen" 
