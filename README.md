@@ -48,3 +48,4 @@ npm run dev
 - Migrations: `database/migrations`
 - Seeders: `database/seeders`
 
+# wbl-ftkma
