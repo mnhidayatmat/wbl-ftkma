@@ -147,7 +147,6 @@ Route::middleware('auth')->group(function () {
     Route::prefix('workplace-issues')->name('workplace-issues.')->group(function () {
         // Public routes (all authenticated users)
         Route::get('/', [WorkplaceIssueReportController::class, 'index'])->name('index');
-        Route::get('{workplaceIssue}', [WorkplaceIssueReportController::class, 'show'])->name('show');
         Route::get('attachments/{attachment}/download', [WorkplaceIssueReportController::class, 'downloadAttachment'])
             ->name('attachments.download')
             ->whereNumber('attachment');
@@ -159,6 +158,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [WorkplaceIssueReportController::class, 'store'])
             ->name('store')
             ->middleware('role:student');
+        Route::post('{workplaceIssue}/feedback', [WorkplaceIssueReportController::class, 'storeFeedback'])
+            ->name('feedback.store')
+            ->middleware('role:student');
+
+        // Show route (must come after static routes like 'create')
+        Route::get('{workplaceIssue}', [WorkplaceIssueReportController::class, 'show'])->name('show');
 
         // Admin/Coordinator-only routes (update and delete)
         Route::put('{workplaceIssue}', [WorkplaceIssueReportController::class, 'update'])

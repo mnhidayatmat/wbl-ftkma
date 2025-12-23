@@ -14,350 +14,449 @@
         </a>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Issue Details Card -->
-            <div class="card-umpsa p-6">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex-1">
-                        <h1 class="text-2xl font-bold heading-umpsa mb-2">{{ $workplaceIssue->title }}</h1>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $workplaceIssue->status_badge_color }}">
-                                {{ $workplaceIssue->status_display }}
-                            </span>
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $workplaceIssue->severity_badge_color }}">
-                                {{ $workplaceIssue->severity_display }}
-                            </span>
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                                {{ $workplaceIssue->category_display }}
-                            </span>
+    @if(Auth::user()->isStudent())
+        {{-- STUDENT VIEW - Compact Two-Column Layout --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Issue Header Card -->
+                <div class="card-umpsa p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                        <div class="flex-1">
+                            <h1 class="text-xl font-bold heading-umpsa mb-3">{{ $workplaceIssue->title }}</h1>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $workplaceIssue->status_badge_color }}">
+                                    {{ $workplaceIssue->status_display }}
+                                </span>
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $workplaceIssue->severity_badge_color }}">
+                                    {{ $workplaceIssue->severity_display }}
+                                </span>
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                    {{ $workplaceIssue->category_display }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description</h3>
+                    <div class="prose prose-sm dark:prose-invert max-w-none">
                         <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $workplaceIssue->description }}</p>
                     </div>
 
-                    @if($workplaceIssue->location)
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Location</h3>
-                            <p class="text-gray-600 dark:text-gray-400">{{ $workplaceIssue->location }}</p>
-                        </div>
-                    @endif
-
-                    @if($workplaceIssue->incident_date || $workplaceIssue->incident_time)
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Incident Date & Time</h3>
-                            <p class="text-gray-600 dark:text-gray-400">
-                                @if($workplaceIssue->incident_date)
-                                    {{ $workplaceIssue->incident_date->format('d M Y') }}
-                                @endif
-                                @if($workplaceIssue->incident_time)
-                                    at {{ $workplaceIssue->incident_time }}
-                                @endif
-                            </p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Coordinator Response -->
-            @if($workplaceIssue->coordinator_comment || $workplaceIssue->resolution_notes)
-                <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Coordinator Response</h2>
-
-                    @if($workplaceIssue->coordinator_comment)
-                        <div class="mb-4">
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Comment</h3>
-                            <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $workplaceIssue->coordinator_comment }}</p>
-                        </div>
-                    @endif
-
-                    @if($workplaceIssue->resolution_notes)
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Resolution Notes</h3>
-                            <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $workplaceIssue->resolution_notes }}</p>
+                    @if($workplaceIssue->location || $workplaceIssue->incident_date)
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                            @if($workplaceIssue->location)
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400">Location</p>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->location }}</p>
+                                </div>
+                            @endif
+                            @if($workplaceIssue->incident_date)
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400">Incident Date</p>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $workplaceIssue->incident_date->format('d M Y') }}
+                                        @if($workplaceIssue->incident_time) at {{ $workplaceIssue->incident_time }} @endif
+                                    </p>
+                                </div>
+                            @endif
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Submitted</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y, H:i') }}</p>
+                            </div>
                         </div>
                     @endif
                 </div>
-            @endif
 
-            <!-- Attachments -->
-            @if($workplaceIssue->attachments->count() > 0)
-                <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Attachments ({{ $workplaceIssue->attachments->count() }})</h2>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach($workplaceIssue->attachments as $attachment)
-                            <div class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <div class="flex-shrink-0">
-                                    @if(in_array($attachment->file_type, ['jpg', 'jpeg', 'png']))
-                                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    @elseif($attachment->file_type === 'pdf')
-                                        <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                    @endif
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $attachment->file_name }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $attachment->formatted_file_size }}</p>
-                                </div>
-                                <a href="{{ route('workplace-issues.attachments.download', $attachment) }}" class="flex-shrink-0 p-2 text-umpsa-primary hover:text-umpsa-secondary transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                    </svg>
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <!-- Activity History -->
-            @if($workplaceIssue->history->count() > 0)
-                <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Activity History</h2>
-
-                    <div class="space-y-4">
-                        @foreach($workplaceIssue->history->sortByDesc('created_at') as $history)
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 {{ $history->action_icon_color }}">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-start justify-between gap-4">
-                                        <div>
-                                            <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $history->action_label }}</p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                                by {{ $history->user->name }}
-                                                <span class="text-gray-400 dark:text-gray-500">• {{ $history->created_at->diffForHumans() }}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    @if($history->comment)
-                                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ $history->comment }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            @if(Auth::user()->isStudent())
-                {{-- STUDENT VIEW - Read Only --}}
-
-                <!-- Student Help Panel -->
-                <div class="card-umpsa p-6 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500">
-                    <div class="flex gap-3">
-                        <svg class="w-6 h-6 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Report Submitted</h3>
-                            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
-                                <p>Your workplace issue report has been successfully submitted and is being reviewed by the WBL coordinator.</p>
-                                <div class="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
-                                    <p class="font-medium mb-2">What happens next?</p>
-                                    <ul class="list-disc list-inside space-y-1 text-sm">
-                                        <li>Coordinator will review your report</li>
-                                        <li>Status will be updated as actions are taken</li>
-                                        <li>You'll be notified of any updates</li>
-                                        <li>Reports cannot be edited after submission</li>
-                                    </ul>
-                                </div>
-                                @if($workplaceIssue->isNew())
-                                    <div class="mt-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded border border-yellow-300 dark:border-yellow-700">
-                                        <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                                            <strong>Status: New</strong> - Your report is awaiting initial review.
-                                        </p>
-                                    </div>
-                                @elseif($workplaceIssue->isUnderReview() || $workplaceIssue->isInProgress())
-                                    <div class="mt-3 p-2 bg-blue-100 dark:bg-blue-900/30 rounded border border-blue-300 dark:border-blue-700">
-                                        <p class="text-sm text-blue-800 dark:text-blue-200">
-                                            <strong>Status: {{ $workplaceIssue->status_display }}</strong> - The coordinator is actively working on your report.
-                                        </p>
-                                    </div>
-                                @elseif($workplaceIssue->isResolved())
-                                    <div class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded border border-green-300 dark:border-green-700">
-                                        <p class="text-sm text-green-800 dark:text-green-200">
-                                            <strong>Status: Resolved</strong> - Your issue has been resolved. Please review the coordinator's response below.
-                                        </p>
-                                    </div>
-                                @elseif($workplaceIssue->isClosed())
-                                    <div class="mt-3 p-2 bg-gray-100 dark:bg-gray-900/30 rounded border border-gray-300 dark:border-gray-700">
-                                        <p class="text-sm text-gray-800 dark:text-gray-200">
-                                            <strong>Status: Closed</strong> - This case has been closed.
-                                        </p>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Report Timeline -->
-                <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Report Timeline</h2>
-                    <div class="space-y-3">
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Submitted</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y, H:i') }}</p>
-                        </div>
-                        @if($workplaceIssue->reviewed_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->reviewed_at->format('d M Y, H:i') }}</p>
-                            </div>
-                        @endif
-                        @if($workplaceIssue->in_progress_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">In Progress Since</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->in_progress_at->format('d M Y, H:i') }}</p>
-                            </div>
-                        @endif
-                        @if($workplaceIssue->resolved_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Resolved</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->resolved_at->format('d M Y, H:i') }}</p>
-                            </div>
-                        @endif
-                        @if($workplaceIssue->closed_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Closed</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->closed_at->format('d M Y, H:i') }}</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Coordinator Response (Read-Only for Students) -->
+                <!-- Coordinator Response -->
                 @if($workplaceIssue->coordinator_comment || $workplaceIssue->resolution_notes)
-                    <div class="card-umpsa p-6 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500">
-                        <h2 class="text-lg font-semibold heading-umpsa mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Coordinator Response
-                        </h2>
-
-                        @if($workplaceIssue->coordinator_comment)
-                            <div class="mb-4">
-                                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Comment</p>
-                                <div class="p-3 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-800">
+                    <div class="card-umpsa overflow-hidden border-l-4 border-green-500">
+                        <div class="bg-green-50 dark:bg-green-900/20 px-6 py-4 flex items-center justify-between">
+                            <h2 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Coordinator Response
+                            </h2>
+                            @if($workplaceIssue->reviewed_at)
+                                <span class="text-xs text-green-700 dark:text-green-300">{{ $workplaceIssue->reviewed_at->format('d M Y, H:i') }}</span>
+                            @endif
+                        </div>
+                        <div class="p-6 space-y-4">
+                            @if($workplaceIssue->coordinator_comment)
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Comment</p>
                                     <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $workplaceIssue->coordinator_comment }}</p>
                                 </div>
-                            </div>
-                        @endif
-
-                        @if($workplaceIssue->resolution_notes)
-                            <div>
-                                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Resolution Notes</p>
-                                <div class="p-3 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-800">
+                            @endif
+                            @if($workplaceIssue->resolution_notes)
+                                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Resolution Notes</p>
                                     <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $workplaceIssue->resolution_notes }}</p>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 @endif
 
-            @else
-                {{-- COORDINATOR/ADMIN VIEW - Full Management Access --}}
+                <!-- Student Feedback Section -->
+                @if(($workplaceIssue->coordinator_comment || $workplaceIssue->resolution_notes) && !$workplaceIssue->isClosed())
+                    <div class="card-umpsa p-6">
+                        <h2 class="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                            </svg>
+                            Your Feedback
+                        </h2>
 
-                <!-- Student Information -->
-                <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Student Information</h2>
-                    <div class="space-y-3">
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Matric Number</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->matric_no }}</p>
-                        </div>
-                        @if($workplaceIssue->student->company)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Company</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->student->company->name }}</p>
+                        @if($workplaceIssue->student_feedback)
+                            <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
+                                <p class="text-xs text-blue-600 dark:text-blue-400 mb-1">Submitted {{ $workplaceIssue->student_feedback_at->format('d M Y, H:i') }}</p>
+                                <p class="text-gray-700 dark:text-gray-300">{{ $workplaceIssue->student_feedback }}</p>
                             </div>
                         @endif
+
+                        <form action="{{ route('workplace-issues.feedback.store', $workplaceIssue) }}" method="POST">
+                            @csrf
+                            <textarea
+                                name="student_feedback"
+                                rows="3"
+                                required
+                                maxlength="2000"
+                                class="w-full px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary @error('student_feedback') border-red-500 @enderror"
+                                placeholder="Share your thoughts on the coordinator's response..."
+                            >{{ old('student_feedback', $workplaceIssue->student_feedback) }}</textarea>
+                            @error('student_feedback')
+                                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            @enderror
+                            <button type="submit" class="mt-3 btn-umpsa-primary text-sm px-4 py-2">
+                                {{ $workplaceIssue->student_feedback ? 'Update Feedback' : 'Submit Feedback' }}
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Status Card -->
+                <div class="card-umpsa overflow-hidden">
+                    @php
+                        $statusConfig = match($workplaceIssue->status) {
+                            'new' => ['bg' => 'bg-purple-500', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Awaiting Review'],
+                            'under_review' => ['bg' => 'bg-blue-500', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'text' => 'Being Reviewed'],
+                            'in_progress' => ['bg' => 'bg-yellow-500', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'text' => 'Action In Progress'],
+                            'resolved' => ['bg' => 'bg-green-500', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Issue Resolved'],
+                            'closed' => ['bg' => 'bg-gray-500', 'icon' => 'M5 13l4 4L19 7', 'text' => 'Case Closed'],
+                            default => ['bg' => 'bg-gray-500', 'icon' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Unknown']
+                        };
+                    @endphp
+                    <div class="{{ $statusConfig['bg'] }} p-4 text-white text-center">
+                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusConfig['icon'] }}"></path>
+                        </svg>
+                        <p class="font-bold">{{ $workplaceIssue->status_display }}</p>
+                        <p class="text-sm opacity-90">{{ $statusConfig['text'] }}</p>
                     </div>
                 </div>
 
-                <!-- Report Details -->
-                <div class="card-umpsa p-6">
-                    <h2 class="text-lg font-semibold heading-umpsa mb-4">Report Timeline</h2>
-                    <div class="space-y-3">
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Submitted</p>
-                            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y, H:i') }}</p>
+                <!-- Timeline -->
+                <div class="card-umpsa p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Timeline</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 dark:text-gray-400">Submitted</span>
+                            <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y') }}</span>
                         </div>
                         @if($workplaceIssue->reviewed_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->reviewed_at->format('d M Y, H:i') }}</p>
-                            </div>
-                        @endif
-                        @if($workplaceIssue->in_progress_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">In Progress Since</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->in_progress_at->format('d M Y, H:i') }}</p>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">Reviewed</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->reviewed_at->format('d M Y') }}</span>
                             </div>
                         @endif
                         @if($workplaceIssue->resolved_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Resolved</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->resolved_at->format('d M Y, H:i') }}</p>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">Resolved</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->resolved_at->format('d M Y') }}</span>
                             </div>
                         @endif
                         @if($workplaceIssue->closed_at)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Closed</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->closed_at->format('d M Y, H:i') }}</p>
-                            </div>
-                        @endif
-                        @if($workplaceIssue->assignedTo)
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Assigned To</p>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->assignedTo->name }}</p>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">Closed</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->closed_at->format('d M Y') }}</span>
                             </div>
                         @endif
                     </div>
                 </div>
 
+                <!-- Attachments -->
+                @if($workplaceIssue->attachments->count() > 0)
+                    <div class="card-umpsa p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Attachments ({{ $workplaceIssue->attachments->count() }})</h3>
+                        <div class="space-y-2">
+                            @foreach($workplaceIssue->attachments as $attachment)
+                                <a href="{{ route('workplace-issues.attachments.download', $attachment) }}" class="flex items-center gap-2 p-2 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                    </svg>
+                                    <span class="flex-1 truncate text-gray-700 dark:text-gray-300">{{ $attachment->file_name }}</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Help Info -->
+                <div class="card-umpsa p-4 bg-blue-50 dark:bg-blue-900/20">
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm">Need Help?</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                        Your report is being handled by the WBL coordinator. You'll be notified of any updates.
+                    </p>
+                </div>
+
+                <!-- Activity History (Collapsible) -->
+                @if($workplaceIssue->history->count() > 0)
+                    <div class="card-umpsa p-4">
+                        <details>
+                            <summary class="font-semibold text-gray-900 dark:text-gray-100 text-sm cursor-pointer">
+                                Activity History ({{ $workplaceIssue->history->count() }})
+                            </summary>
+                            <div class="mt-3 space-y-2 text-sm">
+                                @foreach($workplaceIssue->history->sortByDesc('created_at')->take(5) as $history)
+                                    <div class="flex gap-2 pb-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                                        <div class="flex-1">
+                                            <p class="text-gray-900 dark:text-gray-100">{{ $history->action_label }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $history->created_at->format('d M Y, H:i') }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </details>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+    @else
+        {{-- COORDINATOR/ADMIN VIEW - Compact Two-Column Layout --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Issue Header Card -->
+                <div class="card-umpsa p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                        <div class="flex-1">
+                            <h1 class="text-xl font-bold heading-umpsa mb-3">{{ $workplaceIssue->title }}</h1>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $workplaceIssue->status_badge_color }}">
+                                    {{ $workplaceIssue->status_display }}
+                                </span>
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $workplaceIssue->severity_badge_color }}">
+                                    {{ $workplaceIssue->severity_display }}
+                                </span>
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                    {{ $workplaceIssue->category_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prose prose-sm dark:prose-invert max-w-none">
+                        <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ $workplaceIssue->description }}</p>
+                    </div>
+
+                    @if($workplaceIssue->location || $workplaceIssue->incident_date)
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                            @if($workplaceIssue->location)
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400">Location</p>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->location }}</p>
+                                </div>
+                            @endif
+                            @if($workplaceIssue->incident_date)
+                                <div>
+                                    <p class="text-gray-500 dark:text-gray-400">Incident Date</p>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $workplaceIssue->incident_date->format('d M Y') }}
+                                        @if($workplaceIssue->incident_time) at {{ $workplaceIssue->incident_time }} @endif
+                                    </p>
+                                </div>
+                            @endif
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Submitted</p>
+                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Student Feedback (Prominent Display for Coordinators) -->
+                @if($workplaceIssue->student_feedback)
+                    <div class="card-umpsa overflow-hidden border-l-4 border-blue-500">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 px-6 py-4 flex items-center justify-between">
+                            <h2 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                </svg>
+                                Student Feedback
+                            </h2>
+                            <span class="text-xs text-blue-700 dark:text-blue-300">{{ $workplaceIssue->student_feedback_at->format('d M Y, H:i') }}</span>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $workplaceIssue->student_feedback }}</p>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Activity History (Collapsible) -->
+                @if($workplaceIssue->history->count() > 0)
+                    <div class="card-umpsa p-4">
+                        <details open>
+                            <summary class="font-semibold text-gray-900 dark:text-gray-100 text-sm cursor-pointer mb-3">
+                                Activity History ({{ $workplaceIssue->history->count() }})
+                            </summary>
+                            <div class="space-y-2 text-sm">
+                                @foreach($workplaceIssue->history->sortByDesc('created_at') as $history)
+                                    <div class="flex gap-3 pb-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                                        <div class="flex-shrink-0 {{ $history->action_icon_color }}">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-gray-900 dark:text-gray-100">{{ $history->action_label }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                by {{ $history->user->name }} • {{ $history->created_at->format('d M Y, H:i') }}
+                                            </p>
+                                            @if($history->comment)
+                                                <p class="mt-1 text-gray-600 dark:text-gray-400">{{ $history->comment }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </details>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Status Card -->
+                <div class="card-umpsa overflow-hidden">
+                    @php
+                        $statusConfig = match($workplaceIssue->status) {
+                            'new' => ['bg' => 'bg-purple-500', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Awaiting Review'],
+                            'under_review' => ['bg' => 'bg-blue-500', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'text' => 'Being Reviewed'],
+                            'in_progress' => ['bg' => 'bg-yellow-500', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'text' => 'Action In Progress'],
+                            'resolved' => ['bg' => 'bg-green-500', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Issue Resolved'],
+                            'closed' => ['bg' => 'bg-gray-500', 'icon' => 'M5 13l4 4L19 7', 'text' => 'Case Closed'],
+                            default => ['bg' => 'bg-gray-500', 'icon' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Unknown']
+                        };
+                    @endphp
+                    <div class="{{ $statusConfig['bg'] }} p-4 text-white text-center">
+                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusConfig['icon'] }}"></path>
+                        </svg>
+                        <p class="font-bold">{{ $workplaceIssue->status_display }}</p>
+                        <p class="text-sm opacity-90">{{ $statusConfig['text'] }}</p>
+                    </div>
+                </div>
+
+                <!-- Student Information -->
+                <div class="card-umpsa p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Student Information</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 dark:text-gray-400">Name</span>
+                            <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $workplaceIssue->student->name }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 dark:text-gray-400">Matric No</span>
+                            <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $workplaceIssue->student->matric_no }}</span>
+                        </div>
+                        @if($workplaceIssue->student->company)
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">Company</span>
+                                <span class="text-gray-900 dark:text-gray-100 font-medium text-right">{{ $workplaceIssue->student->company->name }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="card-umpsa p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Timeline</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 dark:text-gray-400">Submitted</span>
+                            <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->submitted_at->format('d M Y') }}</span>
+                        </div>
+                        @if($workplaceIssue->reviewed_at)
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">Reviewed</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->reviewed_at->format('d M Y') }}</span>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->in_progress_at)
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">In Progress</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->in_progress_at->format('d M Y') }}</span>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->resolved_at)
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">Resolved</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->resolved_at->format('d M Y') }}</span>
+                            </div>
+                        @endif
+                        @if($workplaceIssue->closed_at)
+                            <div class="flex justify-between">
+                                <span class="text-gray-500 dark:text-gray-400">Closed</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $workplaceIssue->closed_at->format('d M Y') }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                @if($workplaceIssue->attachments->count() > 0)
+                    <div class="card-umpsa p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Attachments ({{ $workplaceIssue->attachments->count() }})</h3>
+                        <div class="space-y-2">
+                            @foreach($workplaceIssue->attachments as $attachment)
+                                <a href="{{ route('workplace-issues.attachments.download', $attachment) }}" class="flex items-center gap-2 p-2 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                    </svg>
+                                    <span class="flex-1 truncate text-gray-700 dark:text-gray-300">{{ $attachment->file_name }}</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Update Report Form (Admin/Coordinator Only) -->
                 @if(Auth::user()->isAdmin() || Auth::user()->hasRole('coordinator'))
-                    <div class="card-umpsa p-6">
-                        <h2 class="text-lg font-semibold heading-umpsa mb-4">Update Report</h2>
+                    <div class="card-umpsa p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Update Report</h3>
 
-                        <form action="{{ route('workplace-issues.update', $workplaceIssue) }}" method="POST" class="space-y-4">
+                        <form action="{{ route('workplace-issues.update', $workplaceIssue) }}" method="POST" class="space-y-3">
                             @csrf
                             @method('PUT')
 
                             <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                                <label for="status" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                                 <select
                                     id="status"
                                     name="status"
                                     required
-                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
                                 >
                                     <option value="new" {{ $workplaceIssue->status === 'new' ? 'selected' : '' }}>New</option>
                                     <option value="under_review" {{ $workplaceIssue->status === 'under_review' ? 'selected' : '' }}>Under Review</option>
@@ -368,35 +467,35 @@
                             </div>
 
                             <div>
-                                <label for="coordinator_comment" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comment</label>
+                                <label for="coordinator_comment" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Comment</label>
                                 <textarea
                                     id="coordinator_comment"
                                     name="coordinator_comment"
-                                    rows="4"
-                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
-                                    placeholder="Add your comment or response..."
+                                    rows="3"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
+                                    placeholder="Add your comment..."
                                 >{{ old('coordinator_comment', $workplaceIssue->coordinator_comment) }}</textarea>
                             </div>
 
                             <div>
-                                <label for="resolution_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resolution Notes</label>
+                                <label for="resolution_notes" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Resolution Notes</label>
                                 <textarea
                                     id="resolution_notes"
                                     name="resolution_notes"
-                                    rows="3"
-                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
-                                    placeholder="Document the resolution (if applicable)..."
+                                    rows="2"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-umpsa-primary focus:border-umpsa-primary"
+                                    placeholder="Document the resolution..."
                                 >{{ old('resolution_notes', $workplaceIssue->resolution_notes) }}</textarea>
                             </div>
 
-                            <button type="submit" class="w-full btn-umpsa-primary">
+                            <button type="submit" class="w-full btn-umpsa-primary text-sm py-2">
                                 Update Report
                             </button>
                         </form>
                     </div>
                 @endif
-            @endif
+            </div>
         </div>
-    </div>
+    @endif
 </div>
 @endsection
