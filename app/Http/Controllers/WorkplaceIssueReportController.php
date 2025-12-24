@@ -21,7 +21,7 @@ class WorkplaceIssueReportController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        $query = WorkplaceIssueReport::with(['student.user', 'group', 'assignedTo']);
+        $query = WorkplaceIssueReport::with(['student.user', 'group', 'company', 'assignedTo']);
 
         // Role-based filtering
         if ($user->isStudent()) {
@@ -51,6 +51,11 @@ class WorkplaceIssueReportController extends Controller
         // Filter by category
         if ($request->filled('category')) {
             $query->where('category', $request->category);
+        }
+
+        // Filter by company
+        if ($request->filled('company_id')) {
+            $query->where('company_id', $request->company_id);
         }
 
         // Search functionality
@@ -147,6 +152,7 @@ class WorkplaceIssueReportController extends Controller
             $report = WorkplaceIssueReport::create([
                 'student_id' => $student->id,
                 'group_id' => $student->group_id,
+                'company_id' => $student->company_id, // Auto-link to student's current company
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'category' => $validated['category'],
@@ -401,6 +407,68 @@ class WorkplaceIssueReportController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to delete attachment');
+        }
+    }
+
+    /**
+     * Store student feedback on coordinator's response.
+     */
+    public function storeFeedback(Request $request, WorkplaceIssueReport $workplaceIssue): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Only students can provide feedback
+        if (!$user->isStudent()) {
+            abort(403, 'Only students can provide feedback');
+        }
+
+        // Verify the student owns this report
+        $student = $user->student;
+        if (!$student || $workplaceIssue->student_id !== $student->id) {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Don't allow feedback on closed reports
+        if ($workplaceIssue->isClosed()) {
+            return back()->with('error', 'Cannot provide feedback on closed reports');
+        }
+
+        // Only allow feedback if coordinator has responded
+        if (!$workplaceIssue->coordinator_comment && !$workplaceIssue->resolution_notes) {
+            return back()->with('error', 'You can only provide feedback after the coordinator has responded');
+        }
+
+        $validated = $request->validate([
+            'student_feedback' => 'required|string|max:2000',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $oldFeedback = $workplaceIssue->student_feedback;
+
+            // Update the feedback
+            $workplaceIssue->update([
+                'student_feedback' => $validated['student_feedback'],
+                'student_feedback_at' => now(),
+            ]);
+
+            // Log the feedback in history
+            WorkplaceIssueReportHistory::log(
+                $workplaceIssue->id,
+                $oldFeedback ? 'COMMENT_UPDATED' : 'COMMENT_ADDED',
+                $workplaceIssue->status,
+                'Student feedback: ' . $validated['student_feedback'],
+                $oldFeedback ? 'Previous feedback: ' . $oldFeedback : null,
+                ['type' => 'student_feedback']
+            );
+
+            DB::commit();
+
+            return back()->with('success', 'Your feedback has been submitted successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to submit feedback. Please try again.');
         }
     }
 }
