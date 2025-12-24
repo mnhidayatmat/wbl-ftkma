@@ -580,7 +580,7 @@ class DashboardController extends Controller
             $alerts[] = [
                 'type' => 'danger',
                 'message' => "{$criticalIssues} critical workplace issue(s) requiring immediate attention",
-                'link' => route('coordinator.workplace-issues.index'),
+                'link' => route('workplace-issues.index'),
             ];
         }
 
@@ -592,7 +592,7 @@ class DashboardController extends Controller
             $alerts[] = [
                 'type' => 'warning',
                 'message' => "{$highIssues} high-severity workplace issue(s) need review",
-                'link' => route('coordinator.workplace-issues.index'),
+                'link' => route('workplace-issues.index'),
             ];
         }
 

@@ -261,7 +261,7 @@
                 </div>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <a href="{{ route('coordinator.workplace-issues.index') }}" class="text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">Manage issues →</a>
+                <a href="{{ route('workplace-issues.index') }}" class="text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">Manage issues →</a>
             </div>
         </div>
     </div>
@@ -573,7 +573,7 @@
                             </span>
                         </td>
                         <td class="py-3 text-right">
-                            <a href="{{ route('coordinator.workplace-issues.show', $issue['id']) }}"
+                            <a href="{{ route('workplace-issues.show', $issue['id']) }}"
                                class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-[#0084C5] hover:bg-[#003A6C] rounded-lg transition-colors">
                                 View Details
                             </a>
