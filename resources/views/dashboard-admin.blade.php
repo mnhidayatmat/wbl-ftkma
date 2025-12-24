@@ -535,6 +535,7 @@
                 <thead>
                     <tr class="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                         <th class="text-left py-2 font-medium">Student</th>
+                        <th class="text-left py-2 font-medium">Company</th>
                         <th class="text-left py-2 font-medium">Category</th>
                         <th class="text-left py-2 font-medium">Severity</th>
                         <th class="text-left py-2 font-medium">Status</th>
@@ -549,6 +550,9 @@
                         <td class="py-3">
                             <p class="font-medium text-gray-900 dark:text-white">{{ $issue['student_name'] }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $issue['matric_no'] }} • {{ $issue['group'] }}</p>
+                        </td>
+                        <td class="py-3">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ Str::limit($issue['company'], 30) }}</p>
                         </td>
                         <td class="py-3 text-gray-600 dark:text-gray-400">{{ Str::limit($issue['category'], 25) }}</td>
                         <td class="py-3">
@@ -634,7 +638,130 @@
     </div>
 
     <!-- =====================================================
-         8. ASSESSMENT COMPLETION
+         8. COMPANIES WITH MOST WORKPLACE ISSUES
+    ====================================================== -->
+    @if(count($companiesWithIssues) > 0)
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Companies with Most Workplace Issues</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Identify problematic companies for student safety monitoring</p>
+            </div>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Top 10 ranked by total issues</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                        <th class="text-left py-2 font-medium">Rank</th>
+                        <th class="text-left py-2 font-medium">Company</th>
+                        <th class="text-center py-2 font-medium">Total</th>
+                        <th class="text-center py-2 font-medium">Critical</th>
+                        <th class="text-center py-2 font-medium">High</th>
+                        <th class="text-center py-2 font-medium">Medium</th>
+                        <th class="text-center py-2 font-medium">Low</th>
+                        <th class="text-center py-2 font-medium">Open</th>
+                        <th class="text-center py-2 font-medium">Risk Level</th>
+                        <th class="text-right py-2 font-medium">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    @foreach($companiesWithIssues as $index => $company)
+                    <tr class="border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/30
+                        {{ $company['risk_level'] === 'high' ? 'bg-red-50 dark:bg-red-900/10' : '' }}">
+                        <td class="py-3">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full
+                                {{ $index === 0 ? 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200 font-bold' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' }} text-xs">
+                                {{ $index + 1 }}
+                            </span>
+                        </td>
+                        <td class="py-3">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ $company['company_name'] }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">ID: {{ $company['company_id'] }}</p>
+                        </td>
+                        <td class="py-3 text-center">
+                            <span class="font-bold text-gray-900 dark:text-white">{{ $company['total_issues'] }}</span>
+                        </td>
+                        <td class="py-3 text-center">
+                            @if($company['critical_count'] > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                                    {{ $company['critical_count'] }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">0</span>
+                            @endif
+                        </td>
+                        <td class="py-3 text-center">
+                            @if($company['high_count'] > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100">
+                                    {{ $company['high_count'] }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">0</span>
+                            @endif
+                        </td>
+                        <td class="py-3 text-center">
+                            @if($company['medium_count'] > 0)
+                                <span class="text-gray-700 dark:text-gray-300">{{ $company['medium_count'] }}</span>
+                            @else
+                                <span class="text-gray-400">0</span>
+                            @endif
+                        </td>
+                        <td class="py-3 text-center">
+                            @if($company['low_count'] > 0)
+                                <span class="text-gray-600 dark:text-gray-400">{{ $company['low_count'] }}</span>
+                            @else
+                                <span class="text-gray-400">0</span>
+                            @endif
+                        </td>
+                        <td class="py-3 text-center">
+                            @if($company['open_issues'] > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
+                                    {{ $company['open_issues'] }} open
+                                </span>
+                            @else
+                                <span class="text-green-600 dark:text-green-400 text-xs">All resolved</span>
+                            @endif
+                        </td>
+                        <td class="py-3 text-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold
+                                {{ $company['risk_level'] === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' : '' }}
+                                {{ $company['risk_level'] === 'medium' ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100' : '' }}
+                                {{ $company['risk_level'] === 'low' ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : '' }}">
+                                {{ ucfirst($company['risk_level']) }} Risk
+                            </span>
+                        </td>
+                        <td class="py-3 text-right">
+                            <a href="{{ route('companies.show', $company['company_id']) }}"
+                               class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-[#0084C5] hover:bg-[#003A6C] rounded-lg transition-colors">
+                                View Company
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-xs text-yellow-800 dark:text-yellow-200">
+                    <p class="font-semibold mb-1">Risk Level Guide:</p>
+                    <ul class="space-y-1">
+                        <li><strong>High Risk:</strong> 3+ critical issues OR 5+ high severity issues - Consider restricting student placements</li>
+                        <li><strong>Medium Risk:</strong> 1-2 critical OR 2-4 high severity issues - Monitor closely and conduct follow-up</li>
+                        <li><strong>Low Risk:</strong> Only low/medium severity issues - Standard monitoring sufficient</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- =====================================================
+         9. ASSESSMENT COMPLETION
     ====================================================== -->
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
         <div class="mb-6">

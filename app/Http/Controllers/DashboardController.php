@@ -156,6 +156,9 @@ class DashboardController extends Controller
         // Workplace Issue Metrics
         $workplaceIssueMetrics = $this->getWorkplaceIssueMetrics();
 
+        // Companies with Most Issues
+        $companiesWithIssues = $this->getCompaniesWithMostIssues();
+
         // Assessment Completion Overview
         $assessmentCompletion = $this->getAssessmentCompletion();
 
@@ -177,6 +180,7 @@ class DashboardController extends Controller
             'workplaceIssuesBySeverity',
             'criticalWorkplaceIssues',
             'workplaceIssueMetrics',
+            'companiesWithIssues',
             'assessmentCompletion',
             'systemAlerts',
             'groupFilter'
@@ -435,7 +439,7 @@ class DashboardController extends Controller
      */
     private function getCriticalWorkplaceIssues(): array
     {
-        return WorkplaceIssueReport::with(['student', 'group', 'assignedTo'])
+        return WorkplaceIssueReport::with(['student', 'group', 'company', 'assignedTo'])
             ->open()
             ->whereIn('severity', ['critical', 'high'])
             ->orderByRaw("FIELD(severity, 'critical', 'high')")
@@ -450,6 +454,7 @@ class DashboardController extends Controller
                     'student_name' => $issue->student->name ?? 'Unknown',
                     'matric_no' => $issue->student->matric_no ?? '',
                     'group' => $issue->group->name ?? 'N/A',
+                    'company' => $issue->company->company_name ?? 'Not Specified',
                     'category' => $issue->category_display,
                     'severity' => $issue->severity,
                     'severity_display' => $issue->severity_display,
@@ -498,6 +503,57 @@ class DashboardController extends Controller
             'total_resolved' => $totalResolved,
             'with_feedback' => $withFeedback,
         ];
+    }
+
+    /**
+     * Get companies ranked by number of workplace issues.
+     */
+    private function getCompaniesWithMostIssues(): array
+    {
+        return WorkplaceIssueReport::with('company')
+            ->select('company_id', DB::raw('count(*) as total_issues'))
+            ->selectRaw('SUM(CASE WHEN severity = "critical" THEN 1 ELSE 0 END) as critical_count')
+            ->selectRaw('SUM(CASE WHEN severity = "high" THEN 1 ELSE 0 END) as high_count')
+            ->selectRaw('SUM(CASE WHEN severity = "medium" THEN 1 ELSE 0 END) as medium_count')
+            ->selectRaw('SUM(CASE WHEN severity = "low" THEN 1 ELSE 0 END) as low_count')
+            ->selectRaw('SUM(CASE WHEN status IN ("new", "under_review", "in_progress") THEN 1 ELSE 0 END) as open_issues')
+            ->whereNotNull('company_id')
+            ->groupBy('company_id')
+            ->orderByDesc('total_issues')
+            ->limit(10)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'company_id' => $item->company_id,
+                    'company_name' => $item->company->company_name ?? 'Unknown',
+                    'total_issues' => $item->total_issues,
+                    'critical_count' => $item->critical_count,
+                    'high_count' => $item->high_count,
+                    'medium_count' => $item->medium_count,
+                    'low_count' => $item->low_count,
+                    'open_issues' => $item->open_issues,
+                    'risk_level' => $this->calculateCompanyRiskLevel($item),
+                ];
+            })->toArray();
+    }
+
+    /**
+     * Calculate company risk level based on issues.
+     */
+    private function calculateCompanyRiskLevel($companyIssues): string
+    {
+        // High risk: 3+ critical OR 5+ high severity issues
+        if ($companyIssues->critical_count >= 3 || $companyIssues->high_count >= 5) {
+            return 'high';
+        }
+
+        // Medium risk: 1-2 critical OR 2-4 high severity issues
+        if ($companyIssues->critical_count > 0 || $companyIssues->high_count >= 2) {
+            return 'medium';
+        }
+
+        // Low risk: only low/medium severity issues
+        return 'low';
     }
 
     /**

@@ -15,6 +15,7 @@ class WorkplaceIssueReport extends Model
     protected $fillable = [
         'student_id',
         'group_id',
+        'company_id',
         'title',
         'description',
         'category',
@@ -26,6 +27,7 @@ class WorkplaceIssueReport extends Model
         'status',
         'coordinator_comment',
         'resolution_notes',
+        'student_feedback',
         'assigned_to',
         'reviewed_by',
         'resolved_by',
@@ -35,6 +37,7 @@ class WorkplaceIssueReport extends Model
         'in_progress_at',
         'resolved_at',
         'closed_at',
+        'student_feedback_at',
         'ip_address',
         'user_agent',
     ];
@@ -45,6 +48,7 @@ class WorkplaceIssueReport extends Model
         'in_progress_at' => 'datetime',
         'resolved_at' => 'datetime',
         'closed_at' => 'datetime',
+        'student_feedback_at' => 'datetime',
         'incident_date' => 'date',
     ];
 
@@ -57,6 +61,11 @@ class WorkplaceIssueReport extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(WblGroup::class, 'group_id');
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function attachments(): HasMany
@@ -208,5 +217,10 @@ class WorkplaceIssueReport extends Model
     public function scopeOpen($query)
     {
         return $query->whereIn('status', ['new', 'under_review', 'in_progress']);
+    }
+
+    public function scopeByCompany($query, int $companyId)
+    {
+        return $query->where('company_id', $companyId);
     }
 }
