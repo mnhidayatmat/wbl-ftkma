@@ -12,7 +12,7 @@
     $lecturerIsSupervisorLi = $isLecturer && $isSupervisorLi;
 @endphp
 
-<nav class="mt-4 space-y-1" :class="isSidebarCollapsed ? 'px-2' : 'px-3'" 
+<nav class="mt-4 space-y-1" :class="isSidebarCollapsed ? 'px-2' : 'px-3'"
      x-data="{
          companiesMenuOpen: {{ request()->routeIs('companies.*') || request()->routeIs('admin.agreements.*') ? 'true' : 'false' }},
          ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('ppe.assign-students') ? 'true' : 'false' }},
@@ -20,6 +20,7 @@
          ipMenuOpen: {{ request()->routeIs('academic.ip.*') || request()->routeIs('ip.assign-students') ? 'true' : 'false' }},
          oshMenuOpen: {{ request()->routeIs('academic.osh.*') || request()->routeIs('osh.assign-students') ? 'true' : 'false' }},
          liMenuOpen: {{ request()->routeIs('academic.li.*') || request()->routeIs('li.*') || request()->routeIs('li.assign-students') ? 'true' : 'false' }},
+         windowWidth: window.innerWidth,
          // Helper to check if sidebar text should be visible
          // Access parent scope (body x-data) - sidebar is included in same scope
          get sidebarTextVisible() {
@@ -28,7 +29,7 @@
                  const bodyEl = document.body;
                  const parentData = window.Alpine?.$data(bodyEl);
                  if (parentData) {
-                     const isDesktop = window.innerWidth >= 1024;
+                     const isDesktop = this.windowWidth >= 1024;
                      if (isDesktop) {
                          return parentData.sidebarExpanded !== false;
                      }
@@ -38,14 +39,14 @@
                  // Silent fail - fallback to default behavior
              }
              // Fallback: check window width and assume expanded/open
-             return window.innerWidth >= 1024;
+             return this.windowWidth >= 1024;
          },
          get isSidebarCollapsed() {
              try {
                  const bodyEl = document.body;
                  const parentData = window.Alpine?.$data(bodyEl);
                  if (parentData) {
-                     const isDesktop = window.innerWidth >= 1024;
+                     const isDesktop = this.windowWidth >= 1024;
                      if (isDesktop) {
                          return parentData.sidebarExpanded === false;
                      }
@@ -87,7 +88,7 @@
          closeMobileSidebarOnClick(event) {
              // Close mobile/tablet sidebar when clicking actual links (not menu toggles)
              // Only close if clicking on an anchor tag (link) and on mobile/tablet
-             if (event.target.closest('a') && window.innerWidth < 1024) {
+             if (event.target.closest('a') && this.windowWidth < 1024) {
                  const body = document.body;
                  const alpineData = Alpine.$data(body);
                  if (alpineData && alpineData.closeSidebar) {
@@ -97,6 +98,23 @@
                      }, 100);
                  }
              }
+         },
+         init() {
+             // Update windowWidth on resize to make getters reactive
+             const updateWidth = () => {
+                 this.windowWidth = window.innerWidth;
+             };
+
+             // Listen for resize events with debouncing for performance
+             let resizeTimer;
+             window.addEventListener('resize', () => {
+                 clearTimeout(resizeTimer);
+                 resizeTimer = setTimeout(updateWidth, 100);
+             });
+
+             // Also listen to the parent's matchMedia change event
+             const mq = window.matchMedia('(max-width: 1023px)');
+             mq.addEventListener('change', updateWidth);
          }
      }"
      @click="closeMobileSidebarOnClick($event)">
@@ -839,27 +857,48 @@
             
             <!-- Submenu Items -->
             <div x-show="coursesMenuOpen && sidebarTextVisible" x-transition class="ml-6 mt-2 space-y-1">
-                <a href="{{ Route::has('student.fyp.overview') ? route('student.fyp.overview') : '#' }}"
-                   class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.fyp.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <span class="text-sm">FYP</span>
-                </a>
-                <a href="{{ route('academic.fyp.project-proposal.edit') }}"
-                   class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('academic.fyp.project-proposal.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <span class="text-sm">FYP Project Proposal</span>
-                </a>
-                <a href="{{ Route::has('student.ip.overview') ? route('student.ip.overview') : '#' }}" 
+                <!-- FYP Nested Dropdown -->
+                <div x-data="{ fypMenuOpen: {{ request()->routeIs('student.fyp.*') || request()->routeIs('academic.fyp.project-proposal.*') ? 'true' : 'false' }} }">
+                    <button @click="fypMenuOpen = !fypMenuOpen"
+                            class="flex items-center justify-between w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.fyp.*') || request()->routeIs('academic.fyp.project-proposal.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <span class="text-sm">FYP</span>
+                        <svg :class="{'rotate-180': fypMenuOpen}" class="w-3 h-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <!-- FYP Sub-items -->
+                    <div x-show="fypMenuOpen" x-transition class="ml-4 mt-1 space-y-1">
+                        <a href="{{ Route::has('student.fyp.overview') ? route('student.fyp.overview') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.fyp.overview') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Overview</span>
+                        </a>
+                        <a href="{{ route('academic.fyp.project-proposal.edit') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('academic.fyp.project-proposal.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Project Proposal</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{{ Route::has('student.ip.overview') ? route('student.ip.overview') : '#' }}"
                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.ip.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <span class="text-sm">IP</span>
                 </a>
-                <a href="{{ Route::has('student.osh.overview') ? route('student.osh.overview') : '#' }}" 
+                <a href="{{ Route::has('student.osh.overview') ? route('student.osh.overview') : '#' }}"
                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.osh.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <span class="text-sm">OSH</span>
                 </a>
-                <a href="{{ Route::has('student.ppe.overview') ? route('student.ppe.overview') : '#' }}" 
+                <a href="{{ Route::has('student.ppe.overview') ? route('student.ppe.overview') : '#' }}"
                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.ppe.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <span class="text-sm">PPE</span>
                 </a>
-                <a href="{{ Route::has('student.li.overview') ? route('student.li.overview') : '#' }}" 
+                <a href="{{ Route::has('student.li.overview') ? route('student.li.overview') : '#' }}"
                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.li.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <span class="text-sm">Industrial Training</span>
                 </a>
