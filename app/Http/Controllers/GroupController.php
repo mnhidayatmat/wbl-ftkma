@@ -96,7 +96,12 @@ class GroupController extends Controller
 
         $group->load('students.company');
 
-        return view('groups.show', compact('group'));
+        // Group students by programme for better organization
+        $studentsByProgramme = $group->students
+            ->groupBy('programme')
+            ->sortKeys(); // Sort programme names alphabetically
+
+        return view('groups.show', compact('group', 'studentsByProgramme'));
     }
 
     /**

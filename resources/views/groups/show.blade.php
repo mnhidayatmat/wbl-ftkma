@@ -64,30 +64,102 @@
 </div>
 
 @if($group->students->count() > 0)
-    <div class="card-umpsa overflow-hidden">
-        <div class="card-umpsa-header">
-            <h2 class="text-xl font-semibold">Students in this Group</h2>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-[#003A6C] to-[#0084C5] border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-white">Students in this Group</h2>
+            <p class="text-sm text-white/80 mt-1">Organized by programme ({{ $studentsByProgramme->count() }} programmes)</p>
         </div>
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-umpsa-deep-blue uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-umpsa-deep-blue uppercase tracking-wider">Matric No</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-umpsa-deep-blue uppercase tracking-wider">Programme</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-umpsa-deep-blue uppercase tracking-wider">Company</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($group->students as $student)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-umpsa-deep-blue">{{ $student->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $student->matric_no }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $student->programme }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $student->company->company_name ?? 'N/A' }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+
+        <div class="p-6 space-y-4">
+            @foreach($studentsByProgramme as $programme => $students)
+                <div x-data="{ open: {{ $loop->first ? 'true' : 'false' }} }" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                    <!-- Programme Header -->
+                    <button
+                        @click="open = !open"
+                        class="w-full px-6 py-4 flex items-center justify-between bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    >
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-[#003A6C] to-[#0084C5] text-white font-bold text-sm">
+                                {{ $students->count() }}
+                            </span>
+                            <div class="text-left">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $programme }}</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $students->count() }} {{ Str::plural('student', $students->count()) }}</p>
+                            </div>
+                        </div>
+                        <svg
+                            :class="{ 'rotate-180': open }"
+                            class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Students Table -->
+                    <div
+                        x-show="open"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 transform -translate-y-2"
+                        x-transition:enter-end="opacity-100 transform translate-y-0"
+                        class="border-t border-gray-200 dark:border-gray-700"
+                    >
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Matric No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                @foreach($students as $student)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-[#003A6C] to-[#0084C5] flex items-center justify-center text-white text-xs font-semibold">
+                                                    {{ strtoupper(substr($student->name, 0, 1)) }}
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $student->name }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $student->matric_no }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                            @if($student->company)
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4 text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                                    </svg>
+                                                    <span>{{ $student->company->company_name }}</span>
+                                                </div>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                                                    No company assigned
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@else
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-12 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No students in this group</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Students will appear here once they are assigned to this group.</p>
     </div>
 @endif
 @endsection
