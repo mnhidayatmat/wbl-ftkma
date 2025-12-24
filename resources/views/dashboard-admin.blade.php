@@ -240,7 +240,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg transition-shadow group {{ $workplaceIssueStats['critical_high'] > 0 ? 'ring-2 ring-red-400' : '' }}">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Safety Issues</p>
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Workplace Issues</p>
                     <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ number_format($workplaceIssueStats['open']) }}</p>
                     <div class="flex items-center gap-2 mt-2">
                         @if($workplaceIssueStats['critical_high'] > 0)
