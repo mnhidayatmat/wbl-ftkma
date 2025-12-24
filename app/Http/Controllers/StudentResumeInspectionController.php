@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ReferenceSample;
 use App\Models\ResumeInspectionHistory;
 use App\Models\Student;
 use App\Models\StudentResumeInspection;
@@ -36,6 +37,12 @@ class StudentResumeInspectionController extends Controller
         // Check if student is in a completed group
         $isInCompletedGroup = $student->isInCompletedGroup();
 
+        // Get active reference samples grouped by category
+        $referenceSamples = ReferenceSample::active()
+            ->ordered()
+            ->get()
+            ->groupBy('category');
+
         $inspection = $student->resumeInspection;
         if (! $inspection) {
             // Students in completed groups cannot create new inspections
@@ -44,6 +51,7 @@ class StudentResumeInspectionController extends Controller
                     'student' => $student,
                     'inspection' => null,
                     'isInCompletedGroup' => true,
+                    'referenceSamples' => $referenceSamples,
                 ]);
             }
             $inspection = StudentResumeInspection::create([
@@ -56,6 +64,7 @@ class StudentResumeInspectionController extends Controller
             'student' => $student,
             'inspection' => $inspection->load('reviewer'),
             'isInCompletedGroup' => $isInCompletedGroup,
+            'referenceSamples' => $referenceSamples,
         ]);
     }
 

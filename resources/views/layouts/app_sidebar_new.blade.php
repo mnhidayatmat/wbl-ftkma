@@ -220,7 +220,8 @@
         </p>
         
         @if($isAdmin || $isCoordinator)
-        <a href="{{ route('coordinator.resume.index') }}" 
+        <!-- Resume Inspection -->
+        <a href="{{ route('coordinator.resume.index') }}"
            class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('coordinator.resume.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
            :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
            :title="isSidebarCollapsed ? 'Resume Inspection' : ''">
@@ -797,8 +798,8 @@
             <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Dashboard</span>
         </a>
         
-        <!-- Resume Inspection (Standalone) -->
-        <a href="{{ route('student.resume.index') }}" 
+        <!-- Resume Inspection -->
+        <a href="{{ route('student.resume.index') }}"
            class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('student.resume.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
            :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
            :title="isSidebarCollapsed ? 'Resume Inspection' : ''">
