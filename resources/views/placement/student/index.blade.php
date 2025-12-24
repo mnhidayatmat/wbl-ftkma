@@ -107,22 +107,40 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
                 <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] mb-4">Placement Journey</h3>
 
+                @php
+                    // Define clean step labels with icons
+                    $journeySteps = [
+                        1 => ['icon' => '📄', 'label' => 'Resume Preparation'],
+                        2 => ['icon' => '📋', 'label' => 'SAL Released'],
+                        3 => ['icon' => '📤', 'label' => 'Applications Sent'],
+                        4 => ['icon' => '💼', 'label' => 'Interviews'],
+                        5 => ['icon' => '🎉', 'label' => 'Offer Received'],
+                        6 => ['icon' => '✨', 'label' => 'Offer Accepted'],
+                        7 => ['icon' => '📜', 'label' => 'SCL Released'],
+                    ];
+                @endphp
+
                 {{-- Mobile: Vertical Timeline --}}
                 <div class="block md:hidden space-y-3">
-                    @foreach($statuses as $stepNum => $statusInfo)
+                    @foreach($journeySteps as $stepNum => $stepInfo)
                         @php
                             $isActive = $stepNum === $currentStep;
                             $isCompleted = $stepNum < $currentStep;
                         @endphp
                         <div class="flex items-center gap-3">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                                {{ $isCompleted ? 'bg-green-500 text-white' : ($isActive ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500') }}">
-                                {{ $isCompleted ? '✓' : $stepNum }}
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-sm
+                                {{ $isCompleted ? 'bg-green-500 text-white' : ($isActive ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700') }}">
+                                <span class="text-lg">{{ $isCompleted ? '✓' : $stepInfo['icon'] }}</span>
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm font-semibold {{ $isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300' }}">
-                                    {{ $statusInfo['label'] }}
+                                <p class="text-sm font-semibold {{ $isActive ? 'text-blue-600 dark:text-blue-400' : ($isCompleted ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400') }}">
+                                    {{ $stepInfo['label'] }}
                                 </p>
+                                @if($isActive)
+                                    <span class="text-xs text-blue-500 dark:text-blue-400 font-medium">Current Stage</span>
+                                @elseif($isCompleted)
+                                    <span class="text-xs text-green-500 dark:text-green-400">Completed</span>
+                                @endif
                             </div>
                         </div>
                     @endforeach
@@ -131,23 +149,27 @@
                 {{-- Desktop: Horizontal Timeline --}}
                 <div class="hidden md:flex items-center justify-between relative">
                     {{-- Progress Line --}}
-                    <div class="absolute top-6 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700" style="z-index: 0;"></div>
-                    <div class="absolute top-6 left-0 h-1 bg-blue-500 transition-all duration-500"
+                    <div class="absolute top-8 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700" style="z-index: 0;"></div>
+                    <div class="absolute top-8 left-0 h-1 bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500"
                          style="width: {{ $progressPercentage }}%; z-index: 1;"></div>
 
-                    @foreach($statuses as $stepNum => $statusInfo)
+                    @foreach($journeySteps as $stepNum => $stepInfo)
                         @php
                             $isActive = $stepNum === $currentStep;
                             $isCompleted = $stepNum < $currentStep;
                         @endphp
                         <div class="flex flex-col items-center relative z-10" style="flex: 1;">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold mb-2 shadow-md transition-all
-                                {{ $isCompleted ? 'bg-green-500 text-white' : ($isActive ? 'bg-blue-500 text-white ring-4 ring-blue-200' : 'bg-gray-200 dark:bg-gray-700 text-gray-500') }}">
-                                {{ $isCompleted ? '✓' : $stepNum }}
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-2 shadow-md transition-all
+                                {{ $isCompleted ? 'bg-green-500 text-white' : ($isActive ? 'bg-blue-500 text-white ring-4 ring-blue-200 scale-110' : 'bg-gray-200 dark:bg-gray-700') }}">
+                                <span class="text-2xl">{{ $isCompleted ? '✓' : $stepInfo['icon'] }}</span>
                             </div>
-                            <p class="text-xs text-center font-medium {{ $isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400' }}">
-                                {{ $statusInfo['label'] }}
+                            <p class="text-xs text-center font-semibold px-1 {{ $isActive ? 'text-blue-600 dark:text-blue-400' : ($isCompleted ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-500') }}"
+                               style="max-width: 100px;">
+                                {{ $stepInfo['label'] }}
                             </p>
+                            @if($isActive)
+                                <span class="text-xs text-blue-500 dark:text-blue-400 font-bold mt-1">Active</span>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -242,28 +264,127 @@
             </div>
             @endif
 
-            {{-- QUICK ACTIONS --}}
+            {{-- QUICK ACTIONS (Contextual) --}}
             @if((!isset($readOnly) || !$readOnly) && isset($isStudentView) && $isStudentView)
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-                <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] mb-4">Quick Actions</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    @if($canApply && $tracking->status !== 'SCL_RELEASED')
+                <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Quick Actions
+                </h3>
+
+                <div class="space-y-3">
+                    @if($tracking->status === 'NOT_APPLIED')
+                        {{-- Resume Preparation Stage --}}
+                        @if(!$canApply)
+                            <a href="{{ route('student.resume.index') }}"
+                               class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📄 Go to Resume Inspection
+                            </a>
+                        @else
+                            <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200">
+                                ✅ Resume approved! Wait for SAL release
+                            </div>
+                        @endif
+
+                    @elseif($tracking->status === 'SAL_RELEASED')
+                        {{-- SAL Released - Ready to Apply --}}
+                        @if($tracking->sal_path)
+                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📋 Download SAL
+                            </a>
+                        @endif
                         <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm">
-                            Update Status
+                                class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm">
+                                📤 Update to "Applied" Status
                         </button>
-                    @endif
-                    @if($tracking->sal_path)
-                        <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                           class="px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
-                            Download SAL
-                        </a>
-                    @endif
-                    @if($tracking->scl_path)
-                        <a href="{{ route('student.placement.download-scl') }}" target="_blank"
-                           class="px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
-                            Download SCL
-                        </a>
+
+                    @elseif($tracking->status === 'APPLIED')
+                        {{-- Applied - Managing Applications --}}
+                        <button onclick="document.getElementById('addCompanyForm').classList.toggle('hidden')"
+                                class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors text-sm">
+                                🏢 Add Company Application
+                        </button>
+                        @if($tracking->sal_path)
+                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📋 Download SAL
+                            </a>
+                        @endif
+                        <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                class="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-colors text-sm">
+                                💼 Update to "Interviewed" Status
+                        </button>
+
+                    @elseif($tracking->status === 'INTERVIEWED')
+                        {{-- Interviewed - Waiting for Offers --}}
+                        <button onclick="document.getElementById('addCompanyForm').classList.toggle('hidden')"
+                                class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors text-sm">
+                                🏢 Add More Companies
+                        </button>
+                        <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors text-sm">
+                                🎉 Report Offer Received
+                        </button>
+                        @if($tracking->sal_path)
+                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📋 Download SAL
+                            </a>
+                        @endif
+
+                    @elseif($tracking->status === 'OFFER_RECEIVED')
+                        {{-- Offer Received - Need to Accept --}}
+                        <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-sm">
+                                ✨ Accept Offer & Upload Proof
+                        </button>
+                        @if($tracking->sal_path)
+                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                               class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📋 Download SAL
+                            </a>
+                        @endif
+
+                    @elseif($tracking->status === 'ACCEPTED')
+                        {{-- Accepted - Waiting for SCL --}}
+                        @if($tracking->confirmation_proof_path)
+                            <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200">
+                                ✅ Acceptance proof uploaded
+                            </div>
+                        @else
+                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                    class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm">
+                                    📎 Upload Acceptance Proof
+                            </button>
+                        @endif
+                        @if($tracking->sal_path)
+                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📋 Download SAL
+                            </a>
+                        @endif
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200">
+                            ⏳ Waiting for SCL release from admin
+                        </div>
+
+                    @elseif($tracking->status === 'SCL_RELEASED')
+                        {{-- SCL Released - Journey Complete --}}
+                        @if($tracking->scl_path)
+                            <a href="{{ route('student.placement.download-scl') }}" target="_blank"
+                               class="block px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📜 Download SCL
+                            </a>
+                        @endif
+                        @if($tracking->sal_path)
+                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                                📋 Download SAL
+                            </a>
+                        @endif
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200 text-center">
+                            🎉 Placement journey complete!
+                        </div>
                     @endif
                 </div>
             </div>
