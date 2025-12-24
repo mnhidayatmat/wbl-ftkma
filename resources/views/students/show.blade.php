@@ -6,8 +6,8 @@
 <div class="mb-4 flex justify-between items-center">
     <h1 class="text-2xl font-bold heading-umpsa">Student Details</h1>
     <div>
-        <a href="{{ route('students.edit', $student) }}" class="btn-umpsa-primary mr-2">Edit</a>
-        <a href="{{ route('students.index') }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded transition-colors">Back</a>
+        <a href="{{ route('admin.students.edit', $student) }}" class="btn-umpsa-primary mr-2">Edit</a>
+        <a href="{{ route('admin.students.index') }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded transition-colors">Back</a>
     </div>
 </div>
 

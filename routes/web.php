@@ -6,7 +6,6 @@ use App\Http\Controllers\Academic\LI\LiIcEvaluationController;
 use App\Http\Controllers\Academic\LI\LiScheduleController;
 use App\Http\Controllers\Academic\LI\LiSupervisorEvaluationController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentPlacementController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,11 +17,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+// Profile routes moved to students.profile.* - see routes/student.php
+// Route::middleware('auth')->group(function () {
+//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// });
 
 // Debug route to check PHP settings
 Route::get('/debug-php-settings', function () {
@@ -78,15 +78,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/ic/{user}/approve', [StudentPlacementController::class, 'approveIc'])->name('ic.approve');
     });
 
-    // PPE Routes
-    Route::get('/ppe/student', [\App\Http\Controllers\Academic\PPE\PpeStudentController::class, 'index'])
-        ->name('ppe.student.index');
-
-    Route::post('/ppe/student/at-marks', [\App\Http\Controllers\Academic\PPE\PpeStudentController::class, 'submitAtMarks'])
-        ->name('ppe.student.at-marks.store');
-
-    Route::post('/ppe/student/ic-marks', [\App\Http\Controllers\Academic\PPE\PpeStudentController::class, 'submitIcMarks'])
-        ->name('ppe.student.ic-marks.store');
+    // PPE Routes - Controller not implemented yet
+    // Route::get('/ppe/student', [\App\Http\Controllers\Academic\PPE\PpeStudentController::class, 'index'])
+    //     ->name('ppe.student.index');
+    // Route::post('/ppe/student/at-marks', [\App\Http\Controllers\Academic\PPE\PpeStudentController::class, 'submitAtMarks'])
+    //     ->name('ppe.student.at-marks.store');
+    // Route::post('/ppe/student/ic-marks', [\App\Http\Controllers\Academic\PPE\PpeStudentController::class, 'submitIcMarks'])
+    //     ->name('ppe.student.ic-marks.store');
 
     // FYP Schedule Routes
     Route::prefix('fyp/schedules')->name('fyp.schedules.')->group(function () {
@@ -176,4 +174,30 @@ Route::middleware(['auth'])->group(function () {
             Route::post('{referenceSample}/toggle-status', [\App\Http\Controllers\ReferenceSampleController::class, 'toggleStatus'])->name('toggle-status');
         });
     });
+
+    // Workplace Issue Reporting Routes
+    Route::prefix('workplace-issues')->name('workplace-issues.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\WorkplaceIssueReportController::class, 'index'])->name('index');
+        Route::get('create', [\App\Http\Controllers\WorkplaceIssueReportController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\WorkplaceIssueReportController::class, 'store'])->name('store');
+        Route::get('{workplaceIssue}', [\App\Http\Controllers\WorkplaceIssueReportController::class, 'show'])->name('show');
+        Route::put('{workplaceIssue}', [\App\Http\Controllers\WorkplaceIssueReportController::class, 'update'])->name('update');
+        Route::post('{workplaceIssue}/feedback', [\App\Http\Controllers\WorkplaceIssueReportController::class, 'storeFeedback'])->name('feedback.store');
+        Route::get('attachments/{attachment}/download', [\App\Http\Controllers\WorkplaceIssueReportController::class, 'downloadAttachment'])->name('attachments.download');
+    });
+
+    // Student Profile Routes
+    Route::prefix('students/profile')->name('students.profile.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\StudentProfileController::class, 'show'])->name('show');
+        Route::get('create', [\App\Http\Controllers\StudentProfileController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\StudentProfileController::class, 'store'])->name('store');
+        Route::get('{student}/edit', [\App\Http\Controllers\StudentProfileController::class, 'edit'])->name('edit');
+        Route::put('{student}', [\App\Http\Controllers\StudentProfileController::class, 'update'])->name('update');
+    });
+
+    // Global Search
+    Route::get('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
+
+    // Role Switch
+    Route::post('/role/switch', [\App\Http\Controllers\RoleSwitchController::class, 'switch'])->name('role.switch');
 });

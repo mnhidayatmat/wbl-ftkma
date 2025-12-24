@@ -61,7 +61,7 @@
                                             <span class="inline-block">{{ $error }}</span>
                                         </div>
                                         @if(old('email'))
-                                            <form method="POST" action="{{ route('verification.resend') }}" class="inline">
+                                            <form method="POST" action="{{ route('verification.send') }}" class="inline">
                                                 @csrf
                                                 <input type="hidden" name="email" value="{{ old('email') }}">
                                                 <button type="submit" class="text-sm font-semibold underline hover:text-red-900 dark:hover:text-red-300 transition-colors focus:outline-none">

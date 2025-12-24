@@ -276,17 +276,42 @@
                     Reference Samples
                 </h3>
                 <div class="space-y-2">
-                    @foreach([1 => 'Resume Structure', 2 => 'Poster Layout', 3 => 'Achievement Example'] as $num => $title)
-                        <a href="{{ route('student.resume.sample', ['sample' => $num]) }}"
-                           class="flex items-center justify-between p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $title }}</span>
-                            </div>
-                            <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        </a>
-                    @endforeach
-                    <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-2">⚠️ For reference only. Do NOT copy directly.</p>
+                    @php
+                        $allSamples = collect();
+                        if(isset($referenceSamples)) {
+                            $allSamples = $referenceSamples->flatten();
+                        }
+                    @endphp
+
+                    @if($allSamples->isNotEmpty())
+                        @foreach($allSamples as $sample)
+                            <a href="{{ route('reference-samples.download', $sample) }}"
+                               class="flex items-center justify-between p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">{{ $sample->category_icon }}</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $sample->title }}</span>
+                                        @if($sample->description)
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ Str::limit($sample->description, 50) }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-400">{{ $sample->file_size_formatted }}</span>
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                            </a>
+                        @endforeach
+                        <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-2">⚠️ For reference only. Do NOT copy directly.</p>
+                    @else
+                        <div class="text-center py-4">
+                            <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">No reference samples available yet</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Check back later for examples</p>
+                        </div>
+                    @endif
                 </div>
             </div>
 

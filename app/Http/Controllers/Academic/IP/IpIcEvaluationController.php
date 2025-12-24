@@ -180,7 +180,7 @@ class IpIcEvaluationController extends Controller
         }
 
         // Load relationships
-        $student->load('academicTutor', 'industryCoach', 'group');
+        $student->load('academicTutor', 'industryCoach', 'group', 'company');
 
         // Get ALL active assessments for IP course that have IC evaluator role
         // Eager load rubrics and components

@@ -15,11 +15,11 @@
 <nav class="mt-4 space-y-1" :class="isSidebarCollapsed ? 'px-2' : 'px-3'"
      x-data="{
          companiesMenuOpen: {{ request()->routeIs('companies.*') || request()->routeIs('admin.agreements.*') ? 'true' : 'false' }},
-         ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('ppe.assign-students') ? 'true' : 'false' }},
-         fypMenuOpen: {{ request()->routeIs('academic.fyp.*') || request()->routeIs('fyp.*') || request()->routeIs('fyp.assign-students') ? 'true' : 'false' }},
-         ipMenuOpen: {{ request()->routeIs('academic.ip.*') || request()->routeIs('ip.assign-students') ? 'true' : 'false' }},
-         oshMenuOpen: {{ request()->routeIs('academic.osh.*') || request()->routeIs('osh.assign-students') ? 'true' : 'false' }},
-         liMenuOpen: {{ request()->routeIs('academic.li.*') || request()->routeIs('li.*') || request()->routeIs('li.assign-students') ? 'true' : 'false' }},
+         ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         fypMenuOpen: {{ request()->routeIs('academic.fyp.*') || request()->routeIs('fyp.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         ipMenuOpen: {{ request()->routeIs('academic.ip.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         oshMenuOpen: {{ request()->routeIs('academic.osh.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         liMenuOpen: {{ request()->routeIs('academic.li.*') || request()->routeIs('li.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
          windowWidth: window.innerWidth,
          // Helper to check if sidebar text should be visible
          // Access parent scope (body x-data) - sidebar is included in same scope
@@ -136,7 +136,7 @@
 
     <div class="relative">
         <button @click="toggleMenu('companies')"
-                class="w-full flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+                class="w-full flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
                 :class="isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-2'"
                 :title="isSidebarCollapsed ? 'Companies' : ''">
             <div class="flex items-center gap-1">
@@ -166,8 +166,8 @@
              class="mt-1 ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-1">
             
             <!-- Company Directory -->
-            <a href="{{ route('companies.index') }}" 
-               class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 min-h-[40px] {{ request()->routeIs('companies.*') ? 'text-[#0084C5] font-medium bg-[#0084C5]/5 border-l-2 border-[#00A86B] -ml-[2px] pl-[14px]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-[#0084C5]' }}">
+            <a href="{{ route('admin.companies.index') }}"
+               class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 min-h-[40px] {{ request()->routeIs('admin.companies.*') ? 'text-[#0084C5] font-medium bg-[#0084C5]/5 border-l-2 border-[#00A86B] -ml-[2px] pl-[14px]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-[#0084C5]' }}">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
@@ -303,9 +303,9 @@
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
                 @if($isAdmin)
-                <a href="{{ route('fyp.assign-students') }}"
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('fyp.assign-students') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    Assign Students
+                <a href="{{ route('admin.students.index') }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('admin.students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Manage Students
                 </a>
                 <a href="{{ route('academic.fyp.proposals.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -408,8 +408,8 @@
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
                 @if($isAdmin)
-                <a href="{{ route('ip.assign-students') }}" 
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('ip.assign-students') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('admin.students.index') }}" 
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('admin.students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
                 <a href="{{ route('academic.ip.assessments.index') }}" 
@@ -508,8 +508,8 @@
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
                 @if($isAdmin)
-                <a href="{{ route('osh.assign-students') }}" 
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('osh.assign-students') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('admin.students.index') }}" 
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('admin.students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
                 <a href="{{ route('academic.osh.assessments.index') }}" 
@@ -610,8 +610,8 @@
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
                 @if($isAdmin)
-                <a href="{{ route('ppe.assign-students') }}" 
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('ppe.assign-students') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('admin.students.index') }}" 
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('admin.students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
                 <a href="{{ route('academic.ppe.assessments.index') }}" 
@@ -710,8 +710,8 @@
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
                 @if($isAdmin)
-                <a href="{{ route('li.assign-students') }}" 
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('li.assign-students') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('admin.students.index') }}" 
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('admin.students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
                 <a href="{{ route('academic.li.assessments.index') }}" 

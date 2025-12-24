@@ -91,7 +91,7 @@ class StudentController extends Controller
         $activeTab = $request->get('group', null);
 
         // Build sort URLs for columns
-        $baseUrl = route('students.index');
+        $baseUrl = route('admin.students.index');
         $currentParams = $request->only(['group', 'search']);
 
         return view('students.index', compact('students', 'tabs', 'activeTab', 'sortBy', 'sortDirection', 'baseUrl', 'currentParams'));
@@ -124,7 +124,7 @@ class StudentController extends Controller
 
         Student::create($validated);
 
-        return redirect()->route('students.index')
+        return redirect()->route('admin.students.index')
             ->with('success', 'Student created successfully.');
     }
 
@@ -192,7 +192,7 @@ class StudentController extends Controller
             'ic_id' => $icId,
         ]);
 
-        return redirect()->route('students.index')
+        return redirect()->route('admin.students.index')
             ->with('success', 'Student updated successfully.');
     }
 
@@ -201,9 +201,25 @@ class StudentController extends Controller
      */
     public function destroy(Student $student): RedirectResponse
     {
+        // Delete associated user account if exists and user only has student role
+        if ($student->user) {
+            $user = $student->user;
+
+            // Only delete user if they ONLY have the student role (no admin, lecturer, etc.)
+            $userRoles = $user->roles()->pluck('name')->toArray();
+            $hasOnlyStudentRole = count($userRoles) === 1 && in_array('student', $userRoles);
+
+            // Also check legacy role column
+            $isOnlyStudent = $user->role === 'student' && $hasOnlyStudentRole;
+
+            if ($isOnlyStudent) {
+                $user->delete();
+            }
+        }
+
         $student->delete();
 
-        return redirect()->route('students.index')
+        return redirect()->route('admin.students.index')
             ->with('success', 'Student deleted successfully.');
     }
 }

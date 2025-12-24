@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Academic\FYP;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assessment;
 use App\Models\FYP\FypAssessmentWindow;
 use App\Models\FYP\FypAuditLog;
 use Illuminate\Http\Request;
@@ -23,13 +24,33 @@ class FypScheduleController extends Controller
             ['evaluator_role' => 'at'],
             ['created_by' => auth()->id(), 'is_enabled' => true]
         );
+        $atWindow->load('assessments');
 
         $icWindow = FypAssessmentWindow::firstOrCreate(
             ['evaluator_role' => 'ic'],
             ['created_by' => auth()->id(), 'is_enabled' => true]
         );
+        $icWindow->load('assessments');
 
-        return view('academic.fyp.schedule.index', compact('atWindow', 'icWindow'));
+        // Get available assessments for dropdowns
+        $atAssessments = Assessment::where('course_code', 'FYP')
+            ->where('evaluator_role', 'at')
+            ->where('is_active', true)
+            ->orderBy('assessment_name')
+            ->get(['id', 'assessment_name', 'assessment_type']);
+
+        $icAssessments = Assessment::where('course_code', 'FYP')
+            ->where('evaluator_role', 'ic')
+            ->where('is_active', true)
+            ->orderBy('assessment_name')
+            ->get(['id', 'assessment_name', 'assessment_type']);
+
+        return view('academic.fyp.schedule.index', compact(
+            'atWindow',
+            'icWindow',
+            'atAssessments',
+            'icAssessments'
+        ));
     }
 
     /**
@@ -47,6 +68,8 @@ class FypScheduleController extends Controller
             'start_at' => ['nullable', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'assessment_ids' => ['nullable', 'array'],
+            'assessment_ids.*' => ['exists:assessments,id'],
         ]);
 
         $window = FypAssessmentWindow::updateOrCreate(
@@ -62,6 +85,19 @@ class FypScheduleController extends Controller
 
         if (! $window->wasRecentlyCreated) {
             $window->update(['updated_by' => auth()->id()]);
+        }
+
+        // Sync assessments (validate they belong to correct course and evaluator)
+        if (isset($validated['assessment_ids'])) {
+            $validAssessments = Assessment::where('course_code', 'FYP')
+                ->where('evaluator_role', $validated['evaluator_role'])
+                ->whereIn('id', $validated['assessment_ids'])
+                ->pluck('id')
+                ->toArray();
+
+            $window->assessments()->sync($validAssessments);
+        } else {
+            $window->assessments()->detach(); // Empty = applies to all
         }
 
         // Log audit
@@ -90,3 +126,6 @@ class FypScheduleController extends Controller
             ->with('success', 'Reminder emails sent successfully.');
     }
 }
+
+
+

@@ -10,9 +10,12 @@ use App\Models\WblGroup;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PlacementTrackingExport;
 
 class StudentPlacementController extends Controller
 {
@@ -132,22 +135,80 @@ class StudentPlacementController extends Controller
             }
         }
 
-        // Calculate statistics
+        // Calculate comprehensive statistics
         $stats = [
             'total' => Student::count(),
             'resume_recommended' => Student::whereHas('resumeInspection', function ($q) {
                 $q->where('status', 'PASSED');
             })->count(),
-            'sal_released' => StudentPlacementTracking::where('status', 'SAL_RELEASED')->count(),
-            'applied' => StudentPlacementTracking::where('status', 'APPLIED')->count(),
+            'sal_released' => StudentPlacementTracking::whereNotNull('sal_file_path')->count(),
+            'applied' => StudentPlacementTracking::whereIn('status', ['APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
             'pending_sal' => Student::whereHas('resumeInspection', function ($q) {
                 $q->where('status', 'PASSED');
             })->whereHas('placementTracking', function ($q) {
                 $q->where('status', 'NOT_APPLIED');
             })->count(),
+            'interviewed' => StudentPlacementTracking::whereIn('status', ['INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
+            'offer_received' => StudentPlacementTracking::whereIn('status', ['OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
+            'accepted' => StudentPlacementTracking::whereIn('status', ['ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
+            'scl_released' => StudentPlacementTracking::whereNotNull('scl_file_path')->count(),
         ];
 
-        return view('placement.index', compact('students', 'groups', 'stats'));
+        // Placement funnel data (for chart)
+        $funnelData = [
+            'resume_recommended' => $stats['resume_recommended'],
+            'sal_released' => $stats['sal_released'],
+            'applied' => $stats['applied'],
+            'interviewed' => $stats['interviewed'],
+            'offer_received' => $stats['offer_received'],
+            'accepted' => $stats['accepted'],
+            'scl_released' => $stats['scl_released'],
+        ];
+
+        // Group-wise statistics (for comparison chart)
+        $groupStats = WblGroup::withCount(['students' => function ($q) {
+            // Only count students with placement tracking
+        }])->get()->map(function ($group) {
+            $studentsInGroup = Student::where('group_id', $group->id)->pluck('id');
+
+            // Count students with resume recommended (PASSED status)
+            $resumeOkCount = Student::where('group_id', $group->id)
+                ->whereHas('resumeInspection', function ($q) {
+                    $q->where('status', 'PASSED');
+                })->count();
+
+            return [
+                'name' => $group->name,
+                'total' => $studentsInGroup->count(),
+                'resume_ok' => $resumeOkCount,
+                'sal_released' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->whereNotNull('sal_file_path')->count(),
+                'applied' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->whereIn('status', ['APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
+                'accepted' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->whereIn('status', ['ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
+            ];
+        })->filter(function ($group) {
+            return $group['total'] > 0; // Only include groups with students
+        })->values();
+
+        // Timeline data (last 30 days of SAL releases)
+        $timelineData = StudentPlacementTracking::whereNotNull('sal_released_at')
+            ->where('sal_released_at', '>=', now()->subDays(30))
+            ->selectRaw('DATE(sal_released_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => \Carbon\Carbon::parse($item->date)->format('M d'),
+                    'count' => $item->count,
+                ];
+            });
+
+        // Handle export requests
+        if ($request->has('export')) {
+            return $this->exportPlacementData($request->export, $students, $stats, $funnelData, $groupStats, $timelineData);
+        }
+
+        return view('placement.index', compact('students', 'groups', 'stats', 'funnelData', 'groupStats', 'timelineData'));
     }
 
     /**
@@ -1132,6 +1193,205 @@ class StudentPlacementController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Placement tracking reset successfully for '.$student->name.'.');
+    }
+
+    /**
+     * Export placement tracking data in various formats.
+     */
+    private function exportPlacementData($format, $students, $stats, $funnelData, $groupStats, $timelineData)
+    {
+        $timestamp = now()->format('Y-m-d_His');
+
+        switch ($format) {
+            case 'excel':
+                return $this->exportToExcel($students, $stats, $timestamp);
+
+            case 'csv':
+                return $this->exportToCsv($students, $timestamp);
+
+            case 'pdf':
+                return $this->exportToPdf($students, $stats, $funnelData, $groupStats, $timestamp);
+
+            default:
+                return redirect()->route('placement.index')->with('error', 'Invalid export format');
+        }
+    }
+
+    /**
+     * Export to Excel format.
+     */
+    private function exportToExcel($students, $stats, $timestamp)
+    {
+        $data = $this->prepareExportData($students);
+
+        $headers = [
+            'Student Name',
+            'Matric No',
+            'Group',
+            'Resume Status',
+            'Placement Status',
+            'SAL Released',
+            'SAL Release Date',
+            'Company',
+            'Interviewed',
+            'Applications Count',
+        ];
+
+        $rows = $data->map(function ($row) {
+            return [
+                $row['name'],
+                $row['matric_no'],
+                $row['group'],
+                $row['resume_status'],
+                $row['placement_status'],
+                $row['sal_released'],
+                $row['sal_date'],
+                $row['company'],
+                $row['interviewed'],
+                $row['applications_count'],
+            ];
+        });
+
+        $callback = function ($excel) use ($headers, $rows, $stats) {
+            $excel->sheet('Placement Tracking', function ($sheet) use ($headers, $rows, $stats) {
+                // Add summary statistics
+                $sheet->row(1, ['PLACEMENT TRACKING SUMMARY']);
+                $sheet->row(2, ['Total Students', $stats['total']]);
+                $sheet->row(3, ['Resume Recommended', $stats['resume_recommended']]);
+                $sheet->row(4, ['SAL Released', $stats['sal_released']]);
+                $sheet->row(5, ['Applied', $stats['applied']]);
+                $sheet->row(6, ['Accepted', $stats['accepted']]);
+                $sheet->row(7, ['']);
+
+                // Add headers
+                $sheet->row(8, $headers);
+
+                // Add data rows
+                $startRow = 9;
+                foreach ($rows as $index => $row) {
+                    $sheet->row($startRow + $index, $row);
+                }
+
+                // Style the sheet
+                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+                $sheet->getStyle('A8:J8')->getFont()->setBold(true);
+                $sheet->getStyle('A8:J8')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('003A6C');
+                $sheet->getStyle('A8:J8')->getFont()->getColor()->setRGB('FFFFFF');
+            });
+        };
+
+        return response()->streamDownload(function () use ($callback) {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx(
+                \Maatwebsite\Excel\Facades\Excel::raw(null, $callback)
+            );
+            $writer->save('php://output');
+        }, "placement_tracking_{$timestamp}.xlsx");
+    }
+
+    /**
+     * Export to CSV format.
+     */
+    private function exportToCsv($students, $timestamp)
+    {
+        $data = $this->prepareExportData($students);
+
+        $headers = [
+            'Student Name',
+            'Matric No',
+            'Group',
+            'Resume Status',
+            'Placement Status',
+            'SAL Released',
+            'SAL Release Date',
+            'Company',
+            'Interviewed',
+            'Applications Count',
+        ];
+
+        $callback = function () use ($data, $headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+
+            foreach ($data as $row) {
+                fputcsv($file, [
+                    $row['name'],
+                    $row['matric_no'],
+                    $row['group'],
+                    $row['resume_status'],
+                    $row['placement_status'],
+                    $row['sal_released'],
+                    $row['sal_date'],
+                    $row['company'],
+                    $row['interviewed'],
+                    $row['applications_count'],
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->streamDownload($callback, "placement_tracking_{$timestamp}.csv", [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    /**
+     * Export to PDF format.
+     */
+    private function exportToPdf($students, $stats, $funnelData, $groupStats, $timestamp)
+    {
+        $data = $this->prepareExportData($students);
+
+        $pdf = Pdf::loadView('placement.pdf.analytics-report', compact('data', 'stats', 'funnelData', 'groupStats'));
+
+        return $pdf->download("placement_analytics_{$timestamp}.pdf");
+    }
+
+    /**
+     * Prepare data for export.
+     */
+    private function prepareExportData($students)
+    {
+        return $students->map(function ($student) {
+            $resumeInspection = $student->resumeInspection;
+            $tracking = $student->placementTracking;
+
+            // Resume status
+            $resumeStatus = 'Not Started';
+            if ($resumeInspection) {
+                if (empty($resumeInspection->resume_file_path)) {
+                    $resumeStatus = 'Not Started';
+                } elseif ($resumeInspection->status === 'PENDING') {
+                    $resumeStatus = 'Submitted';
+                } elseif ($resumeInspection->status === 'PASSED') {
+                    $resumeStatus = 'Recommended';
+                } elseif ($resumeInspection->status === 'REVISION_REQUIRED') {
+                    $resumeStatus = 'Revision Required';
+                } elseif ($resumeInspection->status === 'FAILED') {
+                    $resumeStatus = 'Rejected';
+                }
+            }
+
+            // Interview count
+            $interviewCount = $tracking ? $tracking->companyApplications->filter(fn ($app) => $app->interviewed === true)->count() : 0;
+
+            // Applications count
+            $applicationsCount = $tracking ? $tracking->companyApplications->count() : 0;
+
+            return [
+                'name' => $student->name,
+                'matric_no' => $student->matric_no,
+                'group' => $student->group ? $student->group->name : '-',
+                'resume_status' => $resumeStatus,
+                'placement_status' => $tracking ? ucwords(str_replace('_', ' ', strtolower($tracking->status))) : 'Not Applied',
+                'sal_released' => ($tracking && $tracking->sal_file_path) ? 'Yes' : 'No',
+                'sal_date' => ($tracking && $tracking->sal_released_at) ? $tracking->sal_released_at->format('d M Y') : '-',
+                'company' => $student->company ? $student->company->company_name : '-',
+                'interviewed' => $interviewCount > 0 ? "Yes ({$interviewCount})" : 'No',
+                'applications_count' => $applicationsCount,
+            ];
+        });
     }
 
     /**

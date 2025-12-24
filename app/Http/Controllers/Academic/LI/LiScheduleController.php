@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Academic\LI;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assessment;
 use App\Models\LI\LiAssessmentWindow;
 use App\Models\LI\LiAuditLog;
 use Illuminate\Http\Request;
@@ -23,13 +24,33 @@ class LiScheduleController extends Controller
             ['evaluator_role' => 'supervisor'],
             ['created_by' => auth()->id(), 'is_enabled' => true]
         );
+        $supervisorWindow->load('assessments');
 
         $icWindow = LiAssessmentWindow::firstOrCreate(
             ['evaluator_role' => 'ic'],
             ['created_by' => auth()->id(), 'is_enabled' => true]
         );
+        $icWindow->load('assessments');
 
-        return view('academic.li.schedule.index', compact('supervisorWindow', 'icWindow'));
+        // Get available assessments for dropdowns
+        $supervisorAssessments = Assessment::where('course_code', 'LI')
+            ->where('evaluator_role', 'supervisor_li')
+            ->where('is_active', true)
+            ->orderBy('assessment_name')
+            ->get(['id', 'assessment_name', 'assessment_type']);
+
+        $icAssessments = Assessment::where('course_code', 'LI')
+            ->where('evaluator_role', 'ic')
+            ->where('is_active', true)
+            ->orderBy('assessment_name')
+            ->get(['id', 'assessment_name', 'assessment_type']);
+
+        return view('academic.li.schedule.index', compact(
+            'supervisorWindow',
+            'icWindow',
+            'supervisorAssessments',
+            'icAssessments'
+        ));
     }
 
     /**
@@ -47,6 +68,8 @@ class LiScheduleController extends Controller
             'start_at' => ['nullable', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'assessment_ids' => ['nullable', 'array'],
+            'assessment_ids.*' => ['exists:assessments,id'],
         ]);
 
         $window = LiAssessmentWindow::updateOrCreate(
@@ -62,6 +85,22 @@ class LiScheduleController extends Controller
 
         if (! $window->wasRecentlyCreated) {
             $window->update(['updated_by' => auth()->id()]);
+        }
+
+        // Sync assessments (validate they belong to correct course and evaluator)
+        // Note: LI uses 'supervisor_li' as evaluator_role in assessments table
+        if (isset($validated['assessment_ids'])) {
+            $evaluatorRoleInAssessments = $validated['evaluator_role'] === 'supervisor' ? 'supervisor_li' : 'ic';
+
+            $validAssessments = Assessment::where('course_code', 'LI')
+                ->where('evaluator_role', $evaluatorRoleInAssessments)
+                ->whereIn('id', $validated['assessment_ids'])
+                ->pluck('id')
+                ->toArray();
+
+            $window->assessments()->sync($validAssessments);
+        } else {
+            $window->assessments()->detach(); // Empty = applies to all
         }
 
         // Log audit
@@ -90,3 +129,6 @@ class LiScheduleController extends Controller
             ->with('success', 'Reminder emails sent successfully.');
     }
 }
+
+
+

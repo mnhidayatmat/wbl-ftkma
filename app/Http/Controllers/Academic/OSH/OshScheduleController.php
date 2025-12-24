@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Academic\OSH;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assessment;
 use App\Models\OSH\OshAssessmentWindow;
 use App\Models\OSH\OshAuditLog;
 use Illuminate\Http\Request;
@@ -23,13 +24,33 @@ class OshScheduleController extends Controller
             ['evaluator_role' => 'lecturer'],
             ['created_by' => auth()->id(), 'is_enabled' => true]
         );
+        $lecturerWindow->load('assessments');
 
         $icWindow = OshAssessmentWindow::firstOrCreate(
             ['evaluator_role' => 'ic'],
             ['created_by' => auth()->id(), 'is_enabled' => true]
         );
+        $icWindow->load('assessments');
 
-        return view('academic.osh.schedule.index', compact('lecturerWindow', 'icWindow'));
+        // Get available assessments for dropdowns
+        $lecturerAssessments = Assessment::where('course_code', 'OSH')
+            ->where('evaluator_role', 'lecturer')
+            ->where('is_active', true)
+            ->orderBy('assessment_name')
+            ->get(['id', 'assessment_name', 'assessment_type']);
+
+        $icAssessments = Assessment::where('course_code', 'OSH')
+            ->where('evaluator_role', 'ic')
+            ->where('is_active', true)
+            ->orderBy('assessment_name')
+            ->get(['id', 'assessment_name', 'assessment_type']);
+
+        return view('academic.osh.schedule.index', compact(
+            'lecturerWindow',
+            'icWindow',
+            'lecturerAssessments',
+            'icAssessments'
+        ));
     }
 
     /**
@@ -47,6 +68,8 @@ class OshScheduleController extends Controller
             'start_at' => ['nullable', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'assessment_ids' => ['nullable', 'array'],
+            'assessment_ids.*' => ['exists:assessments,id'],
         ]);
 
         $window = OshAssessmentWindow::updateOrCreate(
@@ -62,6 +85,19 @@ class OshScheduleController extends Controller
 
         if (! $window->wasRecentlyCreated) {
             $window->update(['updated_by' => auth()->id()]);
+        }
+
+        // Sync assessments (validate they belong to correct course and evaluator)
+        if (isset($validated['assessment_ids'])) {
+            $validAssessments = Assessment::where('course_code', 'OSH')
+                ->where('evaluator_role', $validated['evaluator_role'])
+                ->whereIn('id', $validated['assessment_ids'])
+                ->pluck('id')
+                ->toArray();
+
+            $window->assessments()->sync($validAssessments);
+        } else {
+            $window->assessments()->detach(); // Empty = applies to all
         }
 
         // Log audit

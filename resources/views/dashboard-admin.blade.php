@@ -172,7 +172,7 @@
                 </div>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <a href="{{ route('companies.index') }}" class="text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">View companies →</a>
+                <a href="{{ route('admin.companies.index') }}" class="text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">View companies →</a>
             </div>
         </div>
 
@@ -732,7 +732,7 @@
                             </span>
                         </td>
                         <td class="py-3 text-right">
-                            <a href="{{ route('companies.show', $company['company_id']) }}"
+                            <a href="{{ route('admin.companies.show', $company['company_id']) }}"
                                class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-[#0084C5] hover:bg-[#003A6C] rounded-lg transition-colors">
                                 View Company
                             </a>

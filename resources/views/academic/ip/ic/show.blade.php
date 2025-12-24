@@ -499,10 +499,9 @@
                                                                         </div>
                                                                     </label>
                                                                 @endfor
-                            </div>
-                        </div>
-                        @endif
-                    @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
                                                     
                                                     <!-- Overall Remarks -->
                                                     <div class="mt-6">

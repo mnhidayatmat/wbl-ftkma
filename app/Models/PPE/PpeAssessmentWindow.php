@@ -2,10 +2,12 @@
 
 namespace App\Models\PPE;
 
+use App\Models\Assessment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PpeAssessmentWindow extends Model
 {
@@ -90,5 +92,71 @@ class PpeAssessmentWindow extends Model
             'disabled' => 'Disabled',
             default => 'Unknown',
         };
+    }
+
+    /**
+     * Get the assessments associated with this window.
+     */
+    public function assessments(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Assessment::class,
+            'ppe_assessment_window_assessments',
+            'ppe_assessment_window_id',
+            'assessment_id'
+        )->withTimestamps();
+    }
+
+    /**
+     * Check if this window applies to a specific assessment.
+     *
+     * @param  int|null  $assessmentId  The assessment ID to check
+     * @return bool
+     */
+    public function appliesTo(?int $assessmentId = null): bool
+    {
+        // If no assessment ID provided, return general window status
+        if ($assessmentId === null) {
+            return true;
+        }
+
+        // If no assessments linked to window, it applies to all assessments
+        if ($this->assessments()->count() === 0) {
+            return true;
+        }
+
+        // Check if specific assessment is linked to this window
+        return $this->assessments()->where('assessment_id', $assessmentId)->exists();
+    }
+
+    /**
+     * Check if the window is currently open for a specific assessment.
+     *
+     * @param  int|null  $assessmentId  The assessment ID to check
+     * @return bool
+     */
+    public function isOpenFor(?int $assessmentId = null): bool
+    {
+        return $this->isOpen() && $this->appliesTo($assessmentId);
+    }
+
+    /**
+     * Get display text for selected assessments.
+     *
+     * @return string
+     */
+    public function getSelectedAssessmentsDisplayAttribute(): string
+    {
+        $count = $this->assessments()->count();
+
+        if ($count === 0) {
+            return 'All assessments';
+        }
+
+        if ($count === 1) {
+            return $this->assessments->first()->assessment_name;
+        }
+
+        return "{$count} assessments selected";
     }
 }

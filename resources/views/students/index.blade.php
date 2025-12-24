@@ -6,7 +6,7 @@
 <div class="mb-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <h1 class="text-2xl font-bold heading-umpsa">Students</h1>
-        <a href="{{ route('students.create') }}" class="btn-umpsa-primary whitespace-nowrap">
+        <a href="{{ route('admin.students.create') }}" class="btn-umpsa-primary whitespace-nowrap">
             Add New Student
         </a>
     </div>
@@ -15,12 +15,12 @@
     <x-tab-group 
         :tabs="$tabs" 
         :activeTab="$activeTab" 
-        :baseUrl="route('students.index')"
+        :baseUrl="route('admin.students.index')"
     />
 
     <!-- Search Bar -->
     <div class="mb-6">
-        <form method="GET" action="{{ route('students.index') }}" class="flex gap-2">
+        <form method="GET" action="{{ route('admin.students.index') }}" class="flex gap-2">
             @if(request('group'))
                 <input type="hidden" name="group" value="{{ request('group') }}">
             @endif
@@ -50,7 +50,7 @@
             </button>
             @if(request('search'))
                 <a 
-                    href="{{ route('students.index', array_merge($currentParams ?? [], ['search' => null])) }}" 
+                    href="{{ route('admin.students.index', array_merge($currentParams ?? [], ['search' => null])) }}" 
                     class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors font-semibold flex items-center"
                 >
                     Clear
@@ -122,9 +122,9 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex items-center space-x-3">
-                        <a href="{{ route('students.show', $student) }}" class="text-umpsa-teal hover:text-umpsa-royal-blue transition-colors">View</a>
-                        <a href="{{ route('students.edit', $student) }}" class="text-umpsa-royal-blue hover:text-umpsa-deep-blue transition-colors">Edit</a>
-                        <form action="{{ route('students.destroy', $student) }}" method="POST" class="inline">
+                        <a href="{{ route('admin.students.show', $student) }}" class="text-umpsa-teal hover:text-umpsa-royal-blue transition-colors">View</a>
+                        <a href="{{ route('admin.students.edit', $student) }}" class="text-umpsa-royal-blue hover:text-umpsa-deep-blue transition-colors">Edit</a>
+                        <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors" onclick="return confirm('Are you sure?')">Delete</button>
@@ -186,13 +186,13 @@
             </div>
 
             <div class="flex items-center space-x-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <a href="{{ route('students.show', $student) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-primary text-white rounded-lg hover:bg-umpsa-secondary transition-colors text-sm font-semibold">
+                <a href="{{ route('admin.students.show', $student) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-primary text-white rounded-lg hover:bg-umpsa-secondary transition-colors text-sm font-semibold">
                     View
                 </a>
-                <a href="{{ route('students.edit', $student) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-secondary text-white rounded-lg hover:bg-umpsa-accent transition-colors text-sm font-semibold">
+                <a href="{{ route('admin.students.edit', $student) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-secondary text-white rounded-lg hover:bg-umpsa-accent transition-colors text-sm font-semibold">
                     Edit
                 </a>
-                <form action="{{ route('students.destroy', $student) }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure?')">
+                <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure?')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="w-full px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-semibold">

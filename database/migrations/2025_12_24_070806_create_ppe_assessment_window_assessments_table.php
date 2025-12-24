@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('ppe_assessment_window_assessments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('ppe_assessment_window_id')
+                ->constrained('ppe_assessment_windows')
+                ->onDelete('cascade');
+            $table->foreignId('assessment_id')
+                ->constrained('assessments')
+                ->onDelete('cascade');
+            $table->timestamps();
+
+            // Unique constraint: one assessment can't be assigned to same window multiple times
+            $table->unique(['ppe_assessment_window_id', 'assessment_id'], 'ppe_aw_assessment_unique');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('ppe_assessment_window_assessments');
+    }
+};

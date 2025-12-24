@@ -65,7 +65,7 @@
 
 @if($group->students->count() > 0)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-[#003A6C] to-[#0084C5] border-b border-gray-200 dark:border-gray-700">
+        <div class="px-8 py-5 bg-gradient-to-r from-[#003A6C] to-[#0084C5] border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-xl font-semibold text-white">Students in this Group</h2>
             <p class="text-sm text-white/80 mt-1">Organized by programme ({{ $studentsByProgramme->count() }} programmes)</p>
         </div>
@@ -118,14 +118,7 @@
                                 @foreach($students as $student)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-[#003A6C] to-[#0084C5] flex items-center justify-center text-white text-xs font-semibold">
-                                                    {{ strtoupper(substr($student->name, 0, 1)) }}
-                                                </div>
-                                                <div class="ml-3">
-                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $student->name }}</p>
-                                                </div>
-                                            </div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $student->name }}</p>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                                             {{ $student->matric_no }}
