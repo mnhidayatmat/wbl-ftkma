@@ -13,6 +13,7 @@ use App\Models\StudentAssessmentMark;
 use App\Models\StudentPlacementTracking;
 use App\Models\StudentResumeInspection;
 use App\Models\WblGroup;
+use App\Models\WorkplaceIssueReport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -137,11 +138,23 @@ class DashboardController extends Controller
         $expiryWatchlist = $this->getAgreementExpiryWatchlist();
 
         // =====================================================
-        // 5. ACADEMIC & QUALITY ASSURANCE
+        // 5. WORKPLACE SAFETY & STUDENT WELLBEING
         // =====================================================
 
-        // CLO-PLO Coverage Status
-        $cloPloStatus = $this->getCloPloStatus();
+        // Workplace Issue Statistics
+        $workplaceIssueStats = $this->getWorkplaceIssueStats();
+
+        // Workplace Issues by Status
+        $workplaceIssuesByStatus = $this->getWorkplaceIssuesByStatus();
+
+        // Workplace Issues by Severity
+        $workplaceIssuesBySeverity = $this->getWorkplaceIssuesBySeverity();
+
+        // Critical Workplace Issues
+        $criticalWorkplaceIssues = $this->getCriticalWorkplaceIssues();
+
+        // Workplace Issue Metrics
+        $workplaceIssueMetrics = $this->getWorkplaceIssueMetrics();
 
         // Assessment Completion Overview
         $assessmentCompletion = $this->getAssessmentCompletion();
@@ -159,7 +172,11 @@ class DashboardController extends Controller
             'atRiskStudents',
             'companiesByAgreement',
             'expiryWatchlist',
-            'cloPloStatus',
+            'workplaceIssueStats',
+            'workplaceIssuesByStatus',
+            'workplaceIssuesBySeverity',
+            'criticalWorkplaceIssues',
+            'workplaceIssueMetrics',
             'assessmentCompletion',
             'systemAlerts',
             'groupFilter'
@@ -344,43 +361,143 @@ class DashboardController extends Controller
     }
 
     /**
-     * Get CLO-PLO coverage status per course.
+     * Get workplace issue statistics.
      */
-    private function getCloPloStatus(): array
+    private function getWorkplaceIssueStats(): array
     {
-        $courses = ['PPE', 'IP', 'OSH', 'FYP', 'LI'];
-        $status = [];
+        $totalIssues = WorkplaceIssueReport::count();
+        $openIssues = WorkplaceIssueReport::open()->count();
+        $criticalIssues = WorkplaceIssueReport::open()->where('severity', 'critical')->count();
+        $highIssues = WorkplaceIssueReport::open()->where('severity', 'high')->count();
+        $resolvedThisMonth = WorkplaceIssueReport::where('status', 'resolved')
+            ->where('resolved_at', '>=', now()->startOfMonth())
+            ->count();
 
-        foreach ($courses as $course) {
-            // Get total CLOs defined for this course
-            $totalClos = CloPloMapping::forCourse($course)->count();
+        return [
+            'total' => $totalIssues,
+            'open' => $openIssues,
+            'critical' => $criticalIssues,
+            'high' => $highIssues,
+            'critical_high' => $criticalIssues + $highIssues,
+            'resolved_this_month' => $resolvedThisMonth,
+        ];
+    }
 
-            // Get CLOs with PLO mappings
-            $mappedClos = CloPloMapping::forCourse($course)
-                ->whereHas('ploRelationships')
-                ->count();
+    /**
+     * Get workplace issues by status.
+     */
+    private function getWorkplaceIssuesByStatus(): array
+    {
+        $statusCounts = WorkplaceIssueReport::select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->pluck('count', 'status')
+            ->toArray();
 
-            // Get CLOs allowed for assessment
-            $assessmentClos = CloPloMapping::forCourse($course)
-                ->where('allow_for_assessment', true)
-                ->count();
+        return [
+            'labels' => ['New', 'Under Review', 'In Progress', 'Resolved', 'Closed'],
+            'data' => [
+                $statusCounts['new'] ?? 0,
+                $statusCounts['under_review'] ?? 0,
+                $statusCounts['in_progress'] ?? 0,
+                $statusCounts['resolved'] ?? 0,
+                $statusCounts['closed'] ?? 0,
+            ],
+            'colors' => ['#7C3AED', '#0084C5', '#F59E0B', '#10B981', '#6B7280'],
+        ];
+    }
 
-            // Get CLOs actually used in assessments
-            $usedInAssessments = Assessment::forCourse($course)
-                ->active()
-                ->distinct('clo_code')
-                ->count('clo_code');
+    /**
+     * Get workplace issues by severity.
+     */
+    private function getWorkplaceIssuesBySeverity(): array
+    {
+        $severityCounts = WorkplaceIssueReport::select('severity', DB::raw('count(*) as count'))
+            ->groupBy('severity')
+            ->get()
+            ->pluck('count', 'severity')
+            ->toArray();
 
-            $status[$course] = [
-                'total' => $totalClos,
-                'mapped' => $mappedClos,
-                'assessment_allowed' => $assessmentClos,
-                'used' => $usedInAssessments,
-                'coverage' => $totalClos > 0 ? round(($mappedClos / $totalClos) * 100) : 0,
-            ];
-        }
+        return [
+            'labels' => ['Critical', 'High', 'Medium', 'Low'],
+            'data' => [
+                $severityCounts['critical'] ?? 0,
+                $severityCounts['high'] ?? 0,
+                $severityCounts['medium'] ?? 0,
+                $severityCounts['low'] ?? 0,
+            ],
+            'colors' => ['#EF4444', '#F97316', '#F59E0B', '#3B82F6'],
+        ];
+    }
 
-        return $status;
+    /**
+     * Get critical workplace issues requiring attention.
+     */
+    private function getCriticalWorkplaceIssues(): array
+    {
+        return WorkplaceIssueReport::with(['student', 'group', 'assignedTo'])
+            ->open()
+            ->whereIn('severity', ['critical', 'high'])
+            ->orderByRaw("FIELD(severity, 'critical', 'high')")
+            ->orderBy('submitted_at', 'asc')
+            ->limit(10)
+            ->get()
+            ->map(function ($issue) {
+                $daysOpen = $issue->submitted_at ? now()->diffInDays($issue->submitted_at) : 0;
+
+                return [
+                    'id' => $issue->id,
+                    'student_name' => $issue->student->name ?? 'Unknown',
+                    'matric_no' => $issue->student->matric_no ?? '',
+                    'group' => $issue->group->name ?? 'N/A',
+                    'category' => $issue->category_display,
+                    'severity' => $issue->severity,
+                    'severity_display' => $issue->severity_display,
+                    'status' => $issue->status,
+                    'status_display' => $issue->status_display,
+                    'days_open' => $daysOpen,
+                    'assigned_to' => $issue->assignedTo->name ?? 'Unassigned',
+                    'title' => $issue->title,
+                ];
+            })->toArray();
+    }
+
+    /**
+     * Get workplace issue response metrics.
+     */
+    private function getWorkplaceIssueMetrics(): array
+    {
+        // Average response time (time to first review)
+        $avgResponseTime = WorkplaceIssueReport::whereNotNull('reviewed_at')
+            ->whereNotNull('submitted_at')
+            ->get()
+            ->map(function ($issue) {
+                return $issue->submitted_at->diffInHours($issue->reviewed_at);
+            })
+            ->average();
+
+        // Average resolution time
+        $avgResolutionTime = WorkplaceIssueReport::whereNotNull('resolved_at')
+            ->whereNotNull('submitted_at')
+            ->get()
+            ->map(function ($issue) {
+                return $issue->submitted_at->diffInDays($issue->resolved_at);
+            })
+            ->average();
+
+        // Student satisfaction (count of issues with feedback)
+        $totalResolved = WorkplaceIssueReport::where('status', 'resolved')->count();
+        $withFeedback = WorkplaceIssueReport::where('status', 'resolved')
+            ->whereNotNull('student_feedback')
+            ->count();
+
+        return [
+            'avg_response_hours' => $avgResponseTime ? round($avgResponseTime, 1) : 0,
+            'avg_resolution_days' => $avgResolutionTime ? round($avgResolutionTime, 1) : 0,
+            'feedback_rate' => $totalResolved > 0 ? round(($withFeedback / $totalResolved) * 100) : 0,
+            'total_resolved' => $totalResolved,
+            'with_feedback' => $withFeedback,
+        ];
     }
 
     /**
@@ -452,6 +569,30 @@ class DashboardController extends Controller
                 'type' => 'danger',
                 'message' => "{$expiringAgreements} agreement(s) expiring within 90 days",
                 'link' => route('admin.agreements.index'),
+            ];
+        }
+
+        // Critical workplace issues
+        $criticalIssues = WorkplaceIssueReport::open()
+            ->where('severity', 'critical')
+            ->count();
+        if ($criticalIssues > 0) {
+            $alerts[] = [
+                'type' => 'danger',
+                'message' => "{$criticalIssues} critical workplace issue(s) requiring immediate attention",
+                'link' => route('coordinator.workplace-issues.index'),
+            ];
+        }
+
+        // High severity workplace issues
+        $highIssues = WorkplaceIssueReport::open()
+            ->where('severity', 'high')
+            ->count();
+        if ($highIssues > 0) {
+            $alerts[] = [
+                'type' => 'warning',
+                'message' => "{$highIssues} high-severity workplace issue(s) need review",
+                'link' => route('coordinator.workplace-issues.index'),
             ];
         }
 

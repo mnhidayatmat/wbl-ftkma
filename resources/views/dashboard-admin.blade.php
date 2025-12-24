@@ -100,7 +100,7 @@
     <!-- =====================================================
          1. TOP KPI SUMMARY CARDS
     ====================================================== -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <!-- Total Students -->
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg transition-shadow group">
             <div class="flex items-start justify-between">
@@ -233,6 +233,35 @@
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                 <a href="{{ route('placement.index') }}" class="text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">View placements →</a>
+            </div>
+        </div>
+
+        <!-- Workplace Issues -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg transition-shadow group {{ $workplaceIssueStats['critical_high'] > 0 ? 'ring-2 ring-red-400' : '' }}">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Safety Issues</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ number_format($workplaceIssueStats['open']) }}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        @if($workplaceIssueStats['critical_high'] > 0)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                                {{ $workplaceIssueStats['critical_high'] }} urgent
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                All clear
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br {{ $workplaceIssueStats['critical_high'] > 0 ? 'from-red-500 to-red-600' : 'from-orange-500 to-orange-600' }} flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <a href="{{ route('coordinator.workplace-issues.index') }}" class="text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">Manage issues →</a>
             </div>
         </div>
     </div>
@@ -432,79 +461,210 @@
     </div>
 
     <!-- =====================================================
-         5. ACADEMIC & QUALITY ASSURANCE
+         5. WORKPLACE SAFETY & STUDENT WELLBEING
     ====================================================== -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- CLO-PLO Coverage Status -->
+        <!-- Workplace Issues by Status -->
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">CLO–PLO Coverage</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Outcome-Based Education compliance per course</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Workplace Issues by Status</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Student safety and wellbeing reports</p>
             </div>
-            <div class="space-y-4">
-                @foreach($cloPloStatus as $course => $status)
-                <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-[#003A6C] text-white text-xs font-bold">
-                                {{ $course }}
-                            </span>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $course }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $status['mapped'] }}/{{ $status['total'] }} CLOs mapped</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-lg font-bold {{ $status['coverage'] >= 80 ? 'text-green-600' : ($status['coverage'] >= 50 ? 'text-amber-600' : 'text-red-600') }}">
-                                {{ $status['coverage'] }}%
-                            </p>
-                        </div>
+            <div class="h-[250px]">
+                <canvas id="workplaceIssuesByStatusChart"></canvas>
+            </div>
+            <div class="mt-4 space-y-2">
+                @foreach(['new', 'under_review', 'in_progress', 'resolved', 'closed'] as $index => $status)
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full" style="background-color: {{ $workplaceIssuesByStatus['colors'][$index] }}"></span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ $workplaceIssuesByStatus['labels'][$index] }}</span>
                     </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                        <div class="h-2 rounded-full transition-all duration-500
-                            {{ $status['coverage'] >= 80 ? 'bg-green-500' : ($status['coverage'] >= 50 ? 'bg-amber-500' : 'bg-red-500') }}"
-                             style="width: {{ $status['coverage'] }}%"></div>
-                    </div>
-                    <div class="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{{ $status['assessment_allowed'] }} allowed for assessment</span>
-                        <span>{{ $status['used'] }} used</span>
-                    </div>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $workplaceIssuesByStatus['data'][$index] }}</span>
                 </div>
                 @endforeach
             </div>
         </div>
 
-        <!-- Assessment Completion -->
+        <!-- Workplace Issues by Severity -->
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Assessment Completion</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Marks submission progress by course</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Issues by Severity</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Priority level distribution</p>
             </div>
-            <div class="space-y-4">
-                @foreach($assessmentCompletion as $course => $data)
-                <div class="flex items-center gap-4">
-                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold flex-shrink-0">
-                        {{ $course }}
-                    </span>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $data['assessments'] }} assessments</span>
-                            <span class="text-sm font-bold {{ $data['percentage'] >= 80 ? 'text-green-600' : ($data['percentage'] >= 50 ? 'text-amber-600' : 'text-gray-600') }}">
-                                {{ $data['percentage'] }}%
-                            </span>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                            <div class="h-2.5 rounded-full transition-all duration-500
-                                {{ $data['percentage'] >= 80 ? 'bg-green-500' : ($data['percentage'] >= 50 ? 'bg-amber-500' : 'bg-gray-400') }}"
-                                 style="width: {{ $data['percentage'] }}%"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {{ number_format($data['submitted']) }} / {{ number_format($data['total_possible']) }} marks submitted
-                        </p>
+            <div class="h-[250px]">
+                <canvas id="workplaceIssuesBySeverityChart"></canvas>
+            </div>
+            <div class="mt-4 space-y-2">
+                @foreach(['critical', 'high', 'medium', 'low'] as $index => $severity)
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full" style="background-color: {{ $workplaceIssuesBySeverity['colors'][$index] }}"></span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ $workplaceIssuesBySeverity['labels'][$index] }}</span>
                     </div>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $workplaceIssuesBySeverity['data'][$index] }}</span>
                 </div>
                 @endforeach
             </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         6. CRITICAL WORKPLACE ISSUES ALERT PANEL
+    ====================================================== -->
+    @if(count($criticalWorkplaceIssues) > 0)
+    <div class="bg-white dark:bg-gray-800 rounded-xl border-2 border-red-200 dark:border-red-800 p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Critical Workplace Issues</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Requires immediate attention</p>
+                </div>
+            </div>
+            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 text-sm font-bold">
+                {{ count($criticalWorkplaceIssues) }} urgent
+            </span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                        <th class="text-left py-2 font-medium">Student</th>
+                        <th class="text-left py-2 font-medium">Category</th>
+                        <th class="text-left py-2 font-medium">Severity</th>
+                        <th class="text-left py-2 font-medium">Status</th>
+                        <th class="text-left py-2 font-medium">Assigned To</th>
+                        <th class="text-right py-2 font-medium">Days Open</th>
+                        <th class="text-right py-2 font-medium">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    @foreach($criticalWorkplaceIssues as $issue)
+                    <tr class="border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                        <td class="py-3">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ $issue['student_name'] }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $issue['matric_no'] }} • {{ $issue['group'] }}</p>
+                        </td>
+                        <td class="py-3 text-gray-600 dark:text-gray-400">{{ Str::limit($issue['category'], 25) }}</td>
+                        <td class="py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                {{ $issue['severity'] === 'critical' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' : 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100' }}">
+                                {{ $issue['severity_display'] }}
+                            </span>
+                        </td>
+                        <td class="py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                {{ $issue['status'] === 'new' ? 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100' : '' }}
+                                {{ $issue['status'] === 'under_review' ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' : '' }}
+                                {{ $issue['status'] === 'in_progress' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' : '' }}">
+                                {{ $issue['status_display'] }}
+                            </span>
+                        </td>
+                        <td class="py-3 text-gray-600 dark:text-gray-400">{{ $issue['assigned_to'] }}</td>
+                        <td class="py-3 text-right">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold
+                                {{ $issue['days_open'] > 7 ? 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-200' }}">
+                                {{ $issue['days_open'] }}d
+                            </span>
+                        </td>
+                        <td class="py-3 text-right">
+                            <a href="{{ route('coordinator.workplace-issues.show', $issue['id']) }}"
+                               class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-[#0084C5] hover:bg-[#003A6C] rounded-lg transition-colors">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- =====================================================
+         7. WORKPLACE ISSUE RESPONSE METRICS
+    ====================================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Average Response Time -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Avg Response Time</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $workplaceIssueMetrics['avg_response_hours'] }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">hours to first review</p>
+        </div>
+
+        <!-- Average Resolution Time -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl border border-green-200 dark:border-green-800 p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Avg Resolution Time</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $workplaceIssueMetrics['avg_resolution_days'] }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">days to resolve</p>
+        </div>
+
+        <!-- Student Feedback Rate -->
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl border border-purple-200 dark:border-purple-800 p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Student Feedback</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $workplaceIssueMetrics['feedback_rate'] }}%</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $workplaceIssueMetrics['with_feedback'] }}/{{ $workplaceIssueMetrics['total_resolved'] }} provided feedback</p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         8. ASSESSMENT COMPLETION
+    ====================================================== -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Assessment Completion</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Marks submission progress by course</p>
+        </div>
+        <div class="space-y-4">
+            @foreach($assessmentCompletion as $course => $data)
+            <div class="flex items-center gap-4">
+                <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold flex-shrink-0">
+                    {{ $course }}
+                </span>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $data['assessments'] }} assessments</span>
+                        <span class="text-sm font-bold {{ $data['percentage'] >= 80 ? 'text-green-600' : ($data['percentage'] >= 50 ? 'text-amber-600' : 'text-gray-600') }}">
+                            {{ $data['percentage'] }}%
+                        </span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div class="h-2.5 rounded-full transition-all duration-500
+                            {{ $data['percentage'] >= 80 ? 'bg-green-500' : ($data['percentage'] >= 50 ? 'bg-amber-500' : 'bg-gray-400') }}"
+                             style="width: {{ $data['percentage'] }}%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {{ number_format($data['submitted']) }} / {{ number_format($data['total_possible']) }} marks submitted
+                    </p>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
 </div>
@@ -632,6 +792,73 @@ document.addEventListener('DOMContentLoaded', function() {
                             font: {
                                 size: 12
                             }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Workplace Issues by Status (Donut)
+    const issuesStatusCtx = document.getElementById('workplaceIssuesByStatusChart');
+    if (issuesStatusCtx) {
+        new Chart(issuesStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @json($workplaceIssuesByStatus['labels']),
+                datasets: [{
+                    data: @json($workplaceIssuesByStatus['data']),
+                    backgroundColor: @json($workplaceIssuesByStatus['colors']),
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Workplace Issues by Severity (Horizontal Bar)
+    const issuesSeverityCtx = document.getElementById('workplaceIssuesBySeverityChart');
+    if (issuesSeverityCtx) {
+        new Chart(issuesSeverityCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($workplaceIssuesBySeverity['labels']),
+                datasets: [{
+                    label: 'Issues',
+                    data: @json($workplaceIssuesBySeverity['data']),
+                    backgroundColor: @json($workplaceIssuesBySeverity['colors']),
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
                         }
                     }
                 }
