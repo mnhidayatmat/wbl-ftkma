@@ -264,126 +264,295 @@
             </div>
             @endif
 
-            {{-- QUICK ACTIONS (Contextual) --}}
+            {{-- QUICK ACTIONS (Enhanced & Contextual) --}}
             @if((!isset($readOnly) || !$readOnly) && isset($isStudentView) && $isStudentView)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-                <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Quick Actions
-                </h3>
+            <div class="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-900/10 rounded-xl shadow-lg p-5 border-2 border-blue-100 dark:border-blue-900/50">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Quick Actions
+                    </h3>
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
+                        Step {{ $currentStep }} of 7
+                    </span>
+                </div>
 
-                <div class="space-y-3">
+                {{-- Mini Progress Bar --}}
+                <div class="mb-4 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                    <div class="bg-gradient-to-r from-blue-500 to-green-500 h-1.5 rounded-full transition-all duration-500"
+                         style="width: {{ $progressPercentage }}%"></div>
+                </div>
+
+                <div class="space-y-4">
                     @if($tracking->status === 'NOT_APPLIED')
                         {{-- Resume Preparation Stage --}}
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-500">
+                            <p class="text-xs font-bold text-blue-800 dark:text-blue-200 mb-1">📍 Current Stage</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Complete resume inspection to proceed</p>
+                        </div>
+
                         @if(!$canApply)
-                            <a href="{{ route('student.resume.index') }}"
-                               class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
-                                📄 Go to Resume Inspection
-                            </a>
+                            <div class="space-y-2">
+                                <a href="{{ route('student.resume.index') }}"
+                                   class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
+                                    📄 Go to Resume Inspection
+                                </a>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Submit your resume and posters for approval</p>
+                            </div>
+
+                            {{-- Checklist --}}
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-xs">
+                                <p class="font-semibold text-gray-700 dark:text-gray-300 mb-2">📋 Required Steps:</p>
+                                <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-red-500">○</span>
+                                        <span>Upload merged PDF (Resume + Posters)</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-red-500">○</span>
+                                        <span>Wait for coordinator approval</span>
+                                    </li>
+                                </ul>
+                            </div>
                         @else
-                            <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200">
-                                ✅ Resume approved! Wait for SAL release
+                            <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-green-800 dark:text-green-200">Resume Approved!</p>
+                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">Waiting for admin to release SAL</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
+                                <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 What's Next?</p>
+                                <p class="text-xs text-yellow-700 dark:text-yellow-300">Once SAL is released, you can start applying to companies</p>
                             </div>
                         @endif
 
                     @elseif($tracking->status === 'SAL_RELEASED')
                         {{-- SAL Released - Ready to Apply --}}
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-500">
+                            <p class="text-xs font-bold text-blue-800 dark:text-blue-200 mb-1">📍 Current Stage</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Start applying to companies</p>
+                        </div>
+
                         @if($tracking->sal_path)
-                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
-                                📋 Download SAL
-                            </a>
+                            <div class="space-y-2">
+                                <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                                   class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
+                                    📋 Download SAL
+                                </a>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Student Application Letter for companies</p>
+                            </div>
                         @endif
-                        <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm">
+
+                        <div class="space-y-2">
+                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                    class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
                                 📤 Update to "Applied" Status
-                        </button>
+                            </button>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">After submitting applications</p>
+                        </div>
+
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
+                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tip</p>
+                            <p class="text-xs text-yellow-700 dark:text-yellow-300">Apply to 5-10 companies to increase your chances</p>
+                        </div>
 
                     @elseif($tracking->status === 'APPLIED')
                         {{-- Applied - Managing Applications --}}
-                        <button onclick="document.getElementById('addCompanyForm').classList.toggle('hidden')"
-                                class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors text-sm">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-500">
+                            <p class="text-xs font-bold text-blue-800 dark:text-blue-200 mb-1">📍 Current Stage</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Track applications & wait for interviews</p>
+                        </div>
+
+                        {{-- Quick Stats --}}
+                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs text-purple-600 dark:text-purple-400">Companies Applied</p>
+                                    <p class="text-2xl font-bold text-purple-700 dark:text-purple-300">{{ $totalApplications }}</p>
+                                </div>
+                                <svg class="w-10 h-10 text-purple-300 dark:text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <button onclick="document.getElementById('addCompanyForm').classList.toggle('hidden')"
+                                    class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
                                 🏢 Add Company Application
-                        </button>
+                            </button>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Track all your applications</p>
+                        </div>
+
                         @if($tracking->sal_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
                             </a>
                         @endif
-                        <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                class="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-colors text-sm">
-                                💼 Update to "Interviewed" Status
-                        </button>
+
+                        <div class="space-y-2">
+                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                    class="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                💼 Got Interview Invitation?
+                            </button>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Update when companies call you</p>
+                        </div>
+
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
+                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tip</p>
+                            <p class="text-xs text-yellow-700 dark:text-yellow-300">Follow up with companies 3-5 days after applying</p>
+                        </div>
 
                     @elseif($tracking->status === 'INTERVIEWED')
                         {{-- Interviewed - Waiting for Offers --}}
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-500">
+                            <p class="text-xs font-bold text-blue-800 dark:text-blue-200 mb-1">📍 Current Stage</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Wait for offers or continue applying</p>
+                        </div>
+
+                        {{-- Quick Stats --}}
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs text-purple-600 dark:text-purple-400">Interviews Done</p>
+                                    <p class="text-2xl font-bold text-purple-700 dark:text-purple-300">{{ $interviewedCount }}</p>
+                                </div>
+                                <svg class="w-10 h-10 text-purple-300 dark:text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            </div>
+                        </div>
+
                         <button onclick="document.getElementById('addCompanyForm').classList.toggle('hidden')"
-                                class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors text-sm">
+                                class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
                                 🏢 Add More Companies
                         </button>
-                        <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors text-sm">
-                                🎉 Report Offer Received
-                        </button>
+
+                        <div class="space-y-2">
+                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                    class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                    🎉 Report Offer Received
+                            </button>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Update when you get an offer letter</p>
+                        </div>
+
                         @if($tracking->sal_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
                             </a>
                         @endif
+
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
+                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tip</p>
+                            <p class="text-xs text-yellow-700 dark:text-yellow-300">Send thank-you emails after interviews!</p>
+                        </div>
 
                     @elseif($tracking->status === 'OFFER_RECEIVED')
                         {{-- Offer Received - Need to Accept --}}
-                        <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-sm">
-                                ✨ Accept Offer & Upload Proof
-                        </button>
+                        <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border-l-4 border-orange-500">
+                            <p class="text-xs font-bold text-orange-800 dark:text-orange-200 mb-1">🎉 Congratulations!</p>
+                            <p class="text-sm text-orange-700 dark:text-orange-300">Accept your offer and upload proof</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                    class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                    ✨ Accept Offer & Upload Proof
+                            </button>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Upload your acceptance letter/email</p>
+                        </div>
+
                         @if($tracking->sal_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                               class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
                             </a>
                         @endif
 
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
+                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">⚠️ Important</p>
+                            <p class="text-xs text-yellow-700 dark:text-yellow-300">Accept within offer deadline to secure placement</p>
+                        </div>
+
                     @elseif($tracking->status === 'ACCEPTED')
                         {{-- Accepted - Waiting for SCL --}}
+                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border-l-4 border-green-500">
+                            <p class="text-xs font-bold text-green-800 dark:text-green-200 mb-1">✅ Offer Accepted!</p>
+                            <p class="text-sm text-green-700 dark:text-green-300">Waiting for SCL release</p>
+                        </div>
+
                         @if($tracking->confirmation_proof_path)
-                            <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200">
-                                ✅ Acceptance proof uploaded
+                            <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-green-800 dark:text-green-200">Proof Uploaded</p>
+                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">Acceptance proof submitted</p>
+                                    </div>
+                                </div>
                             </div>
                         @else
-                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                    class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm">
-                                    📎 Upload Acceptance Proof
-                            </button>
+                            <div class="space-y-2">
+                                <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
+                                        class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                        📎 Upload Acceptance Proof
+                                </button>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Required for SCL processing</p>
+                            </div>
                         @endif
+
                         @if($tracking->sal_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
                             </a>
                         @endif
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200">
-                            ⏳ Waiting for SCL release from admin
+
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div>
+                                    <p class="text-xs font-semibold text-blue-800 dark:text-blue-200">Waiting...</p>
+                                    <p class="text-xs text-blue-700 dark:text-blue-300">Admin will release your SCL soon</p>
+                                </div>
+                            </div>
                         </div>
 
                     @elseif($tracking->status === 'SCL_RELEASED')
                         {{-- SCL Released - Journey Complete --}}
+                        <div class="bg-gradient-to-r from-green-400 to-blue-500 rounded-lg p-4 text-white text-center">
+                            <p class="text-3xl mb-2">🎉</p>
+                            <p class="font-bold text-lg">Journey Complete!</p>
+                            <p class="text-xs opacity-90 mt-1">Congratulations on your placement</p>
+                        </div>
+
                         @if($tracking->scl_path)
-                            <a href="{{ route('student.placement.download-scl') }}" target="_blank"
-                               class="block px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
-                                📜 Download SCL
-                            </a>
+                            <div class="space-y-2">
+                                <a href="{{ route('student.placement.download-scl') }}" target="_blank"
+                                   class="block px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
+                                    📜 Download SCL
+                                </a>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Student Confirmation Letter</p>
+                            </div>
                         @endif
+
                         @if($tracking->sal_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-center text-sm">
+                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
                             </a>
                         @endif
-                        <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200 text-center">
-                            🎉 Placement journey complete!
+
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-500">
+                            <p class="text-xs font-semibold text-blue-800 dark:text-blue-200 mb-1">📚 What's Next?</p>
+                            <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                                <li>• Prepare for your internship</li>
+                                <li>• Review company guidelines</li>
+                                <li>• Stay in touch with coordinator</li>
+                            </ul>
                         </div>
                     @endif
                 </div>
