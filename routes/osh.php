@@ -24,8 +24,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Student routes for OSH overview
     Route::middleware('role:student')->prefix('student/osh')->name('student.osh.')->group(function () {
-        Route::get('overview', function () {
-            return view('student.osh.overview');
-        })->name('overview');
+        Route::get('overview', [\App\Http\Controllers\Student\StudentOshOverviewController::class, 'index'])
+            ->name('overview');
     });
 });

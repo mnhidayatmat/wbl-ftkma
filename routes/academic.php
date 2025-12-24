@@ -598,8 +598,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Student Overview Routes
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
-        Route::get('ppe/overview', function () {
-            return view('student.ppe.overview');
-        })->name('ppe.overview');
+        Route::get('ppe/overview', [\App\Http\Controllers\Student\StudentPpeOverviewController::class, 'index'])
+            ->name('ppe.overview');
     });
 });

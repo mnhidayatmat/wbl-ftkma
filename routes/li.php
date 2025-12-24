@@ -27,7 +27,6 @@ Route::middleware(['auth', 'role:supervisor_li,admin'])->group(function () {
 
 // Student LI Overview
 Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('student/li/overview', function () {
-        return view('student.li.overview');
-    })->name('student.li.overview');
+    Route::get('student/li/overview', [\App\Http\Controllers\Student\StudentLiOverviewController::class, 'index'])
+        ->name('student.li.overview');
 });

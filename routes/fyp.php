@@ -27,7 +27,6 @@ Route::middleware(['auth', 'role:at,admin'])->group(function () {
 
 // Student FYP Overview
 Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('student/fyp/overview', function () {
-        return view('student.fyp.overview');
-    })->name('student.fyp.overview');
+    Route::get('student/fyp/overview', [\App\Http\Controllers\Student\StudentFypOverviewController::class, 'index'])
+        ->name('student.fyp.overview');
 });
