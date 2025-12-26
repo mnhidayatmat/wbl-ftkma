@@ -22,9 +22,9 @@
         <div class="card-umpsa p-6 mb-6">
             <div class="flex flex-col items-center">
                 @if($student->image_path)
-                    <img src="{{ asset('storage/' . $student->image_path) }}" alt="{{ $student->name }}" class="w-48 h-48 object-cover rounded-full border-4 border-umpsa-primary shadow-lg mb-4">
+                    <img src="{{ asset('storage/' . $student->image_path) }}" alt="{{ $student->name }}" class="w-48 h-48 object-cover rounded-lg border-4 border-umpsa-primary shadow-lg mb-4">
                 @else
-                    <div class="w-48 h-48 bg-gradient-to-br from-umpsa-primary to-umpsa-secondary rounded-full border-4 border-umpsa-primary shadow-lg flex items-center justify-center mb-4">
+                    <div class="w-48 h-48 bg-gradient-to-br from-umpsa-primary to-umpsa-secondary rounded-lg border-4 border-umpsa-primary shadow-lg flex items-center justify-center mb-4">
                         <svg class="w-28 h-28 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                         </svg>
