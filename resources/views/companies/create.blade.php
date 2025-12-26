@@ -8,15 +8,28 @@
 </div>
 
 <div class="card-umpsa p-6">
-    <form action="{{ route('companies.store') }}" method="POST">
+    <form action="{{ route('admin.companies.store') }}" method="POST">
         @csrf
 
         <div class="mb-4">
             <label for="company_name" class="block text-sm font-semibold text-umpsa-deep-blue dark:text-gray-300 mb-2">Company Name</label>
-            <input type="text" name="company_name" id="company_name" value="{{ old('company_name') }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal @error('company_name') border-red-500 @enderror" required>
+            <input type="text" name="company_name" id="company_name" value="{{ old('company_name') }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal @error('company_name') border-red-500 @enderror" required autocomplete="off">
             @error('company_name')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
+
+            <!-- Search Results Dropdown -->
+            <div id="search-results" class="hidden mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-64 overflow-y-auto">
+                <!-- Results will be populated here via JavaScript -->
+            </div>
+
+            <!-- Info message -->
+            <p class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                <svg class="inline w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Start typing to check for existing companies
+            </p>
         </div>
 
         <div class="mb-4">
@@ -94,7 +107,7 @@
         </div>
 
         <div class="flex items-center justify-end space-x-4">
-            <a href="{{ route('companies.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">Cancel</a>
+            <a href="{{ route('admin.companies.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">Cancel</a>
             <button type="submit" class="btn-umpsa-primary">Create Company</button>
         </div>
     </form>
@@ -104,7 +117,7 @@
     function handlePositionChange(select) {
         const otherContainer = document.getElementById('position_other_container');
         const otherInput = document.getElementById('position_other');
-        
+
         if (select.value === 'Other') {
             otherContainer.style.display = 'block';
             otherInput.required = true;
@@ -114,11 +127,11 @@
             otherInput.value = '';
         }
     }
-    
+
     function handleCategoryChange(select) {
         const otherContainer = document.getElementById('category_other_container');
         const otherInput = document.getElementById('category_other');
-        
+
         if (select.value === 'Other') {
             otherContainer.style.display = 'block';
             otherInput.required = true;
@@ -128,5 +141,88 @@
             otherInput.value = '';
         }
     }
+
+    // Company name search functionality
+    let searchTimeout;
+    const companyNameInput = document.getElementById('company_name');
+    const searchResults = document.getElementById('search-results');
+
+    companyNameInput.addEventListener('input', function() {
+        const query = this.value.trim();
+
+        // Clear previous timeout
+        clearTimeout(searchTimeout);
+
+        // Hide results if query is too short
+        if (query.length < 2) {
+            searchResults.classList.add('hidden');
+            searchResults.innerHTML = '';
+            return;
+        }
+
+        // Debounce the search request
+        searchTimeout = setTimeout(() => {
+            fetch(`{{ route('admin.companies.search') }}?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        searchResults.innerHTML = `
+                            <div class="p-3 text-sm text-green-600 dark:text-green-400">
+                                <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                No existing companies found. Safe to proceed.
+                            </div>
+                        `;
+                        searchResults.classList.remove('hidden');
+                    } else {
+                        let html = `
+                            <div class="p-2 bg-yellow-50 dark:bg-yellow-900 border-b border-yellow-200 dark:border-yellow-700">
+                                <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200">
+                                    ⚠ Found ${data.length} similar ${data.length === 1 ? 'company' : 'companies'}. Please verify before creating:
+                                </p>
+                            </div>
+                        `;
+
+                        data.forEach(company => {
+                            html += `
+                                <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                                    <div class="font-semibold text-sm text-gray-900 dark:text-white">${company.company_name}</div>
+                                    <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                                        <div>PIC: ${company.pic_name || 'N/A'}</div>
+                                        <div>Email: ${company.email || 'N/A'}</div>
+                                        <div>Phone: ${company.phone || 'N/A'}</div>
+                                    </div>
+                                    <a href="{{ route('admin.companies.index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block">
+                                        View Company →
+                                    </a>
+                                </div>
+                            `;
+                        });
+
+                        searchResults.innerHTML = html;
+                        searchResults.classList.remove('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    searchResults.classList.add('hidden');
+                });
+        }, 300); // 300ms debounce
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!companyNameInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+
+    // Show results again when focusing on input if it has content
+    companyNameInput.addEventListener('focus', function() {
+        if (this.value.trim().length >= 2 && searchResults.innerHTML) {
+            searchResults.classList.remove('hidden');
+        }
+    });
 </script>
 @endsection

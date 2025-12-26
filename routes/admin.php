@@ -26,6 +26,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('students/course-assign/{assignment}', [StudentAssignmentController::class, 'removeStudentCourseAssignment'])->name('students.course-assign.remove');
 
     // Companies Management
+    Route::get('companies/search', [CompanyController::class, 'search'])->name('companies.search');
     Route::resource('companies', CompanyController::class);
 
     // Students Management
