@@ -19,12 +19,19 @@ class StudentsPreviewImport implements ToArray, WithHeadingRow
     /**
      * Transform the imported data into an array with validation results
      */
-    public function array(array $rows)
+    public function array(array $array)
     {
-        $this->previewData = [];
+        // The $array parameter contains the rows from the current sheet
+        // Each row is already an associative array with column headers as keys
 
-        foreach ($rows as $index => $row) {
-            $rowNumber = $index + 2; // +2 because Excel is 1-indexed and first row is header
+        $rowIndex = 0;
+        foreach ($array as $row) {
+            // Skip if row is not an array (shouldn't happen, but safety check)
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $rowNumber = $rowIndex + 2; // +2 because Excel is 1-indexed and first row is header
 
             // Validate the row
             $validationResult = $this->validateRow($row, $rowNumber);
@@ -39,6 +46,8 @@ class StudentsPreviewImport implements ToArray, WithHeadingRow
                 'valid' => $validationResult['valid'],
                 'errors' => $validationResult['errors'],
             ];
+
+            $rowIndex++;
         }
 
         return $this->previewData;

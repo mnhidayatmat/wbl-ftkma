@@ -136,7 +136,14 @@ class StudentController extends Controller
             'interests' => ['nullable', 'string'],
             'preferred_industry' => ['nullable', 'string', 'max:255'],
             'preferred_location' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:2048'], // 2MB max
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('students', 'public');
+            $validated['image_path'] = $imagePath;
+        }
 
         // Decode skills JSON if present
         if (isset($validated['skills'])) {
@@ -207,7 +214,19 @@ class StudentController extends Controller
             'interests' => ['nullable', 'string'],
             'preferred_industry' => ['nullable', 'string', 'max:255'],
             'preferred_location' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:2048'], // 2MB max
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($student->image_path) {
+                \Storage::disk('public')->delete($student->image_path);
+            }
+
+            $imagePath = $request->file('image')->store('students', 'public');
+            $validated['image_path'] = $imagePath;
+        }
 
         // Safely extract values with null fallback
         $atId = ! empty($validated['at_id']) ? $validated['at_id'] : null;
@@ -238,6 +257,7 @@ class StudentController extends Controller
             'interests' => $validated['interests'] ?? null,
             'preferred_industry' => $validated['preferred_industry'] ?? null,
             'preferred_location' => $validated['preferred_location'] ?? null,
+            'image_path' => $validated['image_path'] ?? $student->image_path,
         ]);
 
         return redirect()->route('admin.students.index')
@@ -338,7 +358,7 @@ class StudentController extends Controller
         try {
             // Parse and validate the file
             $import = new StudentsPreviewImport();
-            $data = Excel::toArray($import, $request->file('file'));
+            Excel::import($import, $request->file('file'));
             $previewData = $import->getPreviewData();
 
             // Calculate statistics
