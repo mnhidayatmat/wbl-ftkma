@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AssessmentController;
 use App\Http\Controllers\Admin\StudentAssignmentController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\RecruitmentPoolController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +29,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('companies', CompanyController::class);
 
     // Students Management
+    Route::get('students/template', [StudentController::class, 'downloadTemplate'])->name('students.template');
+    Route::post('students/preview-import', [StudentController::class, 'previewImport'])->name('students.preview-import');
+    Route::post('students/confirm-import', [StudentController::class, 'confirmImport'])->name('students.confirm-import');
+    Route::get('students/download-errors', [StudentController::class, 'downloadErrors'])->name('students.download-errors');
+    Route::post('students/cancel-import', [StudentController::class, 'cancelImport'])->name('students.cancel-import');
+    Route::post('students/import', [StudentController::class, 'import'])->name('students.import');
     Route::resource('students', StudentController::class);
 
     // Assessment Management (Admin only)
@@ -66,4 +73,31 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('agreements/{agreement}', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'update'])->name('agreements.update');
     Route::delete('agreements/{agreement}', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'destroy'])->name('agreements.destroy');
     Route::patch('agreements/{agreement}/status', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'updateStatus'])->name('agreements.update-status');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Recruitment Routes (Admin & Coordinator)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('recruitment')->name('recruitment.')->group(function () {
+    // Recruitment Pool - filtering and management
+    Route::get('/pool', [RecruitmentPoolController::class, 'index'])->name('pool.index')
+        ->middleware('role:admin,coordinator');
+
+    // Export routes
+    Route::post('/export/excel', [RecruitmentPoolController::class, 'exportExcel'])->name('export.excel')
+        ->middleware('role:admin,coordinator');
+    Route::post('/export/pdf', [RecruitmentPoolController::class, 'exportPdf'])->name('export.pdf')
+        ->middleware('role:admin,coordinator');
+    Route::post('/export/resumes', [RecruitmentPoolController::class, 'downloadResumes'])->name('export.resumes')
+        ->middleware('role:admin,coordinator');
+
+    // Email handover
+    Route::post('/email-recruiter', [RecruitmentPoolController::class, 'emailToRecruiter'])->name('email-recruiter')
+        ->middleware('role:admin,coordinator');
+
+    // Handover history
+    Route::get('/handovers', [RecruitmentPoolController::class, 'handovers'])->name('handovers.index')
+        ->middleware('role:admin,coordinator');
 });

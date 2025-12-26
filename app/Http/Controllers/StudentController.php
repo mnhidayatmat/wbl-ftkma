@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Student;
 use App\Models\WblGroup;
+use App\Imports\StudentsImport;
+use App\Imports\StudentsPreviewImport;
+use App\Exports\StudentsTemplateExport;
+use App\Exports\StudentsErrorsExport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
@@ -117,10 +122,26 @@ class StudentController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'matric_no' => ['required', 'string', 'max:50', 'unique:students,matric_no'],
-            'programme' => ['required', 'string', 'max:255'],
-            'group_id' => ['required', 'exists:wbl_groups,id'],
+            'programme' => ['nullable', 'string', 'max:255'],
+            'group_id' => ['nullable', 'exists:wbl_groups,id'],
             'company_id' => ['nullable', 'exists:companies,id'],
+            'cgpa' => ['nullable', 'numeric', 'min:0', 'max:4'],
+            'ic_number' => ['nullable', 'string', 'max:20'],
+            'parent_name' => ['nullable', 'string', 'max:255'],
+            'parent_phone_number' => ['nullable', 'string', 'max:20'],
+            'next_of_kin' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_phone_number' => ['nullable', 'string', 'max:20'],
+            'home_address' => ['nullable', 'string'],
+            'skills' => ['nullable', 'json'],
+            'interests' => ['nullable', 'string'],
+            'preferred_industry' => ['nullable', 'string', 'max:255'],
+            'preferred_location' => ['nullable', 'string', 'max:255'],
         ]);
+
+        // Decode skills JSON if present
+        if (isset($validated['skills'])) {
+            $validated['skills'] = json_decode($validated['skills'], true);
+        }
 
         Student::create($validated);
 
@@ -170,16 +191,32 @@ class StudentController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'matric_no' => ['required', 'string', 'max:50', 'unique:students,matric_no,'.$student->id],
-            'programme' => ['required', 'string', 'max:255'],
-            'group_id' => ['required', 'exists:wbl_groups,id'],
+            'programme' => ['nullable', 'string', 'max:255'],
+            'group_id' => ['nullable', 'exists:wbl_groups,id'],
             'company_id' => ['nullable', 'exists:companies,id'],
             'at_id' => ['nullable', 'exists:users,id'],
             'ic_id' => ['nullable', 'exists:users,id'],
+            'cgpa' => ['nullable', 'numeric', 'min:0', 'max:4'],
+            'ic_number' => ['nullable', 'string', 'max:20'],
+            'parent_name' => ['nullable', 'string', 'max:255'],
+            'parent_phone_number' => ['nullable', 'string', 'max:20'],
+            'next_of_kin' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_phone_number' => ['nullable', 'string', 'max:20'],
+            'home_address' => ['nullable', 'string'],
+            'skills' => ['nullable', 'json'],
+            'interests' => ['nullable', 'string'],
+            'preferred_industry' => ['nullable', 'string', 'max:255'],
+            'preferred_location' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Safely extract values with null fallback
         $atId = ! empty($validated['at_id']) ? $validated['at_id'] : null;
         $icId = ! empty($validated['ic_id']) ? $validated['ic_id'] : null;
+
+        // Decode skills JSON if present
+        if (isset($validated['skills'])) {
+            $validated['skills'] = json_decode($validated['skills'], true);
+        }
 
         // Update with null-safe values
         $student->update([
@@ -190,6 +227,17 @@ class StudentController extends Controller
             'company_id' => ! empty($validated['company_id']) ? $validated['company_id'] : null,
             'at_id' => $atId,
             'ic_id' => $icId,
+            'cgpa' => $validated['cgpa'] ?? null,
+            'ic_number' => $validated['ic_number'] ?? null,
+            'parent_name' => $validated['parent_name'] ?? null,
+            'parent_phone_number' => $validated['parent_phone_number'] ?? null,
+            'next_of_kin' => $validated['next_of_kin'] ?? null,
+            'next_of_kin_phone_number' => $validated['next_of_kin_phone_number'] ?? null,
+            'home_address' => $validated['home_address'] ?? null,
+            'skills' => $validated['skills'] ?? null,
+            'interests' => $validated['interests'] ?? null,
+            'preferred_industry' => $validated['preferred_industry'] ?? null,
+            'preferred_location' => $validated['preferred_location'] ?? null,
         ]);
 
         return redirect()->route('admin.students.index')
@@ -221,5 +269,221 @@ class StudentController extends Controller
 
         return redirect()->route('admin.students.index')
             ->with('success', 'Student deleted successfully.');
+    }
+
+    /**
+     * Import students from Excel file.
+     */
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // 10MB max
+        ]);
+
+        try {
+            $import = new StudentsImport();
+            Excel::import($import, $request->file('file'));
+
+            $errors = $import->getErrors();
+            $failures = $import->getFailures();
+
+            // Check if there are any errors or failures
+            if (count($errors) > 0 || count($failures) > 0) {
+                $errorMessages = [];
+
+                // Add general errors
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error;
+                }
+
+                // Add validation failures with row numbers
+                foreach ($failures as $failure) {
+                    $row = $failure->row();
+                    $attribute = $failure->attribute();
+                    $errorMessages[] = "Row {$row}: {$attribute} - " . implode(', ', $failure->errors());
+                }
+
+                // Return with errors but also success for rows that were imported
+                return redirect()->route('admin.students.index')
+                    ->with('warning', 'Import completed with some errors. ' . count($errorMessages) . ' row(s) failed.')
+                    ->with('import_errors', $errorMessages);
+            }
+
+            return redirect()->route('admin.students.index')
+                ->with('success', 'Students imported successfully!');
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.students.index')
+                ->with('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download Excel template for student import.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new StudentsTemplateExport(), 'students_import_template.xlsx');
+    }
+
+    /**
+     * Preview students import before committing to database.
+     */
+    public function previewImport(Request $request): RedirectResponse|View
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // 10MB max
+        ]);
+
+        try {
+            // Parse and validate the file
+            $import = new StudentsPreviewImport();
+            $data = Excel::toArray($import, $request->file('file'));
+            $previewData = $import->getPreviewData();
+
+            // Calculate statistics
+            $stats = [
+                'total' => count($previewData),
+                'valid' => count(array_filter($previewData, fn($row) => $row['valid'])),
+                'invalid' => count(array_filter($previewData, fn($row) => !$row['valid'])),
+            ];
+
+            // Store in session
+            session([
+                'student_import_preview' => [
+                    'data' => $previewData,
+                    'stats' => $stats,
+                    'uploaded_at' => now()->timestamp,
+                ]
+            ]);
+
+            // Redirect to preview page
+            return view('students.import_preview', [
+                'previewData' => $previewData,
+                'stats' => $stats,
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.students.index')
+                ->with('error', 'Failed to process file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Confirm and execute the import after preview.
+     */
+    public function confirmImport(Request $request): RedirectResponse
+    {
+        // Check if preview data exists in session
+        $previewSession = session('student_import_preview');
+
+        if (!$previewSession) {
+            return redirect()->route('admin.students.index')
+                ->with('error', 'No import data found. Please upload a file first.');
+        }
+
+        $previewData = $previewSession['data'];
+        $stats = $previewSession['stats'];
+
+        try {
+            $imported = 0;
+            $skipped = 0;
+
+            // Import only valid rows
+            foreach ($previewData as $row) {
+                if ($row['valid']) {
+                    $data = $row['data'];
+
+                    // Parse skills if needed
+                    $skills = null;
+                    if (!empty($data['skills'])) {
+                        if (is_string($data['skills'])) {
+                            $skills = array_map('trim', explode(',', $data['skills']));
+                        } else {
+                            $skills = $data['skills'];
+                        }
+                    }
+
+                    Student::create([
+                        'name' => $data['name'],
+                        'matric_no' => $data['matric_no'],
+                        'programme' => $data['programme'] ?: null,
+                        'group_id' => $data['group_id'],
+                        'company_id' => $data['company_id'],
+                        'cgpa' => $data['cgpa'] ?: null,
+                        'ic_number' => $data['ic_number'] ?: null,
+                        'mobile_phone' => $data['mobile_phone'] ?: null,
+                        'parent_name' => $data['parent_name'] ?: null,
+                        'parent_phone_number' => $data['parent_phone_number'] ?: null,
+                        'next_of_kin' => $data['next_of_kin'] ?: null,
+                        'next_of_kin_phone_number' => $data['next_of_kin_phone_number'] ?: null,
+                        'home_address' => $data['home_address'] ?: null,
+                        'background' => $data['background'] ?: null,
+                        'skills' => $skills,
+                        'interests' => $data['interests'] ?: null,
+                        'preferred_industry' => $data['preferred_industry'] ?: null,
+                        'preferred_location' => $data['preferred_location'] ?: null,
+                    ]);
+
+                    $imported++;
+                } else {
+                    $skipped++;
+                }
+            }
+
+            // Clear session data
+            session()->forget('student_import_preview');
+
+            // Build success message
+            $message = "Successfully imported {$imported} student(s).";
+            if ($skipped > 0) {
+                $message .= " {$skipped} row(s) were skipped due to validation errors.";
+            }
+
+            return redirect()->route('admin.students.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.students.index')
+                ->with('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download error rows as Excel file.
+     */
+    public function downloadErrors()
+    {
+        $previewSession = session('student_import_preview');
+
+        if (!$previewSession) {
+            return redirect()->route('admin.students.index')
+                ->with('error', 'No import data found.');
+        }
+
+        // Get only invalid rows
+        $invalidRows = array_filter($previewSession['data'], fn($row) => !$row['valid']);
+
+        if (empty($invalidRows)) {
+            return redirect()->back()
+                ->with('info', 'No errors to download.');
+        }
+
+        $timestamp = date('Y-m-d_His');
+        return Excel::download(
+            new StudentsErrorsExport(array_values($invalidRows)),
+            "students_import_errors_{$timestamp}.xlsx"
+        );
+    }
+
+    /**
+     * Cancel import and clear session data.
+     */
+    public function cancelImport(): RedirectResponse
+    {
+        session()->forget('student_import_preview');
+
+        return redirect()->route('admin.students.index')
+            ->with('info', 'Import cancelled.');
     }
 }
