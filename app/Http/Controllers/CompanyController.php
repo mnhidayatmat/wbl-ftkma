@@ -21,11 +21,33 @@ class CompanyController extends Controller
     public function index(): View
     {
         $companies = Company::withCount('students')
-            ->with('mou')
+            ->with(['mou', 'agreements' => function($query) {
+                $query->orderByRaw("CASE WHEN status = 'Active' THEN 1 WHEN status = 'Pending' THEN 2 ELSE 3 END")
+                      ->orderBy('created_at', 'desc');
+            }])
             ->latest()
             ->paginate(15);
 
         return view('companies.index', compact('companies'));
+    }
+
+    /**
+     * Search for companies by name (AJAX endpoint).
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('query', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $companies = Company::where('company_name', 'LIKE', "%{$query}%")
+            ->select('id', 'company_name', 'email', 'phone', 'pic_name')
+            ->limit(10)
+            ->get();
+
+        return response()->json($companies);
     }
 
     /**

@@ -12,7 +12,7 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-2">Manage industry partners and MoU/MoA tracking</p>
             </div>
             @if(auth()->user()->isAdmin())
-            <a href="{{ route('companies.create') }}" class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors">
+            <a href="{{ route('admin.companies.create') }}" class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors">
                 Add New Company
             </a>
             @endif
@@ -35,7 +35,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Email</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Phone</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Students</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">MoU Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Agreement Status</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -60,9 +60,16 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
-                                @if($company->mou)
-                                    @php
-                                        $badgeColor = match($company->mou->status) {
+                                @php
+                                    // Check for active agreement first (unified system)
+                                    $activeAgreement = $company->agreements->where('status', 'Active')->first();
+                                    // If no active, get the most recent one
+                                    $agreement = $activeAgreement ?? $company->agreements->first();
+
+                                    // Fall back to old MoU if no unified agreements exist
+                                    if (!$agreement && $company->mou) {
+                                        $legacyStatus = $company->mou->status;
+                                        $badgeColor = match($legacyStatus) {
                                             'Signed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
                                             'In Progress' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
                                             'Not Responding' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
@@ -70,9 +77,36 @@
                                             'Expired' => 'bg-black text-white dark:bg-gray-900 dark:text-gray-100',
                                             default => 'bg-gray-100 text-gray-800',
                                         };
-                                    @endphp
+                                    } elseif ($agreement) {
+                                        $badgeColor = match($agreement->status) {
+                                            'Active' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                            'Pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                            'Expired' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                            'Terminated' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+                                            'Draft' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                                            default => 'bg-gray-100 text-gray-800',
+                                        };
+                                        $typeColor = match($agreement->agreement_type) {
+                                            'MoU' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+                                            'MoA' => 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+                                            'LOI' => 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+                                            default => 'bg-gray-50 text-gray-700',
+                                        };
+                                    }
+                                @endphp
+
+                                @if($agreement)
+                                    <div class="flex flex-col gap-1">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $typeColor }}">
+                                            {{ $agreement->agreement_type }}
+                                        </span>
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $badgeColor }}">
+                                            {{ $agreement->status }}
+                                        </span>
+                                    </div>
+                                @elseif($company->mou)
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $badgeColor }}">
-                                        {{ $company->mou->status }}
+                                        MoU: {{ $legacyStatus }}
                                     </span>
                                     @if($company->mou->isExpired())
                                         <span class="ml-1 text-xs text-red-600 dark:text-red-400">⚠</span>
@@ -84,14 +118,14 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('companies.show', $company) }}" class="text-[#0084C5] hover:text-[#003A6C] dark:text-[#00AEEF] dark:hover:text-[#0084C5] mr-3 transition-colors">
+                                <a href="{{ route('admin.companies.show', $company) }}" class="text-[#0084C5] hover:text-[#003A6C] dark:text-[#00AEEF] dark:hover:text-[#0084C5] mr-3 transition-colors">
                                     View
                                 </a>
                                 @if(auth()->user()->isAdmin())
-                                <a href="{{ route('companies.edit', $company) }}" class="text-[#0084C5] hover:text-[#003A6C] dark:text-[#00AEEF] dark:hover:text-[#0084C5] mr-3 transition-colors">
+                                <a href="{{ route('admin.companies.edit', $company) }}" class="text-[#0084C5] hover:text-[#003A6C] dark:text-[#00AEEF] dark:hover:text-[#0084C5] mr-3 transition-colors">
                                     Edit
                                 </a>
-                                <form action="{{ route('companies.destroy', $company) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this company?')">
+                                <form action="{{ route('admin.companies.destroy', $company) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this company?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600 transition-colors">
