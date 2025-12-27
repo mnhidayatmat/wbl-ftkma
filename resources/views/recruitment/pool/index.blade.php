@@ -77,10 +77,10 @@
 
                 <!-- Resume Status Filter -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resume Status</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resume Inspection</label>
                     <select name="resume_status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
                         <option value="">All</option>
-                        <option value="approved" {{ request('resume_status') === 'approved' ? 'selected' : '' }}>Approved Only</option>
+                        <option value="approved" {{ request('resume_status') === 'approved' ? 'selected' : '' }}>Recommended</option>
                         <option value="with_resume" {{ request('resume_status') === 'with_resume' ? 'selected' : '' }}>Has Resume</option>
                     </select>
                 </div>
@@ -93,6 +93,7 @@
                         <option value="ready" {{ request('placement_status') === 'ready' ? 'selected' : '' }}>Ready for Placement</option>
                         <option value="not_applied" {{ request('placement_status') === 'not_applied' ? 'selected' : '' }}>Not Applied</option>
                         <option value="applied" {{ request('placement_status') === 'applied' ? 'selected' : '' }}>Applied</option>
+                        <option value="offer_received" {{ request('placement_status') === 'offer_received' ? 'selected' : '' }}>Offer Received</option>
                     </select>
                 </div>
 

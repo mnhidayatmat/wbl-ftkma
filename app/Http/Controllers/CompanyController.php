@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\CompaniesPreviewImport;
 use App\Models\Company;
 use App\Models\CompanyAgreement;
 use App\Models\CompanyContact;
@@ -10,9 +11,9 @@ use App\Models\CompanyNote;
 use App\Models\Moa;
 use App\Models\Mou;
 use App\Models\Student;
-use App\Imports\CompaniesImport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -26,18 +27,18 @@ class CompanyController extends Controller
     {
         $search = $request->input('search');
         $query = Company::withCount('students')
-            ->with(['mou', 'agreements' => function($query) {
+            ->with(['mou', 'agreements' => function ($query) {
                 $query->orderByRaw("CASE WHEN status = 'Active' THEN 1 WHEN status = 'Pending' THEN 2 ELSE 3 END")
-                      ->orderBy('created_at', 'desc');
+                    ->orderBy('created_at', 'desc');
             }]);
 
         // Search filter
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('company_name', 'LIKE', "%{$search}%")
-                  ->orWhere('pic_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%")
-                  ->orWhere('phone', 'LIKE', "%{$search}%");
+                    ->orWhere('pic_name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
             });
         }
 
@@ -46,16 +47,16 @@ class CompanyController extends Controller
             if ($request->agreement_type === 'none') {
                 $query->doesntHave('agreements');
             } else {
-                $query->whereHas('agreements', function($q) use ($request) {
+                $query->whereHas('agreements', function ($q) use ($request) {
                     $q->where('agreement_type', $request->agreement_type)
-                      ->where('status', 'Active');
+                        ->where('status', 'Active');
                 });
             }
         }
 
         // Filter by agreement status
         if ($request->filled('agreement_status')) {
-            $query->whereHas('agreements', function($q) use ($request) {
+            $query->whereHas('agreements', function ($q) use ($request) {
                 $q->where('status', $request->agreement_status);
             });
         }
@@ -63,10 +64,10 @@ class CompanyController extends Controller
         // Filter by expiring dates
         if ($request->filled('expiring')) {
             $months = (int) $request->expiring;
-            $query->whereHas('agreements', function($q) use ($months) {
+            $query->whereHas('agreements', function ($q) use ($months) {
                 $q->where('status', 'Active')
-                  ->where('end_date', '<=', now()->addMonths($months))
-                  ->where('end_date', '>=', now());
+                    ->where('end_date', '<=', now()->addMonths($months))
+                    ->where('end_date', '>=', now());
             });
         }
 
@@ -91,13 +92,13 @@ class CompanyController extends Controller
     {
         return [
             'total_companies' => Company::count(),
-            'with_active_agreements' => Company::whereHas('agreements', function($q) {
+            'with_active_agreements' => Company::whereHas('agreements', function ($q) {
                 $q->where('status', 'Active');
             })->count(),
-            'with_expiring_agreements' => Company::whereHas('agreements', function($q) {
+            'with_expiring_agreements' => Company::whereHas('agreements', function ($q) {
                 $q->where('status', 'Active')
-                  ->where('end_date', '<=', now()->addMonths(3))
-                  ->where('end_date', '>=', now());
+                    ->where('end_date', '<=', now()->addMonths(3))
+                    ->where('end_date', '>=', now());
             })->count(),
             'total_students' => Student::whereNotNull('company_id')->count(),
             'mou_count' => CompanyAgreement::where('agreement_type', 'MoU')
@@ -139,7 +140,9 @@ class CompanyController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Consolidated validation for both company and agreement
         $validated = $request->validate([
+            // Company fields
             'company_name' => ['required', 'string', 'max:255'],
             'category' => ['nullable', 'string', 'max:255'],
             'pic_name' => ['required', 'string', 'max:255'],
@@ -149,39 +152,101 @@ class CompanyController extends Controller
             'industry_type' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'website' => ['nullable', 'url', 'max:255'],
+
+            // Agreement fields
+            'agreement_type' => ['required', 'in:MoU,MoA,LOI'],
+            'agreement_title' => ['nullable', 'string', 'max:255'],
+            'reference_no' => ['nullable', 'string', 'max:100'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'signed_date' => ['nullable', 'date'],
+            'status' => ['required', 'in:Active,Expired,Terminated,Pending,Draft'],
+            'faculty' => ['nullable', 'string', 'max:255'],
+            'programme' => ['nullable', 'string', 'max:255'],
+            'remarks' => ['nullable', 'string', 'max:2000'],
+            'document' => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10MB max
         ]);
 
-        // Handle position_other field
+        // Handle "Other" fields (preserve existing logic)
         if ($request->has('position_other') && $request->position_other) {
             $validated['position'] = $request->position_other;
         }
-
-        // Handle category_other field
         if ($request->has('category_other') && $request->category_other) {
             $validated['category'] = $request->category_other;
         }
 
-        $company = Company::create($validated);
+        // Start database transaction for atomic creation
+        DB::beginTransaction();
 
-        // If position is HR, link IC users from the same company
-        if ($validated['position'] === 'HR' || strtolower($validated['position'] ?? '') === 'hr') {
-            // Find IC users with matching email domain
-            $emailDomain = substr(strrchr($company->email, '@'), 1);
+        try {
+            // Create Company
+            $company = Company::create([
+                'company_name' => $validated['company_name'],
+                'category' => $validated['category'] ?? null,
+                'pic_name' => $validated['pic_name'],
+                'position' => $validated['position'] ?? null,
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'industry_type' => $validated['industry_type'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'website' => $validated['website'] ?? null,
+            ]);
 
-            $icUsers = \App\Models\User::whereHas('roles', function ($query) {
-                $query->where('name', 'ic');
-            })
-                ->where('email', 'like', "%@{$emailDomain}")
-                ->get();
+            // IC auto-linking for HR positions (preserve existing logic)
+            if ($validated['position'] === 'HR' || strtolower($validated['position'] ?? '') === 'hr') {
+                $emailDomain = substr(strrchr($company->email, '@'), 1);
+                $icUsers = \App\Models\User::whereHas('roles', function ($query) {
+                    $query->where('name', 'ic');
+                })
+                    ->where('email', 'like', "%@{$emailDomain}")
+                    ->get();
 
-            // Link IC users to this company
-            foreach ($icUsers as $icUser) {
-                $icUser->update(['company_id' => $company->id]);
+                foreach ($icUsers as $icUser) {
+                    $icUser->update(['company_id' => $company->id]);
+                }
             }
-        }
 
-        return redirect()->route('admin.companies.index')
-            ->with('success', 'Company created successfully.');
+            // Handle agreement document upload
+            $documentPath = null;
+            if ($request->hasFile('document')) {
+                $documentPath = $request->file('document')->store('agreements', 'public');
+            }
+
+            // Create Agreement
+            CompanyAgreement::create([
+                'company_id' => $company->id,
+                'agreement_type' => $validated['agreement_type'],
+                'agreement_title' => $validated['agreement_title'] ?? null,
+                'reference_no' => $validated['reference_no'] ?? null,
+                'start_date' => $validated['start_date'] ?? null,
+                'end_date' => $validated['end_date'] ?? null,
+                'signed_date' => $validated['signed_date'] ?? null,
+                'status' => $validated['status'],
+                'faculty' => $validated['faculty'] ?? null,
+                'programme' => $validated['programme'] ?? null,
+                'remarks' => $validated['remarks'] ?? null,
+                'document_path' => $documentPath,
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.companies.show', $company)
+                ->with('success', 'Company and Agreement created successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Clean up uploaded file if transaction fails
+            if (isset($documentPath) && $documentPath) {
+                Storage::disk('public')->delete($documentPath);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Failed to create company and agreement: '.$e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -220,10 +285,10 @@ class CompanyController extends Controller
         $validated = $request->validate([
             'company_name' => ['required', 'string', 'max:255'],
             'category' => ['nullable', 'string', 'max:255'],
-            'pic_name' => ['required', 'string', 'max:255'],
+            'pic_name' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'industry_type' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'website' => ['nullable', 'url', 'max:255'],
@@ -286,40 +351,102 @@ class CompanyController extends Controller
     }
 
     /**
-     * Import companies from Excel file.
+     * Preview companies import before committing to database.
      */
-    public function import(Request $request): RedirectResponse
+    public function previewImport(Request $request): RedirectResponse|View
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:10240', // Max 10MB
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // 10MB max
         ]);
 
         try {
-            $import = new CompaniesImport();
+            // Parse and validate the file
+            $import = new CompaniesPreviewImport;
             Excel::import($import, $request->file('file'));
+            $previewData = $import->getPreviewData();
 
-            $importedCount = $import->getImportedCount();
-            $errors = $import->getErrors();
-            $failures = $import->getFailures();
+            // Calculate statistics
+            $stats = [
+                'total' => count($previewData),
+                'valid' => count(array_filter($previewData, fn ($row) => $row['valid'])),
+                'invalid' => count(array_filter($previewData, fn ($row) => ! $row['valid'])),
+            ];
 
-            $message = "Successfully imported {$importedCount} companies.";
+            // Store in session
+            session([
+                'company_import_preview' => [
+                    'data' => $previewData,
+                    'stats' => $stats,
+                    'uploaded_at' => now()->timestamp,
+                ],
+            ]);
 
-            if (count($errors) > 0 || count($failures) > 0) {
-                $errorMessages = [];
+            // Redirect to preview page
+            return view('companies.import_preview', [
+                'previewData' => $previewData,
+                'stats' => $stats,
+            ]);
 
-                foreach ($errors as $error) {
-                    $errorMessages[] = $error;
+        } catch (\Exception $e) {
+            return redirect()->route('admin.companies.index')
+                ->with('error', 'Failed to process file: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Confirm and execute the import after preview.
+     */
+    public function confirmImport(Request $request): RedirectResponse
+    {
+        // Check if preview data exists in session
+        $previewSession = session('company_import_preview');
+
+        if (! $previewSession) {
+            return redirect()->route('admin.companies.index')
+                ->with('error', 'No import data found. Please upload a file first.');
+        }
+
+        $previewData = $previewSession['data'];
+        $stats = $previewSession['stats'];
+
+        try {
+            $imported = 0;
+            $skipped = 0;
+
+            // Import only valid rows
+            foreach ($previewData as $row) {
+                if ($row['valid']) {
+                    $data = $row['data'];
+
+                    Company::create([
+                        'company_name' => $data['company_name'],
+                        'category' => $data['category'] ?? 'Other',
+                        'pic_name' => $data['pic_name'],
+                        'email' => $data['email'],
+                        'phone' => $data['phone'],
+                        'address' => $data['address'],
+                        'city' => $data['city'],
+                        'state' => $data['state'],
+                        'postcode' => $data['postcode'],
+                        'country' => $data['country'] ?? 'Malaysia',
+                        'website' => $data['website'],
+                        'industry' => $data['industry'],
+                        'company_size' => $data['company_size'],
+                        'notes' => $data['notes'],
+                    ]);
+
+                    $imported++;
+                } else {
+                    $skipped++;
                 }
+            }
 
-                foreach ($failures as $failure) {
-                    $errorMessages[] = "Row {$failure['row']}: " . implode(', ', $failure['errors']);
-                }
+            // Clear session
+            session()->forget('company_import_preview');
 
-                session()->flash('import_errors', $errorMessages);
-
-                if ($importedCount > 0) {
-                    $message .= " Some records had errors and were skipped.";
-                }
+            $message = "Successfully imported {$imported} companies.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} rows were skipped due to validation errors.";
             }
 
             return redirect()->route('admin.companies.index')
@@ -327,8 +454,19 @@ class CompanyController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->route('admin.companies.index')
-                ->with('error', 'Import failed: ' . $e->getMessage());
+                ->with('error', 'Import failed: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Cancel the import preview.
+     */
+    public function cancelImport(): RedirectResponse
+    {
+        session()->forget('company_import_preview');
+
+        return redirect()->route('admin.companies.index')
+            ->with('info', 'Import cancelled.');
     }
 
     /**
@@ -337,7 +475,7 @@ class CompanyController extends Controller
     public function downloadTemplate()
     {
         return Excel::download(
-            new \App\Exports\CompaniesTemplateExport(),
+            new \App\Exports\CompaniesTemplateExport,
             'companies_import_template.xlsx'
         );
     }

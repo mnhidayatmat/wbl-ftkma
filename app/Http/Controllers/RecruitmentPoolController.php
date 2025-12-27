@@ -77,6 +77,11 @@ class RecruitmentPoolController extends Controller
                 $query->whereHas('placementTracking', function ($q) {
                     $q->whereIn('status', ['APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED']);
                 });
+            } elseif ($request->placement_status === 'offer_received') {
+                // Students who received job offers
+                $query->whereHas('placementTracking', function ($q) {
+                    $q->whereIn('status', ['OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED']);
+                });
             }
         }
 
