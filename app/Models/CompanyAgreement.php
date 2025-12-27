@@ -34,6 +34,26 @@ class CompanyAgreement extends Model
     ];
 
     /**
+     * Boot method to automatically update expired agreements.
+     */
+    protected static function booted(): void
+    {
+        // Check and update status when agreement is retrieved from database
+        static::retrieved(function (CompanyAgreement $agreement) {
+            if ($agreement->status === 'Active' && $agreement->isExpired()) {
+                $agreement->updateQuietly(['status' => 'Expired']);
+            }
+        });
+
+        // Check and update status before saving
+        static::saving(function (CompanyAgreement $agreement) {
+            if ($agreement->status === 'Active' && $agreement->isExpired()) {
+                $agreement->status = 'Expired';
+            }
+        });
+    }
+
+    /**
      * Agreement type options.
      */
     public const AGREEMENT_TYPES = [

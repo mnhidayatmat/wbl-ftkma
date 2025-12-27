@@ -63,11 +63,11 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Category -->
+                    <!-- Industry Type -->
                     <div class="mb-4">
-                        <label for="category" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                        <label for="category" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Industry Type</label>
                         <select name="category" id="category" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('category') border-red-500 @enderror" onchange="handleCategoryChange(this)">
-                            <option value="">Select Category</option>
+                            <option value="">Select Industry Type</option>
                             <option value="Oil and Gas" {{ old('category') === 'Oil and Gas' ? 'selected' : '' }}>Oil and Gas</option>
                             <option value="Design" {{ old('category') === 'Design' ? 'selected' : '' }}>Design</option>
                             <option value="Automotive" {{ old('category') === 'Automotive' ? 'selected' : '' }}>Automotive</option>
@@ -83,20 +83,9 @@
                             <option value="Other" {{ old('category') && !in_array(old('category'), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? 'selected' : '' }}>Other</option>
                         </select>
                         <div id="category_other_container" style="display: {{ old('category') && !in_array(old('category'), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? 'block' : 'none' }};" class="mt-2">
-                            <input type="text" name="category_other" id="category_other" value="{{ old('category') && !in_array(old('category'), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? old('category') : '' }}" placeholder="Specify category" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white">
+                            <input type="text" name="category_other" id="category_other" value="{{ old('category') && !in_array(old('category'), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? old('category') : '' }}" placeholder="Specify industry type" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white">
                         </div>
                         @error('category')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Industry Type -->
-                    <div class="mb-4">
-                        <label for="industry_type" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Industry Type</label>
-                        <input type="text" name="industry_type" id="industry_type" value="{{ old('industry_type') }}"
-                               placeholder="e.g., Heavy Industry, Services"
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('industry_type') border-red-500 @enderror">
-                        @error('industry_type')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>

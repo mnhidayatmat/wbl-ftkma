@@ -21,9 +21,9 @@
         </div>
 
         <div class="mb-4">
-            <label for="category" class="block text-sm font-semibold text-umpsa-deep-blue dark:text-gray-300 mb-2">Category</label>
+            <label for="category" class="block text-sm font-semibold text-umpsa-deep-blue dark:text-gray-300 mb-2">Industry Type</label>
             <select name="category" id="category" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal @error('category') border-red-500 @enderror" onchange="handleCategoryChange(this)">
-                <option value="">Select Category</option>
+                <option value="">Select Industry Type</option>
                 <option value="Oil and Gas" {{ old('category', $company->category) === 'Oil and Gas' ? 'selected' : '' }}>Oil and Gas</option>
                 <option value="Design" {{ old('category', $company->category) === 'Design' ? 'selected' : '' }}>Design</option>
                 <option value="Automotive" {{ old('category', $company->category) === 'Automotive' ? 'selected' : '' }}>Automotive</option>
@@ -39,7 +39,7 @@
                 <option value="Other" {{ old('category', $company->category) && !in_array(old('category', $company->category), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? 'selected' : '' }}>Other</option>
             </select>
             <div id="category_other_container" style="display: {{ old('category', $company->category) && !in_array(old('category', $company->category), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? 'block' : 'none' }};" class="mt-2">
-                <input type="text" name="category_other" id="category_other" value="{{ old('category', $company->category) && !in_array(old('category', $company->category), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? old('category', $company->category) : '' }}" placeholder="Specify category" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal">
+                <input type="text" name="category_other" id="category_other" value="{{ old('category', $company->category) && !in_array(old('category', $company->category), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? old('category', $company->category) : '' }}" placeholder="Specify industry type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal">
             </div>
             @error('category')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

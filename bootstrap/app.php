@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
@@ -29,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Support\Facades\Route::middleware('web')
                 ->group(base_path('routes/admin.php'));
             \Illuminate\Support\Facades\Route::middleware('web')
+                ->group(base_path('routes/coordinator.php'));
+            \Illuminate\Support\Facades\Route::middleware('web')
                 ->group(base_path('routes/placement.php'));
             \Illuminate\Support\Facades\Route::middleware('web')
                 ->group(base_path('routes/resume-inspection.php'));
@@ -54,6 +57,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureRole::class,
             'active.role' => \App\Http\Middleware\CheckActiveRole::class,
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // Update expired agreements daily at midnight
+        $schedule->command('agreements:update-expired')->daily();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
