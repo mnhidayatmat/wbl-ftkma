@@ -405,7 +405,6 @@
     @endif
 
     <!-- Industry Coaches & Supervised Students -->
-    @if($company->industryCoaches->count() > 0)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-700">
             <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -419,6 +418,7 @@
             </h3>
         </div>
         <div class="p-6">
+            @if($company->industryCoaches->count() > 0)
             <div class="space-y-6">
                 @foreach($company->industryCoaches as $ic)
                 <div class="bg-gradient-to-r from-gray-50 to-green-50 dark:from-gray-700/50 dark:to-green-900/20 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
@@ -530,9 +530,23 @@
                 </div>
                 @endforeach
             </div>
+            @else
+            <div class="text-center py-12">
+                <div class="flex justify-center mb-4">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No Industry Coaches</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    There are currently no Industry Coaches linked to this company. Industry Coaches will appear here when they are assigned to this company.
+                </p>
+            </div>
+            @endif
         </div>
     </div>
-    @endif
 
     <!-- MoU/Agreement Expiry Warning -->
     @if($agreement && $agreement->end_date && $agreement->end_date->isFuture() && $agreement->end_date->diffInDays(now()) <= 30)
