@@ -35,6 +35,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('students/course-assign/{assignment}', [StudentAssignmentController::class, 'removeStudentCourseAssignment'])->name('students.course-assign.remove');
 
     // Companies Management
+    Route::get('companies/import', [CompanyController::class, 'showImportForm'])->name('companies.import.form');
+    Route::post('companies/import', [CompanyController::class, 'import'])->name('companies.import');
+    Route::get('companies/template', [CompanyController::class, 'downloadTemplate'])->name('companies.template');
     Route::get('companies/search', [CompanyController::class, 'search'])->name('companies.search');
     Route::resource('companies', CompanyController::class);
 

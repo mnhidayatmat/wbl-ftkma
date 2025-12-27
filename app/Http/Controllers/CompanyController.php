@@ -10,10 +10,12 @@ use App\Models\CompanyNote;
 use App\Models\Moa;
 use App\Models\Mou;
 use App\Models\Student;
+use App\Imports\CompaniesImport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CompanyController extends Controller
 {
@@ -271,6 +273,73 @@ class CompanyController extends Controller
 
         return redirect()->route('admin.companies.index')
             ->with('success', 'Company deleted successfully.');
+    }
+
+    // ==================== IMPORT/EXPORT ====================
+
+    /**
+     * Show the import form.
+     */
+    public function showImportForm(): View
+    {
+        return view('companies.import');
+    }
+
+    /**
+     * Import companies from Excel file.
+     */
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240', // Max 10MB
+        ]);
+
+        try {
+            $import = new CompaniesImport();
+            Excel::import($import, $request->file('file'));
+
+            $importedCount = $import->getImportedCount();
+            $errors = $import->getErrors();
+            $failures = $import->getFailures();
+
+            $message = "Successfully imported {$importedCount} companies.";
+
+            if (count($errors) > 0 || count($failures) > 0) {
+                $errorMessages = [];
+
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error;
+                }
+
+                foreach ($failures as $failure) {
+                    $errorMessages[] = "Row {$failure['row']}: " . implode(', ', $failure['errors']);
+                }
+
+                session()->flash('import_errors', $errorMessages);
+
+                if ($importedCount > 0) {
+                    $message .= " Some records had errors and were skipped.";
+                }
+            }
+
+            return redirect()->route('admin.companies.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.companies.index')
+                ->with('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download Excel template.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(
+            new \App\Exports\CompaniesTemplateExport(),
+            'companies_import_template.xlsx'
+        );
     }
 
     // ==================== CONTACT MANAGEMENT ====================
