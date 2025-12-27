@@ -1,54 +1,196 @@
 <div class="space-y-6">
-    <!-- Company Information -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->company_name }}</p>
-        </div>
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->category ?? 'N/A' }}</p>
-        </div>
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Industry Type</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->industry_type ?? 'N/A' }}</p>
-        </div>
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Person in Charge</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->pic_name }}</p>
-        </div>
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Position</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->position ?? 'N/A' }}</p>
-        </div>
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Email</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->email }}</p>
-        </div>
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Phone</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->phone }}</p>
-        </div>
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Website</label>
-            <p class="text-lg text-gray-900 dark:text-white">
-                @if($company->website)
-                    <a href="{{ $company->website }}" target="_blank" class="text-[#0084C5] hover:underline">{{ $company->website }}</a>
-                @else
-                    N/A
+    <!-- Company Information & Primary Contact -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Company Basic Info (2 columns) -->
+        <div class="lg:col-span-2 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+            <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                Company Information
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Company Name</label>
+                    <p class="text-base text-gray-900 dark:text-white font-medium">{{ $company->company_name }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Category</label>
+                    <p class="text-base text-gray-900 dark:text-white">{{ $company->category ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Industry Type</label>
+                    <p class="text-base text-gray-900 dark:text-white">{{ $company->industry_type ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Website</label>
+                    <p class="text-base text-gray-900 dark:text-white">
+                        @if($company->website)
+                            <a href="{{ $company->website }}" target="_blank" class="text-[#0084C5] hover:underline inline-flex items-center gap-1">
+                                {{ $company->website }}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                            </a>
+                        @else
+                            N/A
+                        @endif
+                    </p>
+                </div>
+                @if($company->address)
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Address</label>
+                    <p class="text-base text-gray-900 dark:text-white">{{ $company->address }}</p>
+                </div>
                 @endif
-            </p>
+            </div>
         </div>
-        @if($company->address)
-        <div class="md:col-span-2">
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Address</label>
-            <p class="text-lg text-gray-900 dark:text-white">{{ $company->address }}</p>
+
+        <!-- Primary Contact (1 column) -->
+        <div class="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-700 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+            <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Primary Contact
+            </h3>
+            <div class="space-y-3">
+                @php
+                    $primaryContact = $company->contacts->where('is_primary', true)->first() ?? $company->contacts->first();
+                @endphp
+                @if($primaryContact)
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Name</label>
+                        <p class="text-base text-gray-900 dark:text-white font-medium">{{ $primaryContact->name }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Role</label>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                            {{ $primaryContact->role }}
+                        </span>
+                    </div>
+                    @if($primaryContact->email)
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Email</label>
+                        <a href="mailto:{{ $primaryContact->email }}" class="text-base text-[#0084C5] hover:underline break-all">
+                            {{ $primaryContact->email }}
+                        </a>
+                    </div>
+                    @endif
+                    @if($primaryContact->phone)
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Phone</label>
+                        <a href="tel:{{ $primaryContact->phone }}" class="text-base text-[#0084C5] hover:underline">
+                            {{ $primaryContact->phone }}
+                        </a>
+                    </div>
+                    @endif
+                @else
+                    <!-- Fallback to company PIC if no contacts -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Name</label>
+                        <p class="text-base text-gray-900 dark:text-white font-medium">{{ $company->pic_name ?? 'N/A' }}</p>
+                    </div>
+                    @if($company->position)
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Position</label>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                            {{ $company->position }}
+                        </span>
+                    </div>
+                    @endif
+                    @if($company->email)
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Email</label>
+                        <a href="mailto:{{ $company->email }}" class="text-base text-[#0084C5] hover:underline break-all">
+                            {{ $company->email }}
+                        </a>
+                    </div>
+                    @endif
+                    @if($company->phone)
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Phone</label>
+                        <a href="tel:{{ $company->phone }}" class="text-base text-[#0084C5] hover:underline">
+                            {{ $company->phone }}
+                        </a>
+                    </div>
+                    @endif
+                @endif
+            </div>
         </div>
-        @endif
     </div>
 
+    <!-- Additional Contacts Section -->
+    @if($company->contacts->count() > 1)
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-[#003A6C] to-[#0084C5]">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                Additional Contacts ({{ $company->contacts->count() - 1 }})
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Role</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Phone</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    @foreach($company->contacts->where('is_primary', false) as $contact)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-8 w-8 bg-gradient-to-br from-[#0084C5] to-[#003A6C] rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold text-xs">
+                                        {{ strtoupper(substr($contact->name, 0, 2)) }}
+                                    </span>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ $contact->name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                {{ $contact->role }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                            @if($contact->email)
+                                <a href="mailto:{{ $contact->email }}" class="hover:text-[#0084C5] transition-colors">
+                                    {{ $contact->email }}
+                                </a>
+                            @else
+                                <span class="text-gray-400">N/A</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                            @if($contact->phone)
+                                <a href="tel:{{ $contact->phone }}" class="hover:text-[#0084C5] transition-colors">
+                                    {{ $contact->phone }}
+                                </a>
+                            @else
+                                <span class="text-gray-400">N/A</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
     <!-- Status Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-4 border-l-4 border-blue-500">
             <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Students</div>
             <div class="text-3xl font-bold text-[#003A6C] dark:text-[#0084C5] mt-2">{{ $company->students->count() }}</div>
@@ -142,14 +284,14 @@
             </div>
         </div>
         <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-4 border-l-4 border-purple-500">
-            <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Total MoAs</div>
-            <div class="text-3xl font-bold text-[#003A6C] dark:text-[#0084C5] mt-2">{{ $company->moas->count() }}</div>
+            <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Agreements</div>
+            <div class="text-3xl font-bold text-[#003A6C] dark:text-[#0084C5] mt-2">{{ $company->agreements->count() }}</div>
         </div>
     </div>
 
     <!-- MoU Expiry Warning -->
     @if($company->mou && $company->mou->end_date && $company->mou->end_date->diffInDays(now()) <= 30 && $company->mou->end_date > now())
-    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mt-6">
+    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
         <div class="flex items-center">
             <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -161,4 +303,3 @@
     </div>
     @endif
 </div>
-

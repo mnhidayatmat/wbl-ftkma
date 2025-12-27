@@ -33,15 +33,10 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md mb-6" x-data="{ activeTab: '{{ $tab }}' }">
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <nav class="flex -mb-px overflow-x-auto">
-                    <button @click="activeTab = 'overview'" 
+                    <button @click="activeTab = 'overview'"
                             :class="activeTab === 'overview' ? 'border-[#0084C5] text-[#0084C5]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                             class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors">
-                        Overview
-                    </button>
-                    <button @click="activeTab = 'contacts'" 
-                            :class="activeTab === 'contacts' ? 'border-[#0084C5] text-[#0084C5]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors">
-                        Contacts
+                        Overview & Contacts
                     </button>
                     <button @click="activeTab = 'students'"
                             :class="activeTab === 'students' ? 'border-[#0084C5] text-[#0084C5]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -68,14 +63,9 @@
 
             <!-- Tab Content -->
             <div class="p-6">
-                <!-- Overview Tab -->
+                <!-- Overview & Contacts Tab -->
                 <div x-show="activeTab === 'overview'" x-transition>
                     @include('companies.tabs.overview', ['company' => $company])
-                </div>
-
-                <!-- Contacts Tab -->
-                <div x-show="activeTab === 'contacts'" x-transition>
-                    @include('companies.tabs.contacts', ['company' => $company])
                 </div>
 
                 <!-- Students Tab -->
