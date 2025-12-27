@@ -138,7 +138,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
-            Route::post('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'update'])->name('clo-plo.update');
+            Route::put('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'update'])->name('clo-plo.update');
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
@@ -239,7 +239,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
-            Route::post('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'update'])->name('clo-plo.update');
+            Route::put('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'update'])->name('clo-plo.update');
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
@@ -334,7 +334,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
-            Route::post('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'update'])->name('clo-plo.update');
+            Route::put('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'update'])->name('clo-plo.update');
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
@@ -433,7 +433,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
-            Route::post('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'update'])->name('clo-plo.update');
+            Route::put('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'update'])->name('clo-plo.update');
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
@@ -563,7 +563,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
-            Route::post('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'update'])->name('clo-plo.update');
+            Route::put('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'update'])->name('clo-plo.update');
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 

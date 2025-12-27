@@ -109,12 +109,21 @@ class ReferenceSampleController extends Controller
             \Log::error('Reference sample validation failed', [
                 'errors' => $e->errors(),
                 'user_id' => $user->id,
+                'upload_max_filesize' => ini_get('upload_max_filesize'),
+                'post_max_size' => ini_get('post_max_size'),
             ]);
+
+            $errorMessage = 'Validation failed. ';
+            if (isset($e->errors()['file'])) {
+                $uploadMax = ini_get('upload_max_filesize');
+                $postMax = ini_get('post_max_size');
+                $errorMessage .= "File upload failed. Your PHP settings allow files up to {$uploadMax} (upload_max_filesize) and forms up to {$postMax} (post_max_size). If your file is larger, please reduce the file size or contact the administrator.";
+            }
 
             return back()
                 ->withErrors($e->errors())
                 ->withInput()
-                ->with('error', 'Validation failed. Please check the form and try again.');
+                ->with('error', $errorMessage);
         }
 
         try {

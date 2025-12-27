@@ -7,7 +7,15 @@
     $isStudent = $user->isStudent();
     $isAdmin = $user->isAdmin();
     $isCoordinator = $user->isCoordinator();
-    
+
+    // Module Coordinators
+    $isFypCoordinator = $user->isFypCoordinator();
+    $isIpCoordinator = $user->isIpCoordinator();
+    $isOshCoordinator = $user->isOshCoordinator();
+    $isPpeCoordinator = $user->isPpeCoordinator();
+    $isLiCoordinator = $user->isLiCoordinator();
+    $isModuleCoordinator = $user->isModuleCoordinator();
+
     $lecturerIsAt = $isLecturer && $isAt;
     $lecturerIsSupervisorLi = $isLecturer && $isSupervisorLi;
 @endphp
@@ -133,6 +141,27 @@
         <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Dashboard</span>
     </a>
 
+    <!-- Module Coordinator Dashboard -->
+    @if($isModuleCoordinator)
+    <a href="{{ route('coordinator.dashboard') }}"
+       class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('coordinator.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+       :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+       :title="isSidebarCollapsed ? 'Coordinator Dashboard' : ''">
+        <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+        </div>
+        <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">
+            @if($isFypCoordinator) FYP Dashboard
+            @elseif($isIpCoordinator) IP Dashboard
+            @elseif($isOshCoordinator) OSH Dashboard
+            @elseif($isPpeCoordinator) PPE Dashboard
+            @elseif($isLiCoordinator) LI Dashboard
+            @endif
+        </span>
+    </a>
+    @endif
 
     <div class="relative">
         <button @click="toggleMenu('companies')"
@@ -236,8 +265,21 @@
             </div>
             <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Resume Inspection</span>
         </a>
+
+        <!-- Recruitment Pool -->
+        <a href="{{ route('recruitment.pool.index') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('recruitment.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Recruitment Pool' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Recruitment Pool</span>
+        </a>
         @endif
-        
+
         <a href="{{ route('placement.index') }}"
            class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('placement.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
            :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"

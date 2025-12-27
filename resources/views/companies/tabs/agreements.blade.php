@@ -88,6 +88,20 @@
                         <span class="ml-4">{{ $agreement->faculty }} {{ $agreement->programme ? '/ ' . $agreement->programme : '' }}</span>
                         @endif
                     </div>
+                    @if($agreement->staff_pic_name || $agreement->staff_pic_phone)
+                    <div class="mt-2 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <span class="font-medium">Staff PIC:</span>
+                        @if($agreement->staff_pic_name)
+                        <span>{{ $agreement->staff_pic_name }}</span>
+                        @endif
+                        @if($agreement->staff_pic_phone)
+                        <span class="ml-2">{{ $agreement->staff_pic_phone }}</span>
+                        @endif
+                    </div>
+                    @endif
                 </div>
                 <div class="flex items-center gap-2">
                     @if($agreement->document_path)

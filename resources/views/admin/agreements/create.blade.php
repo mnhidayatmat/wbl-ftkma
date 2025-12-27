@@ -165,6 +165,32 @@
                     </div>
                 </div>
 
+                <!-- Staff PIC -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            Staff PIC Name
+                        </label>
+                        <input type="text" name="staff_pic_name" value="{{ old('staff_pic_name') }}"
+                               placeholder="e.g., Dr. Ahmad Bin Ali"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('staff_pic_name') border-red-500 @enderror">
+                        @error('staff_pic_name')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            Staff PIC Phone Number
+                        </label>
+                        <input type="text" name="staff_pic_phone" value="{{ old('staff_pic_phone') }}"
+                               placeholder="e.g., +60123456789"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('staff_pic_phone') border-red-500 @enderror">
+                        @error('staff_pic_phone')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
                 <!-- Remarks -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">

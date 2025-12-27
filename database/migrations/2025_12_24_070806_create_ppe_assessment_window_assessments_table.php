@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('ppe_assessment_window_assessments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ppe_assessment_window_id')
-                ->constrained('ppe_assessment_windows')
-                ->onDelete('cascade');
-            $table->foreignId('assessment_id')
-                ->constrained('assessments')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('ppe_assessment_window_id');
+            $table->unsignedBigInteger('assessment_id');
             $table->timestamps();
 
-            // Unique constraint: one assessment can't be assigned to same window multiple times
-            $table->unique(['ppe_assessment_window_id', 'assessment_id'], 'ppe_aw_assessment_unique');
+            // Foreign keys with short constraint names
+            $table->foreign('ppe_assessment_window_id', 'ppe_aw_asmt_window_fk')
+                ->references('id')->on('ppe_assessment_windows')->onDelete('cascade');
+            $table->foreign('assessment_id', 'ppe_aw_asmt_fk')
+                ->references('id')->on('assessments')->onDelete('cascade');
+
+            // Unique constraint
+            $table->unique(['ppe_assessment_window_id', 'assessment_id'], 'ppe_aw_asmt_unique');
         });
     }
 

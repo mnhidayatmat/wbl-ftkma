@@ -117,12 +117,77 @@ use Illuminate\Support\Facades\Storage;
                     </div>
                 </div>
 
+                <!-- IC Number -->
+                <div class="mt-6">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">IC Number</label>
+                    <input type="text" name="ic_number" value="{{ old('ic_number', $student->ic_number) }}"
+                           placeholder="e.g., 990101-01-1234"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                    @error('ic_number') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <!-- Background -->
                 <div class="mt-6">
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Background</label>
                     <textarea name="background" rows="4" placeholder="Tell us about yourself, your interests, and background..."
                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">{{ old('background', $student->background) }}</textarea>
                     @error('background') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <!-- CARD 1.5: Emergency Contact Information -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-[#003A6C] dark:text-[#0084C5] mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Emergency Contact Information
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Parent/Guardian Name -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Parent/Guardian Name</label>
+                        <input type="text" name="parent_name" value="{{ old('parent_name', $student->parent_name) }}"
+                               placeholder="e.g., Ahmad bin Abdullah"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                        @error('parent_name') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <!-- Parent/Guardian Phone Number -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Parent/Guardian Phone Number</label>
+                        <input type="text" name="parent_phone_number" value="{{ old('parent_phone_number', $student->parent_phone_number) }}"
+                               placeholder="e.g., +60123456789"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                        @error('parent_phone_number') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <!-- Next of Kin -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Next of Kin</label>
+                        <input type="text" name="next_of_kin" value="{{ old('next_of_kin', $student->next_of_kin) }}"
+                               placeholder="e.g., Fatimah binti Ahmad (Sister)"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                        @error('next_of_kin') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <!-- Next of Kin Phone Number -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Next of Kin Phone Number</label>
+                        <input type="text" name="next_of_kin_phone_number" value="{{ old('next_of_kin_phone_number', $student->next_of_kin_phone_number) }}"
+                               placeholder="e.g., +60123456789"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                        @error('next_of_kin_phone_number') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <!-- Home Address -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Home Address</label>
+                        <textarea name="home_address" rows="3" placeholder="e.g., No. 123, Jalan ABC, Taman DEF, 26000 Kuantan, Pahang"
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">{{ old('home_address', $student->home_address) }}</textarea>
+                        @error('home_address') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
                 </div>
             </div>
 

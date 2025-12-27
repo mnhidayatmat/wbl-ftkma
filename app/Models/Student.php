@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -29,12 +30,23 @@ class Student extends Model
         'ic_id',
         'background',
         'mobile_phone',
+        'ic_number',
+        'parent_name',
+        'parent_phone_number',
+        'next_of_kin',
+        'next_of_kin_phone_number',
+        'home_address',
         'resume_pdf_path',
         'academic_advisor_id',
+        'skills',
+        'interests',
+        'preferred_industry',
+        'preferred_location',
     ];
 
     protected $casts = [
         'cgpa' => 'decimal:2',
+        'skills' => 'array',
     ];
 
     /**
@@ -169,5 +181,67 @@ class Student extends Model
         return $query->whereHas('group', function ($q) {
             $q->where('status', 'COMPLETED');
         });
+    }
+
+    /**
+     * Get skills as comma-separated string.
+     */
+    public function getSkillsStringAttribute(): string
+    {
+        return $this->skills ? implode(', ', $this->skills) : '';
+    }
+
+    /**
+     * Check if student has a specific skill.
+     */
+    public function hasSkill(string $skill): bool
+    {
+        if (!$this->skills) {
+            return false;
+        }
+
+        return in_array(strtolower($skill), array_map('strtolower', $this->skills));
+    }
+
+    /**
+     * Scope to filter students by skills (match any).
+     */
+    public function scopeWithSkills($query, array $skills)
+    {
+        if (empty($skills)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($skills) {
+            foreach ($skills as $skill) {
+                $q->orWhereJsonContains('skills', $skill);
+            }
+        });
+    }
+
+    /**
+     * Scope to filter students by CGPA range.
+     */
+    public function scopeWithCgpaRange($query, ?float $min = null, ?float $max = null)
+    {
+        if ($min !== null) {
+            $query->where('cgpa', '>=', $min);
+        }
+
+        if ($max !== null) {
+            $query->where('cgpa', '<=', $max);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Scope to filter students ready for recruitment.
+     */
+    public function scopeRecruitmentReady($query)
+    {
+        return $query->whereHas('resumeInspection', function ($q) {
+            $q->where('status', 'RECOMMENDED');
+        })->whereNotNull('resume_pdf_path');
     }
 }

@@ -36,7 +36,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Companies Management
     Route::get('companies/import', [CompanyController::class, 'showImportForm'])->name('companies.import.form');
-    Route::post('companies/import', [CompanyController::class, 'import'])->name('companies.import');
+    Route::post('companies/preview-import', [CompanyController::class, 'previewImport'])->name('companies.preview-import');
+    Route::post('companies/confirm-import', [CompanyController::class, 'confirmImport'])->name('companies.confirm-import');
+    Route::post('companies/cancel-import', [CompanyController::class, 'cancelImport'])->name('companies.cancel-import');
     Route::get('companies/template', [CompanyController::class, 'downloadTemplate'])->name('companies.template');
     Route::get('companies/search', [CompanyController::class, 'search'])->name('companies.search');
     Route::resource('companies', CompanyController::class);

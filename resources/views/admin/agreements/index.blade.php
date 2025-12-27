@@ -156,6 +156,17 @@
                                     {{ $agreement->faculty }} {{ $agreement->programme ? '/ ' . $agreement->programme : '' }}
                                 </div>
                                 @endif
+                                @if($agreement->staff_pic_name)
+                                <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    <span>{{ $agreement->staff_pic_name }}</span>
+                                    @if($agreement->staff_pic_phone)
+                                    <span class="ml-1">({{ $agreement->staff_pic_phone }})</span>
+                                    @endif
+                                </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900 dark:text-white">

@@ -41,7 +41,12 @@
                 <!-- Lecturer Evaluation Window -->
                 <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Lecturer Evaluation (40%)</h3>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Lecturer Evaluation (40%)</h3>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                Applies to: <strong>{{ $lecturerWindow->selected_assessments_display }}</strong>
+                            </p>
+                        </div>
                         @if($lecturerWindow->status === 'open')
                             <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
                                 Open
@@ -66,8 +71,8 @@
                         <input type="hidden" name="evaluator_role" value="lecturer">
                         
                         <div class="flex items-center space-x-3">
-                            <input type="checkbox" 
-                                   name="is_enabled" 
+                            <input type="checkbox"
+                                   name="is_enabled"
                                    id="lecturer_enabled"
                                    value="1"
                                    {{ $lecturerWindow->is_enabled ? 'checked' : '' }}
@@ -77,10 +82,32 @@
                             </label>
                         </div>
 
+                        <!-- Assessment Selection -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Assessments
+                                <span class="text-xs text-gray-500 ml-1">(Leave empty to apply to all assessments)</span>
+                            </label>
+                            <select name="assessment_ids[]"
+                                    multiple
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white"
+                                    size="5">
+                                @foreach($lecturerAssessments as $assessment)
+                                    <option value="{{ $assessment->id }}"
+                                            {{ $lecturerWindow->assessments->contains($assessment->id) ? 'selected' : '' }}>
+                                        {{ $assessment->assessment_name }} ({{ $assessment->assessment_type }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Hold Ctrl (Windows) or Cmd (Mac) to select multiple assessments.
+                            </p>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date & Time</label>
-                            <input type="datetime-local" 
-                                   name="start_at" 
+                            <input type="datetime-local"
+                                   name="start_at"
                                    value="{{ $lecturerWindow->start_at ? $lecturerWindow->start_at->format('Y-m-d\TH:i') : '' }}"
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
                         </div>
@@ -110,7 +137,12 @@
                 <!-- IC Evaluation Window -->
                 <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Industry Coach Evaluation (60%)</h3>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Industry Coach Evaluation (60%)</h3>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                Applies to: <strong>{{ $icWindow->selected_assessments_display }}</strong>
+                            </p>
+                        </div>
                         @if($icWindow->status === 'open')
                             <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
                                 Open
@@ -135,8 +167,8 @@
                         <input type="hidden" name="evaluator_role" value="ic">
                         
                         <div class="flex items-center space-x-3">
-                            <input type="checkbox" 
-                                   name="is_enabled" 
+                            <input type="checkbox"
+                                   name="is_enabled"
                                    id="ic_enabled"
                                    value="1"
                                    {{ $icWindow->is_enabled ? 'checked' : '' }}
@@ -146,10 +178,32 @@
                             </label>
                         </div>
 
+                        <!-- Assessment Selection -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Assessments
+                                <span class="text-xs text-gray-500 ml-1">(Leave empty to apply to all assessments)</span>
+                            </label>
+                            <select name="assessment_ids[]"
+                                    multiple
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white"
+                                    size="5">
+                                @foreach($icAssessments as $assessment)
+                                    <option value="{{ $assessment->id }}"
+                                            {{ $icWindow->assessments->contains($assessment->id) ? 'selected' : '' }}>
+                                        {{ $assessment->assessment_name }} ({{ $assessment->assessment_type }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Hold Ctrl (Windows) or Cmd (Mac) to select multiple assessments.
+                            </p>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date & Time</label>
-                            <input type="datetime-local" 
-                                   name="start_at" 
+                            <input type="datetime-local"
+                                   name="start_at"
                                    value="{{ $icWindow->start_at ? $icWindow->start_at->format('Y-m-d\TH:i') : '' }}"
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
                         </div>

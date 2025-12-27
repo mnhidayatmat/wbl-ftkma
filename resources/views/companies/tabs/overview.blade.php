@@ -159,7 +159,7 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Category</dt>
+                                <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Industry Type</dt>
                                 <dd class="mt-1 text-base text-gray-900 dark:text-white">
                                     @if($company->category)
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
@@ -169,18 +169,6 @@
                                         <span class="text-gray-400 dark:text-gray-500">Not specified</span>
                                     @endif
                                 </dd>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Industry Type</dt>
-                                <dd class="mt-1 text-base text-gray-900 dark:text-white">{{ $company->industry_type ?? 'Not specified' }}</dd>
                             </div>
                         </div>
 

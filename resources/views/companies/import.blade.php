@@ -65,7 +65,7 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Select the filled Excel file to import</p>
             </div>
 
-            <form action="{{ route('admin.companies.import') }}" method="POST" enctype="multipart/form-data" class="p-6">
+            <form action="{{ route('admin.companies.preview-import') }}" method="POST" enctype="multipart/form-data" class="p-6">
                 @csrf
 
                 <!-- File Upload -->

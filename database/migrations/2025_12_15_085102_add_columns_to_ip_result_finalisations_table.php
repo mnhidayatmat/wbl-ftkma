@@ -12,18 +12,38 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ip_result_finalisations', function (Blueprint $table) {
-            $table->foreignId('student_id')->nullable()->after('id')->constrained('students')->onDelete('cascade');
-            $table->foreignId('group_id')->nullable()->after('student_id')->constrained('wbl_groups')->onDelete('cascade');
-            $table->enum('finalisation_scope', ['student', 'group', 'course'])->default('student')->after('group_id');
-            $table->boolean('is_finalised')->default(false)->after('finalisation_scope');
-            $table->text('notes')->nullable()->after('is_finalised');
-            $table->foreignId('finalised_by')->after('notes')->constrained('users')->onDelete('cascade');
-            $table->timestamp('finalised_at')->nullable()->after('finalised_by');
+            if (! Schema::hasColumn('ip_result_finalisations', 'student_id')) {
+                $table->foreignId('student_id')->nullable()->after('id')->constrained('students')->onDelete('cascade');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'group_id')) {
+                $table->foreignId('group_id')->nullable()->after('student_id')->constrained('wbl_groups')->onDelete('cascade');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'finalisation_scope')) {
+                $table->enum('finalisation_scope', ['student', 'group', 'course'])->default('student')->after('group_id');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'is_finalised')) {
+                $table->boolean('is_finalised')->default(false)->after('finalisation_scope');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'notes')) {
+                $table->text('notes')->nullable()->after('is_finalised');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'finalised_by')) {
+                $table->foreignId('finalised_by')->after('notes')->constrained('users')->onDelete('cascade');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'finalised_at')) {
+                $table->timestamp('finalised_at')->nullable()->after('finalised_by');
+            }
 
-            $table->index('student_id');
-            $table->index('group_id');
-            $table->index('is_finalised');
-            $table->unique(['student_id', 'is_finalised'], 'unique_student_finalisation');
+            // Only add indexes if they don't exist
+            if (! Schema::hasColumn('ip_result_finalisations', 'student_id')) {
+                $table->index('student_id');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'group_id')) {
+                $table->index('group_id');
+            }
+            if (! Schema::hasColumn('ip_result_finalisations', 'is_finalised')) {
+                $table->index('is_finalised');
+            }
         });
     }
 

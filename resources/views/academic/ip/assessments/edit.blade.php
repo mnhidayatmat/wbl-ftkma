@@ -249,11 +249,11 @@
                     </label>
                 </div>
 
-                <!-- Rubric Configuration (for all types except Logbook) - Components Only -->
+                <!-- Question Configuration (for all types except Logbook) - Components Only -->
                 <div id="rubricSection" class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-6" style="display: {{ $assessment->assessment_type !== 'Logbook' ? 'block' : 'none' }};">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5]">Rubric Configuration</h3>
+                            <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5]">Question Configuration</h3>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                 Configure rubrics or components for this assessment. Total weight must equal the sum of all CLO weights.
                             </p>

@@ -226,6 +226,81 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if user is FYP Coordinator
+     */
+    public function isFypCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'fyp_coordinator' && $this->hasRole('fyp_coordinator');
+        }
+
+        return $this->hasRole('fyp_coordinator');
+    }
+
+    /**
+     * Check if user is IP Coordinator
+     */
+    public function isIpCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'ip_coordinator' && $this->hasRole('ip_coordinator');
+        }
+
+        return $this->hasRole('ip_coordinator');
+    }
+
+    /**
+     * Check if user is OSH Coordinator
+     */
+    public function isOshCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'osh_coordinator' && $this->hasRole('osh_coordinator');
+        }
+
+        return $this->hasRole('osh_coordinator');
+    }
+
+    /**
+     * Check if user is PPE Coordinator
+     */
+    public function isPpeCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'ppe_coordinator' && $this->hasRole('ppe_coordinator');
+        }
+
+        return $this->hasRole('ppe_coordinator');
+    }
+
+    /**
+     * Check if user is LI Coordinator (Industrial Training)
+     */
+    public function isLiCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'li_coordinator' && $this->hasRole('li_coordinator');
+        }
+
+        return $this->hasRole('li_coordinator');
+    }
+
+    /**
+     * Check if user is any module coordinator
+     */
+    public function isModuleCoordinator(): bool
+    {
+        return $this->isFypCoordinator() || $this->isIpCoordinator() ||
+               $this->isOshCoordinator() || $this->isPpeCoordinator() ||
+               $this->isLiCoordinator();
+    }
+
+    /**
      * Helper method to check role (for backward compatibility)
      */
     public function isRole(string $role): bool

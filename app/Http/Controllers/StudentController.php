@@ -161,7 +161,7 @@ class StudentController extends Controller
      */
     public function show(Student $student): View
     {
-        $student->load(['group', 'company', 'academicTutor', 'industryCoach']);
+        $student->load(['group', 'company', 'academicTutor', 'industryCoach', 'academicAdvisor', 'courseAssignments.lecturer']);
 
         return view('students.show', compact('student'));
     }

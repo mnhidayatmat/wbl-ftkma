@@ -90,6 +90,8 @@ class CompanyAgreementController extends Controller
             'faculty' => ['nullable', 'string', 'max:255'],
             'programme' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:2000'],
+            'staff_pic_name' => ['nullable', 'string', 'max:255'],
+            'staff_pic_phone' => ['nullable', 'string', 'max:20'],
             'document' => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10MB max
         ]);
 
@@ -119,7 +121,7 @@ class CompanyAgreementController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
-        return redirect()->route('admin.agreements.index')
+        return redirect()->route('admin.companies.index')
             ->with('success', 'Agreement created successfully.');
     }
 
@@ -160,6 +162,8 @@ class CompanyAgreementController extends Controller
             'faculty' => ['nullable', 'string', 'max:255'],
             'programme' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:2000'],
+            'staff_pic_name' => ['nullable', 'string', 'max:255'],
+            'staff_pic_phone' => ['nullable', 'string', 'max:20'],
             'document' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
@@ -191,7 +195,7 @@ class CompanyAgreementController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
-        return redirect()->route('admin.agreements.index')
+        return redirect()->route('admin.companies.index')
             ->with('success', 'Agreement updated successfully.');
     }
 
@@ -207,7 +211,7 @@ class CompanyAgreementController extends Controller
 
         $agreement->delete();
 
-        return redirect()->route('admin.agreements.index')
+        return redirect()->route('admin.companies.index')
             ->with('success', 'Agreement deleted successfully.');
     }
 
@@ -396,6 +400,8 @@ class CompanyAgreementController extends Controller
                     'status' => $this->determineStatus($row),
                     'faculty' => $row['faculty'] ?? null,
                     'programme' => $row['programme'] ?? null,
+                    'staff_pic_name' => $row['staff_pic_name'] ?? null,
+                    'staff_pic_phone' => $row['staff_pic_phone'] ?? null,
                     'remarks' => $row['remarks'] ?? null,
                     'created_by' => auth()->id(),
                     'updated_by' => auth()->id(),
@@ -441,6 +447,8 @@ class CompanyAgreementController extends Controller
             'Status',
             'Faculty',
             'Programme',
+            'Staff PIC Name',
+            'Staff PIC Phone',
             'Industry Type',
             'Address',
             'Email',
@@ -468,6 +476,8 @@ class CompanyAgreementController extends Controller
                 'Active',
                 'Faculty of Technology',
                 'Bachelor of Computer Science',
+                'Dr. Ahmad Bin Ali',
+                '+60123456789',
                 'Technology',
                 '123 Main Street, Kuala Lumpur',
                 'contact@abc.com',
@@ -487,6 +497,8 @@ class CompanyAgreementController extends Controller
                 'Active',
                 'Faculty of Engineering',
                 'Mechanical Engineering',
+                'Prof. Siti Nurhaliza',
+                '+60198765432',
                 'Manufacturing',
                 '456 Industrial Park, Kuantan',
                 'info@xyz.com',
@@ -506,6 +518,8 @@ class CompanyAgreementController extends Controller
                 'Pending',
                 '',
                 '',
+                'Dr. Tan Wei Ling',
+                '+60187654321',
                 'Information Technology',
                 'Tech Hub, Cyberjaya',
                 'hr@techsolutions.my',
@@ -539,6 +553,8 @@ class CompanyAgreementController extends Controller
             'status' => ['status'],
             'faculty' => ['faculty', 'fakulti'],
             'programme' => ['programme', 'program'],
+            'staff_pic_name' => ['staff pic name', 'staff pic', 'pic name', 'staff name', 'staffpicname', 'staff_pic_name', 'pic_name'],
+            'staff_pic_phone' => ['staff pic phone', 'staff phone', 'pic phone', 'staff contact', 'staffpicphone', 'staff_pic_phone', 'pic_phone'],
             'industry_type' => ['industry type', 'industry', 'jenis industri', 'industrytype', 'industry_type', 'jenis_industri'],
             'address' => ['address', 'alamat'],
             'email' => ['email', 'e-mail', 'e_mail'],

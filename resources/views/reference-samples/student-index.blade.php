@@ -3,141 +3,131 @@
 @section('title', 'Reference Samples')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="mb-6 flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#003A6C] to-[#0084C5] flex items-center justify-center">
-            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-        </div>
-        <div>
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-6">
             <h1 class="text-2xl font-bold text-[#003A6C] dark:text-[#0084C5]">Reference Samples</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Download sample files to guide your work</p>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Download example files for resume, poster, and achievements</p>
         </div>
-    </div>
 
-    <!-- Reference Samples by Category -->
-    @if($samples->isEmpty())
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-12 text-center">
-            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No reference samples available</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Reference samples will appear here when uploaded by coordinators.</p>
+        <!-- Info Banner -->
+        <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-sm text-blue-700 dark:text-blue-300">
+                    <p class="font-semibold mb-1">How to use these samples:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Click on any sample to download it</li>
+                        <li>Use these as templates or references for your own work</li>
+                        <li>Customize the content to match your own information and achievements</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    @else
-        <div class="space-y-6">
-            @foreach($samples as $category => $categorySamples)
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-                    <!-- Category Header -->
-                    <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">
-                                @if($category === 'resume') 📄
-                                @elseif($category === 'poster') 🖼️
-                                @elseif($category === 'achievement') 🏆
-                                @else 📁
-                                @endif
-                            </span>
-                            <div>
-                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    @if($category === 'resume') Resume Samples
-                                    @elseif($category === 'poster') Poster Samples
-                                    @elseif($category === 'achievement') Achievement Samples
-                                    @else Other Samples
-                                    @endif
-                                </h2>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $categorySamples->count() }} {{ Str::plural('sample', $categorySamples->count()) }} available</p>
+
+        @if($samples->isEmpty())
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-12 text-center">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            <p class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No Reference Samples Available</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Check back later for example files</p>
+        </div>
+        @else
+            @foreach($samples as $category => $categoryItems)
+            <div class="mb-8">
+                <!-- Category Header -->
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-3xl">
+                        @if($category === 'resume') 📄
+                        @elseif($category === 'poster') 🖼️
+                        @elseif($category === 'achievement') 🏆
+                        @else 📁
+                        @endif
+                    </span>
+                    <h2 class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">
+                        {{ ucfirst($category) }} Templates
+                    </h2>
+                    <span class="px-2 py-1 text-xs font-semibold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
+                        {{ $categoryItems->count() }} {{ Str::plural('sample', $categoryItems->count()) }}
+                    </span>
+                </div>
+
+                <!-- Samples Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($categoryItems as $sample)
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+                        <!-- Card Header -->
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="font-semibold text-[#003A6C] dark:text-[#0084C5] mb-2">
+                                {{ $sample->title }}
+                            </h3>
+                            @if($sample->description)
+                            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                {{ $sample->description }}
+                            </p>
+                            @endif
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">File:</span>
+                                    <span class="text-gray-900 dark:text-gray-200 font-medium">{{ $sample->file_name }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Size:</span>
+                                    <span class="text-gray-900 dark:text-gray-200 font-medium">{{ $sample->file_size_formatted }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Type:</span>
+                                    <span class="text-gray-900 dark:text-gray-200 font-medium uppercase">{{ $sample->file_extension }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Downloads:</span>
+                                    <span class="text-gray-900 dark:text-gray-200 font-medium">{{ $sample->download_count }}</span>
+                                </div>
                             </div>
+
+                            <!-- Download Button -->
+                            <a href="{{ route('reference-samples.download', $sample) }}"
+                               class="w-full px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors inline-flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Download
+                            </a>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="px-4 py-2 bg-gray-100 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                                Uploaded {{ $sample->created_at->diffForHumans() }}
+                            </p>
                         </div>
                     </div>
-
-                    <!-- Sample List -->
-                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                        @foreach($categorySamples as $sample)
-                            <div class="group hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                <a href="{{ route('reference-samples.download', $sample) }}" class="flex items-center justify-between px-6 py-4">
-                                    <div class="flex items-center gap-4 flex-1">
-                                        <!-- File Icon -->
-                                        <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-[#003A6C] to-[#0084C5] flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                        </div>
-
-                                        <!-- Sample Info -->
-                                        <div class="flex-1 min-w-0">
-                                            <h3 class="text-base font-semibold text-gray-900 dark:text-white group-hover:text-[#0084C5] dark:group-hover:text-[#00AEEF] transition-colors">
-                                                {{ $sample->title }}
-                                            </h3>
-                                            @if($sample->description)
-                                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{{ $sample->description }}</p>
-                                            @endif
-                                            <div class="flex items-center gap-4 mt-2">
-                                                <span class="text-xs text-gray-500 dark:text-gray-400">
-                                                    <span class="font-medium">{{ strtoupper($sample->file_extension) }}</span> • {{ $sample->file_size_formatted }}
-                                                </span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400">
-                                                    <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                                    </svg>
-                                                    {{ $sample->download_count }} downloads
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Download Button -->
-                                    <div class="flex-shrink-0 ml-4">
-                                        <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-600 group-hover:bg-[#0084C5] dark:group-hover:bg-[#0084C5] flex items-center justify-center transition-colors">
-                                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endforeach
-
-            <!-- Warning Notice -->
-            <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-l-4 border-amber-500 rounded-lg p-4">
-                <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                    <div class="flex-1">
-                        <h4 class="text-sm font-semibold text-amber-900 dark:text-amber-200">Important Notice</h4>
-                        <p class="text-sm text-amber-800 dark:text-amber-300 mt-1">
-                            <strong>For reference only. Do NOT copy directly.</strong>
-                            <br>
-                            These samples are provided as guidelines to help you understand the structure and format. Your work must be original and reflect your own achievements and experiences.
-                        </p>
-                    </div>
+                    @endforeach
                 </div>
             </div>
+            @endforeach
+        @endif
 
-            <!-- Additional Tips -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <div class="flex-1">
-                        <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-200">Tips for Using These Samples</h4>
-                        <ul class="text-sm text-blue-800 dark:text-blue-300 mt-2 space-y-1 list-disc list-inside">
-                            <li>Study the structure and organization of the samples</li>
-                            <li>Adapt the format to showcase your unique experiences</li>
-                            <li>Ensure all information is accurate and truthful</li>
-                            <li>Proofread carefully before submission</li>
-                        </ul>
-                    </div>
+        <!-- Help Section -->
+        <div class="mt-8 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div class="text-sm text-yellow-700 dark:text-yellow-300">
+                    <p class="font-semibold mb-1">Important Notice:</p>
+                    <p>These samples are provided as references only. Please customize them with your own information and achievements. Do not copy content directly - use them as a guide for formatting and structure.</p>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 </div>
 @endsection

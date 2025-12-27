@@ -12,22 +12,40 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ip_audit_logs', function (Blueprint $table) {
-            $table->string('action')->after('id');
-            $table->string('action_type')->after('action');
-            $table->foreignId('user_id')->after('action_type')->constrained('users')->onDelete('cascade');
-            $table->string('user_role')->after('user_id');
-            $table->foreignId('student_id')->nullable()->after('user_role')->constrained('students')->onDelete('set null');
-            $table->foreignId('assessment_id')->nullable()->after('student_id')->constrained('assessments')->onDelete('set null');
-            $table->text('description')->after('assessment_id');
-            $table->json('metadata')->nullable()->after('description');
-            $table->string('ip_address')->nullable()->after('metadata');
-            $table->string('user_agent')->nullable()->after('ip_address');
-
-            $table->index('action');
-            $table->index('action_type');
-            $table->index('user_id');
-            $table->index('student_id');
-            $table->index('created_at');
+            if (! Schema::hasColumn('ip_audit_logs', 'action')) {
+                $table->string('action')->after('id');
+                $table->index('action');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'action_type')) {
+                $table->string('action_type')->after('action');
+                $table->index('action_type');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'user_id')) {
+                $table->foreignId('user_id')->after('action_type')->constrained('users')->onDelete('cascade');
+                $table->index('user_id');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'user_role')) {
+                $table->string('user_role')->after('user_id');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'student_id')) {
+                $table->foreignId('student_id')->nullable()->after('user_role')->constrained('students')->onDelete('set null');
+                $table->index('student_id');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'assessment_id')) {
+                $table->foreignId('assessment_id')->nullable()->after('student_id')->constrained('assessments')->onDelete('set null');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'description')) {
+                $table->text('description')->after('assessment_id');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'metadata')) {
+                $table->json('metadata')->nullable()->after('description');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'ip_address')) {
+                $table->string('ip_address')->nullable()->after('metadata');
+            }
+            if (! Schema::hasColumn('ip_audit_logs', 'user_agent')) {
+                $table->string('user_agent')->nullable()->after('ip_address');
+            }
         });
     }
 

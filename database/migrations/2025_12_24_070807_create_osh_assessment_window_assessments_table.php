@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('osh_assessment_window_assessments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('osh_assessment_window_id')
-                ->constrained('osh_assessment_windows')
-                ->onDelete('cascade');
-            $table->foreignId('assessment_id')
-                ->constrained('assessments')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('osh_assessment_window_id');
+            $table->unsignedBigInteger('assessment_id');
             $table->timestamps();
 
-            // Unique constraint: one assessment can't be assigned to same window multiple times
-            $table->unique(['osh_assessment_window_id', 'assessment_id'], 'osh_aw_assessment_unique');
+            // Foreign keys with short constraint names
+            $table->foreign('osh_assessment_window_id', 'osh_aw_asmt_window_fk')
+                ->references('id')->on('osh_assessment_windows')->onDelete('cascade');
+            $table->foreign('assessment_id', 'osh_aw_asmt_fk')
+                ->references('id')->on('assessments')->onDelete('cascade');
+
+            // Unique constraint
+            $table->unique(['osh_assessment_window_id', 'assessment_id'], 'osh_aw_asmt_unique');
         });
     }
 

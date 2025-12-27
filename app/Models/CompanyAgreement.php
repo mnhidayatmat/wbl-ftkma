@@ -22,6 +22,8 @@ class CompanyAgreement extends Model
         'faculty',
         'programme',
         'remarks',
+        'staff_pic_name',
+        'staff_pic_phone',
         'document_path',
         'created_by',
         'updated_by',

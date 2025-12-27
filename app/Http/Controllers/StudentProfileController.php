@@ -107,6 +107,12 @@ class StudentProfileController extends Controller
             'ic_id' => ['nullable', 'exists:users,id'],
             'background' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],
+            'ic_number' => ['nullable', 'string', 'max:20'],
+            'parent_name' => ['nullable', 'string', 'max:255'],
+            'parent_phone_number' => ['nullable', 'string', 'max:20'],
+            'next_of_kin' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_phone_number' => ['nullable', 'string', 'max:20'],
+            'home_address' => ['nullable', 'string'],
         ]);
 
         // Handle image upload
@@ -127,6 +133,12 @@ class StudentProfileController extends Controller
             'ic_id' => $icId,
             'background' => $validated['background'] ?? null,
             'image_path' => $validated['image_path'] ?? null,
+            'ic_number' => $validated['ic_number'] ?? null,
+            'parent_name' => $validated['parent_name'] ?? null,
+            'parent_phone_number' => $validated['parent_phone_number'] ?? null,
+            'next_of_kin' => $validated['next_of_kin'] ?? null,
+            'next_of_kin_phone_number' => $validated['next_of_kin_phone_number'] ?? null,
+            'home_address' => $validated['home_address'] ?? null,
         ]);
 
         return redirect()->route('students.profile.show')
@@ -226,6 +238,12 @@ class StudentProfileController extends Controller
             'background' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],
             'resume' => ['nullable', 'file', 'mimes:pdf', 'max:5120'], // 5MB max
+            'ic_number' => ['nullable', 'string', 'max:20'],
+            'parent_name' => ['nullable', 'string', 'max:255'],
+            'parent_phone_number' => ['nullable', 'string', 'max:20'],
+            'next_of_kin' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_phone_number' => ['nullable', 'string', 'max:20'],
+            'home_address' => ['nullable', 'string'],
         ]);
 
         // Handle image upload
@@ -265,6 +283,12 @@ class StudentProfileController extends Controller
             'at_id' => $atId,
             'academic_advisor_id' => $academicAdvisorId,
             'background' => $validated['background'] ?? null,
+            'ic_number' => $validated['ic_number'] ?? null,
+            'parent_name' => $validated['parent_name'] ?? null,
+            'parent_phone_number' => $validated['parent_phone_number'] ?? null,
+            'next_of_kin' => $validated['next_of_kin'] ?? null,
+            'next_of_kin_phone_number' => $validated['next_of_kin_phone_number'] ?? null,
+            'home_address' => $validated['home_address'] ?? null,
         ];
 
         if (isset($validated['image_path'])) {

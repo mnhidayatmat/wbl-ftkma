@@ -133,7 +133,7 @@
                     </label>
                 </div>
 
-                <!-- Rubric Configuration (for Oral/Rubric types) -->
+                <!-- Question Configuration (for Oral/Rubric types) -->
                 <div id="rubricSection" class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-6" style="display: {{ in_array($assessment->assessment_type, ['Oral', 'Rubric']) ? 'block' : 'none' }};">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5]">Rubric Questions Configuration</h3>

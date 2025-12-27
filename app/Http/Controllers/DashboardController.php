@@ -265,7 +265,7 @@ class DashboardController extends Controller
     private function getPlacementFunnel(): array
     {
         // Get resume inspection stats
-        $resumeApproved = StudentResumeInspection::where('status', 'RECOMMENDED')->count();
+        $resumeApproved = StudentResumeInspection::where('status', 'PASSED')->count();
 
         // Get placement tracking stats
         $salReleased = StudentPlacementTracking::whereNotNull('sal_released_at')->count();
@@ -594,8 +594,10 @@ class DashboardController extends Controller
     {
         $alerts = [];
 
-        // Pending resume inspections
-        $pendingResumes = StudentResumeInspection::where('status', 'PENDING')->count();
+        // Pending resume inspections (only count those with uploaded files)
+        $pendingResumes = StudentResumeInspection::where('status', 'PENDING')
+            ->whereNotNull('resume_file_path')
+            ->count();
         if ($pendingResumes > 0) {
             $alerts[] = [
                 'type' => 'warning',
@@ -605,7 +607,7 @@ class DashboardController extends Controller
         }
 
         // Students with SAL not released after resume approval
-        $awaitingSal = StudentResumeInspection::where('status', 'RECOMMENDED')
+        $awaitingSal = StudentResumeInspection::where('status', 'PASSED')
             ->whereDoesntHave('student.placementTracking', function ($q) {
                 $q->whereNotNull('sal_released_at');
             })
