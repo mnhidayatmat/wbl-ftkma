@@ -8,7 +8,7 @@
 </div>
 
 <div class="card-umpsa p-6">
-    <form action="{{ route('companies.update', $company) }}" method="POST">
+    <form action="{{ route('admin.companies.update', $company) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -97,7 +97,7 @@
         </div>
 
         <div class="flex items-center justify-end space-x-4">
-            <a href="{{ route('companies.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">Cancel</a>
+            <a href="{{ route('admin.companies.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">Cancel</a>
             <button type="submit" class="btn-umpsa-primary">Update Company</button>
         </div>
     </form>

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\CompanyAgreement;
 use App\Models\CompanyContact;
 use App\Models\CompanyDocument;
 use App\Models\CompanyNote;
 use App\Models\Moa;
 use App\Models\Mou;
+use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,19 +18,91 @@ use Illuminate\View\View;
 class CompanyController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource with unified companies and agreements view.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $companies = Company::withCount('students')
+        $search = $request->input('search');
+        $query = Company::withCount('students')
             ->with(['mou', 'agreements' => function($query) {
                 $query->orderByRaw("CASE WHEN status = 'Active' THEN 1 WHEN status = 'Pending' THEN 2 ELSE 3 END")
                       ->orderBy('created_at', 'desc');
-            }])
-            ->latest()
-            ->paginate(15);
+            }]);
 
-        return view('companies.index', compact('companies'));
+        // Search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'LIKE', "%{$search}%")
+                  ->orWhere('pic_name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filter by agreement type
+        if ($request->filled('agreement_type')) {
+            if ($request->agreement_type === 'none') {
+                $query->doesntHave('agreements');
+            } else {
+                $query->whereHas('agreements', function($q) use ($request) {
+                    $q->where('agreement_type', $request->agreement_type)
+                      ->where('status', 'Active');
+                });
+            }
+        }
+
+        // Filter by agreement status
+        if ($request->filled('agreement_status')) {
+            $query->whereHas('agreements', function($q) use ($request) {
+                $q->where('status', $request->agreement_status);
+            });
+        }
+
+        // Filter by expiring dates
+        if ($request->filled('expiring')) {
+            $months = (int) $request->expiring;
+            $query->whereHas('agreements', function($q) use ($months) {
+                $q->where('status', 'Active')
+                  ->where('end_date', '<=', now()->addMonths($months))
+                  ->where('end_date', '>=', now());
+            });
+        }
+
+        // Filter by company category
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $companies = $query->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $stats = $this->getCompanyStatistics();
+
+        return view('companies.index', compact('companies', 'search', 'stats'));
+    }
+
+    /**
+     * Get statistics for unified view.
+     */
+    private function getCompanyStatistics(): array
+    {
+        return [
+            'total_companies' => Company::count(),
+            'with_active_agreements' => Company::whereHas('agreements', function($q) {
+                $q->where('status', 'Active');
+            })->count(),
+            'with_expiring_agreements' => Company::whereHas('agreements', function($q) {
+                $q->where('status', 'Active')
+                  ->where('end_date', '<=', now()->addMonths(3))
+                  ->where('end_date', '>=', now());
+            })->count(),
+            'total_students' => Student::whereNotNull('company_id')->count(),
+            'mou_count' => CompanyAgreement::where('agreement_type', 'MoU')
+                ->where('status', 'Active')->count(),
+            'moa_count' => CompanyAgreement::where('agreement_type', 'MoA')
+                ->where('status', 'Active')->count(),
+        ];
     }
 
     /**
@@ -104,7 +178,7 @@ class CompanyController extends Controller
             }
         }
 
-        return redirect()->route('companies.index')
+        return redirect()->route('admin.companies.index')
             ->with('success', 'Company created successfully.');
     }
 
@@ -184,7 +258,7 @@ class CompanyController extends Controller
             }
         }
 
-        return redirect()->route('companies.show', $company)
+        return redirect()->route('admin.companies.show', $company)
             ->with('success', 'Company updated successfully.');
     }
 
@@ -195,7 +269,7 @@ class CompanyController extends Controller
     {
         $company->delete();
 
-        return redirect()->route('companies.index')
+        return redirect()->route('admin.companies.index')
             ->with('success', 'Company deleted successfully.');
     }
 
@@ -225,7 +299,7 @@ class CompanyController extends Controller
 
         $company->contacts()->create($validated);
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'contacts'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'contacts'])
             ->with('success', 'Contact added successfully.');
     }
 
@@ -253,7 +327,7 @@ class CompanyController extends Controller
 
         $contact->update($validated);
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'contacts'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'contacts'])
             ->with('success', 'Contact updated successfully.');
     }
 
@@ -268,7 +342,7 @@ class CompanyController extends Controller
 
         $contact->delete();
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'contacts'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'contacts'])
             ->with('success', 'Contact deleted successfully.');
     }
 
@@ -293,7 +367,7 @@ class CompanyController extends Controller
 
         $company->notes()->create($validated);
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'notes'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'notes'])
             ->with('success', 'Note added successfully.');
     }
 
@@ -313,7 +387,7 @@ class CompanyController extends Controller
 
         $note->delete();
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'notes'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'notes'])
             ->with('success', 'Note deleted successfully.');
     }
 
@@ -349,7 +423,7 @@ class CompanyController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'documents'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'documents'])
             ->with('success', 'Document uploaded successfully.');
     }
 
@@ -377,7 +451,7 @@ class CompanyController extends Controller
         Storage::disk('public')->delete($document->file_path);
         $document->delete();
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'documents'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'documents'])
             ->with('success', 'Document deleted successfully.');
     }
 
@@ -419,7 +493,7 @@ class CompanyController extends Controller
 
         $mou->fill($validated)->save();
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'mou'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'mou'])
             ->with('success', 'MoU updated successfully.');
     }
 
@@ -463,7 +537,7 @@ class CompanyController extends Controller
             $moa->students()->attach($request->student_ids);
         }
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'moa'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'moa'])
             ->with('success', 'MoA created successfully.');
     }
 
@@ -508,7 +582,7 @@ class CompanyController extends Controller
             $moa->students()->detach();
         }
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'moa'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'moa'])
             ->with('success', 'MoA updated successfully.');
     }
 
@@ -527,7 +601,7 @@ class CompanyController extends Controller
 
         $moa->delete();
 
-        return redirect()->route('companies.show', ['company' => $company, 'tab' => 'moa'])
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'moa'])
             ->with('success', 'MoA deleted successfully.');
     }
 }

@@ -58,7 +58,7 @@ class SearchController extends Controller
                     'id' => $company->id,
                     'title' => $company->company_name,
                     'subtitle' => $company->email ?? 'No email',
-                    'url' => route('companies.show', $company->id),
+                    'url' => route('admin.companies.show', $company->id),
                     'icon' => 'building',
                 ];
             });

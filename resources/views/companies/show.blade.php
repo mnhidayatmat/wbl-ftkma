@@ -13,11 +13,11 @@
             </div>
             <div class="flex gap-2">
                 @if(auth()->user()->isAdmin())
-                <a href="{{ route('companies.edit', $company) }}" class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors">
+                <a href="{{ route('admin.companies.edit', $company) }}" class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors">
                     Edit Company
                 </a>
                 @endif
-                <a href="{{ route('companies.index') }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors">
+                <a href="{{ route('admin.companies.index') }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors">
                     Back
                 </a>
             </div>
@@ -43,15 +43,10 @@
                             class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors">
                         Contacts
                     </button>
-                    <button @click="activeTab = 'students'" 
+                    <button @click="activeTab = 'students'"
                             :class="activeTab === 'students' ? 'border-[#0084C5] text-[#0084C5]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                             class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors">
                         Students
-                    </button>
-                    <button @click="activeTab = 'mou'" 
-                            :class="activeTab === 'mou' ? 'border-[#0084C5] text-[#0084C5]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors">
-                        MoU & MoA (Legacy)
                     </button>
                     <button @click="activeTab = 'agreements'" 
                             :class="activeTab === 'agreements' ? 'border-[#0084C5] text-[#0084C5]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -88,12 +83,7 @@
                     @include('companies.tabs.students', ['company' => $company])
                 </div>
 
-                <!-- MoU & MoA Tab (Legacy) -->
-                <div x-show="activeTab === 'mou'" x-transition>
-                    @include('companies.tabs.mou-moa', ['company' => $company])
-                </div>
-
-                <!-- Agreements Tab (New Unified System) -->
+                <!-- Agreements Tab -->
                 <div x-show="activeTab === 'agreements'" x-transition>
                     @include('companies.tabs.agreements', ['company' => $company])
                 </div>

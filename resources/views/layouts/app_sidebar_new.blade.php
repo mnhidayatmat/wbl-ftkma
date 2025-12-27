@@ -165,22 +165,13 @@
              x-transition:leave-end="opacity-0 -translate-y-1"
              class="mt-1 ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-1">
             
-            <!-- Company Directory -->
+            <!-- Companies & Agreements (Unified) -->
             <a href="{{ route('admin.companies.index') }}"
-               class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 min-h-[40px] {{ request()->routeIs('admin.companies.*') ? 'text-[#0084C5] font-medium bg-[#0084C5]/5 border-l-2 border-[#00A86B] -ml-[2px] pl-[14px]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-[#0084C5]' }}">
+               class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 min-h-[40px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'text-[#0084C5] font-medium bg-[#0084C5]/5 border-l-2 border-[#00A86B] -ml-[2px] pl-[14px]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-[#0084C5]' }}">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
-                Company Directory
-            </a>
-            
-            <!-- MoU/MoA/LOI -->
-            <a href="{{ route('admin.agreements.index') }}" 
-               class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 min-h-[40px] {{ request()->routeIs('admin.agreements.*') ? 'text-[#0084C5] font-medium bg-[#0084C5]/5 border-l-2 border-[#00A86B] -ml-[2px] pl-[14px]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-[#0084C5]' }}">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                MoU / MoA / LOI
+                Companies & Agreements
             </a>
         </div>
     </div>
@@ -208,6 +199,19 @@
             </svg>
         </div>
         <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Group Control</span>
+    </a>
+
+    <!-- Manage Students (Admin Only) -->
+    <a href="{{ route('admin.students.index') }}"
+       class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.students.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+       :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+       :title="isSidebarCollapsed ? 'Manage Students' : ''">
+        <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+        </div>
+        <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Manage Students</span>
     </a>
     @endif
 
@@ -303,10 +307,6 @@
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
                 @if($isAdmin)
-                <a href="{{ route('admin.students.index') }}"
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('admin.students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    Manage Students
-                </a>
                 <a href="{{ route('academic.fyp.proposals.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Project Proposals
@@ -950,8 +950,21 @@
             <span x-show="!isSidebarCollapsed">PROFILE SETTINGS</span>
             <span x-show="isSidebarCollapsed" class="block w-8 h-[1px] bg-gray-300 mx-auto"></span>
         </p>
-        <a href="{{ route('students.profile.show') }}" 
-           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('students.profile.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+        @php
+            // Determine profile route based on user's primary role
+            $profileRoute = 'students.profile.show'; // default
+            $profileRoutePattern = 'students.profile.*';
+
+            if ($isAdmin) {
+                $profileRoute = 'admin.profile.show';
+                $profileRoutePattern = 'admin.profile.*';
+            } elseif ($isStudent) {
+                $profileRoute = 'students.profile.show';
+                $profileRoutePattern = 'students.profile.*';
+            }
+        @endphp
+        <a href="{{ route($profileRoute) }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs($profileRoutePattern) ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
            :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
            :title="isSidebarCollapsed ? 'My Profile' : ''">
             <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
