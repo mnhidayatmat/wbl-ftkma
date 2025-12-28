@@ -67,8 +67,8 @@ Route::middleware(['auth'])->group(function () {
         // Group Selection (All authenticated users)
         Route::get('groups', [PpeGroupSelectionController::class, 'index'])->name('groups.index');
 
-        // Assessments (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Assessments (Admin and PPE Coordinator)
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('assessments', function () {
                 return app(AssessmentController::class)->index(request(), 'PPE');
             })->name('assessments.index');
@@ -92,49 +92,49 @@ Route::middleware(['auth'])->group(function () {
             })->name('assessments.toggle-active');
         });
 
-        // Assessment Schedule (Admin only - renamed from Settings)
-        Route::middleware('role:admin')->group(function () {
+        // Assessment Schedule (Admin and PPE Coordinator)
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('schedule', [PpeScheduleController::class, 'index'])->name('schedule.index');
             Route::post('schedule/window', [PpeScheduleController::class, 'updateWindow'])->name('schedule.update-window');
             Route::post('schedule/reminder', [PpeScheduleController::class, 'sendReminder'])->name('schedule.send-reminder');
         });
 
-        // Evaluation Progress (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Evaluation Progress (Admin and PPE Coordinator)
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('progress', [PpeProgressController::class, 'index'])->name('progress.index');
         });
 
-        // Moderation (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Moderation (Admin and PPE Coordinator)
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('moderation', [PpeModerationController::class, 'index'])->name('moderation.index');
             Route::get('moderation/{student}', [PpeModerationController::class, 'show'])->name('moderation.show');
             Route::post('moderation/{student}', [PpeModerationController::class, 'store'])->name('moderation.store');
         });
 
-        // Result Finalisation (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Result Finalisation (Admin and PPE Coordinator)
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('finalisation', [PpeFinalisationController::class, 'index'])->name('finalisation.index');
             Route::post('finalisation/student/{student}', [PpeFinalisationController::class, 'finaliseStudent'])->name('finalisation.student');
             Route::post('finalisation/group', [PpeFinalisationController::class, 'finaliseGroup'])->name('finalisation.group');
             Route::post('finalisation/course', [PpeFinalisationController::class, 'finaliseCourse'])->name('finalisation.course');
         });
 
-        // Reports (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Reports (Admin and PPE Coordinator)
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('reports', [PpeReportsController::class, 'index'])->name('reports.index');
             Route::get('reports/cohort', [PpeReportsController::class, 'exportCohort'])->name('reports.cohort');
             Route::get('reports/group/{group}', [PpeReportsController::class, 'exportGroup'])->name('reports.group');
             Route::get('reports/company/{company}', [PpeReportsController::class, 'exportCompany'])->name('reports.company');
         });
 
-        // Audit Log (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Audit Log (Admin and PPE Coordinator)
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('audit', [PpeAuditController::class, 'index'])->name('audit.index');
             Route::get('audit/export', [PpeAuditController::class, 'export'])->name('audit.export');
         });
 
-        // CLO-PLO Analysis (Admin, Coordinator, Lecturer)
-        Route::middleware('role:admin,coordinator,lecturer')->group(function () {
+        // CLO-PLO Analysis (Admin, Coordinator, Lecturer, PPE Coordinator)
+        Route::middleware('role:admin,coordinator,lecturer,ppe_coordinator')->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\PPE\PpeCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
@@ -149,8 +149,8 @@ Route::middleware(['auth'])->group(function () {
             })->name('settings.index');
         });
 
-        // Lecturer Evaluation (Admin and Lecturer - authorization checked in controller)
-        Route::middleware('role:admin,lecturer')->group(function () {
+        // Lecturer Evaluation (Admin, Lecturer, and PPE Coordinator - authorization checked in controller)
+        Route::middleware('role:admin,lecturer,ppe_coordinator')->group(function () {
             Route::get('lecturer', [PpeAtEvaluationController::class, 'index'])->name('lecturer.index');
             Route::get('lecturer/{student}', [PpeAtEvaluationController::class, 'show'])->name('lecturer.show');
             Route::post('lecturer/{student}', [PpeAtEvaluationController::class, 'store'])->name('lecturer.store');
@@ -158,22 +158,22 @@ Route::middleware(['auth'])->group(function () {
             // Student Performance Overview
             Route::get('performance', [PpeStudentPerformanceController::class, 'index'])->name('performance.index');
 
-            // Export routes (Admin only)
-            Route::middleware('role:admin')->group(function () {
+            // Export routes (Admin and PPE Coordinator)
+            Route::middleware('role:admin,ppe_coordinator')->group(function () {
                 Route::get('performance/export/excel', [PpeStudentPerformanceController::class, 'exportExcel'])->name('performance.export.excel');
                 Route::get('performance/export/pdf', [PpeStudentPerformanceController::class, 'exportPdf'])->name('performance.export.pdf');
             });
         });
 
-        // IC Evaluation (Admin and Industry Coach - authorization checked in controller)
-        Route::middleware('role:admin,industry')->group(function () {
+        // IC Evaluation (Admin, Industry Coach, and PPE Coordinator - authorization checked in controller)
+        Route::middleware('role:admin,industry,ppe_coordinator')->group(function () {
             Route::get('ic', [PpeIcEvaluationController::class, 'index'])->name('ic.index');
             Route::get('ic/{student}', [PpeIcEvaluationController::class, 'show'])->name('ic.show');
             Route::post('ic/{student}', [PpeIcEvaluationController::class, 'store'])->name('ic.store');
         });
 
-        // Logbook Evaluation (Admin and Industry Coach)
-        Route::middleware('role:admin,industry')->prefix('logbook')->name('logbook.')->group(function () {
+        // Logbook Evaluation (Admin, Industry Coach, and PPE Coordinator)
+        Route::middleware('role:admin,industry,ppe_coordinator')->prefix('logbook')->name('logbook.')->group(function () {
             Route::get('/', [PpeLogbookController::class, 'index'])->name('index');
             Route::get('/{student}', [PpeLogbookController::class, 'show'])->name('show');
             Route::post('/{student}', [PpeLogbookController::class, 'store'])->name('store');
@@ -186,8 +186,8 @@ Route::middleware(['auth'])->group(function () {
 
     // IP Module Routes
     Route::prefix('academic/ip')->name('academic.ip.')->group(function () {
-        // Assessments (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Assessments (Admin and IP Coordinator)
+        Route::middleware('role:admin,ip_coordinator')->group(function () {
             Route::get('assessments', function () {
                 return app(AssessmentController::class)->index(request(), 'IP');
             })->name('assessments.index');
@@ -234,8 +234,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('audit/export', [IpAuditController::class, 'export'])->name('audit.export');
         });
 
-        // CLO-PLO Analysis (Admin, Coordinator, Lecturer)
-        Route::middleware('role:admin,coordinator,lecturer')->group(function () {
+        // CLO-PLO Analysis (Admin, Coordinator, Lecturer, IP Coordinator)
+        Route::middleware('role:admin,coordinator,lecturer,ip_coordinator')->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
@@ -243,29 +243,29 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\IP\IpCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
-        // Lecturer Evaluation (Admin and Lecturer)
-        Route::middleware('role:admin,lecturer')->group(function () {
+        // Lecturer Evaluation (Admin, Lecturer, and IP Coordinator)
+        Route::middleware('role:admin,lecturer,ip_coordinator')->group(function () {
             Route::get('lecturer', [IpLecturerEvaluationController::class, 'index'])->name('lecturer.index');
             Route::get('lecturer/{student}', [IpLecturerEvaluationController::class, 'show'])->name('lecturer.show');
             Route::post('lecturer/{student}', [IpLecturerEvaluationController::class, 'store'])->name('lecturer.store');
             Route::get('performance', [IpStudentPerformanceController::class, 'index'])->name('performance.index');
 
-            // Export routes (Admin only)
-            Route::middleware('role:admin')->group(function () {
+            // Export routes (Admin and IP Coordinator)
+            Route::middleware('role:admin,ip_coordinator')->group(function () {
                 Route::get('performance/export/excel', [IpStudentPerformanceController::class, 'exportExcel'])->name('performance.export.excel');
                 Route::get('performance/export/pdf', [IpStudentPerformanceController::class, 'exportPdf'])->name('performance.export.pdf');
             });
         });
 
-        // AT Evaluation (Admin and AT - Academic Tutor)
-        Route::middleware('role:admin,lecturer')->group(function () {
+        // AT Evaluation (Admin, AT, and IP Coordinator)
+        Route::middleware('role:admin,lecturer,ip_coordinator')->group(function () {
             Route::get('at', [\App\Http\Controllers\Academic\IP\IpAtEvaluationController::class, 'index'])->name('at.index');
             Route::get('at/{student}', [\App\Http\Controllers\Academic\IP\IpAtEvaluationController::class, 'show'])->name('at.show');
             Route::post('at/{student}', [\App\Http\Controllers\Academic\IP\IpAtEvaluationController::class, 'store'])->name('at.store');
         });
 
-        // IC Evaluation (Admin and Industry Coach - authorization checked in controller)
-        Route::middleware('role:admin,industry')->group(function () {
+        // IC Evaluation (Admin, Industry Coach, and IP Coordinator - authorization checked in controller)
+        Route::middleware('role:admin,industry,ip_coordinator')->group(function () {
             Route::get('ic', [IpIcEvaluationController::class, 'index'])->name('ic.index');
             Route::get('ic/{student}', [IpIcEvaluationController::class, 'show'])->name('ic.show');
             Route::post('ic/{student}', [IpIcEvaluationController::class, 'store'])->name('ic.store');
@@ -273,8 +273,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('ic/{student}/rubric/{assessment}', [IpIcEvaluationController::class, 'storeRubric'])->name('ic.rubric.store');
         });
 
-        // Logbook Evaluation (Admin and Industry Coach)
-        Route::middleware('role:admin,industry')->prefix('logbook')->name('logbook.')->group(function () {
+        // Logbook Evaluation (Admin, Industry Coach, and IP Coordinator)
+        Route::middleware('role:admin,industry,ip_coordinator')->prefix('logbook')->name('logbook.')->group(function () {
             Route::get('/', [IpLogbookController::class, 'index'])->name('index');
             Route::get('/{student}', [IpLogbookController::class, 'show'])->name('show');
             Route::post('/{student}', [IpLogbookController::class, 'store'])->name('store');
@@ -283,8 +283,8 @@ Route::middleware(['auth'])->group(function () {
 
     // OSH Module Routes
     Route::prefix('academic/osh')->name('academic.osh.')->group(function () {
-        // Assessments (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Assessments (Admin and OSH Coordinator)
+        Route::middleware('role:admin,osh_coordinator')->group(function () {
             Route::get('assessments', function () {
                 return app(AssessmentController::class)->index(request(), 'OSH');
             })->name('assessments.index');
@@ -329,8 +329,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('audit/export', [OshAuditController::class, 'export'])->name('audit.export');
         });
 
-        // CLO-PLO Analysis (Admin, Coordinator, Lecturer)
-        Route::middleware('role:admin,coordinator,lecturer')->group(function () {
+        // CLO-PLO Analysis (Admin, Coordinator, Lecturer, OSH Coordinator)
+        Route::middleware('role:admin,coordinator,lecturer,osh_coordinator')->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
@@ -338,8 +338,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\OSH\OshCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
-        // Lecturer Evaluation (Admin and Lecturer)
-        Route::middleware('role:admin,lecturer')->group(function () {
+        // Lecturer Evaluation (Admin, Lecturer, and OSH Coordinator)
+        Route::middleware('role:admin,lecturer,osh_coordinator')->group(function () {
             Route::get('lecturer', [OshAtEvaluationController::class, 'index'])->name('lecturer.index');
             Route::get('lecturer/{student}', [OshAtEvaluationController::class, 'show'])->name('lecturer.show');
             Route::post('lecturer/{student}', [OshAtEvaluationController::class, 'store'])->name('lecturer.store');
@@ -347,22 +347,22 @@ Route::middleware(['auth'])->group(function () {
             // Student Performance Overview
             Route::get('performance', [OshStudentPerformanceController::class, 'index'])->name('performance.index');
 
-            // Export routes (Admin only)
-            Route::middleware('role:admin')->group(function () {
+            // Export routes (Admin and OSH Coordinator)
+            Route::middleware('role:admin,osh_coordinator')->group(function () {
                 Route::get('performance/export/excel', [OshStudentPerformanceController::class, 'exportExcel'])->name('performance.export.excel');
                 Route::get('performance/export/pdf', [OshStudentPerformanceController::class, 'exportPdf'])->name('performance.export.pdf');
             });
         });
 
-        // IC Evaluation (Admin and Industry Coach - authorization checked in controller)
-        Route::middleware('role:admin,industry')->group(function () {
+        // IC Evaluation (Admin, Industry Coach, and OSH Coordinator - authorization checked in controller)
+        Route::middleware('role:admin,industry,osh_coordinator')->group(function () {
             Route::get('ic', [OshIcEvaluationController::class, 'index'])->name('ic.index');
             Route::get('ic/{student}', [OshIcEvaluationController::class, 'show'])->name('ic.show');
             Route::post('ic/{student}', [OshIcEvaluationController::class, 'store'])->name('ic.store');
         });
 
-        // Logbook Evaluation (Admin and Industry Coach)
-        Route::middleware('role:admin,industry')->prefix('logbook')->name('logbook.')->group(function () {
+        // Logbook Evaluation (Admin, Industry Coach, and OSH Coordinator)
+        Route::middleware('role:admin,industry,osh_coordinator')->prefix('logbook')->name('logbook.')->group(function () {
             Route::get('/', [OshLogbookController::class, 'index'])->name('index');
             Route::get('/{student}', [OshLogbookController::class, 'show'])->name('show');
             Route::post('/{student}', [OshLogbookController::class, 'store'])->name('store');
@@ -515,8 +515,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Industrial Training (LI) Module Routes
     Route::prefix('academic/li')->name('academic.li.')->group(function () {
-        // Assessments (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Assessments (Admin and LI Coordinator)
+        Route::middleware('role:admin,li_coordinator')->group(function () {
             Route::get('assessments', function () {
                 return app(AssessmentController::class)->index(request(), 'LI');
             })->name('assessments.index');
@@ -559,8 +559,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('audit/export', [\App\Http\Controllers\Academic\LI\LiAuditController::class, 'export'])->name('audit.export');
         });
 
-        // CLO-PLO Analysis (Admin, Coordinator, Lecturer)
-        Route::middleware('role:admin,coordinator,lecturer')->group(function () {
+        // CLO-PLO Analysis (Admin, Coordinator, Lecturer, LI Coordinator)
+        Route::middleware('role:admin,coordinator,lecturer,li_coordinator')->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
@@ -568,29 +568,29 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
-        // Supervisor Evaluation (Admin and Supervisor LI)
-        Route::middleware('role:admin,supervisor_li')->group(function () {
+        // Supervisor Evaluation (Admin, Supervisor LI, and LI Coordinator)
+        Route::middleware('role:admin,supervisor_li,li_coordinator')->group(function () {
             Route::get('lecturer', [LiSupervisorEvaluationController::class, 'index'])->name('lecturer.index');
             Route::get('lecturer/{student}', [LiSupervisorEvaluationController::class, 'show'])->name('lecturer.show');
             Route::post('lecturer/{student}', [LiSupervisorEvaluationController::class, 'store'])->name('lecturer.store');
         });
 
-        // IC Evaluation (Admin and Industry Coach)
-        Route::middleware('role:admin,industry')->group(function () {
+        // IC Evaluation (Admin, Industry Coach, and LI Coordinator)
+        Route::middleware('role:admin,industry,li_coordinator')->group(function () {
             Route::get('ic', [LiIcEvaluationController::class, 'index'])->name('ic.index');
             Route::get('ic/{student}', [LiIcEvaluationController::class, 'show'])->name('ic.show');
             Route::post('ic/{student}', [LiIcEvaluationController::class, 'store'])->name('ic.store');
         });
 
-        // Logbook Evaluation (Admin and Industry Coach)
-        Route::middleware('role:admin,industry')->prefix('logbook')->name('logbook.')->group(function () {
+        // Logbook Evaluation (Admin, Industry Coach, and LI Coordinator)
+        Route::middleware('role:admin,industry,li_coordinator')->prefix('logbook')->name('logbook.')->group(function () {
             Route::get('/', [LiLogbookController::class, 'index'])->name('index');
             Route::get('/{student}', [LiLogbookController::class, 'show'])->name('show');
             Route::post('/{student}', [LiLogbookController::class, 'store'])->name('store');
         });
 
-        // Student Performance (Admin, Supervisor LI, IC)
-        Route::middleware('role:admin,supervisor_li,industry')->group(function () {
+        // Student Performance (Admin, Supervisor LI, IC, and LI Coordinator)
+        Route::middleware('role:admin,supervisor_li,industry,li_coordinator')->group(function () {
             Route::get('performance', [LiStudentPerformanceController::class, 'index'])->name('performance.index');
             Route::get('performance/export/excel', [LiStudentPerformanceController::class, 'exportExcel'])->name('performance.export.excel');
             Route::get('performance/export/pdf', [LiStudentPerformanceController::class, 'exportPdf'])->name('performance.export.pdf');
