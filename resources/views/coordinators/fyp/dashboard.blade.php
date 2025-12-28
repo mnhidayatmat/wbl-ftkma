@@ -60,7 +60,7 @@
         </div>
 
         <!-- At-Risk Students -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg transition-shadow group {{ count($atRiskStudents) > 0 ? 'ring-2 ring-red-400' : '' }}">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg transition-shadow group">
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">At-Risk Students</p>
