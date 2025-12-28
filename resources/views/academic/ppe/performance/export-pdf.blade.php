@@ -6,7 +6,7 @@
     <title>WBL Student Performance Report – PPE</title>
     <style>
         @page {
-            margin: 30mm 25mm 30mm 25mm;
+            margin: 20mm 15mm 20mm 15mm;
             size: A4 landscape;
         }
         * {
@@ -19,7 +19,7 @@
             font-size: 10px;
             color: #333;
             margin: 0;
-            padding: 0;
+            padding: 10px;
         }
         .header {
             text-align: center;
@@ -111,7 +111,7 @@
             color: #666;
             padding: 8px 0;
             border-top: 1px solid #ddd;
-            margin: 0 25mm;
+            margin: 0 15mm;
         }
         .page-break {
             page-break-after: always;

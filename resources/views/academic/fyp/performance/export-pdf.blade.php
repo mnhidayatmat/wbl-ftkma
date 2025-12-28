@@ -6,7 +6,7 @@
     <title>WBL Student Performance Report – FYP</title>
     <style>
         @page {
-            margin: 15mm 12mm 15mm 12mm;
+            margin: 20mm 15mm 20mm 15mm;
             size: A4 landscape;
         }
         * {
@@ -19,7 +19,7 @@
             font-size: 10px;
             color: #333;
             margin: 0;
-            padding: 0;
+            padding: 10px;
         }
         .header {
             text-align: center;

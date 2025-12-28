@@ -6,7 +6,7 @@
     <title>WBL Student Performance Report – LI</title>
     <style>
         @page {
-            margin: 30mm 25mm 30mm 25mm;
+            margin: 20mm 15mm 20mm 15mm;
             size: A4 landscape;
         }
         * {
@@ -19,7 +19,7 @@
             font-size: 10px;
             color: #333;
             margin: 0;
-            padding: 0;
+            padding: 10px;
         }
         .header {
             text-align: center;
@@ -80,12 +80,14 @@
         .footer {
             position: fixed;
             bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
             font-size: 8px;
             color: #666;
-            width: 100%;
+            padding: 8px 0;
             border-top: 1px solid #ddd;
-            padding-top: 5px;
+            margin: 0 15mm;
         }
     </style>
 </head>

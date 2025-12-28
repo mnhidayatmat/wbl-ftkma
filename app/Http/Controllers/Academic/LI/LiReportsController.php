@@ -292,10 +292,10 @@ class LiReportsController extends Controller
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-            ->setOption('margin-top', 30)
-            ->setOption('margin-bottom', 30)
-            ->setOption('margin-left', 25)
-            ->setOption('margin-right', 25)
+            ->setOption('margin-top', 20)
+            ->setOption('margin-bottom', 20)
+            ->setOption('margin-left', 15)
+            ->setOption('margin-right', 15)
             ->setOption('enable-local-file-access', true);
 
         $fileName = str_replace(' ', '_', $title).'_'.now()->format('Y-m-d_His').'.pdf';
