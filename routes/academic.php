@@ -417,11 +417,12 @@ Route::middleware(['auth'])->group(function () {
             Route::post('finalisation/group', [FypFinalisationController::class, 'finaliseGroup'])->name('finalisation.group');
             Route::post('finalisation/course', [FypFinalisationController::class, 'finaliseCourse'])->name('finalisation.course');
 
-            // Reports (Admin only)
+            // Reports (Admin and FYP Coordinator)
             Route::get('reports', [FypReportsController::class, 'index'])->name('reports.index');
             Route::get('reports/cohort', [FypReportsController::class, 'exportCohort'])->name('reports.cohort');
             Route::get('reports/group/{group}', [FypReportsController::class, 'exportGroup'])->name('reports.group');
             Route::get('reports/company/{company}', [FypReportsController::class, 'exportCompany'])->name('reports.company');
+            Route::get('reports/clo-assessment', [FypReportsController::class, 'exportCloAssessment'])->name('reports.clo-assessment');
 
             // Audit Log (Admin only)
             Route::get('audit', [FypAuditController::class, 'index'])->name('audit.index');

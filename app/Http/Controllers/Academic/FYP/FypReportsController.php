@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Academic\FYP;
 
+use App\Exports\CloAssessmentExport;
 use App\Exports\StudentPerformanceExport;
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
@@ -281,6 +282,133 @@ class FypReportsController extends Controller
             });
 
         return [$atTotalWeight, $atRubricTotalWeight, $icTotalWeight];
+    }
+
+    /**
+     * Export CLO Assessment report.
+     */
+    public function exportCloAssessment(Request $request)
+    {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $format = $request->query('format', 'excel');
+
+        // Build query for students
+        $query = Student::with(['group', 'company']);
+
+        // Apply filters
+        if ($request->filled('session')) {
+            $query->where('academic_session', $request->session);
+        }
+        if ($request->filled('group_id')) {
+            $query->where('group_id', $request->group_id);
+        }
+        if ($request->filled('company_id')) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        $students = $query->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()
+                ->with('error', 'No student data available for the selected filters.');
+        }
+
+        // Get all FYP assessments with rubrics
+        $assessments = Assessment::forCourse('FYP')
+            ->active()
+            ->with('rubrics')
+            ->get();
+
+        // Extract unique CLO codes from rubrics
+        $cloCodes = $assessments->flatMap(function ($assessment) {
+            return $assessment->rubrics->pluck('clo_code');
+        })->filter()->unique()->sort()->values()->toArray();
+
+        if (empty($cloCodes)) {
+            return redirect()->back()
+                ->with('error', 'No CLO data found for FYP assessments.');
+        }
+
+        // Get all rubric marks for these students
+        $rubricMarks = StudentAssessmentRubricMark::whereIn('student_id', $students->pluck('id'))
+            ->with('rubric')
+            ->get()
+            ->groupBy('student_id');
+
+        // Calculate CLO scores for each student
+        $studentsWithClo = $students->map(function ($student) use ($rubricMarks, $cloCodes) {
+            $studentMarks = $rubricMarks->get($student->id, collect());
+
+            // Group marks by CLO
+            $cloScores = [];
+            foreach ($cloCodes as $clo) {
+                $cloScores[$clo] = 0;
+            }
+
+            foreach ($studentMarks as $mark) {
+                if ($mark->rubric && $mark->rubric->clo_code) {
+                    $cloCode = $mark->rubric->clo_code;
+                    if (isset($cloScores[$cloCode])) {
+                        $cloScores[$cloCode] += $mark->weighted_contribution;
+                    }
+                }
+            }
+
+            $student->clo_scores = $cloScores;
+
+            // Calculate total and status
+            $totalScore = array_sum($cloScores);
+            if ($totalScore >= 80) {
+                $student->overall_status_label = 'Completed';
+            } elseif ($totalScore > 0) {
+                $student->overall_status_label = 'In Progress';
+            } else {
+                $student->overall_status_label = 'Not Started';
+            }
+
+            return $student;
+        });
+
+        // Log export
+        Log::info('FYP CLO Assessment Report Export', [
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()->name,
+            'format' => $format,
+            'filters' => $request->only(['session', 'group_id', 'company_id', 'report_type']),
+            'exported_count' => $studentsWithClo->count(),
+        ]);
+
+        if ($format === 'pdf') {
+            return $this->exportCloPdf($studentsWithClo, $cloCodes);
+        }
+
+        $fileName = 'FYP_CLO_Assessment_'.now()->format('Y-m-d_His').'.xlsx';
+
+        return Excel::download(new CloAssessmentExport($studentsWithClo, $cloCodes, 'FYP'), $fileName);
+    }
+
+    /**
+     * Export CLO Assessment to PDF.
+     */
+    private function exportCloPdf($students, $cloCodes)
+    {
+        $pdf = Pdf::loadView('academic.fyp.reports.clo-assessment-pdf', [
+            'students' => $students,
+            'cloCodes' => $cloCodes,
+            'generatedBy' => auth()->user()->name,
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'landscape')
+            ->setOption('margin-top', 15)
+            ->setOption('margin-bottom', 15)
+            ->setOption('margin-left', 12)
+            ->setOption('margin-right', 12);
+
+        $fileName = 'FYP_CLO_Assessment_'.now()->format('Y-m-d_His').'.pdf';
+
+        return $pdf->download($fileName);
     }
 
     /**

@@ -134,36 +134,105 @@
                 </div>
             </div>
 
-            <!-- AT Contribution Report -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+            <!-- Assessment by CLO Report -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 lg:col-span-2">
                 <div class="flex items-center mb-4">
-                    <div class="p-3 bg-purple-600 rounded-lg mr-4">
+                    <div class="p-3 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg mr-4">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AT Contribution Report</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Academic Tutor contribution breakdown</p>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Assessment by CLO Report</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Detailed assessment breakdown organized by Course Learning Outcomes (CLO)</p>
                     </div>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Coming soon...</p>
-            </div>
 
-            <!-- IC Contribution Report -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                <div class="flex items-center mb-4">
-                    <div class="p-3 bg-orange-600 rounded-lg mr-4">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
+                <form action="{{ route('academic.fyp.reports.clo-assessment') }}" method="GET" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Academic Session Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Academic Session
+                            </label>
+                            <select name="session" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white">
+                                <option value="">All Sessions</option>
+                                @php
+                                    $currentYear = date('Y');
+                                    $sessions = [];
+                                    for ($i = 0; $i < 5; $i++) {
+                                        $year = $currentYear - $i;
+                                        $nextYear = $year + 1;
+                                        $sessions[] = "{$year}/{$nextYear}";
+                                    }
+                                @endphp
+                                @foreach($sessions as $session)
+                                    <option value="{{ $session }}">{{ $session }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Group Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Group
+                            </label>
+                            <select name="group_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white">
+                                <option value="">All Groups</option>
+                                @php
+                                    $groups = \App\Models\WblGroup::orderBy('name')->get();
+                                @endphp
+                                @foreach($groups as $group)
+                                    <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Company Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Company
+                            </label>
+                            <select name="company_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white">
+                                <option value="">All Companies</option>
+                                @php
+                                    $companies = \App\Models\Company::whereHas('students')->orderBy('company_name')->get();
+                                @endphp
+                                @foreach($companies as $company)
+                                    <option value="{{ $company->id }}">{{ $company->company_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Report Type -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Report Type
+                            </label>
+                            <select name="report_type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white">
+                                <option value="individual">Individual Students</option>
+                                <option value="batch">Batch Summary</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">IC Contribution Report</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Industry Coach contribution breakdown</p>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" name="format" value="excel"
+                                class="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Export to Excel
+                        </button>
+                        <button type="submit" name="format" value="pdf"
+                                class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            Export to PDF
+                        </button>
                     </div>
-                </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Coming soon...</p>
+                </form>
             </div>
         </div>
     </div>
