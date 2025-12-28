@@ -36,13 +36,21 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+
         // Check if email is verified for all users
-        if (! Auth::user()->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             Auth::logout();
 
             return redirect()->route('login')
                 ->withErrors(['email' => 'Please verify your email address before logging in. Check your inbox for the verification link.'])
                 ->withInput($request->only('email'));
+        }
+
+        // Auto-switch to admin role if user has admin role
+        if ($user->hasRole('admin')) {
+            $request->session()->put('active_role', 'admin');
+            $request->session()->put('active_role_expires_at', now()->addHours(24));
         }
 
         return redirect()->intended(route('dashboard'));
