@@ -132,18 +132,18 @@
                                         <span class="text-gray-400">Never</span>
                                     @endif
                                 </td>
-                                <td class="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
-                                    @can('edit-ic-marks', $student)
-                                        <a href="{{ route('academic.fyp.ic.show', $student) }}" 
-                                           class="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-[#0084C5] hover:bg-[#003A6C] text-white rounded-lg transition-colors">
+                                <td class="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
+                                    @if(auth()->user()->isAdmin() || (auth()->user()->isIndustry() && $student->ic_id == auth()->id()))
+                                        <a href="{{ route('academic.fyp.ic.show', $student) }}"
+                                           class="inline-flex items-center px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white rounded-lg transition-colors">
                                             {{ $student->evaluation_status == 'not_started' ? 'Evaluate' : 'Edit' }}
                                         </a>
                                     @else
-                                        <a href="{{ route('academic.fyp.ic.show', $student) }}" 
-                                           class="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors">
+                                        <a href="{{ route('academic.fyp.ic.show', $student) }}"
+                                           class="inline-flex items-center px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors">
                                             View
                                         </a>
-                                    @endcan
+                                    @endif
                                 </td>
                             </tr>
                             @empty
