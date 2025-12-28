@@ -17,4 +17,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/coordinator/dashboard', [ModuleCoordinatorController::class, 'dashboard'])
         ->name('coordinator.dashboard')
         ->middleware('role:fyp_coordinator,ip_coordinator,osh_coordinator,ppe_coordinator,li_coordinator,admin');
+
+    // Module Coordinator Profile
+    Route::get('/coordinator/profile', [ModuleCoordinatorController::class, 'profile'])
+        ->name('coordinator.profile.show')
+        ->middleware('role:fyp_coordinator,ip_coordinator,osh_coordinator,ppe_coordinator,li_coordinator,admin');
+
+    Route::patch('/coordinator/profile', [ModuleCoordinatorController::class, 'updateProfile'])
+        ->name('coordinator.profile.update')
+        ->middleware('role:fyp_coordinator,ip_coordinator,osh_coordinator,ppe_coordinator,li_coordinator,admin');
 });

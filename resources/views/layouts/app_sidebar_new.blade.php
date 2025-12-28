@@ -1018,6 +1018,12 @@
             if ($isAdmin) {
                 $profileRoute = 'admin.profile.show';
                 $profileRoutePattern = 'admin.profile.*';
+            } elseif ($isModuleCoordinator) {
+                $profileRoute = 'coordinator.profile.show';
+                $profileRoutePattern = 'coordinator.profile.*';
+            } elseif ($isLecturer || $isAt || $isSupervisorLi || $isIc) {
+                $profileRoute = 'lecturer.profile.show';
+                $profileRoutePattern = 'lecturer.profile.*';
             } elseif ($isStudent) {
                 $profileRoute = 'students.profile.show';
                 $profileRoutePattern = 'students.profile.*';

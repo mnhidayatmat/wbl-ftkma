@@ -564,4 +564,62 @@ class ModuleCoordinatorController extends Controller
             'total_students' => $students->count(),
         ];
     }
+
+    /**
+     * Show coordinator profile
+     */
+    public function profile()
+    {
+        $user = auth()->user();
+
+        // Determine coordinator type
+        $coordinatorType = '';
+        if ($user->isFypCoordinator()) {
+            $coordinatorType = 'FYP';
+        } elseif ($user->isIpCoordinator()) {
+            $coordinatorType = 'IP';
+        } elseif ($user->isOshCoordinator()) {
+            $coordinatorType = 'OSH';
+        } elseif ($user->isPpeCoordinator()) {
+            $coordinatorType = 'PPE';
+        } elseif ($user->isLiCoordinator()) {
+            $coordinatorType = 'LI';
+        }
+
+        return view('coordinators.profile.show', compact('user', 'coordinatorType'));
+    }
+
+    /**
+     * Update coordinator profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'current_password' => ['nullable', 'required_with:password', 'current_password'],
+            'password' => ['nullable', 'min:8', 'confirmed'],
+        ]);
+
+        // Update user information
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+
+        if (isset($validated['phone'])) {
+            $user->phone = $validated['phone'];
+        }
+
+        // Update password if provided
+        if (!empty($validated['password'])) {
+            $user->password = bcrypt($validated['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('coordinator.profile.show')
+            ->with('success', 'Profile updated successfully!');
+    }
 }
