@@ -366,15 +366,6 @@
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
-                @if($isFypCoordinator)
-                <a href="{{ route('coordinator.dashboard') }}"
-                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('coordinator.dashboard') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B] bg-blue-50 dark:bg-blue-900/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                    Dashboard
-                </a>
-                @endif
                 @if($isAdmin || $isFypCoordinator)
                 <a href="{{ route('academic.fyp.proposals.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
