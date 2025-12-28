@@ -29,103 +29,103 @@
 
     <!-- Summary Banner with Key Insights -->
     <div class="mb-6 relative overflow-hidden">
-        <div class="bg-gradient-to-br from-[#003A6C] via-[#0084C5] to-[#00AEEF] rounded-2xl p-6 md:p-8 shadow-xl">
+        <div class="bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 md:p-8 shadow-xl">
             <!-- Decorative Background Elements -->
-            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
-            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-[#0084C5]/10 rounded-full -mr-32 -mt-32"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-[#00AEEF]/10 rounded-full -ml-24 -mb-24"></div>
 
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#003A6C] to-[#0084C5] flex items-center justify-center shadow-lg">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-white text-2xl font-bold">Module Overview</h2>
-                        <p class="text-white/80 text-sm">Real-time insights and performance metrics</p>
+                        <h2 class="text-gray-900 dark:text-white text-2xl font-bold">Module Overview</h2>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Real-time insights and performance metrics</p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                     <!-- Overall Progress -->
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300">
+                    <div class="bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-white/80 text-xs uppercase tracking-wider font-medium">Overall Progress</span>
-                            <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider font-medium">Overall Progress</span>
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                             </svg>
                         </div>
-                        <p class="text-white text-3xl font-bold mb-1" data-count="{{ $stats['assessment_completion_rate'] }}">0</p>
+                        <p class="text-gray-900 dark:text-white text-3xl font-bold mb-1" data-count="{{ $stats['assessment_completion_rate'] }}">0</p>
                         <div class="flex items-center gap-1 text-xs">
-                            <span class="text-green-300 font-medium">↑ {{ $stats['assessment_completion_rate'] }}%</span>
-                            <span class="text-white/60">complete</span>
+                            <span class="text-green-600 dark:text-green-400 font-medium">↑ {{ $stats['assessment_completion_rate'] }}%</span>
+                            <span class="text-gray-600 dark:text-gray-400">complete</span>
                         </div>
                     </div>
 
                     <!-- Active Engagement -->
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300">
+                    <div class="bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-white/80 text-xs uppercase tracking-wider font-medium">Active Students</span>
-                            <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider font-medium">Active Students</span>
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
                         </div>
-                        <p class="text-white text-3xl font-bold mb-1" data-count="{{ $stats['total_students'] - $stats['at_risk_count'] }}">0</p>
+                        <p class="text-gray-900 dark:text-white text-3xl font-bold mb-1" data-count="{{ $stats['total_students'] - $stats['at_risk_count'] }}">0</p>
                         <div class="flex items-center gap-1 text-xs">
-                            <span class="text-white/60">of</span>
-                            <span class="text-white/90 font-medium">{{ $stats['total_students'] }} total</span>
+                            <span class="text-gray-600 dark:text-gray-400">of</span>
+                            <span class="text-gray-900 dark:text-white font-medium">{{ $stats['total_students'] }} total</span>
                         </div>
                     </div>
 
                     <!-- Supervision Coverage -->
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300">
+                    <div class="bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-white/80 text-xs uppercase tracking-wider font-medium">Supervision</span>
-                            <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider font-medium">Supervision</span>
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                             </svg>
                         </div>
-                        <p class="text-white text-3xl font-bold mb-1" data-count="{{ $stats['supervisor_assignment_rate'] }}">0</p>
+                        <p class="text-gray-900 dark:text-white text-3xl font-bold mb-1" data-count="{{ $stats['supervisor_assignment_rate'] }}">0</p>
                         <div class="flex items-center gap-1 text-xs">
-                            <span class="text-white/90 font-medium">{{ $stats['supervisor_assignment_rate'] }}%</span>
-                            <span class="text-white/60">assigned</span>
+                            <span class="text-gray-900 dark:text-white font-medium">{{ $stats['supervisor_assignment_rate'] }}%</span>
+                            <span class="text-gray-600 dark:text-gray-400">assigned</span>
                         </div>
                     </div>
 
                     <!-- Quality Index -->
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300">
+                    <div class="bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-white/80 text-xs uppercase tracking-wider font-medium">Quality Score</span>
-                            <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider font-medium">Quality Score</span>
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                             </svg>
                         </div>
                         @php
                             $qualityScore = round(($stats['assessment_completion_rate'] + $logbookStatus['compliance_rate']) / 2);
                         @endphp
-                        <p class="text-white text-3xl font-bold mb-1" data-count="{{ $qualityScore }}">0</p>
+                        <p class="text-gray-900 dark:text-white text-3xl font-bold mb-1" data-count="{{ $qualityScore }}">0</p>
                         <div class="flex items-center gap-1 text-xs">
                             @if($qualityScore >= 80)
-                                <span class="text-green-300 font-medium">Excellent</span>
+                                <span class="text-green-600 dark:text-green-400 font-medium">Excellent</span>
                             @elseif($qualityScore >= 60)
-                                <span class="text-yellow-300 font-medium">Good</span>
+                                <span class="text-yellow-600 dark:text-yellow-400 font-medium">Good</span>
                             @else
-                                <span class="text-orange-300 font-medium">Needs Attention</span>
+                                <span class="text-orange-600 dark:text-orange-400 font-medium">Needs Attention</span>
                             @endif
                         </div>
                     </div>
                 </div>
 
                 @if(count($atRiskStudents) > 0)
-                <div class="mt-5 bg-red-500/20 backdrop-blur-sm border border-red-300/30 rounded-xl p-4">
+                <div class="mt-5 bg-red-50/80 dark:bg-red-900/30 backdrop-blur-sm border border-red-200/50 dark:border-red-800/50 rounded-xl p-4 shadow-sm">
                     <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
-                        <p class="text-white text-sm">
+                        <p class="text-gray-900 dark:text-white text-sm">
                             <span class="font-bold">{{ count($atRiskStudents) }} student(s)</span> require immediate attention
-                            <a href="#at-risk-section" class="ml-2 underline hover:no-underline">View details →</a>
+                            <a href="#at-risk-section" class="ml-2 underline hover:no-underline text-[#0084C5] dark:text-[#00AEEF]">View details →</a>
                         </p>
                     </div>
                 </div>
