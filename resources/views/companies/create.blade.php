@@ -39,11 +39,11 @@
                 <!-- Company Name -->
                 <div class="mb-4">
                     <label for="company_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Company Name <span class="text-red-500">*</span>
+                        Company Name
                     </label>
                     <input type="text" name="company_name" id="company_name" value="{{ old('company_name') }}"
                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('company_name') border-red-500 @enderror"
-                           required autocomplete="off">
+                           autocomplete="off">
                     @error('company_name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -95,10 +95,10 @@
                     <!-- PIC Name -->
                     <div class="mb-4">
                         <label for="pic_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            Person in Charge (PIC) Name <span class="text-red-500">*</span>
+                            Person in Charge (PIC) Name
                         </label>
                         <input type="text" name="pic_name" id="pic_name" value="{{ old('pic_name') }}"
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('pic_name') border-red-500 @enderror" required>
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('pic_name') border-red-500 @enderror">
                         @error('pic_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -134,10 +134,10 @@
                     <!-- Email -->
                     <div class="mb-4">
                         <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            Email <span class="text-red-500">*</span>
+                            Email
                         </label>
                         <input type="email" name="email" id="email" value="{{ old('email') }}"
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('email') border-red-500 @enderror" required>
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('email') border-red-500 @enderror">
                         @error('email')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -146,10 +146,10 @@
                     <!-- Phone -->
                     <div class="mb-4">
                         <label for="phone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            Phone <span class="text-red-500">*</span>
+                            Phone
                         </label>
                         <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('phone') border-red-500 @enderror" required>
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('phone') border-red-500 @enderror">
                         @error('phone')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

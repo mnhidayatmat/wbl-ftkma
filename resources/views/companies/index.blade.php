@@ -45,7 +45,7 @@
 
         <!-- Compact Statistics -->
         @if(isset($stats))
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-4">
+        <div class="grid grid-cols-3 md:grid-cols-7 gap-3 mb-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
                 <div class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">{{ $stats['total_companies'] ?? 0 }}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Companies</div>
@@ -59,16 +59,20 @@
                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Active MoA</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-green-600">{{ $stats['with_active_agreements'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">With Agreements</div>
+                <div class="text-xl font-bold text-orange-600">{{ $stats['loi_count'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Active LoI</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-yellow-600">{{ $stats['with_expiring_agreements'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Expiring Soon</div>
+                <div class="text-xl font-bold text-yellow-600">{{ $stats['with_pending_agreements'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pending</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-[#00AEEF]">{{ $stats['total_students'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Students</div>
+                <div class="text-xl font-bold text-gray-600">{{ $stats['with_draft_agreements'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Draft</div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
+                <div class="text-xl font-bold text-red-600">{{ $stats['with_expired_agreements'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Expired</div>
             </div>
         </div>
         @endif

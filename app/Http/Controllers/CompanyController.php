@@ -95,15 +95,21 @@ class CompanyController extends Controller
             'with_active_agreements' => Company::whereHas('agreements', function ($q) {
                 $q->where('status', 'Active');
             })->count(),
-            'with_expiring_agreements' => Company::whereHas('agreements', function ($q) {
-                $q->where('status', 'Active')
-                    ->where('end_date', '<=', now()->addMonths(3))
-                    ->where('end_date', '>=', now());
+            'with_pending_agreements' => Company::whereHas('agreements', function ($q) {
+                $q->where('status', 'Pending');
+            })->count(),
+            'with_draft_agreements' => Company::whereHas('agreements', function ($q) {
+                $q->where('status', 'Draft');
+            })->count(),
+            'with_expired_agreements' => Company::whereHas('agreements', function ($q) {
+                $q->where('status', 'Expired');
             })->count(),
             'total_students' => Student::whereNotNull('company_id')->count(),
             'mou_count' => CompanyAgreement::where('agreement_type', 'MoU')
                 ->where('status', 'Active')->count(),
             'moa_count' => CompanyAgreement::where('agreement_type', 'MoA')
+                ->where('status', 'Active')->count(),
+            'loi_count' => CompanyAgreement::where('agreement_type', 'LOI')
                 ->where('status', 'Active')->count(),
         ];
     }
@@ -143,12 +149,12 @@ class CompanyController extends Controller
         // Consolidated validation for both company and agreement
         $validated = $request->validate([
             // Company fields
-            'company_name' => ['required', 'string', 'max:255'],
+            'company_name' => ['nullable', 'string', 'max:255'],
             'category' => ['nullable', 'string', 'max:255'],
-            'pic_name' => ['required', 'string', 'max:255'],
+            'pic_name' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'industry_type' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'website' => ['nullable', 'url', 'max:255'],
@@ -576,6 +582,32 @@ class CompanyController extends Controller
 
         return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'notes'])
             ->with('success', 'Note added successfully.');
+    }
+
+    /**
+     * Update a note.
+     */
+    public function updateNote(Request $request, Company $company, CompanyNote $note): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Only allow update by creator or admin
+        if ($note->created_by !== auth()->id() && ! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validated = $request->validate([
+            'note' => ['required', 'string'],
+            'follow_up_type' => ['required', 'string', 'in:Email,Call,Meeting,Reminder sent'],
+            'next_action_date' => ['nullable', 'date'],
+        ]);
+
+        $note->update($validated);
+
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'notes'])
+            ->with('success', 'Note updated successfully.');
     }
 
     /**
