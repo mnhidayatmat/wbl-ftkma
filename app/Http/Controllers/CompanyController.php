@@ -378,6 +378,11 @@ class CompanyController extends Controller
             $validated['position'] = $request->position_other;
         }
 
+        // Handle category_other field (Industry Type)
+        if ($request->has('category_other') && $request->category_other) {
+            $validated['category'] = $request->category_other;
+        }
+
         $company->update($validated);
 
         // If position is HR, link IC users from the same company
