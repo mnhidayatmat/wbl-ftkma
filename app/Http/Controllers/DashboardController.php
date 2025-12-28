@@ -658,10 +658,15 @@ class DashboardController extends Controller
         // Overdue company follow-up actions
         $overdueActions = CompanyNote::getOverdueActions();
         if ($overdueActions->count() > 0) {
+            $firstOverdue = $overdueActions->first();
+            $message = $overdueActions->count() === 1
+                ? "1 overdue follow-up: {$firstOverdue->company->company_name}"
+                : "{$overdueActions->count()} overdue company follow-up action(s) - view {$firstOverdue->company->company_name}";
+
             $alerts[] = [
                 'type' => 'danger',
-                'message' => "{$overdueActions->count()} overdue company follow-up action(s)",
-                'link' => route('admin.companies.index'),
+                'message' => $message,
+                'link' => route('admin.companies.show', ['company' => $firstOverdue->company_id, 'tab' => 'notes']),
             ];
         }
 
@@ -670,10 +675,15 @@ class DashboardController extends Controller
             return !$note->isOverdue();
         });
         if ($upcomingActions->count() > 0) {
+            $firstUpcoming = $upcomingActions->first();
+            $message = $upcomingActions->count() === 1
+                ? "1 follow-up due soon: {$firstUpcoming->company->company_name} ({$firstUpcoming->next_action_date->format('d M Y')})"
+                : "{$upcomingActions->count()} company follow-up action(s) due soon - view {$firstUpcoming->company->company_name}";
+
             $alerts[] = [
                 'type' => 'info',
-                'message' => "{$upcomingActions->count()} company follow-up action(s) due soon",
-                'link' => route('admin.companies.index'),
+                'message' => $message,
+                'link' => route('admin.companies.show', ['company' => $firstUpcoming->company_id, 'tab' => 'notes']),
             ];
         }
 
