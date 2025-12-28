@@ -32,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Support\Facades\Route::middleware('web')
                 ->group(base_path('routes/coordinator.php'));
             \Illuminate\Support\Facades\Route::middleware('web')
+                ->group(base_path('routes/lecturer.php'));
+            \Illuminate\Support\Facades\Route::middleware('web')
                 ->group(base_path('routes/placement.php'));
             \Illuminate\Support\Facades\Route::middleware('web')
                 ->group(base_path('routes/resume-inspection.php'));
