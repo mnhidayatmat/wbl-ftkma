@@ -24,7 +24,7 @@
      x-data="{
          companiesMenuOpen: {{ request()->routeIs('companies.*') || request()->routeIs('admin.agreements.*') ? 'true' : 'false' }},
          ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
-         fypMenuOpen: {{ request()->routeIs('academic.fyp.*') || request()->routeIs('fyp.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         fypMenuOpen: {{ request()->routeIs('academic.fyp.*') || request()->routeIs('fyp.*') || request()->routeIs('admin.students.*') || request()->routeIs('coordinator.dashboard') || $isFypCoordinator ? 'true' : 'false' }},
          ipMenuOpen: {{ request()->routeIs('academic.ip.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
          oshMenuOpen: {{ request()->routeIs('academic.osh.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
          liMenuOpen: {{ request()->routeIs('academic.li.*') || request()->routeIs('li.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
