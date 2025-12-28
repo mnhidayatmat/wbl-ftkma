@@ -27,14 +27,23 @@ class DashboardController extends Controller
      */
     public function index(Request $request): View|RedirectResponse
     {
+        $user = auth()->user();
+
         // If user is a student, show student dashboard
-        if (auth()->user()->isStudent()) {
+        if ($user->isStudent()) {
             return $this->studentDashboard();
         }
 
         // Admin Dashboard
-        if (auth()->user()->isAdmin()) {
+        if ($user->isAdmin()) {
             return $this->adminDashboard($request);
+        }
+
+        // Module Coordinator Dashboard - redirect to coordinator dashboard
+        if ($user->isFypCoordinator() || $user->isIpCoordinator() ||
+            $user->isOshCoordinator() || $user->isPpeCoordinator() ||
+            $user->isLiCoordinator()) {
+            return redirect()->route('coordinator.dashboard');
         }
 
         // Default dashboard for other roles
