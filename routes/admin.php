@@ -52,6 +52,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
         // Notes
         Route::post('notes', [CompanyController::class, 'storeNote'])->name('notes.store');
+        Route::patch('notes/{note}', [CompanyController::class, 'updateNote'])->name('notes.update');
+        Route::patch('notes/{note}/status', [CompanyController::class, 'updateNoteStatus'])->name('notes.update-status');
         Route::delete('notes/{note}', [CompanyController::class, 'destroyNote'])->name('notes.destroy');
 
         // Documents

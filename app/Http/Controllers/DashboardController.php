@@ -6,6 +6,7 @@ use App\Models\Assessment;
 use App\Models\CloPloMapping;
 use App\Models\Company;
 use App\Models\CompanyAgreement;
+use App\Models\CompanyNote;
 use App\Models\PPE\PpeStudentAtMark;
 use App\Models\PPE\PpeStudentIcMark;
 use App\Models\Student;
@@ -651,6 +652,28 @@ class DashboardController extends Controller
                 'type' => 'warning',
                 'message' => "{$highIssues} high-severity workplace issue(s) need review",
                 'link' => route('workplace-issues.index'),
+            ];
+        }
+
+        // Overdue company follow-up actions
+        $overdueActions = CompanyNote::getOverdueActions();
+        if ($overdueActions->count() > 0) {
+            $alerts[] = [
+                'type' => 'danger',
+                'message' => "{$overdueActions->count()} overdue company follow-up action(s)",
+                'link' => route('admin.companies.index'),
+            ];
+        }
+
+        // Upcoming company follow-up actions (within 7 days, not overdue)
+        $upcomingActions = CompanyNote::getPendingActions()->filter(function ($note) {
+            return !$note->isOverdue();
+        });
+        if ($upcomingActions->count() > 0) {
+            $alerts[] = [
+                'type' => 'info',
+                'message' => "{$upcomingActions->count()} company follow-up action(s) due soon",
+                'link' => route('admin.companies.index'),
             ];
         }
 

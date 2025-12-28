@@ -630,6 +630,31 @@ class CompanyController extends Controller
             ->with('success', 'Note deleted successfully.');
     }
 
+    /**
+     * Update note action status (mark as completed or dismissed).
+     */
+    public function updateNoteStatus(Request $request, Company $company, CompanyNote $note): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validated = $request->validate([
+            'action_status' => ['required', 'string', 'in:pending,completed,dismissed'],
+        ]);
+
+        $note->update($validated);
+
+        $statusLabel = match($validated['action_status']) {
+            'completed' => 'completed',
+            'dismissed' => 'dismissed',
+            default => 'pending',
+        };
+
+        return redirect()->back()
+            ->with('success', "Follow-up action marked as {$statusLabel}.");
+    }
+
     // ==================== DOCUMENT MANAGEMENT ====================
 
     /**
