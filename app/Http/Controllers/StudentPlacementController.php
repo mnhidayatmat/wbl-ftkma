@@ -39,6 +39,18 @@ class StudentPlacementController extends Controller
         }
         $groups = $groupsQuery->get();
 
+        // Default to latest created group if no group filter is specified
+        if (! $request->filled('group') && $groups->count() > 0) {
+            $latestGroup = WblGroup::latest('created_at')->first();
+
+            // Verify this group is accessible to the current user
+            if ($latestGroup && ($user->isAdmin() || $user->isCoordinator() || $latestGroup->status === 'ACTIVE')) {
+                // Redirect with the latest group selected, preserving other query parameters
+                $queryParams = array_merge($request->all(), ['group' => $latestGroup->id]);
+                return redirect()->route('placement.index', $queryParams);
+            }
+        }
+
         // Build query for students
         $query = Student::with([
             'placementTracking.applicationEvidence',
