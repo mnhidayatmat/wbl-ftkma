@@ -15,5 +15,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function () {
     // Module Coordinator Dashboard - accessible by any module coordinator
     Route::get('/coordinator/dashboard', [ModuleCoordinatorController::class, 'dashboard'])
-        ->name('coordinator.dashboard');
+        ->name('coordinator.dashboard')
+        ->middleware('role:fyp_coordinator,ip_coordinator,osh_coordinator,ppe_coordinator,li_coordinator,admin');
 });
