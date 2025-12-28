@@ -298,10 +298,10 @@ class FypReportsController extends Controller
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape')
-            ->setOption('margin-top', 30)
-            ->setOption('margin-bottom', 30)
-            ->setOption('margin-left', 25)
-            ->setOption('margin-right', 25)
+            ->setOption('margin-top', 15)
+            ->setOption('margin-bottom', 15)
+            ->setOption('margin-left', 12)
+            ->setOption('margin-right', 12)
             ->setOption('enable-local-file-access', true);
 
         $fileName = str_replace(' ', '_', $title).'_'.now()->format('Y-m-d_His').'.pdf';
