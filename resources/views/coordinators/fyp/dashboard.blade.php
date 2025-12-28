@@ -457,7 +457,7 @@
         <div class="relative z-10">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4 cursor-pointer" onclick="toggleAtRiskSection()">
                     <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg animate-pulse">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -474,6 +474,15 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button onclick="toggleAtRiskSection()" id="at-risk-toggle-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
+                        <svg id="at-risk-chevron-down" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                        <svg id="at-risk-chevron-up" class="w-4 h-4 hidden transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                        </svg>
+                        <span id="at-risk-toggle-text">Minimize</span>
+                    </button>
                     <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
@@ -483,8 +492,8 @@
                 </div>
             </div>
 
-            <!-- Student Cards -->
-            <div class="grid grid-cols-1 gap-4">
+            <!-- Student Cards (Collapsible) -->
+            <div id="at-risk-content" class="grid grid-cols-1 gap-4 transition-all duration-300 ease-in-out overflow-hidden">
                 @foreach($atRiskStudents as $index => $student)
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] group">
                     <div class="flex items-start gap-4">
@@ -844,7 +853,40 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Toggle At-Risk Section
+function toggleAtRiskSection() {
+    const content = document.getElementById('at-risk-content');
+    const toggleText = document.getElementById('at-risk-toggle-text');
+    const chevronDown = document.getElementById('at-risk-chevron-down');
+    const chevronUp = document.getElementById('at-risk-chevron-up');
+
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+        // Collapse
+        content.style.maxHeight = '0px';
+        content.style.opacity = '0';
+        content.style.marginTop = '0';
+        toggleText.textContent = 'Expand';
+        chevronDown.classList.add('hidden');
+        chevronUp.classList.remove('hidden');
+    } else {
+        // Expand
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.style.opacity = '1';
+        content.style.marginTop = '';
+        toggleText.textContent = 'Minimize';
+        chevronDown.classList.remove('hidden');
+        chevronUp.classList.add('hidden');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize At-Risk Section as expanded
+    const atRiskContent = document.getElementById('at-risk-content');
+    if (atRiskContent) {
+        atRiskContent.style.maxHeight = atRiskContent.scrollHeight + 'px';
+        atRiskContent.style.opacity = '1';
+    }
+
     // Count-up Animation Function
     function animateCounter(element) {
         const target = parseInt(element.getAttribute('data-count'));
