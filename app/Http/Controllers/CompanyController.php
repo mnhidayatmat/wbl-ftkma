@@ -90,8 +90,73 @@ class CompanyController extends Controller
      */
     private function getCompanyStatistics(): array
     {
+        $totalCompanies = Company::count();
+        $totalAgreements = CompanyAgreement::count();
+
+        // Count agreements by type
+        $mouActive = CompanyAgreement::where('agreement_type', 'MoU')->where('status', 'Active')->count();
+        $moaActive = CompanyAgreement::where('agreement_type', 'MoA')->where('status', 'Active')->count();
+        $loiActive = CompanyAgreement::where('agreement_type', 'LOI')->where('status', 'Active')->count();
+
+        // Count agreements by status
+        $activeAgreements = CompanyAgreement::where('status', 'Active')->count();
+        $pendingAgreements = CompanyAgreement::where('status', 'Pending')->count();
+        $draftAgreements = CompanyAgreement::where('status', 'Draft')->count();
+        $expiredAgreements = CompanyAgreement::where('status', 'Expired')->count();
+
+        // Expiring agreements (within next 3 and 6 months)
+        $expiringIn3Months = CompanyAgreement::where('status', 'Active')
+            ->where('end_date', '<=', now()->addMonths(3))
+            ->where('end_date', '>=', now())
+            ->count();
+
+        $expiringIn6Months = CompanyAgreement::where('status', 'Active')
+            ->where('end_date', '<=', now()->addMonths(6))
+            ->where('end_date', '>=', now())
+            ->count();
+
+        // Companies without any agreements
+        $companiesWithoutAgreements = Company::doesntHave('agreements')->count();
+
+        // Category distribution
+        $categoryDistribution = Company::selectRaw('COALESCE(category, "Uncategorized") as category, COUNT(*) as count')
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn ($item) => ['name' => $item->category ?: 'Uncategorized', 'count' => $item->count])
+            ->toArray();
+
+        // Agreement type distribution (all statuses)
+        $agreementTypeDistribution = CompanyAgreement::selectRaw('agreement_type, status, COUNT(*) as count')
+            ->groupBy('agreement_type', 'status')
+            ->get()
+            ->groupBy('agreement_type')
+            ->map(function ($items) {
+                return $items->pluck('count', 'status')->toArray();
+            })
+            ->toArray();
+
+        // Monthly agreement trends (last 12 months)
+        $agreementTrends = CompanyAgreement::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($item) => ['month' => $item->month, 'count' => $item->count])
+            ->toArray();
+
+        // Expiring soon list (for attention required section)
+        $expiringSoon = CompanyAgreement::with('company')
+            ->where('status', 'Active')
+            ->where('end_date', '<=', now()->addMonths(3))
+            ->where('end_date', '>=', now())
+            ->orderBy('end_date')
+            ->limit(10)
+            ->get();
+
         return [
-            'total_companies' => Company::count(),
+            'total_companies' => $totalCompanies,
+            'total_agreements' => $totalAgreements,
             'with_active_agreements' => Company::whereHas('agreements', function ($q) {
                 $q->where('status', 'Active');
             })->count(),
@@ -104,13 +169,21 @@ class CompanyController extends Controller
             'with_expired_agreements' => Company::whereHas('agreements', function ($q) {
                 $q->where('status', 'Expired');
             })->count(),
+            'companies_without_agreements' => $companiesWithoutAgreements,
             'total_students' => Student::whereNotNull('company_id')->count(),
-            'mou_count' => CompanyAgreement::where('agreement_type', 'MoU')
-                ->where('status', 'Active')->count(),
-            'moa_count' => CompanyAgreement::where('agreement_type', 'MoA')
-                ->where('status', 'Active')->count(),
-            'loi_count' => CompanyAgreement::where('agreement_type', 'LOI')
-                ->where('status', 'Active')->count(),
+            'mou_count' => $mouActive,
+            'moa_count' => $moaActive,
+            'loi_count' => $loiActive,
+            'active_agreements' => $activeAgreements,
+            'pending_agreements' => $pendingAgreements,
+            'draft_agreements' => $draftAgreements,
+            'expired_agreements' => $expiredAgreements,
+            'expiring_3_months' => $expiringIn3Months,
+            'expiring_6_months' => $expiringIn6Months,
+            'category_distribution' => $categoryDistribution,
+            'agreement_type_distribution' => $agreementTypeDistribution,
+            'agreement_trends' => $agreementTrends,
+            'expiring_soon' => $expiringSoon,
         ];
     }
 
@@ -645,7 +718,7 @@ class CompanyController extends Controller
 
         $note->update($validated);
 
-        $statusLabel = match($validated['action_status']) {
+        $statusLabel = match ($validated['action_status']) {
             'completed' => 'completed',
             'dismissed' => 'dismissed',
             default => 'pending',

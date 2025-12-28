@@ -43,38 +43,273 @@
         </div>
         @endif
 
-        <!-- Compact Statistics -->
+        <!-- Enhanced Statistics Cards with Gradients and Icons -->
         @if(isset($stats))
-        <div class="grid grid-cols-3 md:grid-cols-7 gap-3 mb-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">{{ $stats['total_companies'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Companies</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Total Companies Card -->
+            <div class="bg-gradient-to-br from-[#003A6C] to-[#0084C5] rounded-xl shadow-lg p-5 text-white transform hover:scale-105 transition-transform duration-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-blue-100 mb-1">Total Companies</div>
+                        <div class="text-3xl font-bold">{{ $stats['total_companies'] ?? 0 }}</div>
+                        <div class="text-xs text-blue-100 mt-2">{{ $stats['with_active_agreements'] ?? 0 }} with active agreements</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-full p-3">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-blue-600">{{ $stats['mou_count'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Active MoU</div>
+
+            <!-- Active Agreements Card -->
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-5 text-white transform hover:scale-105 transition-transform duration-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-green-100 mb-1">Active Agreements</div>
+                        <div class="text-3xl font-bold">{{ $stats['active_agreements'] ?? 0 }}</div>
+                        <div class="text-xs text-green-100 mt-2">
+                            <span class="bg-white bg-opacity-20 px-2 py-0.5 rounded-full">MoU: {{ $stats['mou_count'] ?? 0 }}</span>
+                            <span class="bg-white bg-opacity-20 px-2 py-0.5 rounded-full ml-1">MoA: {{ $stats['moa_count'] ?? 0 }}</span>
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-full p-3">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-purple-600">{{ $stats['moa_count'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Active MoA</div>
+
+            <!-- Expiring Soon Card -->
+            <div class="bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg p-5 text-white transform hover:scale-105 transition-transform duration-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-amber-100 mb-1">Expiring Soon</div>
+                        <div class="text-3xl font-bold">{{ $stats['expiring_3_months'] ?? 0 }}</div>
+                        <div class="text-xs text-amber-100 mt-2">Within 3 months | {{ $stats['expiring_6_months'] ?? 0 }} in 6mo</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-full p-3">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-orange-600">{{ $stats['loi_count'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Active LoI</div>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-yellow-600">{{ $stats['with_pending_agreements'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pending</div>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-gray-600">{{ $stats['with_draft_agreements'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Draft</div>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 text-center border border-gray-200 dark:border-gray-700">
-                <div class="text-xl font-bold text-red-600">{{ $stats['with_expired_agreements'] ?? 0 }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Expired</div>
+
+            <!-- Placed Students Card -->
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-5 text-white transform hover:scale-105 transition-transform duration-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-purple-100 mb-1">Placed Students</div>
+                        <div class="text-3xl font-bold">{{ $stats['total_students'] ?? 0 }}</div>
+                        <div class="text-xs text-purple-100 mt-2">Assigned to companies</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-full p-3">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Analytics Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Agreement Type Distribution Chart -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5] flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
+                                <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
+                            </svg>
+                            Agreement Distribution
+                        </h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">By type and status</p>
+                    </div>
+                </div>
+                <div class="relative" style="height: 280px;">
+                    <canvas id="agreementTypeChart"></canvas>
+                </div>
+                <!-- Agreement Summary -->
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-3 gap-3">
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">MoU</div>
+                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $stats['mou_count'] ?? 0 }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">MoA</div>
+                        <div class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ $stats['moa_count'] ?? 0 }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">LoI</div>
+                        <div class="text-lg font-bold text-orange-600 dark:text-orange-400">{{ $stats['loi_count'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Distribution Chart -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5] flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                            </svg>
+                            Industry Categories
+                        </h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Company distribution by industry</p>
+                    </div>
+                </div>
+                <div class="relative" style="height: 280px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <!-- Category Stats Summary -->
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 gap-3">
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Total Categories</div>
+                        <div class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5]">{{ count($stats['category_distribution'] ?? []) }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">No Agreement</div>
+                        <div class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ $stats['companies_without_agreements'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attention Required Section -->
+        @if(($stats['expiring_soon'] ?? collect())->count() > 0 || ($stats['pending_agreements'] ?? 0) > 0)
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 mb-6" x-data="{ isMinimized: false }">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-red-100 dark:bg-red-900/30 rounded-full p-2">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Attention Required</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Agreements expiring soon or pending action</p>
+                    </div>
+                </div>
+                <button @click="isMinimized = !isMinimized" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-500 transition-transform" :class="{ 'rotate-180': isMinimized }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+            </div>
+            <div x-show="!isMinimized" x-collapse class="p-4">
+                @if(($stats['expiring_soon'] ?? collect())->count() > 0)
+                {{-- Layout with expiring agreements: 2 columns --}}
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Expiring Soon List -->
+                    <div class="space-y-3">
+                        <h4 class="text-sm font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                            </svg>
+                            Expiring Within 3 Months
+                        </h4>
+                        @foreach($stats['expiring_soon'] as $agreement)
+                        <div class="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-900 dark:text-white text-sm">{{ $agreement->company->company_name ?? 'Unknown' }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="px-1.5 py-0.5 rounded text-xs font-medium
+                                        @if($agreement->agreement_type === 'MoU') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                        @elseif($agreement->agreement_type === 'MoA') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                        @else bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 @endif">
+                                        {{ $agreement->agreement_type }}
+                                    </span>
+                                    <span class="ml-2">Expires: {{ $agreement->end_date?->format('d M Y') }}</span>
+                                </div>
+                            </div>
+                            <a href="{{ route('admin.companies.show', $agreement->company_id) }}" class="text-[#0084C5] hover:text-[#003A6C] text-sm font-medium">View</a>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Quick Stats Summary (2x2 grid when expiring list exists) -->
+                    <div class="space-y-3">
+                        <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400">Status Summary</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 text-center">
+                                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['pending_agreements'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400">Pending</div>
+                            </div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-center">
+                                <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">{{ $stats['draft_agreements'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400">Draft</div>
+                            </div>
+                            <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 text-center">
+                                <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $stats['expired_agreements'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400">Expired</div>
+                            </div>
+                            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
+                                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['companies_without_agreements'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400">No Agreement</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @else
+                {{-- Layout without expiring agreements: Full width 4 columns --}}
+                <div class="space-y-3">
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400">Status Summary</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800 text-center transform hover:scale-105 transition-transform duration-200">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="bg-yellow-100 dark:bg-yellow-800/50 rounded-full p-2">
+                                    <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['pending_agreements'] ?? 0 }}</div>
+                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">Pending</div>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 text-center transform hover:scale-105 transition-transform duration-200">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="bg-gray-200 dark:bg-gray-600 rounded-full p-2">
+                                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="text-3xl font-bold text-gray-600 dark:text-gray-400">{{ $stats['draft_agreements'] ?? 0 }}</div>
+                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">Draft</div>
+                        </div>
+                        <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 text-center transform hover:scale-105 transition-transform duration-200">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="bg-red-100 dark:bg-red-800/50 rounded-full p-2">
+                                    <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ $stats['expired_agreements'] ?? 0 }}</div>
+                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">Expired</div>
+                        </div>
+                        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 text-center transform hover:scale-105 transition-transform duration-200">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="bg-blue-100 dark:bg-blue-800/50 rounded-full p-2">
+                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['companies_without_agreements'] ?? 0 }}</div>
+                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">No Agreement</div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
         @endif
 
         <!-- Compact Filters -->
@@ -333,3 +568,143 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agreement Type Distribution Chart (Doughnut)
+    const agreementTypeCtx = document.getElementById('agreementTypeChart');
+    if (agreementTypeCtx) {
+        new Chart(agreementTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['MoU', 'MoA', 'LoI'],
+                datasets: [{
+                    data: [
+                        {{ $stats['mou_count'] ?? 0 }},
+                        {{ $stats['moa_count'] ?? 0 }},
+                        {{ $stats['loi_count'] ?? 0 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',  // Blue for MoU
+                        'rgba(147, 51, 234, 0.8)',  // Purple for MoA
+                        'rgba(249, 115, 22, 0.8)'   // Orange for LoI
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(147, 51, 234, 1)',
+                        'rgba(249, 115, 22, 1)'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: { size: 12, weight: '500' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 58, 108, 0.9)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.raw} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Category Distribution Chart (Horizontal Bar)
+    const categoryCtx = document.getElementById('categoryChart');
+    if (categoryCtx) {
+        const categoryData = @json($stats['category_distribution'] ?? []);
+        const labels = categoryData.map(item => item.name || 'Uncategorized');
+        const data = categoryData.map(item => item.count);
+
+        // Generate colors for categories
+        const colors = [
+            'rgba(0, 58, 108, 0.8)',   // UMPSA Primary
+            'rgba(0, 132, 197, 0.8)',  // UMPSA Secondary
+            'rgba(0, 174, 239, 0.8)',  // UMPSA Accent
+            'rgba(34, 197, 94, 0.8)',  // Green
+            'rgba(249, 115, 22, 0.8)', // Orange
+            'rgba(147, 51, 234, 0.8)', // Purple
+            'rgba(236, 72, 153, 0.8)', // Pink
+            'rgba(107, 114, 128, 0.8)' // Gray
+        ];
+
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Companies',
+                    data: data,
+                    backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+                    borderColor: labels.map((_, i) => colors[i % colors.length].replace('0.8', '1')),
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barThickness: 24
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 58, 108, 0.9)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            precision: 0,
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 11 },
+                            callback: function(value, index) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 15 ? label.substring(0, 15) + '...' : label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+@endpush

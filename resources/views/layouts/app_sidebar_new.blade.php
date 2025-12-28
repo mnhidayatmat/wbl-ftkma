@@ -22,7 +22,6 @@
 
 <nav class="mt-4 space-y-1" :class="isSidebarCollapsed ? 'px-2' : 'px-3'"
      x-data="{
-         companiesMenuOpen: {{ request()->routeIs('companies.*') || request()->routeIs('admin.agreements.*') ? 'true' : 'false' }},
          ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
          fypMenuOpen: {{ request()->routeIs('academic.fyp.*') || request()->routeIs('fyp.*') || request()->routeIs('admin.students.*') || request()->routeIs('coordinator.dashboard') || $isFypCoordinator ? 'true' : 'false' }},
          ipMenuOpen: {{ request()->routeIs('academic.ip.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
@@ -68,24 +67,21 @@
          toggleMenu(menuName) {
              // Check if the clicked menu is already open
              let isCurrentlyOpen = false;
-            if (menuName === 'companies' && this.companiesMenuOpen) isCurrentlyOpen = true;
             if (menuName === 'ppe' && this.ppeMenuOpen) isCurrentlyOpen = true;
             if (menuName === 'fyp' && this.fypMenuOpen) isCurrentlyOpen = true;
             if (menuName === 'ip' && this.ipMenuOpen) isCurrentlyOpen = true;
             if (menuName === 'osh' && this.oshMenuOpen) isCurrentlyOpen = true;
             if (menuName === 'li' && this.liMenuOpen) isCurrentlyOpen = true;
-            
+
             // Close all menus first
-            this.companiesMenuOpen = false;
             this.ppeMenuOpen = false;
             this.fypMenuOpen = false;
             this.ipMenuOpen = false;
             this.oshMenuOpen = false;
             this.liMenuOpen = false;
-            
+
             // If the clicked menu was not open, open it now
             if (!isCurrentlyOpen) {
-                if (menuName === 'companies') this.companiesMenuOpen = true;
                 if (menuName === 'ppe') this.ppeMenuOpen = true;
                 if (menuName === 'fyp') this.fypMenuOpen = true;
                 if (menuName === 'ip') this.ipMenuOpen = true;
@@ -163,47 +159,17 @@
     @endif
 
     @if(!$isFypCoordinator)
-    <div class="relative">
-        <button @click="toggleMenu('companies')"
-                class="w-full flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
-                :class="isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-2'"
-                :title="isSidebarCollapsed ? 'Companies' : ''">
-            <div class="flex items-center gap-1">
-                <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
-                <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Companies</span>
-            </div>
-            <svg x-show="sidebarTextVisible"
-                 class="w-4 h-4 transition-transform duration-200 flex-shrink-0"
-                 :class="companiesMenuOpen ? 'rotate-180' : ''"
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+    <a href="{{ route('admin.companies.index') }}"
+       class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+       :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+       :title="isSidebarCollapsed ? 'Companies' : ''">
+        <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
             </svg>
-        </button>
-
-        <!-- Companies Sub-menu -->
-        <div x-show="companiesMenuOpen && sidebarTextVisible"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-1"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-1"
-             class="mt-1 ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-1">
-
-            <!-- Companies & Agreements (Unified) -->
-            <a href="{{ route('admin.companies.index') }}"
-               class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 min-h-[40px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'text-[#0084C5] font-medium bg-[#0084C5]/5 border-l-2 border-[#00A86B] -ml-[2px] pl-[14px]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-[#0084C5]' }}">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                Companies & Agreements
-            </a>
         </div>
-    </div>
+        <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Companies</span>
+    </a>
 
     <a href="{{ route('admin.users.roles.index') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.users.roles.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"

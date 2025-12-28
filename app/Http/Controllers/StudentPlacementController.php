@@ -15,14 +15,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\PlacementTrackingExport;
 
 class StudentPlacementController extends Controller
 {
     /**
      * Display student placement tracking with filtering and SAL release.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         // Check access: Admin, Coordinator (full), Lecturer/AT/IC/Supervisor LI (read-only)
         $user = auth()->user();
@@ -47,6 +46,7 @@ class StudentPlacementController extends Controller
             if ($latestGroup && ($user->isAdmin() || $user->isCoordinator() || $latestGroup->status === 'ACTIVE')) {
                 // Redirect with the latest group selected, preserving other query parameters
                 $queryParams = array_merge($request->all(), ['group' => $latestGroup->id]);
+
                 return redirect()->route('placement.index', $queryParams);
             }
         }
