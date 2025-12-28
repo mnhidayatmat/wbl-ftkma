@@ -24,8 +24,8 @@ class FypAtEvaluationController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and AT can access AT evaluation
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isAt()) {
+        // Only Admin, AT, and FYP Coordinator can access AT evaluation
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isAt() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -135,8 +135,8 @@ class FypAtEvaluationController extends Controller
         // Load relationships for display
         $student->load('academicTutor', 'industryCoach', 'group');
 
-        // Check authorization: Admin or assigned AT
-        if (! auth()->user()->isAdmin()) {
+        // Check authorization: Admin, FYP Coordinator, or assigned AT
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             if (auth()->user()->isAt()) {
                 if ($student->at_id !== auth()->id()) {
                     abort(403, 'You are not authorized to edit AT marks for this student. This student is assigned to a different AT.');
@@ -247,7 +247,7 @@ class FypAtEvaluationController extends Controller
     public function store(Request $request, Student $student): RedirectResponse
     {
         // Check authorization
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             if (auth()->user()->isAt()) {
                 if ($student->at_id !== auth()->id()) {
                     abort(403, 'You are not authorized to edit AT marks for this student.');
@@ -257,8 +257,8 @@ class FypAtEvaluationController extends Controller
             }
         }
 
-        // Check if assessment window is open (Admin can bypass)
-        if (! auth()->user()->isAdmin()) {
+        // Check if assessment window is open (Admin and FYP Coordinator can bypass)
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             $this->requireOpenWindow('at');
         }
 

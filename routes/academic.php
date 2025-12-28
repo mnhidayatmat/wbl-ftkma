@@ -371,8 +371,8 @@ Route::middleware(['auth'])->group(function () {
 
     // FYP Module Routes
     Route::prefix('academic/fyp')->name('academic.fyp.')->group(function () {
-        // Assessments (Admin only)
-        Route::middleware('role:admin')->group(function () {
+        // Assessments (Admin and FYP Coordinator)
+        Route::middleware('role:admin,fyp_coordinator')->group(function () {
             Route::get('assessments', function () {
                 return app(AssessmentController::class)->index(request(), 'FYP');
             })->name('assessments.index');
@@ -428,8 +428,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('audit/export', [FypAuditController::class, 'export'])->name('audit.export');
         });
 
-        // CLO-PLO Analysis (Admin, Coordinator, Lecturer)
-        Route::middleware('role:admin,coordinator,lecturer')->group(function () {
+        // CLO-PLO Analysis (Admin, Coordinator, Lecturer, FYP Coordinator)
+        Route::middleware('role:admin,coordinator,lecturer,fyp_coordinator')->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
@@ -437,8 +437,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\FYP\FypCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
-        // AT Evaluation (Admin and AT)
-        Route::middleware('role:admin,at')->group(function () {
+        // AT Evaluation (Admin, AT, and FYP Coordinator)
+        Route::middleware('role:admin,at,fyp_coordinator')->group(function () {
             Route::get('lecturer', [FypAtEvaluationController::class, 'index'])->name('lecturer.index');
             Route::get('lecturer/{student}', [FypAtEvaluationController::class, 'show'])->name('lecturer.show');
             Route::post('lecturer/{student}', [FypAtEvaluationController::class, 'store'])->name('lecturer.store');
@@ -446,15 +446,15 @@ Route::middleware(['auth'])->group(function () {
             // Student Performance Overview
             Route::get('performance', [FypStudentPerformanceController::class, 'index'])->name('performance.index');
 
-            // Export routes (Admin only)
-            Route::middleware('role:admin')->group(function () {
+            // Export routes (Admin and FYP Coordinator)
+            Route::middleware('role:admin,fyp_coordinator')->group(function () {
                 Route::get('performance/export/excel', [FypStudentPerformanceController::class, 'exportExcel'])->name('performance.export.excel');
                 Route::get('performance/export/pdf', [FypStudentPerformanceController::class, 'exportPdf'])->name('performance.export.pdf');
             });
         });
 
-        // IC Evaluation (Admin and Industry Coach - authorization checked in controller)
-        Route::middleware('role:admin,industry')->group(function () {
+        // IC Evaluation (Admin, Industry Coach, and FYP Coordinator - authorization checked in controller)
+        Route::middleware('role:admin,industry,fyp_coordinator')->group(function () {
             Route::get('ic', [FypIcEvaluationController::class, 'index'])->name('ic.index');
             Route::get('ic/{student}', [FypIcEvaluationController::class, 'show'])->name('ic.show');
             Route::post('ic/{student}', [FypIcEvaluationController::class, 'store'])->name('ic.store');
@@ -462,8 +462,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('ic/{student}/rubric/{assessment}', [FypIcEvaluationController::class, 'storeRubric'])->name('ic.rubric.store');
         });
 
-        // Logbook Evaluation (Admin and Industry Coach)
-        Route::middleware('role:admin,industry')->prefix('logbook')->name('logbook.')->group(function () {
+        // Logbook Evaluation (Admin, Industry Coach, and FYP Coordinator)
+        Route::middleware('role:admin,industry,fyp_coordinator')->prefix('logbook')->name('logbook.')->group(function () {
             Route::get('/', [FypLogbookController::class, 'index'])->name('index');
             Route::get('/{student}', [FypLogbookController::class, 'show'])->name('show');
             Route::post('/{student}', [FypLogbookController::class, 'store'])->name('store');
@@ -502,8 +502,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/submit', [\App\Http\Controllers\Academic\FYP\FypProjectProposalController::class, 'submit'])->name('submit');
         });
 
-        // Project Proposal Management (Admin/AT)
-        Route::middleware('role:admin,at')->prefix('proposals')->name('proposals.')->group(function () {
+        // Project Proposal Management (Admin, AT, and FYP Coordinator)
+        Route::middleware('role:admin,at,fyp_coordinator')->prefix('proposals')->name('proposals.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Academic\FYP\FypProjectProposalController::class, 'index'])->name('index');
             Route::get('/{proposal}', [\App\Http\Controllers\Academic\FYP\FypProjectProposalController::class, 'show'])->name('show');
             Route::post('/{proposal}/approve', [\App\Http\Controllers\Academic\FYP\FypProjectProposalController::class, 'approve'])->name('approve');

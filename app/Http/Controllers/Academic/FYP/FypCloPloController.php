@@ -19,7 +19,7 @@ class FypCloPloController extends Controller
 
     public function index(): View
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isCoordinator() && ! auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isCoordinator() && ! auth()->user()->isLecturer() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

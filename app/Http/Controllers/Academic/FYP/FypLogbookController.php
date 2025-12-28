@@ -21,8 +21,8 @@ class FypLogbookController extends Controller
      */
     public function index(Request $request): View
     {
-        // Authorization: Admin or IC can access
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
+        // Authorization: Admin, IC, or FYP Coordinator can access
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

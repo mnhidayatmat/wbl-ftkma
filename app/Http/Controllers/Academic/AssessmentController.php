@@ -26,18 +26,18 @@ class AssessmentController extends Controller
      */
     public function index(Request $request, string $course = 'PPE'): View
     {
-        // Only Admin can manage assessments
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access.');
-        }
-
-        // Validate course code
+        // Validate course code first
         $validCourses = ['PPE', 'IP', 'OSH', 'FYP', 'LI'];
         if (! in_array(strtoupper($course), $validCourses)) {
             abort(404, 'Course not found.');
         }
 
         $courseCode = strtoupper($course);
+
+        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
+        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+            abort(403, 'Unauthorized access.');
+        }
 
         // For FYP, IP, PPE, LI, and OSH, group by assessment name to handle multiple CLOs per assessment
         if (in_array($courseCode, ['FYP', 'IP', 'PPE', 'LI', 'OSH'])) {
@@ -81,16 +81,17 @@ class AssessmentController extends Controller
      */
     public function create(Request $request, string $course = 'PPE'): View
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         $validCourses = ['PPE', 'IP', 'OSH', 'FYP', 'LI'];
         if (! in_array(strtoupper($course), $validCourses)) {
             abort(404, 'Course not found.');
         }
 
         $courseCode = strtoupper($course);
+
+        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
+        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+            abort(403, 'Unauthorized access.');
+        }
         $courseName = Assessment::getCourseCodes()[$courseCode] ?? $courseCode;
         $courseLower = strtolower($courseCode);
 
@@ -121,16 +122,17 @@ class AssessmentController extends Controller
      */
     public function store(Request $request, string $course = 'PPE'): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         $validCourses = ['PPE', 'IP', 'OSH', 'FYP', 'LI'];
         if (! in_array(strtoupper($course), $validCourses)) {
             abort(404, 'Course not found.');
         }
 
         $courseCode = strtoupper($course);
+
+        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
+        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+            abort(403, 'Unauthorized access.');
+        }
         $totalWeight = 0; // Initialize for component/rubric validation
 
         // For all courses, handle multiple CLOs (FYP-style)
@@ -262,10 +264,6 @@ class AssessmentController extends Controller
      */
     public function edit(Request $request, Assessment $assessment, ?string $course = null): View
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         // Get course from assessment
         $course = $course ?? $assessment->course_code;
 
@@ -275,6 +273,11 @@ class AssessmentController extends Controller
         }
 
         $courseCode = strtoupper($course);
+
+        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
+        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+            abort(403, 'Unauthorized access.');
+        }
         $courseName = Assessment::getCourseCodes()[$courseCode] ?? $courseCode;
         $courseLower = strtolower($courseCode);
 
@@ -324,10 +327,6 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, Assessment $assessment, ?string $course = null): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         // Get course from assessment
         $course = $course ?? $assessment->course_code;
 
@@ -337,6 +336,11 @@ class AssessmentController extends Controller
         }
 
         $courseCode = strtoupper($course);
+
+        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
+        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+            abort(403, 'Unauthorized access.');
+        }
 
         // For all courses, handle multiple CLOs (FYP-style)
 
@@ -458,10 +462,6 @@ class AssessmentController extends Controller
      */
     public function destroy(Assessment $assessment, ?string $course = null): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         // Get course from assessment
         $course = $course ?? $assessment->course_code;
 
@@ -471,6 +471,11 @@ class AssessmentController extends Controller
         }
 
         $courseCode = $assessment->course_code;
+
+        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
+        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+            abort(403, 'Unauthorized access.');
+        }
         $assessment->delete();
 
         return redirect()->route($this->getAssessmentsIndexRoute($courseCode))
@@ -482,12 +487,15 @@ class AssessmentController extends Controller
      */
     public function toggleActive(Assessment $assessment, ?string $course = null): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         // Get course from assessment
         $course = $course ?? $assessment->course_code;
+
+        $courseCode = $assessment->course_code;
+
+        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
+        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+            abort(403, 'Unauthorized access.');
+        }
 
         $validCourses = ['PPE', 'IP', 'OSH', 'FYP', 'LI'];
         if (! in_array(strtoupper($course), $validCourses) || $assessment->course_code !== strtoupper($course)) {
@@ -796,15 +804,22 @@ class AssessmentController extends Controller
      */
     public function reorderComponents(Request $request): \Illuminate\Http\JsonResponse
     {
-        if (! auth()->user()->isAdmin()) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
         $validated = $request->validate([
             'components' => ['required', 'array'],
             'components.*.id' => ['required', 'exists:assessment_components,id'],
             'components.*.order' => ['required', 'integer', 'min:0'],
         ]);
+
+        // Check authorization based on the component's assessment course
+        if (!empty($validated['components'])) {
+            $firstComponent = \App\Models\AssessmentComponent::with('assessment')->find($validated['components'][0]['id']);
+            if ($firstComponent && $firstComponent->assessment) {
+                $courseCode = $firstComponent->assessment->course_code;
+                if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+                    return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+                }
+            }
+        }
 
         foreach ($validated['components'] as $componentData) {
             \App\Models\AssessmentComponent::where('id', $componentData['id'])

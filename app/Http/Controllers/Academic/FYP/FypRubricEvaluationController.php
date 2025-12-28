@@ -485,7 +485,7 @@ class FypRubricEvaluationController extends Controller
     public function release(Request $request, Student $student, FypRubricTemplate $template): RedirectResponse
     {
         // Only Admin can release
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Only administrators can release evaluations.');
         }
 

@@ -20,7 +20,7 @@ class FypRubricController extends Controller
     public function index(Request $request): View
     {
         // Only Admin can manage rubric templates
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -66,7 +66,7 @@ class FypRubricController extends Controller
      */
     public function create(): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -88,7 +88,7 @@ class FypRubricController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -121,7 +121,7 @@ class FypRubricController extends Controller
      */
     public function show(FypRubricTemplate $rubric): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -144,7 +144,7 @@ class FypRubricController extends Controller
      */
     public function edit(FypRubricTemplate $rubric): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -178,7 +178,7 @@ class FypRubricController extends Controller
      */
     public function update(Request $request, FypRubricTemplate $rubric): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -214,7 +214,7 @@ class FypRubricController extends Controller
      */
     public function destroy(FypRubricTemplate $rubric): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -240,7 +240,7 @@ class FypRubricController extends Controller
      */
     public function addElement(Request $request, FypRubricTemplate $rubric): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -299,7 +299,7 @@ class FypRubricController extends Controller
      */
     public function updateElement(Request $request, FypRubricTemplate $rubric, FypRubricElement $element): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -342,7 +342,7 @@ class FypRubricController extends Controller
      */
     public function deleteElement(FypRubricTemplate $rubric, FypRubricElement $element): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -368,7 +368,7 @@ class FypRubricController extends Controller
      */
     public function updateDescriptors(Request $request, FypRubricTemplate $rubric, FypRubricElement $element): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -410,7 +410,7 @@ class FypRubricController extends Controller
      */
     public function reorderElements(Request $request, FypRubricTemplate $rubric): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -439,7 +439,7 @@ class FypRubricController extends Controller
      */
     public function duplicate(FypRubricTemplate $rubric): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

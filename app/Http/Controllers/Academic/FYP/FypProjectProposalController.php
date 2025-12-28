@@ -15,7 +15,7 @@ class FypProjectProposalController extends Controller
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -140,8 +140,8 @@ class FypProjectProposalController extends Controller
     {
         $user = auth()->user();
 
-        // Allow admin, AT, or the student themselves
-        if (! $user->isAdmin() && $user->id !== $proposal->student->at_id && $user->id !== $proposal->student->user_id) {
+        // Allow admin, FYP Coordinator, AT, or the student themselves
+        if (! $user->isAdmin() && ! $user->isFypCoordinator() && $user->id !== $proposal->student->at_id && $user->id !== $proposal->student->user_id) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -157,7 +157,7 @@ class FypProjectProposalController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user->isAdmin() && $user->id !== $proposal->student->at_id) {
+        if (! $user->isAdmin() && ! $user->isFypCoordinator() && $user->id !== $proposal->student->at_id) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -182,7 +182,7 @@ class FypProjectProposalController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user->isAdmin() && $user->id !== $proposal->student->at_id) {
+        if (! $user->isAdmin() && ! $user->isFypCoordinator() && $user->id !== $proposal->student->at_id) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -209,8 +209,9 @@ class FypProjectProposalController extends Controller
     {
         $user = auth()->user();
 
-        // Allow admin, AT, IC, or the student themselves
+        // Allow admin, FYP Coordinator, AT, IC, or the student themselves
         if (! $user->isAdmin() &&
+            ! $user->isFypCoordinator() &&
             $user->id !== $proposal->student->at_id &&
             $user->id !== $proposal->student->ic_id &&
             $user->id !== $proposal->student->user_id) {

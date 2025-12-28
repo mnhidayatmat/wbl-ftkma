@@ -25,7 +25,7 @@ class FypIcEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -166,8 +166,8 @@ class FypIcEvaluationController extends Controller
      */
     public function show(Student $student): View
     {
-        // Check authorization - Admin can view any, IC can view assigned students
-        if (! auth()->user()->isAdmin()) {
+        // Check authorization - Admin and FYP Coordinator can view any, IC can view assigned students
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             if (auth()->user()->isIndustry()) {
                 if ($student->ic_id !== auth()->id()) {
                     abort(403, 'You are not authorized to view this student. This student is assigned to a different Industry Coach.');
@@ -339,8 +339,8 @@ class FypIcEvaluationController extends Controller
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
 
-        // Check if assessment window is open (Admin can bypass)
-        if (! auth()->user()->isAdmin()) {
+        // Check if assessment window is open (Admin and FYP Coordinator can bypass)
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             $this->requireOpenWindow('ic');
         }
 
@@ -595,8 +595,8 @@ class FypIcEvaluationController extends Controller
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
 
-        // Check if assessment window is open (Admin can bypass)
-        if (! auth()->user()->isAdmin()) {
+        // Check if assessment window is open (Admin and FYP Coordinator can bypass)
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             $this->requireOpenWindow('ic');
         }
 

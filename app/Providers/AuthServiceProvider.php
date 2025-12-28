@@ -34,8 +34,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         // Register Gates
         Gate::define('edit-at-marks', function ($user, $student = null) {
-            // Admin can always edit any AT marks
-            if ($user->role === 'admin') {
+            // Admin and FYP Coordinator can always edit any AT marks
+            if ($user->role === 'admin' || $user->isFypCoordinator()) {
                 return true;
             }
 
@@ -55,8 +55,8 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('edit-ic-marks', function ($user, $student = null) {
-            // Admin can edit any IC marks
-            if ($user->isAdmin()) {
+            // Admin and FYP Coordinator can edit any IC marks
+            if ($user->isAdmin() || $user->isFypCoordinator()) {
                 return true;
             }
             // IC can only edit marks for students assigned to them

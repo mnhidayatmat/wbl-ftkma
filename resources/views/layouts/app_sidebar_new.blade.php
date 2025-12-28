@@ -127,9 +127,9 @@
      }"
      @click="closeMobileSidebarOnClick($event)">
     
-    <!-- Group #1: Dashboard (Hidden for Students - they have it in STUDENT section) -->
-    @if(!$isStudent)
-    <a href="{{ route('dashboard') }}" 
+    <!-- Group #1: Dashboard (Hidden for Students and FYP Coordinators - they have their own dashboards) -->
+    @if(!$isStudent && !$isFypCoordinator)
+    <a href="{{ route('dashboard') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('dashboard') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
        :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
        :title="isSidebarCollapsed ? 'Dashboard' : ''">
@@ -163,6 +163,7 @@
     </a>
     @endif
 
+    @if(!$isFypCoordinator)
     <div class="relative">
         <button @click="toggleMenu('companies')"
                 class="w-full flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
@@ -176,16 +177,16 @@
                 </div>
                 <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Companies</span>
             </div>
-            <svg x-show="sidebarTextVisible" 
-                 class="w-4 h-4 transition-transform duration-200 flex-shrink-0" 
+            <svg x-show="sidebarTextVisible"
+                 class="w-4 h-4 transition-transform duration-200 flex-shrink-0"
                  :class="companiesMenuOpen ? 'rotate-180' : ''"
                  fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
             </svg>
         </button>
-        
+
         <!-- Companies Sub-menu -->
-        <div x-show="companiesMenuOpen && sidebarTextVisible" 
+        <div x-show="companiesMenuOpen && sidebarTextVisible"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-1"
              x-transition:enter-end="opacity-100 translate-y-0"
@@ -193,7 +194,7 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-1"
              class="mt-1 ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-1">
-            
+
             <!-- Companies & Agreements (Unified) -->
             <a href="{{ route('admin.companies.index') }}"
                class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 min-h-[40px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'text-[#0084C5] font-medium bg-[#0084C5]/5 border-l-2 border-[#00A86B] -ml-[2px] pl-[14px]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-[#0084C5]' }}">
@@ -204,8 +205,8 @@
             </a>
         </div>
     </div>
-    
-    <a href="{{ route('admin.users.roles.index') }}" 
+
+    <a href="{{ route('admin.users.roles.index') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.users.roles.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
        :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
        :title="isSidebarCollapsed ? 'User Roles' : ''">
@@ -216,9 +217,9 @@
         </div>
         <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">User Roles</span>
     </a>
-    
+
     <!-- Group Control (Admin Only) - Manage group lifecycle and visibility -->
-    <a href="{{ route('admin.groups.index') }}" 
+    <a href="{{ route('admin.groups.index') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.groups.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
        :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
        :title="isSidebarCollapsed ? 'Group Control' : ''">
@@ -243,9 +244,10 @@
         <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Manage Students</span>
     </a>
     @endif
+    @endif
 
-    <!-- Student Placement Tracking -->
-    @if($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc)
+    <!-- Student Placement Tracking (Hidden for FYP Coordinators) -->
+    @if(($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc) && !$isFypCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">PLACEMENT</span>
@@ -307,15 +309,15 @@
     @endif
 
     <!-- Group #2: ACADEMIC MODULES (Hidden for Students - they have "My Courses" section) -->
-    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin)
+    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin || $isFypCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">ACADEMIC MODULES</span>
             <span x-show="isSidebarCollapsed" class="block w-8 h-[1px] bg-gray-300 dark:bg-gray-600 mx-auto"></span>
         </p>
-        
+
         <!-- FYP -->
-        @if($isAt || ($isLecturer && $lecturerIsAt) || $isAdmin)
+        @if($isAt || ($isLecturer && $lecturerIsAt) || $isAdmin || $isFypCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('fyp')"
@@ -348,57 +350,57 @@
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
-                @if($isAdmin)
+                @if($isAdmin || $isFypCoordinator)
                 <a href="{{ route('academic.fyp.proposals.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Project Proposals
                 </a>
-                <a href="{{ route('academic.fyp.assessments.index') }}" 
+                <a href="{{ route('academic.fyp.assessments.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assessments
                 </a>
-                <a href="{{ route('academic.fyp.schedule.index') }}" 
+                <a href="{{ route('academic.fyp.schedule.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.schedule.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assessment Schedule
                 </a>
                 @endif
-                @if($isAdmin || $isCoordinator || $isLecturer)
-                <a href="{{ route('academic.fyp.clo-plo.index') }}" 
+                @if($isAdmin || $isCoordinator || $isLecturer || $isFypCoordinator)
+                <a href="{{ route('academic.fyp.clo-plo.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.clo-plo.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     CLO–PLO Analysis
                 </a>
                 @endif
-                @if($isAt || $isAdmin)
-                <a href="{{ route('academic.fyp.lecturer.index') }}" 
+                @if($isAt || $isAdmin || $isFypCoordinator)
+                <a href="{{ route('academic.fyp.lecturer.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.lecturer.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     AT Evaluation
                 </a>
                 @endif
-                @if($isIc || $isAdmin)
-                <a href="{{ route('academic.fyp.ic.index') }}" 
+                @if($isIc || $isAdmin || $isFypCoordinator)
+                <a href="{{ route('academic.fyp.ic.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.ic.*') || request()->routeIs('academic.fyp.logbook.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     IC Evaluation
                 </a>
                 {{-- Logbook Evaluation is now accessed through IC Evaluation page --}}
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.fyp.progress.index') }}" 
+                @if($isAdmin || $isFypCoordinator)
+                <a href="{{ route('academic.fyp.progress.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.progress.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Evaluation Progress
                 </a>
                 @endif
-                @if($isAt || $isAdmin)
-                <a href="{{ route('academic.fyp.performance.index') }}" 
+                @if($isAt || $isAdmin || $isFypCoordinator)
+                <a href="{{ route('academic.fyp.performance.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.performance.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Student Performance
                 </a>
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.fyp.moderation.index') }}" 
+                @if($isAdmin || $isFypCoordinator)
+                <a href="{{ route('academic.fyp.moderation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.moderation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Moderation
                 </a>
-                <a href="{{ route('academic.fyp.finalisation.index') }}" 
+                <a href="{{ route('academic.fyp.finalisation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.finalisation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Result Finalisation
                 </a>
@@ -415,8 +417,8 @@
         </div>
         @endif
 
-        <!-- IP -->
-        @if($isLecturer || $isAdmin)
+        <!-- IP (Hidden for FYP Coordinators) -->
+        @if(($isLecturer || $isAdmin) && !$isFypCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('ip')"
@@ -515,8 +517,8 @@
         </div>
         @endif
 
-        <!-- OSH -->
-        @if($isLecturer || $isAdmin)
+        <!-- OSH (Hidden for FYP Coordinators) -->
+        @if(($isLecturer || $isAdmin) && !$isFypCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('osh')"
@@ -615,8 +617,8 @@
         </div>
         @endif
 
-        <!-- PPE -->
-        @if($isLecturer || $isIc || $isAdmin)
+        <!-- PPE (Hidden for FYP Coordinators) -->
+        @if(($isLecturer || $isIc || $isAdmin) && !$isFypCoordinator)
         <div class="mb-1">
             <!-- Parent Menu Item (Toggle Only - No Navigation) -->
             <button type="button"
@@ -717,8 +719,8 @@
         </div>
         @endif
 
-        <!-- Industrial Training -->
-        @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin)
+        <!-- Industrial Training (LI) (Hidden for FYP Coordinators) -->
+        @if(($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin) && !$isFypCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('li')"
@@ -963,8 +965,8 @@
     </div>
     @endif
 
-    <!-- Group #3: INDUSTRY COACH -->
-    @if($isIc)
+    <!-- Group #3: INDUSTRY COACH (Hidden for FYP Coordinators) -->
+    @if($isIc && !$isFypCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">INDUSTRY COACH</span>

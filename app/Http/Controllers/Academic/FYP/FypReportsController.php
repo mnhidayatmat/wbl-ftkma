@@ -23,7 +23,7 @@ class FypReportsController extends Controller
      */
     public function index(): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -44,7 +44,7 @@ class FypReportsController extends Controller
      */
     public function exportCohort(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -71,7 +71,7 @@ class FypReportsController extends Controller
         }
 
         // Get weights for export
-        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
+        [$atTotalWeight, $atRubricTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
         $fileName = 'FYP_Cohort_Results_'.now()->format('Y-m-d_His').'.xlsx';
 
@@ -83,7 +83,7 @@ class FypReportsController extends Controller
      */
     public function exportGroup(Request $request, WblGroup $group)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -113,7 +113,7 @@ class FypReportsController extends Controller
         }
 
         // Get weights for export
-        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
+        [$atTotalWeight, $atRubricTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
         $fileName = 'FYP_Group_'.str_replace(' ', '_', $group->name).'_'.now()->format('Y-m-d_His').'.xlsx';
 
@@ -125,7 +125,7 @@ class FypReportsController extends Controller
      */
     public function exportCompany(Request $request, Company $company)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -155,7 +155,7 @@ class FypReportsController extends Controller
         }
 
         // Get weights for export
-        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
+        [$atTotalWeight, $atRubricTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
         $fileName = 'FYP_Company_'.str_replace(' ', '_', $company->company_name).'_'.now()->format('Y-m-d_His').'.xlsx';
 
@@ -259,6 +259,17 @@ class FypReportsController extends Controller
             ->active()
             ->sum('weight_percentage');
 
+        // Get AT rubric-based assessments weight
+        $atRubricTotalWeight = Assessment::forCourse('FYP')
+            ->forEvaluator('at')
+            ->active()
+            ->whereIn('assessment_type', ['Oral', 'Rubric'])
+            ->with('rubrics')
+            ->get()
+            ->sum(function ($assessment) {
+                return $assessment->rubrics->sum('weight_percentage');
+            });
+
         $icTotalWeight = Assessment::forCourse('FYP')
             ->forEvaluator('ic')
             ->active()
@@ -269,7 +280,7 @@ class FypReportsController extends Controller
                 return $assessment->rubrics->sum('weight_percentage');
             });
 
-        return [$atTotalWeight, $icTotalWeight];
+        return [$atTotalWeight, $atRubricTotalWeight, $icTotalWeight];
     }
 
     /**
@@ -277,11 +288,12 @@ class FypReportsController extends Controller
      */
     private function exportPdf($students, $title)
     {
-        [$atTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
+        [$atTotalWeight, $atRubricTotalWeight, $icTotalWeight] = $this->getAssessmentWeights();
 
         $pdf = Pdf::loadView('academic.fyp.performance.export-pdf', [
             'students' => $students,
             'atTotalWeight' => $atTotalWeight,
+            'atRubricTotalWeight' => $atRubricTotalWeight,
             'icTotalWeight' => $icTotalWeight,
             'adminName' => auth()->user()->name,
             'generatedAt' => now(),

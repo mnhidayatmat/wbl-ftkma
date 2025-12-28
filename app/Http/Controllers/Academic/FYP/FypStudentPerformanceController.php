@@ -22,8 +22,8 @@ class FypStudentPerformanceController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and AT can access
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isAt()) {
+        // Only Admin, AT, and FYP Coordinator can access
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isAt() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

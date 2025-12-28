@@ -18,7 +18,7 @@ class FypProgressController extends Controller
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isFypCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
