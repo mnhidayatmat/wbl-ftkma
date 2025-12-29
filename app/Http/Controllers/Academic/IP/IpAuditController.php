@@ -14,7 +14,7 @@ class IpAuditController extends Controller
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -74,7 +74,7 @@ class IpAuditController extends Controller
      */
     public function export(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

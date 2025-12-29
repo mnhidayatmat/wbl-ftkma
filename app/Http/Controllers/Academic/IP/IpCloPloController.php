@@ -22,8 +22,8 @@ class IpCloPloController extends Controller
      */
     public function index(): View
     {
-        // Only Admin, Coordinator, and Lecturer can access
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isCoordinator() && ! auth()->user()->isLecturer()) {
+        // Only Admin, IP Coordinator, and Lecturer can access
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -65,7 +65,7 @@ class IpCloPloController extends Controller
      */
     public function updateCount(Request $request): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -88,8 +88,8 @@ class IpCloPloController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Only Admin can create/edit
-        if (! auth()->user()->isAdmin()) {
+        // Only Admin or IP Coordinator can create/edit
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -144,8 +144,8 @@ class IpCloPloController extends Controller
      */
     public function update(Request $request, CloPloMapping $cloPloMapping): RedirectResponse
     {
-        // Only Admin can update
-        if (! auth()->user()->isAdmin()) {
+        // Only Admin or IP Coordinator can update
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -197,7 +197,7 @@ class IpCloPloController extends Controller
      */
     public function destroy(CloPloMapping $cloPloMapping): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

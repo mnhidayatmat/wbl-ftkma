@@ -22,8 +22,8 @@ class IpStudentPerformanceController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and Lecturer can access
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        // Only Admin, IP Coordinator and Lecturer can access
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -254,8 +254,8 @@ class IpStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        // Only Admin can export
-        if (! auth()->user()->isAdmin()) {
+        // Only Admin or IP Coordinator can export
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -304,8 +304,8 @@ class IpStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        // Only Admin can export
-        if (! auth()->user()->isAdmin()) {
+        // Only Admin or IP Coordinator can export
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
