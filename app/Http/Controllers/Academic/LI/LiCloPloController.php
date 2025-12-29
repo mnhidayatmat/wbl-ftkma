@@ -19,7 +19,7 @@ class LiCloPloController extends Controller
 
     public function index(): View
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isCoordinator() && ! auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isCoordinator() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -53,7 +53,7 @@ class LiCloPloController extends Controller
      */
     public function updateCount(Request $request): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -73,7 +73,7 @@ class LiCloPloController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -119,7 +119,7 @@ class LiCloPloController extends Controller
 
     public function update(Request $request, CloPloMapping $cloPloMapping): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -164,7 +164,7 @@ class LiCloPloController extends Controller
 
     public function destroy(CloPloMapping $cloPloMapping): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

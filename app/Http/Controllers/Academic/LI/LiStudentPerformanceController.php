@@ -35,15 +35,15 @@ class LiStudentPerformanceController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        // Admin can see all, Lecturers/Industry might have restricted views if needed
+        // Admin and LI Coordinator can see all, Lecturers/Industry have restricted views
         // For performance index, usually Admin-only or restricted to ATs/ICs
-        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             // If they are a supervisor_li (stored via StudentCourseAssignment)
             $assignedStudentIds = \App\Models\StudentCourseAssignment::where('lecturer_id', auth()->id())
                 ->where('course_type', 'Industrial Training')
                 ->pluck('student_id');
             $query->whereIn('id', $assignedStudentIds);
-        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
+        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
 
@@ -134,7 +134,7 @@ class LiStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -170,7 +170,7 @@ class LiStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -230,12 +230,12 @@ class LiStudentPerformanceController extends Controller
 
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             $assignedStudentIds = \App\Models\StudentCourseAssignment::where('lecturer_id', auth()->id())
                 ->where('course_type', 'Industrial Training')
                 ->pluck('student_id');
             $query->whereIn('id', $assignedStudentIds);
-        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
+        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
 

@@ -23,7 +23,7 @@ class LiIcEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isIndustry()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -38,8 +38,8 @@ class LiIcEvaluationController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
+        // Admin and LI Coordinator can see all students, IC only sees assigned students
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
 
@@ -221,8 +221,8 @@ class LiIcEvaluationController extends Controller
             abort(403, 'You are not authorized to edit IC marks for this student.');
         }
 
-        // Check if assessment window is open (Admin can bypass)
-        if (! auth()->user()->isAdmin()) {
+        // Check if assessment window is open (Admin and LI Coordinator can bypass)
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             $this->requireOpenWindow('ic');
         }
 
@@ -319,6 +319,3 @@ class LiIcEvaluationController extends Controller
             ->with('last_saved', now()->format('H:i:s'));
     }
 }
-
-
-

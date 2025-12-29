@@ -22,8 +22,8 @@ class LiSupervisorEvaluationController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and Supervisor LI can access Supervisor evaluation
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isSupervisorLi()) {
+        // Only Admin, LI Coordinator, and Supervisor LI can access Supervisor evaluation
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isSupervisorLi()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -38,8 +38,8 @@ class LiSupervisorEvaluationController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        // Admin can see all students, Supervisor only sees assigned students
-        if (auth()->user()->isSupervisorLi() && ! auth()->user()->isAdmin()) {
+        // Admin and LI Coordinator can see all students, Supervisor only sees assigned students
+        if (auth()->user()->isSupervisorLi() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             $studentIds = \App\Models\StudentCourseAssignment::where('lecturer_id', auth()->id())
                 ->where('course_type', 'Industrial Training')
                 ->pluck('student_id');
@@ -224,8 +224,8 @@ class LiSupervisorEvaluationController extends Controller
             abort(403, 'You are not authorized to edit Supervisor marks for this student.');
         }
 
-        // Check if assessment window is open (Admin can bypass)
-        if (! auth()->user()->isAdmin()) {
+        // Check if assessment window is open (Admin and LI Coordinator can bypass)
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             $this->requireOpenWindow('supervisor');
         }
 
@@ -324,6 +324,3 @@ class LiSupervisorEvaluationController extends Controller
             ->with('success', 'Marks saved successfully.');
     }
 }
-
-
-

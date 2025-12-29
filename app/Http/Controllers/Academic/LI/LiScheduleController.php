@@ -16,7 +16,7 @@ class LiScheduleController extends Controller
      */
     public function index(): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -58,7 +58,7 @@ class LiScheduleController extends Controller
      */
     public function updateWindow(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -120,7 +120,7 @@ class LiScheduleController extends Controller
      */
     public function sendReminder(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -129,6 +129,3 @@ class LiScheduleController extends Controller
             ->with('success', 'Reminder emails sent successfully.');
     }
 }
-
-
-

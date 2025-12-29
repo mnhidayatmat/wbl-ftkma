@@ -19,7 +19,7 @@ class LiModerationController extends Controller
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -135,7 +135,7 @@ class LiModerationController extends Controller
      */
     public function show(Student $student): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -198,7 +198,7 @@ class LiModerationController extends Controller
      */
     public function store(Request $request, Student $student)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
