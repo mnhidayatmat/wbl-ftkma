@@ -12,6 +12,7 @@ use App\Http\Controllers\Academic\FYP\FypReportsController;
 use App\Http\Controllers\Academic\FYP\FypRubricController;
 use App\Http\Controllers\Academic\FYP\FypRubricEvaluationController;
 use App\Http\Controllers\Academic\FYP\FypScheduleController;
+use App\Http\Controllers\Academic\FYP\FypStudentAssignmentController;
 use App\Http\Controllers\Academic\FYP\FypStudentPerformanceController;
 use App\Http\Controllers\Academic\IP\IpAuditController;
 use App\Http\Controllers\Academic\IP\IpIcEvaluationController;
@@ -402,6 +403,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('schedule', [FypScheduleController::class, 'index'])->name('schedule.index');
             Route::post('schedule/window', [FypScheduleController::class, 'updateWindow'])->name('schedule.update-window');
             Route::post('schedule/reminder', [FypScheduleController::class, 'sendReminder'])->name('schedule.send-reminder');
+
+            // Student Assignment (Admin and FYP Coordinator)
+            Route::prefix('assign-students')->name('assign-students.')->group(function () {
+                Route::get('/', [FypStudentAssignmentController::class, 'index'])->name('index');
+                Route::put('/{student}', [FypStudentAssignmentController::class, 'update'])->name('update');
+                Route::post('/bulk-update', [FypStudentAssignmentController::class, 'bulkUpdate'])->name('bulk-update');
+                Route::post('/{student}/clear', [FypStudentAssignmentController::class, 'clearAssignment'])->name('clear');
+            });
 
             // Evaluation Progress (Admin only)
             Route::get('progress', [FypProgressController::class, 'index'])->name('progress.index');

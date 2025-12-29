@@ -21,7 +21,7 @@ class PpeReportsController extends Controller
      */
     public function index(): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -42,7 +42,7 @@ class PpeReportsController extends Controller
      */
     public function exportCohort(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -78,7 +78,7 @@ class PpeReportsController extends Controller
      */
     public function exportGroup(Request $request, WblGroup $group)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -117,7 +117,7 @@ class PpeReportsController extends Controller
      */
     public function exportCompany(Request $request, Company $company)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

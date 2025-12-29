@@ -22,10 +22,13 @@ class IpLecturerEvaluationController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and Lecturer can access Lecturer evaluation
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        // Only Admin, Lecturer, and IP Coordinator can access Lecturer evaluation
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
+
+        // IP Coordinator can only view, not edit
+        $isViewOnly = auth()->user()->isIpCoordinator() && ! auth()->user()->isAdmin();
 
         // Get active assessments for IP course with lecturer evaluator role
         $assessments = Assessment::forCourse('IP')
@@ -38,8 +41,8 @@ class IpLecturerEvaluationController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        // Admin can see all students, Lecturer sees only students if they are the assigned IP lecturer
-        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
+        // Admin and IP Coordinator can see all students, Lecturer sees only students if they are the assigned IP lecturer
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             // IP uses single lecturer from course_settings
             $ipSetting = CourseSetting::where('course_type', 'IP')->first();
             if ($ipSetting && $ipSetting->lecturer_id === auth()->id()) {
@@ -50,6 +53,7 @@ class IpLecturerEvaluationController extends Controller
                 $query->whereRaw('1 = 0'); // Force empty result
             }
         }
+        // IP Coordinator can see all students (view-only)
 
         // Filter by active groups only
         $query->inActiveGroups();
@@ -131,13 +135,11 @@ class IpLecturerEvaluationController extends Controller
             'studentsWithStatus',
             'assessments',
             'totalWeight',
-            'groups'
+            'groups',
+            'isViewOnly'
         ));
     }
 
-    /**
-     * Show the evaluation form for a specific student.
-     */
     /**
      * Show the evaluation form for a specific student.
      */
@@ -146,13 +148,16 @@ class IpLecturerEvaluationController extends Controller
         // Load relationships for display
         $student->load('academicTutor', 'industryCoach', 'group');
 
-        // Check authorization: Admin or assigned IP lecturer
-        if (! auth()->user()->isAdmin()) {
+        // IP Coordinator can only view, not edit
+        $isViewOnly = auth()->user()->isIpCoordinator() && ! auth()->user()->isAdmin();
+
+        // Check authorization: Admin, assigned IP lecturer, or IP Coordinator (view-only)
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             if (auth()->user()->isLecturer()) {
                 // IP uses single lecturer from course_settings
                 $ipSetting = CourseSetting::where('course_type', 'IP')->first();
                 if (! $ipSetting || $ipSetting->lecturer_id !== auth()->id()) {
-                    abort(403, 'You are not authorized to edit Lecturer marks for IP. You are not the assigned IP lecturer. Please contact an administrator.');
+                    abort(403, 'You are not authorized to view Lecturer marks for IP. You are not the assigned IP lecturer. Please contact an administrator.');
                 }
             } else {
                 abort(403, 'Unauthorized access.');
@@ -196,7 +201,8 @@ class IpLecturerEvaluationController extends Controller
             'assessmentsByClo',
             'marks',
             'componentMarks',
-            'totalContribution'
+            'totalContribution',
+            'isViewOnly'
         ));
     }
 
@@ -205,6 +211,11 @@ class IpLecturerEvaluationController extends Controller
      */
     public function store(Request $request, Student $student): RedirectResponse
     {
+        // IP Coordinator cannot submit marks (view-only)
+        if (auth()->user()->isIpCoordinator() && ! auth()->user()->isAdmin()) {
+            abort(403, 'IP Coordinator can only view evaluations, not submit marks.');
+        }
+
         // Check authorization: Admin or assigned IP lecturer
         if (! auth()->user()->isAdmin()) {
             if (auth()->user()->isLecturer()) {

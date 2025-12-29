@@ -31,6 +31,16 @@
             </div>
         @endif
 
+        @if($isViewOnly ?? false)
+            <div class="mb-4 p-4 bg-blue-100 dark:bg-blue-900 border border-blue-400 dark:border-blue-700 text-blue-700 dark:text-blue-300 rounded-lg flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                <span class="font-medium">View Only Mode</span> - You are viewing this evaluation as IP Coordinator. Editing is not available.
+            </div>
+        @endif
+
         <!-- Student Info Header -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -165,8 +175,8 @@
                                     </div>
                                 </div>
 
-                                @can('edit-at-marks', $student)
-                                    <button @click="showModal = true" 
+                                @if(!($isViewOnly ?? false) && Gate::allows('edit-at-marks', $student))
+                                    <button @click="showModal = true"
                                             class="w-full py-2.5 px-4 bg-[#0084C5] hover:bg-[#003A6C] text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -177,7 +187,7 @@
                                      <div class="w-full py-2.5 px-4 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium rounded-lg text-center text-sm">
                                         View Only
                                     </div>
-                                @endcan
+                                @endif
                             </div>
 
                             <!-- MODAL -->
@@ -281,17 +291,17 @@
                                                                                 {{ $component->criteria_keywords }}
                                                                             </div>
                                                                             @endif
-                                                                            @can('edit-at-marks', $student)
-                                                                            <button type="button" 
-                                                                                    @click="showRemarks = !showRemarks" 
+                                                                            @if(!($isViewOnly ?? false) && Gate::allows('edit-at-marks', $student))
+                                                                            <button type="button"
+                                                                                    @click="showRemarks = !showRemarks"
                                                                                     class="text-xs text-[#0084C5] hover:text-[#003A6C] dark:text-[#0084C5] dark:hover:text-[#00A86B] mt-1 flex items-center gap-1 transition-colors font-medium">
                                                                                 <span x-text="showRemarks ? '▲ Hide remarks' : '▼ Add remarks'"></span>
                                                                             </button>
-                                                                            <div x-show="showRemarks" 
-                                                                                 x-collapse 
+                                                                            <div x-show="showRemarks"
+                                                                                 x-collapse
                                                                                  class="mt-2 space-y-1">
-                                                                                <textarea name="component_remarks[{{ $hasComponents && $component->id ? $component->id : 'temp_' . $index }}]" 
-                                                                                          rows="2" 
+                                                                                <textarea name="component_remarks[{{ $hasComponents && $component->id ? $component->id : 'temp_' . $index }}]"
+                                                                                          rows="2"
                                                                                           placeholder="Optional remarks for this component..."
                                                                                           class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] resize-none">{{ $componentMark?->remarks }}</textarea>
                                                                                 <p class="text-xs text-gray-400 dark:text-gray-500 italic">
@@ -302,7 +312,7 @@
                                                                             <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
                                                                                 {{ $componentMark->remarks }}
                                                                             </div>
-                                                                            @endcan
+                                                                            @endif
                                                                         </div>
                                                                     </td>
                                                                     <!-- Rating Columns: Radio Buttons -->

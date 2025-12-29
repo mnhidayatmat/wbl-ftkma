@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AssessmentController;
 use App\Http\Controllers\Admin\StudentAssignmentController;
-use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\StudentController;
 use App\Http\Controllers\RecruitmentPoolController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordinator,ppe_coordinator,li_coordinator'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Profile
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [AdminProfileController::class, 'show'])->name('show');
@@ -41,6 +41,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('companies/cancel-import', [CompanyController::class, 'cancelImport'])->name('companies.cancel-import');
     Route::get('companies/template', [CompanyController::class, 'downloadTemplate'])->name('companies.template');
     Route::get('companies/search', [CompanyController::class, 'search'])->name('companies.search');
+    Route::get('companies/export/excel', [CompanyController::class, 'exportExcel'])->name('companies.export.excel');
+    Route::get('companies/export/pdf', [CompanyController::class, 'exportPdf'])->name('companies.export.pdf');
     Route::resource('companies', CompanyController::class);
 
     // Company nested routes (contacts, notes, documents)

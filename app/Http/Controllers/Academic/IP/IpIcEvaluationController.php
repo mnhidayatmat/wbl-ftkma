@@ -24,9 +24,12 @@ class IpIcEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry() && ! auth()->user()->isIpCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
+
+        // IP Coordinator can only view, not edit
+        $isViewOnly = auth()->user()->isIpCoordinator() && ! auth()->user()->isAdmin();
 
         // Get ALL active assessments for IP course that have IC evaluator in assessment_evaluators table
         $icAssessments = Assessment::forCourse('IP')
@@ -44,10 +47,11 @@ class IpIcEvaluationController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
+        // Admin and IP Coordinator can see all students, IC only sees assigned students
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
+        // IP Coordinator can see all students (view-only)
 
         // Apply search filter
         if ($request->filled('search')) {
@@ -159,7 +163,8 @@ class IpIcEvaluationController extends Controller
         return view('academic.ip.ic.index', compact(
             'studentsWithStatus',
             'groups',
-            'totalIcWeight'
+            'totalIcWeight',
+            'isViewOnly'
         ));
     }
 
@@ -168,8 +173,11 @@ class IpIcEvaluationController extends Controller
      */
     public function show(Student $student): View
     {
-        // Check authorization - Admin can view any, IC can view assigned students
-        if (! auth()->user()->isAdmin()) {
+        // IP Coordinator can only view, not edit
+        $isViewOnly = auth()->user()->isIpCoordinator() && ! auth()->user()->isAdmin();
+
+        // Check authorization - Admin can view any, IC can view assigned students, IP Coordinator can view all (view-only)
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
             if (auth()->user()->isIndustry()) {
                 if ($student->ic_id !== auth()->id()) {
                     abort(403, 'You are not authorized to view this student. This student is assigned to a different Industry Coach.');
@@ -285,7 +293,8 @@ class IpIcEvaluationController extends Controller
             'totalIcWeight',
             'atAssessments',
             'atMarks',
-            'atTotalContribution'
+            'atTotalContribution',
+            'isViewOnly'
         ));
     }
 
@@ -294,6 +303,11 @@ class IpIcEvaluationController extends Controller
      */
     public function store(Request $request, Student $student): RedirectResponse
     {
+        // IP Coordinator cannot submit marks (view-only)
+        if (auth()->user()->isIpCoordinator() && ! auth()->user()->isAdmin()) {
+            abort(403, 'IP Coordinator can only view evaluations, not submit marks.');
+        }
+
         // Check authorization using gate
         if (! Gate::allows('edit-ic-marks', $student)) {
             abort(403, 'You are not authorized to edit IC marks for this student.');

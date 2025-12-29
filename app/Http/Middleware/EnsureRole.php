@@ -21,32 +21,47 @@ class EnsureRole
 
         $user = auth()->user();
 
-        // Check active role first (for role switching system)
-        $activeRole = $user->getActiveRole();
-
-        if ($activeRole) {
-            // User is using role switching - check active role
-            if (! in_array($activeRole, $roles) || ! $user->hasRole($activeRole)) {
-                abort(403, 'Unauthorized access. Please switch to the correct role.');
+        // Check if user has any of the required roles
+        $hasRequiredRole = false;
+        foreach ($roles as $role) {
+            if ($user->hasRole($role)) {
+                $hasRequiredRole = true;
+                break;
             }
-        } else {
-            // Fallback to old role column for backward compatibility
-            if (! in_array($user->role, $roles)) {
-                // Also check if user has any of the required roles
-                $hasRequiredRole = false;
-                foreach ($roles as $role) {
-                    if ($user->hasRole($role)) {
-                        $hasRequiredRole = true;
-                        break;
-                    }
-                }
 
-                if (! $hasRequiredRole) {
-                    abort(403, 'Unauthorized access.');
-                }
+            // Also check coordinator-specific methods
+            if ($role === 'ip_coordinator' && $user->isIpCoordinator()) {
+                $hasRequiredRole = true;
+                break;
+            }
+            if ($role === 'fyp_coordinator' && $user->isFypCoordinator()) {
+                $hasRequiredRole = true;
+                break;
+            }
+            if ($role === 'osh_coordinator' && $user->isOshCoordinator()) {
+                $hasRequiredRole = true;
+                break;
+            }
+            if ($role === 'ppe_coordinator' && $user->isPpeCoordinator()) {
+                $hasRequiredRole = true;
+                break;
+            }
+            if ($role === 'li_coordinator' && $user->isLiCoordinator()) {
+                $hasRequiredRole = true;
+                break;
             }
         }
 
-        return $next($request);
+        // If user has any required role, allow access
+        if ($hasRequiredRole) {
+            return $next($request);
+        }
+
+        // Fallback to old role column for backward compatibility
+        if (in_array($user->role, $roles)) {
+            return $next($request);
+        }
+
+        abort(403, 'Unauthorized access.');
     }
 }

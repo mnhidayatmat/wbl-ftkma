@@ -3,29 +3,14 @@
 @section('title', 'PPE Coordinator Dashboard')
 
 @section('content')
-<div class="min-h-screen">
-    <!-- Page Header -->
-    <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <nav class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    <span>Dashboard</span>
-                    <span class="mx-2">›</span>
-                    <span class="text-gray-700 dark:text-gray-200">PPE Coordinator</span>
-                </nav>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">PPE Coordinator Dashboard</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Monitor and manage Professional Practice Evaluation module</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('academic.ppe.reports.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-[#003A6C] text-white rounded-lg text-sm font-medium hover:bg-[#002D54] transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Export Reports
-                </a>
-            </div>
-        </div>
-    </div>
+<div class="min-h-screen space-y-6">
+    <!-- Project Milestone Timeline -->
+    <x-coordinator.milestone-timeline
+        module="ppe"
+        :atWindow="$atWindow ?? null"
+        :icWindow="$icWindow ?? null"
+        :groups="$groups ?? null"
+    />
 
     <!-- Summary Banner with Key Insights -->
     <div class="mb-6 relative overflow-hidden">
@@ -406,14 +391,15 @@
 
     <!-- At-Risk Students Section -->
     @if(count($atRiskStudents) > 0)
-    <div id="at-risk-section" class="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border-2 border-red-200 dark:border-red-800 p-6 md:p-8 mb-6 relative overflow-hidden">
+    <div id="at-risk-section" class="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border-2 border-red-200 dark:border-red-800 mb-6 relative overflow-hidden" x-data="{ isMinimized: true }">
         <div class="absolute top-0 right-0 w-64 h-64 bg-red-100/50 dark:bg-red-900/10 rounded-full -mr-32 -mt-32"></div>
         <div class="absolute bottom-0 left-0 w-48 h-48 bg-orange-100/50 dark:bg-orange-900/10 rounded-full -ml-24 -mb-24"></div>
 
         <div class="relative z-10">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <!-- Header (Always visible) -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 md:p-8" :class="{ 'pb-4': !isMinimized }">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg animate-pulse">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg" :class="{ 'animate-pulse': !isMinimized }">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
@@ -428,39 +414,47 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Students requiring immediate intervention and support</p>
                     </div>
                 </div>
+                <button @click="isMinimized = !isMinimized" class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors self-start sm:self-center">
+                    <svg class="w-5 h-5 text-red-600 dark:text-red-400 transition-transform duration-300" :class="{ 'rotate-180': isMinimized }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 gap-4">
-                @foreach($atRiskStudents as $student)
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-xl transition-all duration-300">
-                    <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 flex items-center justify-center flex-shrink-0">
-                            <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ substr($student['student_name'], 0, 1) }}</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ $student['student_name'] }}</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $student['matric_no'] }} • {{ $student['group'] }}</p>
-                                </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student['risk_level'] === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
-                                    {{ ucfirst($student['risk_level']) }} Risk
-                                </span>
+            <!-- Collapsible Content -->
+            <div x-show="!isMinimized" x-collapse class="px-6 md:px-8 pb-6 md:pb-8">
+                <div class="grid grid-cols-1 gap-4">
+                    @foreach($atRiskStudents as $student)
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 flex items-center justify-center flex-shrink-0">
+                                <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ substr($student['student_name'], 0, 1) }}</span>
                             </div>
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                @foreach($student['issues'] as $issue)
-                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    {{ $issue }}
-                                </span>
-                                @endforeach
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">{{ $student['student_name'] }}</h4>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $student['matric_no'] }} • {{ $student['group'] }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student['risk_level'] === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                                        {{ ucfirst($student['risk_level']) }} Risk
+                                    </span>
+                                </div>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    @foreach($student['issues'] as $issue)
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $issue }}
+                                    </span>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
-                @endforeach
             </div>
         </div>
     </div>

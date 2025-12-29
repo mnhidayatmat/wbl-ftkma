@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Companies & Agreements Report</title>
+    <style>
+        @page {
+            margin: 50px 40px 70px 40px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 9px;
+            line-height: 1.4;
+            color: #333;
+        }
+        .page-wrapper {
+            margin: 0;
+        }
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 3px solid #003A6C;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            color: #003A6C;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .header .subtitle {
+            color: #666;
+            font-size: 10px;
+        }
+        .meta-info {
+            display: table;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 8px;
+        }
+        .meta-left, .meta-right {
+            display: table-cell;
+            width: 50%;
+        }
+        .meta-right {
+            text-align: right;
+        }
+        .stats-row {
+            width: 100%;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .stats-row table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .stats-row td {
+            padding: 8px 10px;
+            text-align: center;
+            border-right: 1px solid #ddd;
+        }
+        .stats-row td:last-child {
+            border-right: none;
+        }
+        .stats-row .stat-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #003A6C;
+        }
+        .stats-row .stat-label {
+            font-size: 7px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .filters-applied {
+            background: #f8f9fa;
+            padding: 8px 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 8px;
+        }
+        .filters-applied strong {
+            color: #003A6C;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        table.data-table thead th {
+            background: #003A6C;
+            color: white;
+            padding: 8px 5px;
+            text-align: left;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        table.data-table tbody td {
+            padding: 6px 5px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 8px;
+            vertical-align: top;
+        }
+        table.data-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        table.data-table tbody tr:hover {
+            background: #f3f4f6;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 7px;
+            font-weight: bold;
+        }
+        .badge-mou { background: #dbeafe; color: #1e40af; }
+        .badge-moa { background: #f3e8ff; color: #7c3aed; }
+        .badge-loi { background: #ffedd5; color: #c2410c; }
+        .badge-active { background: #dcfce7; color: #166534; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-draft { background: #dbeafe; color: #1e40af; }
+        .badge-expired { background: #fee2e2; color: #991b1b; }
+        .badge-not-started { background: #f1f5f9; color: #475569; }
+        .badge-terminated { background: #374151; color: white; }
+        .footer {
+            position: fixed;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 7px;
+            color: #666;
+            padding: 10px 0;
+            border-top: 1px solid #ddd;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .company-name {
+            font-weight: bold;
+            color: #003A6C;
+        }
+        .contact-info {
+            font-size: 7px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+    <div class="header">
+        <h1>Companies & Agreements Report</h1>
+        <div class="subtitle">Work-Based Learning Management System - FTKMA UMPSA</div>
+    </div>
+
+    <div class="meta-info">
+        <div class="meta-left">
+            <strong>Generated:</strong> {{ $exportDate }}<br>
+            <strong>Total Records:</strong> {{ $companies->count() }} companies
+        </div>
+        <div class="meta-right">
+            <strong>Generated By:</strong> {{ auth()->user()->name ?? 'System' }}<br>
+            <strong>Report ID:</strong> RPT-{{ date('YmdHis') }}
+        </div>
+    </div>
+
+    @if(array_filter($filters))
+    <div class="filters-applied">
+        <strong>Filters Applied:</strong>
+        @if($filters['search']) Search: "{{ $filters['search'] }}" | @endif
+        @if($filters['agreement_type']) Agreement Type: {{ $filters['agreement_type'] }} | @endif
+        @if($filters['agreement_status']) Status: {{ $filters['agreement_status'] }} | @endif
+        @if($filters['category']) Category: {{ $filters['category'] }} | @endif
+        @if($filters['expiring']) Expiring in {{ $filters['expiring'] }} months @endif
+    </div>
+    @endif
+
+    <div class="stats-row">
+        <table>
+            <tr>
+                <td>
+                    <div class="stat-value">{{ $stats['total_companies'] ?? 0 }}</div>
+                    <div class="stat-label">Total Companies</div>
+                </td>
+                <td>
+                    <div class="stat-value">{{ $stats['active_agreements'] ?? 0 }}</div>
+                    <div class="stat-label">Active Agreements</div>
+                </td>
+                <td>
+                    <div class="stat-value">{{ $stats['mou_count'] ?? 0 }}</div>
+                    <div class="stat-label">MoU</div>
+                </td>
+                <td>
+                    <div class="stat-value">{{ $stats['moa_count'] ?? 0 }}</div>
+                    <div class="stat-label">MoA</div>
+                </td>
+                <td>
+                    <div class="stat-value">{{ $stats['loi_count'] ?? 0 }}</div>
+                    <div class="stat-label">LOI</div>
+                </td>
+                <td>
+                    <div class="stat-value">{{ $stats['expiring_3_months'] ?? 0 }}</div>
+                    <div class="stat-label">Expiring Soon</div>
+                </td>
+                <td>
+                    <div class="stat-value">{{ $stats['total_students'] ?? 0 }}</div>
+                    <div class="stat-label">Placed Students</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 3%;">No</th>
+                <th style="width: 15%;">Company</th>
+                <th style="width: 10%;">Industry</th>
+                <th style="width: 15%;">Contact</th>
+                <th style="width: 8%;">Agreement</th>
+                <th style="width: 12%;">Title/Ref</th>
+                <th style="width: 10%;">Duration</th>
+                <th style="width: 8%;">Status</th>
+                <th style="width: 10%;">Faculty/Programme</th>
+                <th style="width: 5%;" class="text-center">Students</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($companies as $index => $company)
+            @php
+                $primaryAgreement = $company->agreements
+                    ->sortByDesc(function ($a) {
+                        return match ($a->status) {
+                            'Active' => 6,
+                            'Pending' => 5,
+                            'Draft' => 4,
+                            'Not Started' => 3,
+                            'Expired' => 2,
+                            'Terminated' => 1,
+                            default => 0,
+                        };
+                    })
+                    ->first();
+            @endphp
+            <tr>
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td>
+                    <div class="company-name">{{ $company->company_name }}</div>
+                    @if($company->category)
+                    <div class="contact-info">{{ $company->category }}</div>
+                    @endif
+                </td>
+                <td>{{ $company->industry_type ?? '-' }}</td>
+                <td>
+                    <div>{{ $company->pic_name ?? '-' }}</div>
+                    <div class="contact-info">{{ $company->email ?? '' }}</div>
+                    <div class="contact-info">{{ $company->phone ?? '' }}</div>
+                </td>
+                <td>
+                    @if($primaryAgreement)
+                    <span class="badge badge-{{ strtolower($primaryAgreement->agreement_type) }}">
+                        {{ $primaryAgreement->agreement_type }}
+                    </span>
+                    @else
+                    <span style="color: #999;">-</span>
+                    @endif
+                </td>
+                <td>
+                    @if($primaryAgreement)
+                    <div>{{ $primaryAgreement->agreement_title ?? '-' }}</div>
+                    <div class="contact-info">{{ $primaryAgreement->reference_no ?? '' }}</div>
+                    @else
+                    -
+                    @endif
+                </td>
+                <td>
+                    @if($primaryAgreement && ($primaryAgreement->start_date || $primaryAgreement->end_date))
+                    <div>{{ $primaryAgreement->start_date?->format('d/m/Y') ?? '-' }}</div>
+                    <div>{{ $primaryAgreement->end_date?->format('d/m/Y') ?? '-' }}</div>
+                    @else
+                    -
+                    @endif
+                </td>
+                <td>
+                    @if($primaryAgreement)
+                    @php
+                        $statusClass = match($primaryAgreement->status) {
+                            'Active' => 'active',
+                            'Pending' => 'pending',
+                            'Draft' => 'draft',
+                            'Expired' => 'expired',
+                            'Not Started' => 'not-started',
+                            'Terminated' => 'terminated',
+                            default => 'draft'
+                        };
+                    @endphp
+                    <span class="badge badge-{{ $statusClass }}">{{ $primaryAgreement->status }}</span>
+                    @else
+                    <span style="color: #999;">None</span>
+                    @endif
+                </td>
+                <td>
+                    @if($primaryAgreement)
+                    <div>{{ $primaryAgreement->faculty ?? '-' }}</div>
+                    <div class="contact-info">{{ $primaryAgreement->programme ?? '' }}</div>
+                    @else
+                    -
+                    @endif
+                </td>
+                <td class="text-center">{{ $company->students_count ?? 0 }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="10" class="text-center" style="padding: 20px;">
+                    No companies found matching the criteria.
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+    </div>
+
+    <div class="footer">
+        <p>WBL Management System - FTKMA UMPSA | Report generated on {{ $exportDate }} | Page <span class="pagenum"></span></p>
+    </div>
+</body>
+</html>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CompaniesAgreementsExport;
 use App\Imports\CompaniesPreviewImport;
 use App\Models\Company;
 use App\Models\CompanyAgreement;
@@ -11,6 +12,7 @@ use App\Models\CompanyNote;
 use App\Models\Moa;
 use App\Models\Mou;
 use App\Models\Student;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -578,6 +580,105 @@ class CompanyController extends Controller
             new \App\Exports\CompaniesTemplateExport,
             'companies_import_template.xlsx'
         );
+    }
+
+    /**
+     * Export companies and agreements to Excel.
+     */
+    public function exportExcel(Request $request)
+    {
+        $companies = $this->getFilteredCompaniesForExport($request);
+
+        $filename = 'companies_agreements_'.date('Y-m-d_His').'.xlsx';
+
+        return Excel::download(new CompaniesAgreementsExport($companies), $filename);
+    }
+
+    /**
+     * Export companies and agreements to PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        $companies = $this->getFilteredCompaniesForExport($request);
+        $stats = $this->getCompanyStatistics();
+
+        $pdf = Pdf::loadView('companies.export-pdf', [
+            'companies' => $companies,
+            'stats' => $stats,
+            'exportDate' => now()->format('d M Y, H:i'),
+            'filters' => [
+                'search' => $request->input('search'),
+                'agreement_type' => $request->input('agreement_type'),
+                'agreement_status' => $request->input('agreement_status'),
+                'category' => $request->input('category'),
+                'expiring' => $request->input('expiring'),
+            ],
+        ]);
+
+        $pdf->setPaper('a4', 'landscape');
+
+        $filename = 'companies_agreements_'.date('Y-m-d_His').'.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Get filtered companies for export based on request parameters.
+     */
+    private function getFilteredCompaniesForExport(Request $request)
+    {
+        $query = Company::withCount('students')
+            ->with(['agreements' => function ($query) {
+                $query->orderByRaw("CASE WHEN status = 'Active' THEN 1 WHEN status = 'Pending' THEN 2 ELSE 3 END")
+                    ->orderBy('created_at', 'desc');
+            }]);
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'LIKE', "%{$search}%")
+                    ->orWhere('pic_name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filter by agreement type
+        if ($request->filled('agreement_type')) {
+            if ($request->agreement_type === 'none') {
+                $query->doesntHave('agreements');
+            } else {
+                $query->whereHas('agreements', function ($q) use ($request) {
+                    $q->where('agreement_type', $request->agreement_type)
+                        ->where('status', 'Active');
+                });
+            }
+        }
+
+        // Filter by agreement status
+        if ($request->filled('agreement_status')) {
+            $query->whereHas('agreements', function ($q) use ($request) {
+                $q->where('status', $request->agreement_status);
+            });
+        }
+
+        // Filter by expiring dates
+        if ($request->filled('expiring')) {
+            $months = (int) $request->expiring;
+            $query->whereHas('agreements', function ($q) use ($months) {
+                $q->where('status', 'Active')
+                    ->where('end_date', '<=', now()->addMonths($months))
+                    ->where('end_date', '>=', now());
+            });
+        }
+
+        // Filter by company category
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        return $query->latest()->get();
     }
 
     // ==================== CONTACT MANAGEMENT ====================

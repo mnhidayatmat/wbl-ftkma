@@ -11,84 +11,17 @@
     $supervisionRate = $stats['total_students'] > 0
         ? round(($supervisorStatus['with_both'] ?? 0) / $stats['total_students'] * 100)
         : 0;
-    $qualityScore = min(100, max(0, 100 - (($atRiskStudents->count() ?? 0) * 5)));
+    $qualityScore = min(100, max(0, 100 - ((count($atRiskStudents) ?? 0) * 5)));
 @endphp
 
 <div class="space-y-6">
-    <!-- Summary Banner with Glassmorphism -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-6 text-white shadow-xl">
-        <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-        <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
-        <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
-
-        <div class="relative">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <div class="flex items-center gap-3 mb-2">
-                        <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <h1 class="text-2xl font-bold">Industrial Training Coordinator Dashboard</h1>
-                    </div>
-                    <p class="text-white/80">Monitor and manage Learning Integration (LI) module assessments</p>
-                </div>
-                <div class="flex gap-2">
-                    <a href="{{ route('academic.li.reports.index') }}" class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm font-semibold rounded-lg transition-all inline-flex items-center gap-2 border border-white/30">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Export Reports
-                    </a>
-                </div>
-            </div>
-
-            <!-- Summary Stats Row -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div class="text-white/70 text-sm font-medium">Overall Progress</div>
-                    <div class="text-3xl font-bold mt-1">{{ $overallProgress }}%</div>
-                    <div class="text-white/60 text-xs mt-1">All assessments</div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div class="text-white/70 text-sm font-medium">Active Students</div>
-                    <div class="text-3xl font-bold mt-1">{{ $stats['total_students'] }}</div>
-                    <div class="text-white/60 text-xs mt-1">In {{ $stats['total_groups'] }} groups</div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div class="text-white/70 text-sm font-medium">Supervision</div>
-                    <div class="text-3xl font-bold mt-1">{{ $supervisionRate }}%</div>
-                    <div class="text-white/60 text-xs mt-1">Fully assigned</div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div class="text-white/70 text-sm font-medium">Quality Score</div>
-                    <div class="text-3xl font-bold mt-1">{{ $qualityScore }}</div>
-                    <div class="text-white/60 text-xs mt-1">Based on at-risk</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- At-Risk Alert Banner -->
-    @if($atRiskStudents->count() > 0)
-    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
-        <div class="flex items-center gap-3">
-            <div class="flex-shrink-0 p-2 bg-amber-100 dark:bg-amber-800/50 rounded-lg">
-                <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-            </div>
-            <div class="flex-1">
-                <h3 class="font-semibold text-amber-800 dark:text-amber-200">Attention Required</h3>
-                <p class="text-sm text-amber-700 dark:text-amber-300">{{ $atRiskStudents->count() }} student(s) need immediate attention due to missing evaluations or low logbook compliance.</p>
-            </div>
-            <a href="#at-risk-section" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors text-sm">
-                View Details
-            </a>
-        </div>
-    </div>
-    @endif
+    <!-- Project Milestone Timeline -->
+    <x-coordinator.milestone-timeline
+        module="li"
+        :atWindow="$atWindow ?? null"
+        :icWindow="$icWindow ?? null"
+        :groups="$groups ?? null"
+    />
 
     <!-- KPI Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -129,11 +62,11 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">At-Risk Students</p>
-                    <p class="text-3xl font-bold {{ $atRiskStudents->count() > 0 ? 'text-amber-600' : 'text-green-600' }} mt-2">{{ $atRiskStudents->count() }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $atRiskStudents->count() > 0 ? 'Needs attention' : 'All on track' }}</p>
+                    <p class="text-3xl font-bold {{ count($atRiskStudents) > 0 ? 'text-amber-600' : 'text-green-600' }} mt-2">{{ count($atRiskStudents) }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ count($atRiskStudents) > 0 ? 'Needs attention' : 'All on track' }}</p>
                 </div>
-                <div class="p-4 {{ $atRiskStudents->count() > 0 ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-green-100 dark:bg-green-900/30' }} rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <svg class="w-8 h-8 {{ $atRiskStudents->count() > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-4 {{ count($atRiskStudents) > 0 ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-green-100 dark:bg-green-900/30' }} rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-8 h-8 {{ count($atRiskStudents) > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
                 </div>
@@ -316,100 +249,72 @@
     </div>
 
     <!-- At-Risk Students Section -->
-    @if($atRiskStudents->count() > 0)
-    <div id="at-risk-section" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-                At-Risk Students ({{ $atRiskStudents->count() }})
-            </h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Students requiring immediate attention based on evaluation status and logbook compliance</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-900/50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matric No</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supervisor LI</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">IC</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Logbook</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Risk Factors</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+    @if(count($atRiskStudents) > 0)
+    <div id="at-risk-section" class="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border-2 border-red-200 dark:border-red-800 mb-6 relative overflow-hidden" x-data="{ isMinimized: true }">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-red-100/50 dark:bg-red-900/10 rounded-full -mr-32 -mt-32"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-orange-100/50 dark:bg-orange-900/10 rounded-full -ml-24 -mb-24"></div>
+
+        <div class="relative z-10">
+            <!-- Header (Always visible) -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 md:p-8" :class="{ 'pb-4': !isMinimized }">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg" :class="{ 'animate-pulse': !isMinimized }">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            Attention Required
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-red-600 text-white text-sm font-bold shadow-lg">
+                                {{ count($atRiskStudents) }}
+                            </span>
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Students requiring immediate intervention and support</p>
+                    </div>
+                </div>
+                <button @click="isMinimized = !isMinimized" class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors self-start sm:self-center">
+                    <svg class="w-5 h-5 text-red-600 dark:text-red-400 transition-transform duration-300" :class="{ 'rotate-180': isMinimized }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Collapsible Content -->
+            <div x-show="!isMinimized" x-collapse class="px-6 md:px-8 pb-6 md:pb-8">
+                <div class="grid grid-cols-1 gap-4">
                     @foreach($atRiskStudents as $student)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
-                                        {{ substr($student->user->name ?? 'N', 0, 1) }}
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 flex items-center justify-center flex-shrink-0">
+                                <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ substr($student['student_name'], 0, 1) }}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white">{{ $student['student_name'] }}</h4>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $student['matric_no'] }} • {{ $student['group'] }}</p>
                                     </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student['risk_level'] === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                                        {{ ucfirst($student['risk_level']) }} Risk
+                                    </span>
                                 </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $student->user->name ?? 'N/A' }}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $student->user->email ?? '' }}</div>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    @foreach($student['issues'] as $issue)
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $issue }}
+                                    </span>
+                                    @endforeach
                                 </div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-mono">
-                            {{ $student->matric_no ?? 'N/A' }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($student->supervisor)
-                                <span class="text-sm text-gray-900 dark:text-white">{{ $student->supervisor->name ?? 'Assigned' }}</span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                                    Not Assigned
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($student->ic)
-                                <span class="text-sm text-gray-900 dark:text-white">{{ $student->ic->name ?? 'Assigned' }}</span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                                    Not Assigned
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @php
-                                $logbookPercent = $student->logbook_compliance ?? 0;
-                            @endphp
-                            <div class="flex items-center gap-2">
-                                <div class="w-16 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                                    <div class="h-2 rounded-full {{ $logbookPercent >= 80 ? 'bg-green-500' : ($logbookPercent >= 50 ? 'bg-yellow-500' : 'bg-red-500') }}" style="width: {{ $logbookPercent }}%"></div>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400">{{ $logbookPercent }}%</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-wrap gap-1">
-                                @if(!$student->supervisor)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">
-                                        No Supervisor LI
-                                    </span>
-                                @endif
-                                @if(!$student->ic)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">
-                                        No IC
-                                    </span>
-                                @endif
-                                @if(($student->logbook_compliance ?? 0) < 50)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                                        Low Logbook
-                                    </span>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                     @endforeach
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
     </div>
     @endif

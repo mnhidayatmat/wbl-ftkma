@@ -118,17 +118,17 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    @can('edit-at-marks', $student)
-                                        <a href="{{ route('academic.ip.lecturer.show', $student) }}" 
+                                    @if(!($isViewOnly ?? false) && Gate::allows('edit-at-marks', $student))
+                                        <a href="{{ route('academic.ip.lecturer.show', $student) }}"
                                            class="inline-flex items-center px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white rounded-lg transition-colors">
                                             {{ $student->evaluation_status == 'not_started' ? 'Evaluate' : 'Edit' }}
                                         </a>
                                     @else
-                                        <a href="{{ route('academic.ip.lecturer.show', $student) }}" 
+                                        <a href="{{ route('academic.ip.lecturer.show', $student) }}"
                                            class="inline-flex items-center px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors">
                                             View
                                         </a>
-                                    @endcan
+                                    @endif
                                 </td>
                             </tr>
                         @empty

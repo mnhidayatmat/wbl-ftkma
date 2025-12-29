@@ -31,6 +31,16 @@
             </div>
         @endif
 
+        @if($isViewOnly ?? false)
+            <div class="mb-4 p-4 bg-blue-100 dark:bg-blue-900 border border-blue-400 dark:border-blue-700 text-blue-700 dark:text-blue-300 rounded-lg flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                <span class="font-medium">View Only Mode</span> - You are viewing this evaluation as IP Coordinator. Editing is not available.
+            </div>
+        @endif
+
         <!-- Student Info Header -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -82,7 +92,7 @@
                 }
             }
             $progressPercent = $totalAssessments > 0 ? ($completedCount / $totalAssessments) * 100 : 0;
-            $canEdit = Gate::allows('edit-ic-marks', $student);
+            $canEdit = !($isViewOnly ?? false) && Gate::allows('edit-ic-marks', $student);
         @endphp
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8 border border-gray-100 dark:border-gray-700">
