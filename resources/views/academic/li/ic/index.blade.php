@@ -131,7 +131,7 @@
                                 <td class="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
                                     <a href="{{ route('academic.li.ic.show', $student) }}"
                                        class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white text-sm rounded-lg transition-all shadow-sm">
-                                        {{ $student->evaluation_status == 'not_started' ? 'Evaluate' : 'Edit' }}
+                                        View
                                     </a>
                                 </td>
                             </tr>

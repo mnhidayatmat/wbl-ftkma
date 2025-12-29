@@ -124,9 +124,9 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('academic.li.lecturer.show', $student) }}" 
+                                    <a href="{{ route('academic.li.lecturer.show', $student) }}"
                                        class="inline-flex items-center px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white rounded-lg transition-all shadow-sm active:scale-95">
-                                        {{ $student->evaluation_status == 'not_started' ? 'Evaluate' : 'Edit' }}
+                                        View
                                     </a>
                                 </td>
                             </tr>
