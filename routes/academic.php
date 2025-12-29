@@ -601,11 +601,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('audit/export', [\App\Http\Controllers\Academic\LI\LiAuditController::class, 'export'])->name('audit.export');
 
             // Student Assignment (Admin and LI Coordinator)
-            // For LI: Single lecturer assigned to all students, IC is set by student during registration
+            // For LI: Lecturer can be assigned individually per student, IC is set by student during registration
             Route::prefix('assign-students')->name('assign-students.')->group(function () {
                 Route::get('/', [LiStudentAssignmentController::class, 'index'])->name('index');
-                Route::post('/assign-lecturer', [LiStudentAssignmentController::class, 'assignLecturerToAll'])->name('assign-lecturer');
-                Route::post('/clear-lecturer', [LiStudentAssignmentController::class, 'clearLecturerFromAll'])->name('clear-lecturer');
+                Route::put('/{student}', [LiStudentAssignmentController::class, 'update'])->name('update');
+                Route::post('/bulk-update', [LiStudentAssignmentController::class, 'bulkUpdate'])->name('bulk-update');
+                Route::delete('/{student}/clear', [LiStudentAssignmentController::class, 'clearAssignment'])->name('clear');
                 Route::get('/export', [LiStudentAssignmentController::class, 'export'])->name('export');
             });
         });

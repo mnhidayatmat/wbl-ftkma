@@ -13,8 +13,8 @@ use Illuminate\View\View;
 class LiStudentAssignmentController extends Controller
 {
     /**
-     * Display the student assignment page.
-     * For LI: Single lecturer assigned to all students, IC is set by student during registration.
+     * Display the student assignment page with inline edit table.
+     * For LI: Lecturer can be assigned individually per student, IC is set by student during registration.
      */
     public function index(Request $request): View
     {
@@ -29,9 +29,15 @@ class LiStudentAssignmentController extends Controller
             $query->where('group_id', $request->group);
         }
 
-        // Filter by IC assignment status
+        // Filter by assignment status
         if ($request->filled('status')) {
             switch ($request->status) {
+                case 'at_assigned':
+                    $query->whereNotNull('at_id');
+                    break;
+                case 'at_unassigned':
+                    $query->whereNull('at_id');
+                    break;
                 case 'ic_assigned':
                     $query->whereNotNull('ic_id');
                     break;
@@ -66,14 +72,11 @@ class LiStudentAssignmentController extends Controller
         // Get groups for filter
         $groups = WblGroup::orderBy('name')->get();
 
-        // Get the currently assigned LI lecturer (check if all students have same lecturer)
-        $currentLecturer = $this->getCurrentLiLecturer();
-
         // Calculate statistics
-        $totalStudents = Student::count();
         $stats = [
-            'total' => $totalStudents,
-            'with_lecturer' => Student::whereNotNull('at_id')->count(),
+            'total' => Student::count(),
+            'at_assigned' => Student::whereNotNull('at_id')->count(),
+            'at_unassigned' => Student::whereNull('at_id')->count(),
             'ic_assigned' => Student::whereNotNull('ic_id')->count(),
             'ic_unassigned' => Student::whereNull('ic_id')->count(),
         ];
@@ -82,72 +85,85 @@ class LiStudentAssignmentController extends Controller
             'students',
             'lecturers',
             'groups',
-            'stats',
-            'currentLecturer'
+            'stats'
         ));
     }
 
     /**
-     * Get the current LI lecturer assigned to students.
-     * Returns the lecturer if all students have the same one, null otherwise.
+     * Update single student lecturer assignment (inline edit).
      */
-    private function getCurrentLiLecturer(): ?User
-    {
-        $lecturerIds = Student::whereNotNull('at_id')
-            ->distinct()
-            ->pluck('at_id')
-            ->toArray();
-
-        // If all students have the same lecturer
-        if (count($lecturerIds) === 1) {
-            return User::find($lecturerIds[0]);
-        }
-
-        // If no lecturer assigned or multiple different lecturers
-        return null;
-    }
-
-    /**
-     * Assign a single lecturer to ALL students (LI module specific).
-     */
-    public function assignLecturerToAll(Request $request): RedirectResponse
+    public function update(Request $request, Student $student): RedirectResponse
     {
         if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         $validated = $request->validate([
-            'lecturer_id' => ['required', 'exists:users,id'],
+            'at_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        $lecturer = User::findOrFail($validated['lecturer_id']);
-
-        // Verify user is a lecturer
-        if (! $lecturer->hasRole('lecturer') && $lecturer->role !== 'lecturer') {
-            return redirect()->back()
-                ->with('error', 'Selected user must have lecturer role.');
+        // Handle AT assignment
+        if ($request->has('at_id')) {
+            if (! empty($validated['at_id'])) {
+                $at = User::findOrFail($validated['at_id']);
+                if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
+                    return redirect()->back()
+                        ->withQueryString()
+                        ->with('error', 'Lecturer must have lecturer role.');
+                }
+            }
+            $student->update(['at_id' => $validated['at_id'] ?: null]);
         }
 
-        // Update all students with this lecturer
-        $count = Student::query()->update(['at_id' => $lecturer->id]);
-
         return redirect()->back()
-            ->with('success', "Lecturer {$lecturer->name} has been assigned to all {$count} students.");
+            ->withQueryString()
+            ->with('success', "Lecturer updated for {$student->name}.");
     }
 
     /**
-     * Clear lecturer assignment from all students.
+     * Bulk update multiple students' lecturer assignments.
      */
-    public function clearLecturerFromAll(): RedirectResponse
+    public function bulkUpdate(Request $request): RedirectResponse
     {
         if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
-        $count = Student::whereNotNull('at_id')->update(['at_id' => null]);
+        $validated = $request->validate([
+            'student_ids' => ['required', 'array', 'min:1'],
+            'student_ids.*' => ['exists:students,id'],
+            'bulk_at_id' => ['required', 'exists:users,id'],
+        ]);
+
+        // Verify lecturer role
+        $at = User::findOrFail($validated['bulk_at_id']);
+        if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
+            return redirect()->back()
+                ->withQueryString()
+                ->with('error', 'Selected user must be a lecturer.');
+        }
+
+        $count = Student::whereIn('id', $validated['student_ids'])->update(['at_id' => $validated['bulk_at_id']]);
 
         return redirect()->back()
-            ->with('success', "Lecturer assignment cleared from {$count} students.");
+            ->withQueryString()
+            ->with('success', "Lecturer assigned to {$count} student(s).");
+    }
+
+    /**
+     * Clear lecturer assignment for a student.
+     */
+    public function clearAssignment(Request $request, Student $student): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student->update(['at_id' => null]);
+
+        return redirect()->back()
+            ->withQueryString()
+            ->with('success', "Lecturer cleared for {$student->name}.");
     }
 
     /**
