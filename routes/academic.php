@@ -25,6 +25,7 @@ use App\Http\Controllers\Academic\IP\IpStudentAssignmentController;
 use App\Http\Controllers\Academic\IP\IpStudentPerformanceController;
 use App\Http\Controllers\Academic\LI\LiIcEvaluationController;
 use App\Http\Controllers\Academic\LI\LiLogbookController;
+use App\Http\Controllers\Academic\LI\LiStudentAssignmentController;
 use App\Http\Controllers\Academic\LI\LiStudentPerformanceController;
 use App\Http\Controllers\Academic\LI\LiSupervisorEvaluationController;
 use App\Http\Controllers\Academic\OSH\OshAtEvaluationController;
@@ -586,6 +587,15 @@ Route::middleware(['auth'])->group(function () {
             Route::get('reports/company/{company}', [\App\Http\Controllers\Academic\LI\LiReportsController::class, 'exportCompany'])->name('reports.company');
             Route::get('audit', [\App\Http\Controllers\Academic\LI\LiAuditController::class, 'index'])->name('audit.index');
             Route::get('audit/export', [\App\Http\Controllers\Academic\LI\LiAuditController::class, 'export'])->name('audit.export');
+
+            // Student Assignment (Admin and LI Coordinator)
+            // For LI: Single lecturer assigned to all students, IC is set by student during registration
+            Route::prefix('assign-students')->name('assign-students.')->group(function () {
+                Route::get('/', [LiStudentAssignmentController::class, 'index'])->name('index');
+                Route::post('/assign-lecturer', [LiStudentAssignmentController::class, 'assignLecturerToAll'])->name('assign-lecturer');
+                Route::post('/clear-lecturer', [LiStudentAssignmentController::class, 'clearLecturerFromAll'])->name('clear-lecturer');
+                Route::get('/export', [LiStudentAssignmentController::class, 'export'])->name('export');
+            });
         });
 
         // CLO-PLO Analysis (Admin, Coordinator, Lecturer, LI Coordinator)
