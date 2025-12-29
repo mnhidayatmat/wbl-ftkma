@@ -109,9 +109,10 @@
                     <div class="flex-1">
                         <div class="text-sm font-medium text-green-100 mb-1">Active Agreements</div>
                         <div class="text-3xl font-bold">{{ $stats['active_agreements'] ?? 0 }}</div>
-                        <div class="text-xs text-green-100 mt-2">
+                        <div class="text-xs text-green-100 mt-2 flex flex-wrap gap-1">
                             <span class="bg-white bg-opacity-20 px-2 py-0.5 rounded-full">MoU: {{ $stats['mou_count'] ?? 0 }}</span>
-                            <span class="bg-white bg-opacity-20 px-2 py-0.5 rounded-full ml-1">MoA: {{ $stats['moa_count'] ?? 0 }}</span>
+                            <span class="bg-white bg-opacity-20 px-2 py-0.5 rounded-full">MoA: {{ $stats['moa_count'] ?? 0 }}</span>
+                            <span class="bg-white bg-opacity-20 px-2 py-0.5 rounded-full">LOI: {{ $stats['loi_count'] ?? 0 }}</span>
                         </div>
                     </div>
                     <div class="bg-white bg-opacity-20 rounded-full p-3">
