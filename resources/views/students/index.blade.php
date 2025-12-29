@@ -161,10 +161,12 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex items-center space-x-3">
                         <a href="{{ route('admin.students.show', $student) }}" class="text-umpsa-teal hover:text-umpsa-royal-blue transition-colors">View</a>
-                        <a href="{{ route('admin.students.edit', ['student' => $student, 'page' => $students->currentPage(), 'group' => request('group')]) }}" class="text-umpsa-royal-blue hover:text-umpsa-deep-blue transition-colors">Edit</a>
+                        <a href="{{ route('admin.students.edit', ['student' => $student, 'page' => $students->currentPage(), 'group' => request('group'), 'per_page' => request('per_page')]) }}" class="text-umpsa-royal-blue hover:text-umpsa-deep-blue transition-colors">Edit</a>
                         <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
+                            <input type="hidden" name="group" value="{{ request('group') }}">
+                            <input type="hidden" name="per_page" value="{{ request('per_page') }}">
                             <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors" onclick="return confirm('Are you sure?')">Delete</button>
                         </form>
                     </div>
@@ -227,12 +229,14 @@
                 <a href="{{ route('admin.students.show', $student) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-primary text-white rounded-lg hover:bg-umpsa-secondary transition-colors text-sm font-semibold">
                     View
                 </a>
-                <a href="{{ route('admin.students.edit', ['student' => $student, 'page' => $students->currentPage(), 'group' => request('group')]) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-secondary text-white rounded-lg hover:bg-umpsa-accent transition-colors text-sm font-semibold">
+                <a href="{{ route('admin.students.edit', ['student' => $student, 'page' => $students->currentPage(), 'group' => request('group'), 'per_page' => request('per_page')]) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-secondary text-white rounded-lg hover:bg-umpsa-accent transition-colors text-sm font-semibold">
                     Edit
                 </a>
                 <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure?')">
                     @csrf
                     @method('DELETE')
+                    <input type="hidden" name="group" value="{{ request('group') }}">
+                    <input type="hidden" name="per_page" value="{{ request('per_page') }}">
                     <button type="submit" class="w-full px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-semibold">
                         Delete
                     </button>

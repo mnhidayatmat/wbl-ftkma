@@ -122,7 +122,7 @@ class StudentController extends Controller
     {
         // Only show active groups for assignment
         $groups = WblGroup::where('status', 'ACTIVE')->orderBy('name')->get();
-        $companies = Company::all();
+        $companies = Company::orderBy('company_name')->get();
 
         return view('students.create', compact('groups', 'companies'));
     }
@@ -195,7 +195,7 @@ class StudentController extends Controller
             $q->where('status', 'ACTIVE')
                 ->orWhere('id', $student->group_id); // Include current group even if completed
         })->orderBy('name')->get();
-        $companies = Company::all();
+        $companies = Company::orderBy('company_name')->get();
         $lecturers = \App\Models\User::where('role', 'lecturer')->orderBy('name')->get();
         $industryCoaches = \App\Models\User::where('role', 'industry')->orderBy('name')->get();
 
@@ -293,6 +293,10 @@ class StudentController extends Controller
             $redirectParams['page'] = (int) $request->page;
         }
 
+        if ($request->filled('per_page')) {
+            $redirectParams['per_page'] = $request->per_page;
+        }
+
         return redirect()->route('admin.students.index', $redirectParams)
             ->with('success', 'Student updated successfully.');
     }
@@ -300,7 +304,7 @@ class StudentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Student $student): RedirectResponse
+    public function destroy(Request $request, Student $student): RedirectResponse
     {
         // Delete associated user account if exists and user only has student role
         if ($student->user) {
@@ -325,8 +329,14 @@ class StudentController extends Controller
 
         // Redirect back to the same group filter if student had a group
         $redirectParams = [];
-        if ($groupId) {
+        if ($request->filled('group')) {
+            $redirectParams['group'] = $request->group;
+        } elseif ($groupId) {
             $redirectParams['group'] = $groupId;
+        }
+
+        if ($request->filled('per_page')) {
+            $redirectParams['per_page'] = $request->per_page;
         }
 
         return redirect()->route('admin.students.index', $redirectParams)

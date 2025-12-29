@@ -17,6 +17,9 @@
         @if(request('group'))
             <input type="hidden" name="return_group" value="{{ request('group') }}">
         @endif
+        @if(request('per_page'))
+            <input type="hidden" name="per_page" value="{{ request('per_page') }}">
+        @endif
 
         <!-- Student Image Upload -->
         <div class="mb-6">
