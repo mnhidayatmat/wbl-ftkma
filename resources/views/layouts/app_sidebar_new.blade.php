@@ -22,11 +22,11 @@
 
 <nav class="mt-4 space-y-1" :class="isSidebarCollapsed ? 'px-2' : 'px-3'"
      x-data="{
-         ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('admin.students.*') || $isPpeCoordinator ? 'true' : 'false' }},
          fypMenuOpen: {{ request()->routeIs('academic.fyp.*') || request()->routeIs('fyp.*') || request()->routeIs('admin.students.*') || request()->routeIs('coordinator.dashboard') || $isFypCoordinator ? 'true' : 'false' }},
          ipMenuOpen: {{ request()->routeIs('academic.ip.*') || request()->routeIs('admin.students.*') || $isIpCoordinator ? 'true' : 'false' }},
          oshMenuOpen: {{ request()->routeIs('academic.osh.*') || request()->routeIs('admin.students.*') || $isOshCoordinator ? 'true' : 'false' }},
-         liMenuOpen: {{ request()->routeIs('academic.li.*') || request()->routeIs('li.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         liMenuOpen: {{ request()->routeIs('academic.li.*') || request()->routeIs('li.*') || request()->routeIs('admin.students.*') || $isLiCoordinator ? 'true' : 'false' }},
          windowWidth: window.innerWidth,
          // Helper to check if sidebar text should be visible
          // Access parent scope (body x-data) - sidebar is included in same scope
@@ -301,16 +301,33 @@
     </div>
     @endif
 
+    <!-- LI Coordinator Dashboard (Standalone - positioned above Academic Modules) -->
+    @if($isLiCoordinator)
+    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <a href="{{ route('coordinator.dashboard') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('coordinator.dashboard') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Dashboard' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Dashboard</span>
+        </a>
+    </div>
+    @endif
+
     <!-- Group #2: ACADEMIC MODULES (Hidden for Students - they have "My Courses" section) -->
-    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin || $isFypCoordinator || $isIpCoordinator || $isOshCoordinator || $isPpeCoordinator)
+    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin || $isFypCoordinator || $isIpCoordinator || $isOshCoordinator || $isPpeCoordinator || $isLiCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">ACADEMIC MODULES</span>
             <span x-show="isSidebarCollapsed" class="block w-8 h-[1px] bg-gray-300 dark:bg-gray-600 mx-auto"></span>
         </p>
 
-        <!-- FYP (Hidden for IP and OSH Coordinators) -->
-        @if(($isAt || ($isLecturer && $lecturerIsAt) || $isAdmin || $isFypCoordinator) && !$isIpCoordinator && !$isOshCoordinator)
+        <!-- FYP (Hidden for IP, OSH, PPE, and LI Coordinators) -->
+        @if(($isAt || ($isLecturer && $lecturerIsAt) || $isAdmin || $isFypCoordinator) && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator && !$isLiCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('fyp')"
@@ -414,8 +431,8 @@
         </div>
         @endif
 
-        <!-- IP (Hidden for FYP and OSH Coordinators, visible for IP Coordinators) -->
-        @if(($isLecturer || $isAdmin || $isIpCoordinator) && !$isFypCoordinator && !$isOshCoordinator)
+        <!-- IP (Hidden for FYP, OSH, PPE, and LI Coordinators, visible for IP Coordinators) -->
+        @if(($isLecturer || $isAdmin || $isIpCoordinator) && !$isFypCoordinator && !$isOshCoordinator && !$isPpeCoordinator && !$isLiCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('ip')"
@@ -514,8 +531,8 @@
         </div>
         @endif
 
-        <!-- OSH (Hidden for FYP and IP Coordinators, visible for OSH Coordinators) -->
-        @if(($isLecturer || $isAdmin || $isOshCoordinator) && !$isFypCoordinator && !$isIpCoordinator)
+        <!-- OSH (Hidden for FYP, IP, PPE, and LI Coordinators, visible for OSH Coordinators) -->
+        @if(($isLecturer || $isAdmin || $isOshCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isPpeCoordinator && !$isLiCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('osh')"
@@ -614,8 +631,8 @@
         </div>
         @endif
 
-        <!-- PPE (Hidden for FYP, IP, and OSH Coordinators) -->
-        @if(($isLecturer || $isIc || $isAdmin || $isPpeCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
+        <!-- PPE (Hidden for FYP, IP, OSH, and LI Coordinators) -->
+        @if(($isLecturer || $isIc || $isAdmin || $isPpeCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isLiCoordinator)
         <div class="mb-1">
             <!-- Parent Menu Item (Toggle Only - No Navigation) -->
             <button type="button"
@@ -716,8 +733,8 @@
         </div>
         @endif
 
-        <!-- Industrial Training (LI) (Hidden for FYP, IP, and OSH Coordinators) -->
-        @if(($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
+        <!-- Industrial Training (LI) (Hidden for FYP, IP, OSH, and PPE Coordinators) -->
+        @if(($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin || $isLiCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('li')"
