@@ -151,7 +151,7 @@
             </div>
 
             <!-- Category Distribution Chart -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 flex flex-col">
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5] flex items-center gap-2">
@@ -162,15 +162,32 @@
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Company distribution by industry</p>
                     </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-[#003A6C] dark:text-[#0084C5]">{{ $stats['total_companies'] ?? 0 }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Total Companies</div>
+                    </div>
                 </div>
-                <div class="relative" style="height: 280px;">
-                    <canvas id="categoryChart"></canvas>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                    <!-- Doughnut Chart -->
+                    <div class="relative flex items-center justify-center" style="height: 280px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <!-- Category Legend -->
+                    <div class="flex flex-col justify-center">
+                        <div id="categoryLegend" class="space-y-3 max-h-[280px] overflow-y-auto pr-2">
+                            <!-- Legend items will be populated by JavaScript -->
+                        </div>
+                    </div>
                 </div>
                 <!-- Category Stats Summary -->
-                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 gap-3">
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-3 gap-3">
                     <div class="text-center">
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Total Categories</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Categories</div>
                         <div class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5]">{{ count($stats['category_distribution'] ?? []) }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 dark:text-gray-400">With Agreement</div>
+                        <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ $stats['with_active_agreements'] ?? 0 }}</div>
                     </div>
                     <div class="text-center">
                         <div class="text-xs text-gray-500 dark:text-gray-400">No Agreement</div>
@@ -556,11 +573,44 @@
                 </table>
             </div>
 
-            @if($companies->hasPages())
             <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 text-sm">
-                {{ $companies->withQueryString()->links() }}
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    {{-- Per Page Selector --}}
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600 dark:text-gray-400 text-xs">Show:</span>
+                        @php
+                            $currentPerPage = request('per_page', 15);
+                            $perPageOptions = [15, 25, 50, 100, 'all'];
+                        @endphp
+                        <div class="flex items-center gap-1">
+                            @foreach($perPageOptions as $option)
+                                @php
+                                    $isActive = ($currentPerPage == $option) || ($option === 15 && !request('per_page'));
+                                    $queryParams = array_merge(request()->except(['per_page', 'page']), ['per_page' => $option]);
+                                @endphp
+                                <a href="{{ route('admin.companies.index', $queryParams) }}"
+                                   class="px-2.5 py-1 text-xs font-medium rounded transition-colors
+                                       {{ $isActive
+                                           ? 'bg-[#0084C5] text-white'
+                                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                                    {{ $option === 'all' ? 'All' : $option }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Pagination Links --}}
+                    @if($companies->hasPages() && request('per_page') !== 'all')
+                        <div class="flex-1">
+                            {{ $companies->withQueryString()->links() }}
+                        </div>
+                    @else
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            Showing {{ $companies->count() }} {{ Str::plural('company', $companies->count()) }}
+                        </div>
+                    @endif
+                </div>
             </div>
-            @endif
         </div>
     </div>
 </div>
@@ -630,77 +680,93 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Category Distribution Chart (Horizontal Bar)
+    // Category Distribution Chart (Doughnut with Custom Legend)
     const categoryCtx = document.getElementById('categoryChart');
-    if (categoryCtx) {
+    const categoryLegend = document.getElementById('categoryLegend');
+    if (categoryCtx && categoryLegend) {
         const categoryData = @json($stats['category_distribution'] ?? []);
-        const labels = categoryData.map(item => item.name || 'Uncategorized');
-        const data = categoryData.map(item => item.count);
 
-        // Generate colors for categories
+        // Sort by count descending and take top 5, group rest as "Others"
+        const sortedData = [...categoryData].sort((a, b) => b.count - a.count);
+        const topCategories = sortedData.slice(0, 5);
+        const otherCategories = sortedData.slice(5);
+        const othersCount = otherCategories.reduce((sum, item) => sum + item.count, 0);
+
+        // Prepare final data
+        const finalData = [...topCategories];
+        if (othersCount > 0) {
+            finalData.push({ name: 'Others', count: othersCount });
+        }
+
+        const labels = finalData.map(item => item.name || 'Uncategorized');
+        const data = finalData.map(item => item.count);
+        const total = data.reduce((a, b) => a + b, 0);
+
+        // Color palette
         const colors = [
-            'rgba(0, 58, 108, 0.8)',   // UMPSA Primary
-            'rgba(0, 132, 197, 0.8)',  // UMPSA Secondary
-            'rgba(0, 174, 239, 0.8)',  // UMPSA Accent
-            'rgba(34, 197, 94, 0.8)',  // Green
-            'rgba(249, 115, 22, 0.8)', // Orange
-            'rgba(147, 51, 234, 0.8)', // Purple
-            'rgba(236, 72, 153, 0.8)', // Pink
-            'rgba(107, 114, 128, 0.8)' // Gray
+            'rgba(0, 58, 108, 0.85)',   // UMPSA Primary (Navy)
+            'rgba(0, 132, 197, 0.85)',  // UMPSA Secondary (Blue)
+            'rgba(0, 174, 239, 0.85)',  // UMPSA Accent (Cyan)
+            'rgba(34, 197, 94, 0.85)',  // Green
+            'rgba(249, 115, 22, 0.85)', // Orange
+            'rgba(107, 114, 128, 0.85)' // Gray (for Others)
         ];
 
+        // Create doughnut chart
         new Chart(categoryCtx, {
-            type: 'bar',
+            type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Companies',
                     data: data,
-                    backgroundColor: labels.map((_, i) => colors[i % colors.length]),
-                    borderColor: labels.map((_, i) => colors[i % colors.length].replace('0.8', '1')),
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    barThickness: 24
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    hoverOffset: 8
                 }]
             },
             options: {
-                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '55%',
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 58, 108, 0.9)',
-                        titleFont: { size: 14, weight: 'bold' },
-                        bodyFont: { size: 13 },
-                        padding: 12,
-                        cornerRadius: 8
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        },
-                        ticks: {
-                            precision: 0,
-                            font: { size: 11 }
-                        }
-                    },
-                    y: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 11 },
-                            callback: function(value, index) {
-                                const label = this.getLabelForValue(value);
-                                return label.length > 15 ? label.substring(0, 15) + '...' : label;
+                        backgroundColor: 'rgba(0, 58, 108, 0.95)',
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                return ` ${context.raw} companies (${percentage}%)`;
                             }
                         }
                     }
                 }
             }
         });
+
+        // Generate custom legend
+        let legendHTML = '';
+        finalData.forEach((item, index) => {
+            const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
+            const colorClass = colors[index] || colors[colors.length - 1];
+            legendHTML += `
+                <div class="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${colorClass}"></span>
+                        <span class="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[120px]" title="${item.name || 'Uncategorized'}">${item.name || 'Uncategorized'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">${item.count}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">(${percentage}%)</span>
+                    </div>
+                </div>
+            `;
+        });
+        categoryLegend.innerHTML = legendHTML;
     }
 });
 </script>

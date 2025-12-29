@@ -412,7 +412,7 @@
 
         <div class="relative z-10">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4 cursor-pointer" onclick="toggleAtRiskSection()">
                     <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg animate-pulse">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -428,9 +428,18 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Students requiring immediate intervention and support</p>
                     </div>
                 </div>
+                <button onclick="toggleAtRiskSection()" id="at-risk-toggle-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
+                    <svg id="at-risk-chevron-down" class="w-4 h-4 hidden transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                    <svg id="at-risk-chevron-up" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                    </svg>
+                    <span id="at-risk-toggle-text">Expand</span>
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 gap-4">
+            <div id="at-risk-content" class="grid grid-cols-1 gap-4 transition-all duration-300 ease-in-out overflow-hidden" style="max-height: 0px; opacity: 0;">
                 @foreach($atRiskStudents as $student)
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-xl transition-all duration-300">
                     <div class="flex items-start gap-4">
@@ -526,3 +535,33 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+// Toggle At-Risk Section
+function toggleAtRiskSection() {
+    const content = document.getElementById('at-risk-content');
+    const toggleText = document.getElementById('at-risk-toggle-text');
+    const chevronDown = document.getElementById('at-risk-chevron-down');
+    const chevronUp = document.getElementById('at-risk-chevron-up');
+
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+        // Collapse
+        content.style.maxHeight = '0px';
+        content.style.opacity = '0';
+        content.style.marginTop = '0';
+        toggleText.textContent = 'Expand';
+        chevronDown.classList.add('hidden');
+        chevronUp.classList.remove('hidden');
+    } else {
+        // Expand
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.style.opacity = '1';
+        content.style.marginTop = '';
+        toggleText.textContent = 'Minimize';
+        chevronDown.classList.remove('hidden');
+        chevronUp.classList.add('hidden');
+    }
+}
+</script>
+@endpush

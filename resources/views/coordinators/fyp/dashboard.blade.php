@@ -880,11 +880,18 @@ function toggleAtRiskSection() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize At-Risk Section as expanded
+    // Initialize At-Risk Section as minimized by default
     const atRiskContent = document.getElementById('at-risk-content');
+    const toggleText = document.getElementById('at-risk-toggle-text');
+    const chevronDown = document.getElementById('at-risk-chevron-down');
+    const chevronUp = document.getElementById('at-risk-chevron-up');
     if (atRiskContent) {
-        atRiskContent.style.maxHeight = atRiskContent.scrollHeight + 'px';
-        atRiskContent.style.opacity = '1';
+        atRiskContent.style.maxHeight = '0px';
+        atRiskContent.style.opacity = '0';
+        atRiskContent.style.marginTop = '0';
+        if (toggleText) toggleText.textContent = 'Expand';
+        if (chevronDown) chevronDown.classList.add('hidden');
+        if (chevronUp) chevronUp.classList.remove('hidden');
     }
 
     // Count-up Animation Function
