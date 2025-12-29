@@ -153,7 +153,7 @@
     </a>
     @endif
 
-    @if(!$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
+    @if(!$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isLiCoordinator)
     <a href="{{ route('admin.companies.index') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
        :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
@@ -659,7 +659,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>
-            <div x-show="ppeMenuOpen && sidebarTextVisible" 
+            <div x-show="ppeMenuOpen && sidebarTextVisible"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-y-2"
                  x-transition:enter-end="opacity-100 translate-y-0"
@@ -672,6 +672,7 @@
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.assign-students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
+                @endif
                 <a href="{{ route('academic.ppe.assessments.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assessments
@@ -680,8 +681,7 @@
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.schedule.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assessment Schedule
                 </a>
-                @endif
-                @if($isAdmin || $isPpeCoordinator || $isCoordinator || $isLecturer)
+                @if($isAdmin || $isCoordinator || $isLecturer || $isPpeCoordinator)
                 <a href="{{ route('academic.ppe.clo-plo.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.clo-plo.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     CLO–PLO Analysis
@@ -781,50 +781,50 @@
                     Assessment Schedule
                 </a>
                 @endif
-                @if($isAdmin || $isCoordinator || $isLecturer)
-                <a href="{{ route('academic.li.clo-plo.index') }}" 
+                @if($isAdmin || $isLiCoordinator || $isCoordinator || $isLecturer)
+                <a href="{{ route('academic.li.clo-plo.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.clo-plo.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     CLO–PLO Analysis
                 </a>
                 @endif
-                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isAdmin)
-                <a href="{{ route('academic.li.lecturer.index') }}" 
+                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isAdmin || $isLiCoordinator)
+                <a href="{{ route('academic.li.lecturer.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.lecturer.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Supervisor Evaluation
                 </a>
                 @endif
-                @if($isIc || $isAdmin)
-                <a href="{{ route('academic.li.ic.index') }}" 
+                @if($isIc || $isAdmin || $isLiCoordinator)
+                <a href="{{ route('academic.li.ic.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.ic.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     IC Evaluation
                 </a>
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.li.progress.index') }}" 
+                @if($isAdmin || $isLiCoordinator)
+                <a href="{{ route('academic.li.progress.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.progress.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Evaluation Progress
                 </a>
                 @endif
-                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin)
-                <a href="{{ route('academic.li.performance.index') }}" 
+                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin || $isLiCoordinator)
+                <a href="{{ route('academic.li.performance.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.performance.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Student Performance
                 </a>
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.li.moderation.index') }}" 
+                @if($isAdmin || $isLiCoordinator)
+                <a href="{{ route('academic.li.moderation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.moderation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Moderation
                 </a>
-                <a href="{{ route('academic.li.finalisation.index') }}" 
+                <a href="{{ route('academic.li.finalisation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.finalisation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Result Finalisation
                 </a>
-                <a href="{{ route('academic.li.reports.index') }}" 
+                <a href="{{ route('academic.li.reports.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.reports.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Reports
                 </a>
-                <a href="{{ route('academic.li.audit.index') }}" 
+                <a href="{{ route('academic.li.audit.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.audit.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Audit Log
                 </a>
