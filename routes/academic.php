@@ -582,9 +582,8 @@ Route::middleware(['auth'])->group(function () {
             })->name('assessments.toggle-active');
 
             // Assessment Schedule, Progress, Moderation, Finalisation, Reports, Audit
-            Route::get('schedule', function () {
-                return view('academic.li.schedule.index');
-            })->name('schedule.index');
+            Route::get('schedule', [\App\Http\Controllers\Academic\LI\LiScheduleController::class, 'index'])->name('schedule.index');
+            Route::post('schedule/update-window', [\App\Http\Controllers\Academic\LI\LiScheduleController::class, 'updateWindow'])->name('schedule.update-window');
             Route::get('progress', [\App\Http\Controllers\Academic\LI\LiProgressController::class, 'index'])->name('progress.index');
             Route::get('moderation', [\App\Http\Controllers\Academic\LI\LiModerationController::class, 'index'])->name('moderation.index');
             Route::get('moderation/{student}', [\App\Http\Controllers\Academic\LI\LiModerationController::class, 'show'])->name('moderation.show');
