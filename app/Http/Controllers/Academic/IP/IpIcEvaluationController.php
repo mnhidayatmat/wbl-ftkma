@@ -44,8 +44,8 @@ class IpIcEvaluationController extends Controller
         $rubricAssessments = $icAssessments->filter(fn ($a) => in_array($a->assessment_type, ['Oral', 'Rubric']) && $a->rubrics->count() > 0);
         $markAssessments = $icAssessments->filter(fn ($a) => ! in_array($a->assessment_type, ['Oral', 'Rubric']) || $a->rubrics->count() === 0);
 
-        // Build query for students
-        $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
+        // Build query for students (company comes from IC, not student directly)
+        $query = Student::with(['group', 'academicTutor', 'industryCoach.company']);
 
         // Admin and IP Coordinator can see all students, IC only sees assigned students
         if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isIpCoordinator()) {
@@ -187,8 +187,8 @@ class IpIcEvaluationController extends Controller
             }
         }
 
-        // Load relationships
-        $student->load('academicTutor', 'industryCoach', 'group', 'company');
+        // Load relationships (company comes from IC, not student directly)
+        $student->load('academicTutor', 'industryCoach.company', 'group');
 
         // Get ALL active assessments for IP course that have IC evaluator role
         // Eager load rubrics and components

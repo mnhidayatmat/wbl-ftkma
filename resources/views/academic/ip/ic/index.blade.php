@@ -101,7 +101,7 @@
                                     <div class="text-sm text-gray-600 dark:text-gray-300">{{ $student->group->name ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 hidden xl:table-cell">
-                                    <div class="text-sm text-gray-600 dark:text-gray-300">{{ $student->company->company_name ?? 'N/A' }}</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-300">{{ $student->industryCoach->company->company_name ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
                                     @if($student->evaluation_status == 'not_started')

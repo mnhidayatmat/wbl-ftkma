@@ -59,9 +59,9 @@
                         <span class="font-medium text-gray-900 dark:text-white">{{ $student->group->name ?? 'N/A' }}</span>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg px-4 py-2 border border-gray-100 dark:border-gray-600">
-                        <span class="text-gray-500 dark:text-gray-400 block text-xs">Company</span>
-                        <span class="font-medium text-gray-900 dark:text-white truncate max-w-[150px]" title="{{ $student->company->company_name ?? 'N/A' }}">
-                            {{ $student->company->company_name ?? 'N/A' }}
+                        <span class="text-gray-500 dark:text-gray-400 block text-xs">Company (from IC)</span>
+                        <span class="font-medium text-gray-900 dark:text-white truncate max-w-[150px]" title="{{ $student->industryCoach->company->company_name ?? 'N/A' }}">
+                            {{ $student->industryCoach->company->company_name ?? 'N/A' }}
                         </span>
                     </div>
                 </div>

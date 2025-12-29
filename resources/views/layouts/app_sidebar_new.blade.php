@@ -25,7 +25,7 @@
          ppeMenuOpen: {{ request()->routeIs('academic.ppe.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
          fypMenuOpen: {{ request()->routeIs('academic.fyp.*') || request()->routeIs('fyp.*') || request()->routeIs('admin.students.*') || request()->routeIs('coordinator.dashboard') || $isFypCoordinator ? 'true' : 'false' }},
          ipMenuOpen: {{ request()->routeIs('academic.ip.*') || request()->routeIs('admin.students.*') || $isIpCoordinator ? 'true' : 'false' }},
-         oshMenuOpen: {{ request()->routeIs('academic.osh.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
+         oshMenuOpen: {{ request()->routeIs('academic.osh.*') || request()->routeIs('admin.students.*') || $isOshCoordinator ? 'true' : 'false' }},
          liMenuOpen: {{ request()->routeIs('academic.li.*') || request()->routeIs('li.*') || request()->routeIs('admin.students.*') ? 'true' : 'false' }},
          windowWidth: window.innerWidth,
          // Helper to check if sidebar text should be visible
@@ -153,7 +153,7 @@
     </a>
     @endif
 
-    @if(!$isFypCoordinator && !$isIpCoordinator)
+    @if(!$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
     <a href="{{ route('admin.companies.index') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
        :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
@@ -205,8 +205,8 @@
     </a>
     @endif
 
-    <!-- Student Placement Tracking (Hidden for FYP and IP Coordinators) -->
-    @if(($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc) && !$isFypCoordinator && !$isIpCoordinator)
+    <!-- Student Placement Tracking (Hidden for FYP, IP, and OSH Coordinators) -->
+    @if(($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">PLACEMENT</span>
@@ -285,15 +285,15 @@
     @endif
 
     <!-- Group #2: ACADEMIC MODULES (Hidden for Students - they have "My Courses" section) -->
-    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin || $isFypCoordinator || $isIpCoordinator)
+    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin || $isFypCoordinator || $isIpCoordinator || $isOshCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">ACADEMIC MODULES</span>
             <span x-show="isSidebarCollapsed" class="block w-8 h-[1px] bg-gray-300 dark:bg-gray-600 mx-auto"></span>
         </p>
 
-        <!-- FYP (Hidden for IP Coordinators) -->
-        @if(($isAt || ($isLecturer && $lecturerIsAt) || $isAdmin || $isFypCoordinator) && !$isIpCoordinator)
+        <!-- FYP (Hidden for IP and OSH Coordinators) -->
+        @if(($isAt || ($isLecturer && $lecturerIsAt) || $isAdmin || $isFypCoordinator) && !$isIpCoordinator && !$isOshCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('fyp')"
@@ -397,8 +397,8 @@
         </div>
         @endif
 
-        <!-- IP (Hidden for FYP Coordinators, visible for IP Coordinators) -->
-        @if(($isLecturer || $isAdmin || $isIpCoordinator) && !$isFypCoordinator)
+        <!-- IP (Hidden for FYP and OSH Coordinators, visible for IP Coordinators) -->
+        @if(($isLecturer || $isAdmin || $isIpCoordinator) && !$isFypCoordinator && !$isOshCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('ip')"
@@ -497,8 +497,8 @@
         </div>
         @endif
 
-        <!-- OSH (Hidden for FYP and IP Coordinators) -->
-        @if(($isLecturer || $isAdmin) && !$isFypCoordinator && !$isIpCoordinator)
+        <!-- OSH (Hidden for FYP and IP Coordinators, visible for OSH Coordinators) -->
+        @if(($isLecturer || $isAdmin || $isOshCoordinator) && !$isFypCoordinator && !$isIpCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('osh')"
@@ -545,50 +545,50 @@
                     Assessment Schedule
                 </a>
                 @endif
-                @if($isAdmin || $isCoordinator || $isLecturer)
-                <a href="{{ route('academic.osh.clo-plo.index') }}" 
+                @if($isAdmin || $isCoordinator || $isLecturer || $isOshCoordinator)
+                <a href="{{ route('academic.osh.clo-plo.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.clo-plo.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     CLO–PLO Analysis
                 </a>
                 @endif
-                @if($isLecturer || $isAdmin)
-                <a href="{{ route('academic.osh.lecturer.index') }}" 
+                @if($isLecturer || $isAdmin || $isOshCoordinator)
+                <a href="{{ route('academic.osh.lecturer.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.lecturer.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Lecturer Evaluation
                 </a>
                 @endif
-                @if($isIc || $isAdmin)
-                <a href="{{ route('academic.osh.ic.index') }}" 
+                @if($isIc || $isAdmin || $isOshCoordinator)
+                <a href="{{ route('academic.osh.ic.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.ic.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     IC Evaluation
                 </a>
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.osh.progress.index') }}" 
+                @if($isAdmin || $isOshCoordinator)
+                <a href="{{ route('academic.osh.progress.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.progress.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Evaluation Progress
                 </a>
                 @endif
-                @if($isLecturer || $isAdmin)
-                <a href="{{ route('academic.osh.performance.index') }}" 
+                @if($isLecturer || $isAdmin || $isOshCoordinator)
+                <a href="{{ route('academic.osh.performance.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.performance.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Student Performance
                 </a>
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.osh.moderation.index') }}" 
+                @if($isAdmin || $isOshCoordinator)
+                <a href="{{ route('academic.osh.moderation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.moderation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Moderation
                 </a>
-                <a href="{{ route('academic.osh.finalisation.index') }}" 
+                <a href="{{ route('academic.osh.finalisation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.finalisation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Result Finalisation
                 </a>
-                <a href="{{ route('academic.osh.reports.index') }}" 
+                <a href="{{ route('academic.osh.reports.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.reports.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Reports
                 </a>
-                <a href="{{ route('academic.osh.audit.index') }}" 
+                <a href="{{ route('academic.osh.audit.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.audit.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Audit Log
                 </a>
@@ -597,8 +597,8 @@
         </div>
         @endif
 
-        <!-- PPE (Hidden for FYP and IP Coordinators) -->
-        @if(($isLecturer || $isIc || $isAdmin) && !$isFypCoordinator && !$isIpCoordinator)
+        <!-- PPE (Hidden for FYP, IP, and OSH Coordinators) -->
+        @if(($isLecturer || $isIc || $isAdmin) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
         <div class="mb-1">
             <!-- Parent Menu Item (Toggle Only - No Navigation) -->
             <button type="button"
@@ -699,8 +699,8 @@
         </div>
         @endif
 
-        <!-- Industrial Training (LI) (Hidden for FYP and IP Coordinators) -->
-        @if(($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin) && !$isFypCoordinator && !$isIpCoordinator)
+        <!-- Industrial Training (LI) (Hidden for FYP, IP, and OSH Coordinators) -->
+        @if(($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('li')"
@@ -945,8 +945,8 @@
     </div>
     @endif
 
-    <!-- Group #3: INDUSTRY COACH (Hidden for FYP Coordinators) -->
-    @if($isIc && !$isFypCoordinator)
+    <!-- Group #3: INDUSTRY COACH (Hidden for FYP and OSH Coordinators) -->
+    @if($isIc && !$isFypCoordinator && !$isOshCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">INDUSTRY COACH</span>
