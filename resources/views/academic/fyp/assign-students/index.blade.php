@@ -266,6 +266,14 @@
                                             @endforeach
                                         </select>
                                     </form>
+                                    @if($student->company && $student->company->pic_name && !$student->ic_id)
+                                        <div class="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                                            <span class="font-medium">Company PIC:</span> {{ $student->company->pic_name }}
+                                            @if($student->company->email)
+                                                <br><span class="text-gray-500">{{ $student->company->email }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </td>
 
                                 <!-- Actions -->
