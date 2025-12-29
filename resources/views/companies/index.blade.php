@@ -358,6 +358,7 @@
                     <thead class="bg-[#003A6C]">
                         <tr>
                             <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase">Company</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase">Industry Type</th>
                             <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase">Contact Info</th>
                             <th class="px-3 py-2 text-center text-xs font-medium text-white uppercase">Students</th>
                             <th class="px-3 py-2 text-left text-xs font-medium text-white uppercase">Agreements</th>
@@ -371,8 +372,12 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-3 py-3">
                                 <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ $company->company_name }}</div>
+                            </td>
+                            <td class="px-3 py-3">
                                 @if($company->category)
-                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $company->category }}</div>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $company->category }}</span>
+                                @else
+                                <span class="text-xs text-gray-400 dark:text-gray-500">-</span>
                                 @endif
                             </td>
                             <td class="px-3 py-3">
@@ -534,7 +539,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-3 py-12 text-center">
+                            <td colspan="8" class="px-3 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
