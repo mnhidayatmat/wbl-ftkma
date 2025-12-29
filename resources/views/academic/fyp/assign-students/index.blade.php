@@ -50,7 +50,25 @@
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-amber-500">
                 <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ $stats['unassigned'] }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Unassigned</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">IC Pending</div>
+            </div>
+        </div>
+
+        <!-- Info Card about IC Assignment -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-300">About Industry Coach (IC) Assignment</h3>
+                    <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                        For FYP module, Industry Coaches are assigned by students during their registration process.
+                        The IC assignment shown below is set by each student when they register for the Final Year Project.
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -131,7 +149,7 @@
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">students selected</span>
                     </div>
 
-                    <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Bulk AT Select -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Assign AT (Supervisor)</label>
@@ -144,18 +162,6 @@
                             </select>
                         </div>
 
-                        <!-- Bulk IC Select -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Assign IC</label>
-                            <select name="bulk_ic_id" x-model="bulkIcId"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white text-sm">
-                                <option value="">-- Select IC --</option>
-                                @foreach($industryCoaches as $ic)
-                                    <option value="{{ $ic->id }}">{{ $ic->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
                         <!-- Apply Button -->
                         <div class="flex items-end">
                             <template x-for="id in selectedStudents" :key="id">
@@ -163,8 +169,8 @@
                             </template>
                             <button type="submit"
                                     class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-                                    :disabled="!bulkAtId && !bulkIcId"
-                                    :class="{ 'opacity-50 cursor-not-allowed': !bulkAtId && !bulkIcId }">
+                                    :disabled="!bulkAtId"
+                                    :class="{ 'opacity-50 cursor-not-allowed': !bulkAtId }">
                                 Apply Bulk Assignment
                             </button>
                         </div>
@@ -250,76 +256,44 @@
                                     </form>
                                 </td>
 
-                                <!-- IC Dropdown -->
+                                <!-- Industry Coach (Student-assigned) -->
                                 <td class="px-4 py-3">
-                                    <form action="{{ route('academic.fyp.assign-students.update', $student) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PUT')
-                                        <select name="ic_id"
-                                                onchange="this.form.submit()"
-                                                class="w-full min-w-[150px] px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white {{ $student->ic_id ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20' }}">
-                                            <option value="">-- Select IC --</option>
-                                            @foreach($industryCoaches as $ic)
-                                                <option value="{{ $ic->id }}" {{ $student->ic_id == $ic->id ? 'selected' : '' }}>
-                                                    {{ $ic->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </form>
-                                    @if($student->company && $student->company->pic_name && !$student->ic_id)
-                                        <div class="mt-1 text-xs text-blue-600 dark:text-blue-400">
-                                            <span class="font-medium">Company PIC:</span> {{ $student->company->pic_name }}
-                                            @if($student->company->email)
-                                                <br><span class="text-gray-500">{{ $student->company->email }}</span>
-                                            @endif
-                                        </div>
+                                    @if($student->industryCoach)
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            {{ $student->industryCoach->name }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Pending
+                                        </span>
+                                        @if($student->company && $student->company->pic_name)
+                                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                PIC: {{ $student->company->pic_name }}
+                                            </div>
+                                        @endif
                                     @endif
                                 </td>
 
                                 <!-- Actions -->
                                 <td class="px-4 py-3">
-                                    @if($student->at_id || $student->ic_id)
-                                        <div class="flex items-center gap-1">
-                                            @if($student->at_id)
-                                                <form action="{{ route('academic.fyp.assign-students.clear', $student) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <input type="hidden" name="clear" value="at">
-                                                    <button type="submit"
-                                                            class="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
-                                                            title="Clear AT">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            @endif
-                                            @if($student->ic_id)
-                                                <form action="{{ route('academic.fyp.assign-students.clear', $student) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <input type="hidden" name="clear" value="ic">
-                                                    <button type="submit"
-                                                            class="p-1.5 text-purple-600 hover:text-purple-800 hover:bg-purple-100 rounded-lg transition-colors"
-                                                            title="Clear IC">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            @endif
-                                            @if($student->at_id && $student->ic_id)
-                                                <form action="{{ route('academic.fyp.assign-students.clear', $student) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <input type="hidden" name="clear" value="both">
-                                                    <button type="submit"
-                                                            class="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
-                                                            title="Clear All">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            @endif
-                                        </div>
+                                    @if($student->at_id)
+                                        <form action="{{ route('academic.fyp.assign-students.clear', $student) }}" method="POST" class="inline">
+                                            @csrf
+                                            <input type="hidden" name="clear" value="at">
+                                            <button type="submit"
+                                                    class="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+                                                    title="Clear AT">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
                                     @else
                                         <span class="text-xs text-gray-400">-</span>
                                     @endif
@@ -358,7 +332,6 @@
         return {
             selectedStudents: [],
             bulkAtId: '',
-            bulkIcId: '',
 
             get allSelected() {
                 const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
@@ -392,7 +365,6 @@
             clearSelection() {
                 this.selectedStudents = [];
                 this.bulkAtId = '';
-                this.bulkIcId = '';
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(cb => cb.checked = false);
             }
