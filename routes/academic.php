@@ -50,6 +50,7 @@ use App\Http\Controllers\Academic\PPE\PpeModerationController;
 use App\Http\Controllers\Academic\PPE\PpeProgressController;
 use App\Http\Controllers\Academic\PPE\PpeReportsController;
 use App\Http\Controllers\Academic\PPE\PpeScheduleController;
+use App\Http\Controllers\Academic\PPE\PpeStudentAssignmentController;
 use App\Http\Controllers\Academic\PPE\PpeStudentPerformanceController;
 use Illuminate\Support\Facades\Route;
 
@@ -135,6 +136,17 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('role:admin,ppe_coordinator')->group(function () {
             Route::get('audit', [PpeAuditController::class, 'index'])->name('audit.index');
             Route::get('audit/export', [PpeAuditController::class, 'export'])->name('audit.export');
+        });
+
+        // Student Assignment (Admin and PPE Coordinator)
+        // For PPE: Single lecturer assigned to all students, IC is set by student during registration
+        Route::middleware('role:admin,ppe_coordinator')->group(function () {
+            Route::prefix('assign-students')->name('assign-students.')->group(function () {
+                Route::get('/', [PpeStudentAssignmentController::class, 'index'])->name('index');
+                Route::post('/assign-lecturer', [PpeStudentAssignmentController::class, 'assignLecturerToAll'])->name('assign-lecturer');
+                Route::post('/clear-lecturer', [PpeStudentAssignmentController::class, 'clearLecturerFromAll'])->name('clear-lecturer');
+                Route::get('/export', [PpeStudentAssignmentController::class, 'export'])->name('export');
+            });
         });
 
         // CLO-PLO Analysis (Admin, Coordinator, Lecturer, PPE Coordinator)
