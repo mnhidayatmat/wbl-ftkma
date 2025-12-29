@@ -265,9 +265,9 @@
                                 <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $stats['expired_agreements'] ?? 0 }}</div>
                                 <div class="text-xs text-gray-600 dark:text-gray-400">Expired</div>
                             </div>
-                            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
-                                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['companies_without_agreements'] ?? 0 }}</div>
-                                <div class="text-xs text-gray-600 dark:text-gray-400">No Agreement</div>
+                            <div class="p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                                <div class="text-2xl font-bold text-slate-600 dark:text-slate-400">{{ $stats['not_started_agreements'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400">Not Started</div>
                             </div>
                         </div>
                     </div>
@@ -304,14 +304,14 @@
                             <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ $stats['expired_agreements'] ?? 0 }}</span>
                             <span class="text-sm text-gray-600 dark:text-gray-400">Expired</span>
                         </div>
-                        <div class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 flex items-center gap-2 hover:shadow-md transition-shadow duration-200">
-                            <div class="bg-blue-100 dark:bg-blue-800/50 rounded-full p-1.5">
-                                <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
+                        <div class="px-4 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center gap-2 hover:shadow-md transition-shadow duration-200">
+                            <div class="bg-slate-200 dark:bg-slate-700 rounded-full p-1.5">
+                                <svg class="w-4 h-4 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                                 </svg>
                             </div>
-                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $stats['companies_without_agreements'] ?? 0 }}</span>
-                            <span class="text-sm text-gray-600 dark:text-gray-400">No Agreement</span>
+                            <span class="text-lg font-bold text-slate-600 dark:text-slate-400">{{ $stats['not_started_agreements'] ?? 0 }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Not Started</span>
                         </div>
                     </div>
                 </div>
@@ -335,9 +335,10 @@
                 </select>
                 <select name="agreement_status" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white">
                     <option value="">All Status</option>
-                    <option value="Active" {{ request('agreement_status') == 'Active' ? 'selected' : '' }}>Active</option>
-                    <option value="Pending" {{ request('agreement_status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="Not Started" {{ request('agreement_status') == 'Not Started' ? 'selected' : '' }}>Not Started</option>
                     <option value="Draft" {{ request('agreement_status') == 'Draft' ? 'selected' : '' }}>Draft</option>
+                    <option value="Pending" {{ request('agreement_status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="Active" {{ request('agreement_status') == 'Active' ? 'selected' : '' }}>Active</option>
                     <option value="Expired" {{ request('agreement_status') == 'Expired' ? 'selected' : '' }}>Expired</option>
                     <option value="Terminated" {{ request('agreement_status') == 'Terminated' ? 'selected' : '' }}>Terminated</option>
                 </select>
@@ -471,10 +472,11 @@
                             </td>
                             <td class="px-3 py-3 text-center">
                                 @php
-                                    // Count agreements by status (priority order: Active > Pending > Draft > Expired > Terminated)
+                                    // Count agreements by status (priority order: Active > Pending > Draft > Not Started > Expired > Terminated)
                                     $hasActive = $company->agreements->where('status', 'Active')->count() > 0;
                                     $hasPending = $company->agreements->where('status', 'Pending')->count() > 0;
                                     $hasDraft = $company->agreements->where('status', 'Draft')->count() > 0;
+                                    $hasNotStarted = $company->agreements->where('status', 'Not Started')->count() > 0;
                                     $hasExpired = $company->agreements->where('status', 'Expired')->count() > 0;
                                     $hasTerminated = $company->agreements->where('status', 'Terminated')->count() > 0;
                                 @endphp
@@ -489,6 +491,10 @@
                                 @elseif($hasDraft)
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                         Draft
+                                    </span>
+                                @elseif($hasNotStarted)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200">
+                                        Not Started
                                     </span>
                                 @elseif($hasExpired)
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
@@ -599,16 +605,10 @@
                         </div>
                     </div>
 
-                    {{-- Pagination Links --}}
-                    @if($companies->hasPages() && request('per_page') !== 'all')
-                        <div class="flex-1">
-                            {{ $companies->withQueryString()->links() }}
-                        </div>
-                    @else
-                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                            Showing {{ $companies->count() }} {{ Str::plural('company', $companies->count()) }}
-                        </div>
-                    @endif
+                    {{-- Company Count --}}
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        Showing {{ $companies->count() }} of {{ $companies->total() }} {{ Str::plural('company', $companies->total()) }}
+                    </div>
                 </div>
             </div>
         </div>

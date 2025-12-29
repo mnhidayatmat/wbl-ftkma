@@ -96,11 +96,12 @@
                 <div>
                     <select name="status" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white">
                         <option value="">All Status</option>
+                        <option value="Not Started" {{ request('status') == 'Not Started' ? 'selected' : '' }}>Not Started</option>
+                        <option value="Draft" {{ request('status') == 'Draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
                         <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
                         <option value="Expired" {{ request('status') == 'Expired' ? 'selected' : '' }}>Expired</option>
                         <option value="Terminated" {{ request('status') == 'Terminated' ? 'selected' : '' }}>Terminated</option>
-                        <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="Draft" {{ request('status') == 'Draft' ? 'selected' : '' }}>Draft</option>
                     </select>
                 </div>
                 <div>

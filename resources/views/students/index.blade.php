@@ -253,11 +253,38 @@
 </div>
 
 <!-- Pagination -->
-@if($students->hasPages())
-    <div class="mt-6">
-        {{ $students->links() }}
+<div class="mt-6 px-3 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        {{-- Per Page Selector --}}
+        <div class="flex items-center gap-2">
+            <span class="text-gray-600 dark:text-gray-400 text-sm">Show:</span>
+            @php
+                $currentPerPage = request('per_page', 15);
+                $perPageOptions = [15, 25, 50, 100, 'all'];
+            @endphp
+            <div class="flex items-center gap-1">
+                @foreach($perPageOptions as $option)
+                    @php
+                        $isActive = ($currentPerPage == $option) || ($option === 15 && !request('per_page'));
+                        $queryParams = array_merge(request()->except(['per_page', 'page']), ['per_page' => $option]);
+                    @endphp
+                    <a href="{{ route('admin.students.index', $queryParams) }}"
+                       class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors
+                           {{ $isActive
+                               ? 'bg-[#0084C5] text-white'
+                               : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                        {{ $option === 'all' ? 'All' : $option }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Student Count --}}
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+            Showing {{ $students->count() }} of {{ $students->total() }} {{ Str::plural('student', $students->total()) }}
+        </div>
     </div>
-@endif
+</div>
 
 <!-- Import Modal -->
 <div id="import-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">

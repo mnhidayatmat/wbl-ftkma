@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Rules
+
+**NEVER remove or delete any existing database data or tables.** When making database changes:
+- Only create new migrations that ADD columns or tables
+- Do NOT use `migrate:fresh` or `migrate:refresh` commands
+- Do NOT drop tables or columns with existing data
+- Always preserve existing production data
+
 ## Project Overview
 
 WBL (Work-Based Learning) Management System - A Laravel 11 application for managing academic assessments across multiple modules (PPE, FYP, IP, OSH, LI) for UMPSA university. Handles students, lecturers, industry coaches, and administrators.

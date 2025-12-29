@@ -68,11 +68,12 @@ class CompanyAgreement extends Model
      * Status options.
      */
     public const STATUS_OPTIONS = [
+        'Not Started' => 'Not Started',
+        'Draft' => 'Draft',
+        'Pending' => 'Pending',
         'Active' => 'Active',
         'Expired' => 'Expired',
         'Terminated' => 'Terminated',
-        'Pending' => 'Pending',
-        'Draft' => 'Draft',
     ];
 
     /**

@@ -76,9 +76,23 @@ class CompanyController extends Controller
             $query->where('category', $request->category);
         }
 
-        $companies = $query->latest()
-            ->paginate(15)
-            ->withQueryString();
+        // Handle per_page parameter (supports 'all' for showing all records)
+        $perPage = $request->input('per_page', 15);
+        if ($perPage === 'all') {
+            $companies = $query->latest()->get();
+            // Wrap in a paginator-like object for view compatibility
+            $companies = new \Illuminate\Pagination\LengthAwarePaginator(
+                $companies,
+                $companies->count(),
+                $companies->count(),
+                1,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $companies = $query->latest()
+                ->paginate((int) $perPage)
+                ->withQueryString();
+        }
 
         $stats = $this->getCompanyStatistics();
 
@@ -102,6 +116,7 @@ class CompanyController extends Controller
         $activeAgreements = CompanyAgreement::where('status', 'Active')->count();
         $pendingAgreements = CompanyAgreement::where('status', 'Pending')->count();
         $draftAgreements = CompanyAgreement::where('status', 'Draft')->count();
+        $notStartedAgreements = CompanyAgreement::where('status', 'Not Started')->count();
         $expiredAgreements = CompanyAgreement::where('status', 'Expired')->count();
 
         // Expiring agreements (within next 3 and 6 months)
@@ -177,6 +192,7 @@ class CompanyController extends Controller
             'active_agreements' => $activeAgreements,
             'pending_agreements' => $pendingAgreements,
             'draft_agreements' => $draftAgreements,
+            'not_started_agreements' => $notStartedAgreements,
             'expired_agreements' => $expiredAgreements,
             'expiring_3_months' => $expiringIn3Months,
             'expiring_6_months' => $expiringIn6Months,
@@ -239,7 +255,7 @@ class CompanyController extends Controller
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'signed_date' => ['nullable', 'date'],
-            'status' => ['required', 'in:Active,Expired,Terminated,Pending,Draft'],
+            'status' => ['required', 'in:Not Started,Draft,Pending,Active,Expired,Terminated'],
             'faculty' => ['nullable', 'string', 'max:255'],
             'programme' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:2000'],

@@ -71,7 +71,20 @@ class StudentController extends Controller
             $query->inActiveGroups();
         }
 
-        $students = $query->paginate(15)->withQueryString();
+        // Handle per_page parameter (supports 'all' for showing all records)
+        $perPage = $request->input('per_page', 15);
+        if ($perPage === 'all') {
+            $allStudents = $query->get();
+            $students = new \Illuminate\Pagination\LengthAwarePaginator(
+                $allStudents,
+                $allStudents->count(),
+                $allStudents->count(),
+                1,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $students = $query->paginate((int) $perPage)->withQueryString();
+        }
 
         // Get groups for tabs based on role
         $groupsQuery = WblGroup::orderBy('name');

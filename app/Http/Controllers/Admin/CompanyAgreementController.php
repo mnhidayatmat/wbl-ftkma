@@ -86,7 +86,7 @@ class CompanyAgreementController extends Controller
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'signed_date' => ['nullable', 'date'],
-            'status' => ['required', 'in:Active,Expired,Terminated,Pending,Draft'],
+            'status' => ['required', 'in:Not Started,Draft,Pending,Active,Expired,Terminated'],
             'faculty' => ['nullable', 'string', 'max:255'],
             'programme' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:2000'],
@@ -158,7 +158,7 @@ class CompanyAgreementController extends Controller
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'signed_date' => ['nullable', 'date'],
-            'status' => ['required', 'in:Active,Expired,Terminated,Pending,Draft'],
+            'status' => ['required', 'in:Not Started,Draft,Pending,Active,Expired,Terminated'],
             'faculty' => ['nullable', 'string', 'max:255'],
             'programme' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:2000'],
@@ -708,7 +708,7 @@ class CompanyAgreementController extends Controller
     {
         if (! empty($row['status'])) {
             $status = ucfirst(strtolower($row['status']));
-            if (in_array($status, ['Active', 'Expired', 'Terminated', 'Pending', 'Draft'])) {
+            if (in_array($status, ['Not Started', 'Draft', 'Pending', 'Active', 'Expired', 'Terminated'])) {
                 return $status;
             }
         }
@@ -731,7 +731,7 @@ class CompanyAgreementController extends Controller
     public function updateStatus(Request $request, CompanyAgreement $agreement): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:Active,Expired,Terminated,Pending,Draft'],
+            'status' => ['required', 'in:Not Started,Draft,Pending,Active,Expired,Terminated'],
         ]);
 
         $agreement->update([

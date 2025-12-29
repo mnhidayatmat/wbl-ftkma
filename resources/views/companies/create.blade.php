@@ -273,9 +273,10 @@
                     </label>
                     <select name="status" id="status" required
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('status') border-red-500 @enderror">
-                        <option value="Draft" {{ old('status', 'Draft') == 'Draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="Active" {{ old('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Not Started" {{ old('status', 'Not Started') == 'Not Started' ? 'selected' : '' }}>Not Started</option>
+                        <option value="Draft" {{ old('status') == 'Draft' ? 'selected' : '' }}>Draft</option>
                         <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Active" {{ old('status') == 'Active' ? 'selected' : '' }}>Active</option>
                         <option value="Expired" {{ old('status') == 'Expired' ? 'selected' : '' }}>Expired</option>
                         <option value="Terminated" {{ old('status') == 'Terminated' ? 'selected' : '' }}>Terminated</option>
                     </select>
