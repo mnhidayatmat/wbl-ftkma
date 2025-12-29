@@ -22,6 +22,21 @@ class AssessmentController extends Controller
     }
 
     /**
+     * Check if the current user is authorized to manage assessments for a course.
+     */
+    private function isAuthorizedForCourse(string $courseCode): bool
+    {
+        $user = auth()->user();
+
+        return $user->isAdmin() ||
+            ($courseCode === 'FYP' && $user->isFypCoordinator()) ||
+            ($courseCode === 'IP' && $user->isIpCoordinator()) ||
+            ($courseCode === 'OSH' && $user->isOshCoordinator()) ||
+            ($courseCode === 'LI' && $user->isLiCoordinator()) ||
+            ($courseCode === 'PPE' && $user->isPpeCoordinator());
+    }
+
+    /**
      * Display a listing of assessments for a specific course.
      */
     public function index(Request $request, string $course = 'PPE'): View
@@ -34,8 +49,8 @@ class AssessmentController extends Controller
 
         $courseCode = strtoupper($course);
 
-        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
-        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+        // Admin can manage all assessments, Coordinators can manage their respective module assessments
+        if (! $this->isAuthorizedForCourse($courseCode)) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -88,8 +103,8 @@ class AssessmentController extends Controller
 
         $courseCode = strtoupper($course);
 
-        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
-        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+        // Admin can manage all assessments, Coordinators can manage their respective module assessments
+        if (! $this->isAuthorizedForCourse($courseCode)) {
             abort(403, 'Unauthorized access.');
         }
         $courseName = Assessment::getCourseCodes()[$courseCode] ?? $courseCode;
@@ -129,8 +144,8 @@ class AssessmentController extends Controller
 
         $courseCode = strtoupper($course);
 
-        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
-        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+        // Admin can manage all assessments, Coordinators can manage their respective module assessments
+        if (! $this->isAuthorizedForCourse($courseCode)) {
             abort(403, 'Unauthorized access.');
         }
         $totalWeight = 0; // Initialize for component/rubric validation
@@ -274,8 +289,8 @@ class AssessmentController extends Controller
 
         $courseCode = strtoupper($course);
 
-        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
-        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+        // Admin can manage all assessments, Coordinators can manage their respective module assessments
+        if (! $this->isAuthorizedForCourse($courseCode)) {
             abort(403, 'Unauthorized access.');
         }
         $courseName = Assessment::getCourseCodes()[$courseCode] ?? $courseCode;
@@ -337,8 +352,8 @@ class AssessmentController extends Controller
 
         $courseCode = strtoupper($course);
 
-        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
-        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+        // Admin can manage all assessments, Coordinators can manage their respective module assessments
+        if (! $this->isAuthorizedForCourse($courseCode)) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -472,8 +487,8 @@ class AssessmentController extends Controller
 
         $courseCode = $assessment->course_code;
 
-        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
-        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+        // Admin can manage all assessments, Coordinators can manage their respective module assessments
+        if (! $this->isAuthorizedForCourse($courseCode)) {
             abort(403, 'Unauthorized access.');
         }
         $assessment->delete();
@@ -492,8 +507,8 @@ class AssessmentController extends Controller
 
         $courseCode = $assessment->course_code;
 
-        // Admin can manage all assessments, FYP Coordinator can manage FYP assessments
-        if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+        // Admin can manage all assessments, Coordinators can manage their respective module assessments
+        if (! $this->isAuthorizedForCourse($courseCode)) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -815,7 +830,7 @@ class AssessmentController extends Controller
             $firstComponent = \App\Models\AssessmentComponent::with('assessment')->find($validated['components'][0]['id']);
             if ($firstComponent && $firstComponent->assessment) {
                 $courseCode = $firstComponent->assessment->course_code;
-                if (! auth()->user()->isAdmin() && ! ($courseCode === 'FYP' && auth()->user()->isFypCoordinator())) {
+                if (! $this->isAuthorizedForCourse($courseCode)) {
                     return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
                 }
             }
