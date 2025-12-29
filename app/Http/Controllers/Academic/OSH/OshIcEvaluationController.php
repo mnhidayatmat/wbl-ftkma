@@ -28,7 +28,7 @@ class OshIcEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry() && ! auth()->user()->isOshCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

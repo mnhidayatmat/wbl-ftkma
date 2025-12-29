@@ -24,8 +24,8 @@ class OshAtEvaluationController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and Lecturer can access Lecturer evaluation
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        // Only Admin, Lecturer, and OSH Coordinator can access Lecturer evaluation
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isOshCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -142,8 +142,8 @@ class OshAtEvaluationController extends Controller
         // Load relationships for display
         $student->load('academicTutor', 'industryCoach', 'group');
 
-        // Check authorization: Admin or assigned OSH lecturer
-        if (! auth()->user()->isAdmin()) {
+        // Check authorization: Admin, OSH Coordinator, or assigned OSH lecturer
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isOshCoordinator()) {
             if (auth()->user()->isLecturer()) {
                 // OSH uses single lecturer from course_settings
                 $oshSetting = CourseSetting::where('course_type', 'OSH')->first();

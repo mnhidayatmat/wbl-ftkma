@@ -23,8 +23,8 @@ class OshStudentPerformanceController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and Lecturer can access
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        // Only Admin, Lecturer, and OSH Coordinator can access
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isOshCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -223,7 +223,7 @@ class OshStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isOshCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -251,7 +251,7 @@ class OshStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isOshCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
