@@ -22,7 +22,7 @@ class LiStudentAssignmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $query = Student::with(['group', 'academicTutor', 'industryCoach', 'company']);
+        $query = Student::with(['group', 'academicTutor', 'industryCoach.company']);
 
         // Filter by group
         if ($request->filled('group')) {
@@ -107,21 +107,19 @@ class LiStudentAssignmentController extends Controller
             if (! empty($validated['at_id'])) {
                 $at = User::findOrFail($validated['at_id']);
                 if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
-                    return redirect()->back()
-                        ->withQueryString()
-                        ->with('error', 'Lecturer must have lecturer role.');
+                    return redirect()->route('academic.li.assign-students.index', $request->query())
+                        ->with('error', 'Supervisor LI must have lecturer role.');
                 }
             }
             $student->update(['at_id' => $validated['at_id'] ?: null]);
         }
 
-        return redirect()->back()
-            ->withQueryString()
-            ->with('success', "Lecturer updated for {$student->name}.");
+        return redirect()->route('academic.li.assign-students.index', $request->query())
+            ->with('success', "Supervisor LI updated for {$student->name}.");
     }
 
     /**
-     * Bulk update multiple students' lecturer assignments.
+     * Bulk update multiple students' Supervisor LI assignments.
      */
     public function bulkUpdate(Request $request): RedirectResponse
     {
@@ -138,20 +136,18 @@ class LiStudentAssignmentController extends Controller
         // Verify lecturer role
         $at = User::findOrFail($validated['bulk_at_id']);
         if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
-            return redirect()->back()
-                ->withQueryString()
+            return redirect()->route('academic.li.assign-students.index', $request->query())
                 ->with('error', 'Selected user must be a lecturer.');
         }
 
         $count = Student::whereIn('id', $validated['student_ids'])->update(['at_id' => $validated['bulk_at_id']]);
 
-        return redirect()->back()
-            ->withQueryString()
-            ->with('success', "Lecturer assigned to {$count} student(s).");
+        return redirect()->route('academic.li.assign-students.index', $request->query())
+            ->with('success', "Supervisor LI assigned to {$count} student(s).");
     }
 
     /**
-     * Clear lecturer assignment for a student.
+     * Clear Supervisor LI assignment for a student.
      */
     public function clearAssignment(Request $request, Student $student): RedirectResponse
     {
@@ -161,9 +157,8 @@ class LiStudentAssignmentController extends Controller
 
         $student->update(['at_id' => null]);
 
-        return redirect()->back()
-            ->withQueryString()
-            ->with('success', "Lecturer cleared for {$student->name}.");
+        return redirect()->route('academic.li.assign-students.index', $request->query())
+            ->with('success', "Supervisor LI cleared for {$student->name}.");
     }
 
     /**
@@ -175,7 +170,7 @@ class LiStudentAssignmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $students = Student::with(['group', 'academicTutor', 'industryCoach', 'company'])
+        $students = Student::with(['group', 'academicTutor', 'industryCoach.company'])
             ->orderBy('name')
             ->get();
 
@@ -187,7 +182,7 @@ class LiStudentAssignmentController extends Controller
 
         $callback = function () use ($students) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Student Name', 'Matric No', 'Programme', 'Group', 'Lecturer', 'Industry Coach', 'Company']);
+            fputcsv($file, ['No', 'Student Name', 'Matric No', 'Programme', 'Group', 'Supervisor LI', 'Industry Coach', 'Company (IC)', 'Company Address']);
 
             foreach ($students as $index => $student) {
                 fputcsv($file, [
@@ -198,7 +193,8 @@ class LiStudentAssignmentController extends Controller
                     $student->group->name ?? 'N/A',
                     $student->academicTutor->name ?? 'Not Assigned',
                     $student->industryCoach->name ?? 'Not Assigned',
-                    $student->company->company_name ?? 'N/A',
+                    $student->industryCoach->company->company_name ?? 'N/A',
+                    $student->industryCoach->company->address ?? 'N/A',
                 ]);
             }
 

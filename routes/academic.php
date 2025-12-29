@@ -607,6 +607,10 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/bulk-update', [LiStudentAssignmentController::class, 'bulkUpdate'])->name('bulk-update');
                 Route::delete('/{student}/clear', [LiStudentAssignmentController::class, 'clearAssignment'])->name('clear');
                 Route::get('/export', [LiStudentAssignmentController::class, 'export'])->name('export');
+                // Fallback: redirect GET requests for specific student back to index
+                Route::get('/{student}', function () {
+                    return redirect()->route('academic.li.assign-students.index');
+                })->name('show');
             });
         });
 

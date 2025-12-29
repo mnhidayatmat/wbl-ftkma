@@ -9,7 +9,7 @@
         <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-xl sm:text-2xl font-bold text-[#003A6C] dark:text-[#0084C5]">LI Student Assignment</h1>
-                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">Assign Lecturers to Learning Integration students individually</p>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">Assign Supervisor LI to Learning Integration students individually</p>
             </div>
             <a href="{{ route('academic.li.assign-students.export') }}"
                class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors">
@@ -47,11 +47,11 @@
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-green-500">
                 <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $stats['at_assigned'] }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Lecturer Assigned</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Supervisor LI Assigned</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-amber-500">
                 <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ $stats['at_unassigned'] }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">Lecturer Pending</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Supervisor LI Pending</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-purple-500">
                 <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $stats['ic_assigned'] }}</div>
@@ -84,7 +84,7 @@
                 <div class="flex-1">
                     <select name="bulk_at_id" required
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
-                        <option value="">-- Select Lecturer --</option>
+                        <option value="">-- Select Supervisor LI --</option>
                         @foreach($lecturers as $lecturer)
                             <option value="{{ $lecturer->id }}">{{ $lecturer->name }}</option>
                         @endforeach
@@ -151,8 +151,8 @@
                     <select name="status"
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
                         <option value="">All Status</option>
-                        <option value="at_assigned" {{ request('status') == 'at_assigned' ? 'selected' : '' }}>Lecturer Assigned</option>
-                        <option value="at_unassigned" {{ request('status') == 'at_unassigned' ? 'selected' : '' }}>Lecturer Not Assigned</option>
+                        <option value="at_assigned" {{ request('status') == 'at_assigned' ? 'selected' : '' }}>Supervisor LI Assigned</option>
+                        <option value="at_unassigned" {{ request('status') == 'at_unassigned' ? 'selected' : '' }}>Supervisor LI Not Assigned</option>
                         <option value="ic_assigned" {{ request('status') == 'ic_assigned' ? 'selected' : '' }}>IC Assigned</option>
                         <option value="ic_unassigned" {{ request('status') == 'ic_unassigned' ? 'selected' : '' }}>IC Not Assigned</option>
                     </select>
@@ -200,7 +200,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Student Name</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Matric No</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider hidden md:table-cell">Group</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Lecturer</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Supervisor LI</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Industry Coach</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider hidden lg:table-cell">Company</th>
                         </tr>
@@ -239,7 +239,7 @@
                                     <div class="text-sm text-gray-600 dark:text-gray-400">{{ $student->group->name ?? 'N/A' }}</div>
                                 </td>
 
-                                <!-- Lecturer (Editable) -->
+                                <!-- Supervisor LI (Editable) -->
                                 <td class="px-4 py-3">
                                     <form action="{{ route('academic.li.assign-students.update', $student) }}" method="POST" class="inline">
                                         @csrf
@@ -247,7 +247,7 @@
                                         <select name="at_id"
                                                 onchange="this.form.submit()"
                                                 class="w-full min-w-[150px] px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white {{ $student->academicTutor ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20' }}">
-                                            <option value="">-- Select Lecturer --</option>
+                                            <option value="">-- Select Supervisor LI --</option>
                                             @foreach($lecturers as $lecturer)
                                                 <option value="{{ $lecturer->id }}" {{ $student->at_id == $lecturer->id ? 'selected' : '' }}>
                                                     {{ $lecturer->name }}
@@ -276,17 +276,21 @@
                                     @endif
                                 </td>
 
-                                <!-- Company -->
+                                <!-- Company (IC's Company) -->
                                 <td class="px-4 py-3 hidden lg:table-cell">
-                                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $student->company->company_name ?? 'N/A' }}</div>
-                                    @if($student->company && $student->company->address)
-                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-start gap-1">
-                                            <svg class="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            </svg>
-                                            <span>{{ $student->company->address }}</span>
-                                        </div>
+                                    @if($student->industryCoach && $student->industryCoach->company)
+                                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $student->industryCoach->company->company_name }}</div>
+                                        @if($student->industryCoach->company->address)
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-start gap-1">
+                                                <svg class="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                <span>{{ $student->industryCoach->company->address }}</span>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <span class="text-sm text-gray-400 dark:text-gray-500">-</span>
                                     @endif
                                 </td>
                             </tr>

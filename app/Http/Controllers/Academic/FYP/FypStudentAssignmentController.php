@@ -21,7 +21,7 @@ class FypStudentAssignmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $query = Student::with(['group', 'academicTutor', 'industryCoach', 'company']);
+        $query = Student::with(['group', 'academicTutor', 'industryCoach.company']);
 
         // Filter by group
         if ($request->filled('group')) {
@@ -104,7 +104,7 @@ class FypStudentAssignmentController extends Controller
     }
 
     /**
-     * Update single student AT/IC assignment (inline edit).
+     * Update single student AT assignment (inline edit).
      */
     public function update(Request $request, Student $student): RedirectResponse
     {
@@ -114,48 +114,26 @@ class FypStudentAssignmentController extends Controller
 
         $validated = $request->validate([
             'at_id' => ['nullable', 'exists:users,id'],
-            'ic_id' => ['nullable', 'exists:users,id'],
         ]);
-
-        $updateData = [];
 
         // Handle AT assignment
         if ($request->has('at_id')) {
             if (! empty($validated['at_id'])) {
                 $at = User::findOrFail($validated['at_id']);
                 if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
-                    return redirect()->back()
-                        ->withQueryString()
-                        ->with('error', 'Academic Tutor must be a lecturer.');
+                    return redirect()->route('academic.fyp.assign-students.index', $request->query())
+                        ->with('error', 'Academic Tutor must have lecturer role.');
                 }
             }
-            $updateData['at_id'] = $validated['at_id'] ?: null;
+            $student->update(['at_id' => $validated['at_id'] ?: null]);
         }
 
-        // Handle IC assignment
-        if ($request->has('ic_id')) {
-            if (! empty($validated['ic_id'])) {
-                $ic = User::findOrFail($validated['ic_id']);
-                if (! $ic->hasRole('industry') && $ic->role !== 'industry') {
-                    return redirect()->back()
-                        ->withQueryString()
-                        ->with('error', 'Industry Coach must have industry role.');
-                }
-            }
-            $updateData['ic_id'] = $validated['ic_id'] ?: null;
-        }
-
-        if (! empty($updateData)) {
-            $student->update($updateData);
-        }
-
-        return redirect()->back()
-            ->withQueryString()
-            ->with('success', "Assignment updated for {$student->name}.");
+        return redirect()->route('academic.fyp.assign-students.index', $request->query())
+            ->with('success', "Academic Tutor updated for {$student->name}.");
     }
 
     /**
-     * Bulk update multiple students' AT/IC assignments.
+     * Bulk update multiple students' AT assignments.
      */
     public function bulkUpdate(Request $request): RedirectResponse
     {
@@ -166,49 +144,24 @@ class FypStudentAssignmentController extends Controller
         $validated = $request->validate([
             'student_ids' => ['required', 'array', 'min:1'],
             'student_ids.*' => ['exists:students,id'],
-            'bulk_at_id' => ['nullable', 'exists:users,id'],
-            'bulk_ic_id' => ['nullable', 'exists:users,id'],
+            'bulk_at_id' => ['required', 'exists:users,id'],
         ]);
 
-        if (empty($validated['bulk_at_id']) && empty($validated['bulk_ic_id'])) {
-            return redirect()->back()
-                ->withQueryString()
-                ->with('error', 'Please select an AT or IC to assign.');
+        // Verify AT has lecturer role
+        $at = User::findOrFail($validated['bulk_at_id']);
+        if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
+            return redirect()->route('academic.fyp.assign-students.index', $request->query())
+                ->with('error', 'Academic Tutor must have lecturer role.');
         }
 
-        $updateData = [];
+        $count = Student::whereIn('id', $validated['student_ids'])->update(['at_id' => $validated['bulk_at_id']]);
 
-        // Verify and set AT
-        if (! empty($validated['bulk_at_id'])) {
-            $at = User::findOrFail($validated['bulk_at_id']);
-            if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
-                return redirect()->back()
-                    ->withQueryString()
-                    ->with('error', 'Academic Tutor must be a lecturer.');
-            }
-            $updateData['at_id'] = $validated['bulk_at_id'];
-        }
-
-        // Verify and set IC
-        if (! empty($validated['bulk_ic_id'])) {
-            $ic = User::findOrFail($validated['bulk_ic_id']);
-            if (! $ic->hasRole('industry') && $ic->role !== 'industry') {
-                return redirect()->back()
-                    ->withQueryString()
-                    ->with('error', 'Industry Coach must have industry role.');
-            }
-            $updateData['ic_id'] = $validated['bulk_ic_id'];
-        }
-
-        $count = Student::whereIn('id', $validated['student_ids'])->update($updateData);
-
-        return redirect()->back()
-            ->withQueryString()
-            ->with('success', "Updated assignments for {$count} student(s).");
+        return redirect()->route('academic.fyp.assign-students.index', $request->query())
+            ->with('success', "Academic Tutor assigned to {$count} student(s).");
     }
 
     /**
-     * Clear assignments for a student.
+     * Clear AT assignment for a student.
      */
     public function clearAssignment(Request $request, Student $student): RedirectResponse
     {
@@ -216,28 +169,9 @@ class FypStudentAssignmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $validated = $request->validate([
-            'clear' => ['required', 'in:at,ic,both'],
-        ]);
+        $student->update(['at_id' => null]);
 
-        $updateData = [];
-        switch ($validated['clear']) {
-            case 'at':
-                $updateData['at_id'] = null;
-                break;
-            case 'ic':
-                $updateData['ic_id'] = null;
-                break;
-            case 'both':
-                $updateData['at_id'] = null;
-                $updateData['ic_id'] = null;
-                break;
-        }
-
-        $student->update($updateData);
-
-        return redirect()->back()
-            ->withQueryString()
-            ->with('success', "Assignment cleared for {$student->name}.");
+        return redirect()->route('academic.fyp.assign-students.index', $request->query())
+            ->with('success', "Academic Tutor cleared for {$student->name}.");
     }
 }

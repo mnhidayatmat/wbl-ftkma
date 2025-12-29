@@ -8,7 +8,7 @@
         <!-- Page Header -->
         <div class="mb-4 sm:mb-6">
             <h1 class="text-xl sm:text-2xl font-bold text-[#003A6C] dark:text-[#0084C5]">Assign Students</h1>
-            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">Assign Academic Tutors (Supervisors) and Industry Coaches to FYP students</p>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">Assign Academic Tutors to FYP students</p>
         </div>
 
         <!-- Flash Messages -->
@@ -152,7 +152,7 @@
                     <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Bulk AT Select -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Assign AT (Supervisor)</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Assign Academic Tutor</label>
                             <select name="bulk_at_id" x-model="bulkAtId"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white text-sm">
                                 <option value="">-- Select AT --</option>
@@ -201,9 +201,9 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Matric No</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider hidden lg:table-cell">Programme</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider hidden md:table-cell">Group</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Academic Tutor (Supervisor)</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Academic Tutor</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Industry Coach</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider hidden lg:table-cell">Company</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -280,22 +280,21 @@
                                     @endif
                                 </td>
 
-                                <!-- Actions -->
-                                <td class="px-4 py-3">
-                                    @if($student->at_id)
-                                        <form action="{{ route('academic.fyp.assign-students.clear', $student) }}" method="POST" class="inline">
-                                            @csrf
-                                            <input type="hidden" name="clear" value="at">
-                                            <button type="submit"
-                                                    class="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
-                                                    title="Clear AT">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                <!-- Company (IC's Company) -->
+                                <td class="px-4 py-3 hidden lg:table-cell">
+                                    @if($student->industryCoach && $student->industryCoach->company)
+                                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $student->industryCoach->company->company_name }}</div>
+                                        @if($student->industryCoach->company->address)
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-start gap-1">
+                                                <svg class="w-3 h-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                 </svg>
-                                            </button>
-                                        </form>
+                                                <span>{{ $student->industryCoach->company->address }}</span>
+                                            </div>
+                                        @endif
                                     @else
-                                        <span class="text-xs text-gray-400">-</span>
+                                        <span class="text-sm text-gray-400 dark:text-gray-500">-</span>
                                     @endif
                                 </td>
                             </tr>
