@@ -33,6 +33,7 @@ use App\Http\Controllers\Academic\OSH\OshFinalisationController;
 use App\Http\Controllers\Academic\OSH\OshIcEvaluationController;
 use App\Http\Controllers\Academic\OSH\OshLogbookController;
 use App\Http\Controllers\Academic\OSH\OshModerationController;
+use App\Http\Controllers\Academic\OSH\OshStudentAssignmentController;
 use App\Http\Controllers\Academic\OSH\OshProgressController;
 use App\Http\Controllers\Academic\OSH\OshReportsController;
 use App\Http\Controllers\Academic\OSH\OshScheduleController;
@@ -338,6 +339,15 @@ Route::middleware(['auth'])->group(function () {
             Route::get('reports/company/{company}', [OshReportsController::class, 'exportCompany'])->name('reports.company');
             Route::get('audit', [OshAuditController::class, 'index'])->name('audit.index');
             Route::get('audit/export', [OshAuditController::class, 'export'])->name('audit.export');
+
+            // Student Assignment (Admin and OSH Coordinator)
+            // For OSH: Single lecturer assigned to all students, IC is set by student during registration
+            Route::prefix('assign-students')->name('assign-students.')->group(function () {
+                Route::get('/', [OshStudentAssignmentController::class, 'index'])->name('index');
+                Route::post('/assign-lecturer', [OshStudentAssignmentController::class, 'assignLecturerToAll'])->name('assign-lecturer');
+                Route::post('/clear-lecturer', [OshStudentAssignmentController::class, 'clearLecturerFromAll'])->name('clear-lecturer');
+                Route::get('/export', [OshStudentAssignmentController::class, 'export'])->name('export');
+            });
         });
 
         // CLO-PLO Analysis (Admin, Coordinator, Lecturer, OSH Coordinator)
