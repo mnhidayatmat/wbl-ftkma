@@ -284,8 +284,25 @@
     </div>
     @endif
 
+    <!-- PPE Coordinator Dashboard (Standalone - positioned above Academic Modules) -->
+    @if($isPpeCoordinator)
+    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <a href="{{ route('coordinator.dashboard') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('coordinator.dashboard') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Dashboard' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Dashboard</span>
+        </a>
+    </div>
+    @endif
+
     <!-- Group #2: ACADEMIC MODULES (Hidden for Students - they have "My Courses" section) -->
-    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin || $isFypCoordinator || $isIpCoordinator || $isOshCoordinator)
+    @if($isLecturer || $isAt || $isSupervisorLi || $isIc || $isAdmin || $isFypCoordinator || $isIpCoordinator || $isOshCoordinator || $isPpeCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">ACADEMIC MODULES</span>
@@ -598,7 +615,7 @@
         @endif
 
         <!-- PPE (Hidden for FYP, IP, and OSH Coordinators) -->
-        @if(($isLecturer || $isIc || $isAdmin) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
+        @if(($isLecturer || $isIc || $isAdmin || $isPpeCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
         <div class="mb-1">
             <!-- Parent Menu Item (Toggle Only - No Navigation) -->
             <button type="button"
@@ -647,50 +664,50 @@
                     Assessment Schedule
                 </a>
                 @endif
-                @if($isAdmin || $isCoordinator || $isLecturer)
-                <a href="{{ route('academic.ppe.clo-plo.index') }}" 
+                @if($isAdmin || $isPpeCoordinator || $isCoordinator || $isLecturer)
+                <a href="{{ route('academic.ppe.clo-plo.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.clo-plo.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     CLO–PLO Analysis
                 </a>
                 @endif
-                @if($isLecturer || $isAdmin)
-                <a href="{{ route('academic.ppe.lecturer.index') }}" 
+                @if($isLecturer || $isAdmin || $isPpeCoordinator)
+                <a href="{{ route('academic.ppe.lecturer.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.lecturer.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Lecturer Evaluation
                 </a>
                 @endif
-                @if($isIc || $isAdmin)
-                <a href="{{ route('academic.ppe.ic.index') }}" 
+                @if($isIc || $isAdmin || $isPpeCoordinator)
+                <a href="{{ route('academic.ppe.ic.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.ic.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     IC Evaluation
                 </a>
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.ppe.progress.index') }}" 
+                @if($isAdmin || $isPpeCoordinator)
+                <a href="{{ route('academic.ppe.progress.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.progress.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Evaluation Progress
                 </a>
                 @endif
-                @if($isLecturer || $isAdmin)
-                <a href="{{ route('academic.ppe.performance.index') }}" 
+                @if($isLecturer || $isAdmin || $isPpeCoordinator)
+                <a href="{{ route('academic.ppe.performance.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.performance.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Student Performance
                 </a>
                 @endif
-                @if($isAdmin)
-                <a href="{{ route('academic.ppe.moderation.index') }}" 
+                @if($isAdmin || $isPpeCoordinator)
+                <a href="{{ route('academic.ppe.moderation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.moderation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Moderation
                 </a>
-                <a href="{{ route('academic.ppe.finalisation.index') }}" 
+                <a href="{{ route('academic.ppe.finalisation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.finalisation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Result Finalisation
                 </a>
-                <a href="{{ route('academic.ppe.reports.index') }}" 
+                <a href="{{ route('academic.ppe.reports.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.reports.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Reports
                 </a>
-                <a href="{{ route('academic.ppe.audit.index') }}" 
+                <a href="{{ route('academic.ppe.audit.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.audit.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Audit Log
                 </a>

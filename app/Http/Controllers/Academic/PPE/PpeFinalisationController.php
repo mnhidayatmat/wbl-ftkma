@@ -17,7 +17,7 @@ class PpeFinalisationController extends Controller
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -89,7 +89,7 @@ class PpeFinalisationController extends Controller
      */
     public function finaliseStudent(Request $request, Student $student)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -141,7 +141,7 @@ class PpeFinalisationController extends Controller
      */
     public function finaliseGroup(Request $request, WblGroup $group)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -204,7 +204,7 @@ class PpeFinalisationController extends Controller
      */
     public function finaliseCourse(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

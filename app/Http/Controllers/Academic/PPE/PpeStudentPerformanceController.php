@@ -23,8 +23,8 @@ class PpeStudentPerformanceController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and Lecturer can access
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        // Only Admin, PPE Coordinator and Lecturer can access
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator() && ! auth()->user()->isLecturer()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -217,8 +217,8 @@ class PpeStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        // Only Admin can export
-        if (! auth()->user()->isAdmin()) {
+        // Only Admin or PPE Coordinator can export
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -267,8 +267,8 @@ class PpeStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        // Only Admin can export
-        if (! auth()->user()->isAdmin()) {
+        // Only Admin or PPE Coordinator can export
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

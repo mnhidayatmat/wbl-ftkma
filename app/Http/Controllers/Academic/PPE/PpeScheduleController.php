@@ -16,7 +16,7 @@ class PpeScheduleController extends Controller
      */
     public function index(): View
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -58,7 +58,7 @@ class PpeScheduleController extends Controller
      */
     public function updateWindow(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -117,7 +117,7 @@ class PpeScheduleController extends Controller
      */
     public function sendReminder(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
