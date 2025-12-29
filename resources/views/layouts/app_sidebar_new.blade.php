@@ -153,7 +153,7 @@
     </a>
     @endif
 
-    @if(!$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isLiCoordinator)
+    @if(!$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator && !$isLiCoordinator)
     <a href="{{ route('admin.companies.index') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
        :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
@@ -205,8 +205,8 @@
     </a>
     @endif
 
-    <!-- Student Placement Tracking (Hidden for FYP, IP, and OSH Coordinators) -->
-    @if(($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator)
+    <!-- Student Placement Tracking (Hidden for FYP, IP, OSH, and PPE Coordinators) -->
+    @if(($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">PLACEMENT</span>
@@ -272,23 +272,6 @@
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <a href="{{ route('coordinator.dashboard') }}"
            class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('coordinator.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
-           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
-           :title="isSidebarCollapsed ? 'Dashboard' : ''">
-            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-            </div>
-            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Dashboard</span>
-        </a>
-    </div>
-    @endif
-
-    <!-- PPE Coordinator Dashboard (Standalone - positioned above Academic Modules) -->
-    @if($isPpeCoordinator)
-    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-        <a href="{{ route('coordinator.dashboard') }}"
-           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('coordinator.dashboard') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
            :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
            :title="isSidebarCollapsed ? 'Dashboard' : ''">
             <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
