@@ -150,9 +150,15 @@ class StudentController extends Controller
             $validated['skills'] = json_decode($validated['skills'], true);
         }
 
-        Student::create($validated);
+        $student = Student::create($validated);
 
-        return redirect()->route('admin.students.index')
+        // Redirect to the same group filter if student was assigned to a group
+        $redirectParams = [];
+        if ($student->group_id) {
+            $redirectParams['group'] = $student->group_id;
+        }
+
+        return redirect()->route('admin.students.index', $redirectParams)
             ->with('success', 'Student created successfully.');
     }
 
@@ -260,7 +266,21 @@ class StudentController extends Controller
             'image_path' => $validated['image_path'] ?? $student->image_path,
         ]);
 
-        return redirect()->route('admin.students.index')
+        // Redirect back to the same group and page if available
+        $redirectParams = [];
+
+        // Use return_group if provided (original group filter), otherwise use student's current group
+        if ($request->filled('return_group')) {
+            $redirectParams['group'] = $request->return_group;
+        } elseif ($student->group_id) {
+            $redirectParams['group'] = $student->group_id;
+        }
+
+        if ($request->filled('page') && (int) $request->page > 1) {
+            $redirectParams['page'] = (int) $request->page;
+        }
+
+        return redirect()->route('admin.students.index', $redirectParams)
             ->with('success', 'Student updated successfully.');
     }
 
@@ -285,9 +305,18 @@ class StudentController extends Controller
             }
         }
 
+        // Store group_id before deleting
+        $groupId = $student->group_id;
+
         $student->delete();
 
-        return redirect()->route('admin.students.index')
+        // Redirect back to the same group filter if student had a group
+        $redirectParams = [];
+        if ($groupId) {
+            $redirectParams['group'] = $groupId;
+        }
+
+        return redirect()->route('admin.students.index', $redirectParams)
             ->with('success', 'Student deleted successfully.');
     }
 

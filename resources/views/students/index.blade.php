@@ -161,7 +161,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex items-center space-x-3">
                         <a href="{{ route('admin.students.show', $student) }}" class="text-umpsa-teal hover:text-umpsa-royal-blue transition-colors">View</a>
-                        <a href="{{ route('admin.students.edit', $student) }}" class="text-umpsa-royal-blue hover:text-umpsa-deep-blue transition-colors">Edit</a>
+                        <a href="{{ route('admin.students.edit', ['student' => $student, 'page' => $students->currentPage(), 'group' => request('group')]) }}" class="text-umpsa-royal-blue hover:text-umpsa-deep-blue transition-colors">Edit</a>
                         <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
@@ -227,7 +227,7 @@
                 <a href="{{ route('admin.students.show', $student) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-primary text-white rounded-lg hover:bg-umpsa-secondary transition-colors text-sm font-semibold">
                     View
                 </a>
-                <a href="{{ route('admin.students.edit', $student) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-secondary text-white rounded-lg hover:bg-umpsa-accent transition-colors text-sm font-semibold">
+                <a href="{{ route('admin.students.edit', ['student' => $student, 'page' => $students->currentPage(), 'group' => request('group')]) }}" class="flex-1 text-center px-3 py-2 bg-umpsa-secondary text-white rounded-lg hover:bg-umpsa-accent transition-colors text-sm font-semibold">
                     Edit
                 </a>
                 <form action="{{ route('admin.students.destroy', $student) }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure?')">

@@ -11,6 +11,12 @@
     <form action="{{ route('admin.students.update', $student) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
+        @if(request('page'))
+            <input type="hidden" name="page" value="{{ request('page') }}">
+        @endif
+        @if(request('group'))
+            <input type="hidden" name="return_group" value="{{ request('group') }}">
+        @endif
 
         <!-- Student Image Upload -->
         <div class="mb-6">
