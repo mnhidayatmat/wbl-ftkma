@@ -257,52 +257,44 @@
                 </div>
                 @else
                 {{-- Layout without expiring agreements: Full width 4 columns --}}
-                <div class="space-y-3">
+                <div class="space-y-2">
                     <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400">Status Summary</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800 text-center transform hover:scale-105 transition-transform duration-200">
-                            <div class="flex items-center justify-center mb-2">
-                                <div class="bg-yellow-100 dark:bg-yellow-800/50 rounded-full p-2">
-                                    <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 flex items-center gap-2 hover:shadow-md transition-shadow duration-200">
+                            <div class="bg-yellow-100 dark:bg-yellow-800/50 rounded-full p-1.5">
+                                <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
                             </div>
-                            <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['pending_agreements'] ?? 0 }}</div>
-                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">Pending</div>
+                            <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['pending_agreements'] ?? 0 }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Pending</span>
                         </div>
-                        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 text-center transform hover:scale-105 transition-transform duration-200">
-                            <div class="flex items-center justify-center mb-2">
-                                <div class="bg-gray-200 dark:bg-gray-600 rounded-full p-2">
-                                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                                    </svg>
-                                </div>
+                        <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center gap-2 hover:shadow-md transition-shadow duration-200">
+                            <div class="bg-gray-200 dark:bg-gray-600 rounded-full p-1.5">
+                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                </svg>
                             </div>
-                            <div class="text-3xl font-bold text-gray-600 dark:text-gray-400">{{ $stats['draft_agreements'] ?? 0 }}</div>
-                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">Draft</div>
+                            <span class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ $stats['draft_agreements'] ?? 0 }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Draft</span>
                         </div>
-                        <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 text-center transform hover:scale-105 transition-transform duration-200">
-                            <div class="flex items-center justify-center mb-2">
-                                <div class="bg-red-100 dark:bg-red-800/50 rounded-full p-2">
-                                    <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
+                        <div class="px-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 flex items-center gap-2 hover:shadow-md transition-shadow duration-200">
+                            <div class="bg-red-100 dark:bg-red-800/50 rounded-full p-1.5">
+                                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
                             </div>
-                            <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ $stats['expired_agreements'] ?? 0 }}</div>
-                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">Expired</div>
+                            <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ $stats['expired_agreements'] ?? 0 }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Expired</span>
                         </div>
-                        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 text-center transform hover:scale-105 transition-transform duration-200">
-                            <div class="flex items-center justify-center mb-2">
-                                <div class="bg-blue-100 dark:bg-blue-800/50 rounded-full p-2">
-                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
+                        <div class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 flex items-center gap-2 hover:shadow-md transition-shadow duration-200">
+                            <div class="bg-blue-100 dark:bg-blue-800/50 rounded-full p-1.5">
+                                <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
+                                </svg>
                             </div>
-                            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['companies_without_agreements'] ?? 0 }}</div>
-                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">No Agreement</div>
+                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $stats['companies_without_agreements'] ?? 0 }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">No Agreement</span>
                         </div>
                     </div>
                 </div>

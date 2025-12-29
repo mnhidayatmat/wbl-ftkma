@@ -25,6 +25,8 @@ class Company extends Model
         'industry_type',
         'address',
         'website',
+        'staff_pic_name',
+        'staff_pic_phone',
     ];
 
     /**
