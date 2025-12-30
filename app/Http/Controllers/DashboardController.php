@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assessment;
-use App\Models\CloPloMapping;
 use App\Models\Company;
 use App\Models\CompanyAgreement;
 use App\Models\CompanyNote;
+use App\Models\FYP\FypAssessmentWindow;
+use App\Models\IP\IpAssessmentWindow;
+use App\Models\LI\LiAssessmentWindow;
+use App\Models\OSH\OshAssessmentWindow;
+use App\Models\PPE\PpeAssessmentWindow;
 use App\Models\PPE\PpeStudentAtMark;
 use App\Models\PPE\PpeStudentIcMark;
 use App\Models\Student;
@@ -681,7 +685,7 @@ class DashboardController extends Controller
 
         // Upcoming company follow-up actions (within 7 days, not overdue)
         $upcomingActions = CompanyNote::getPendingActions()->filter(function ($note) {
-            return !$note->isOverdue();
+            return ! $note->isOverdue();
         });
         if ($upcomingActions->count() > 0) {
             $firstUpcoming = $upcomingActions->first();
@@ -857,6 +861,8 @@ class DashboardController extends Controller
                 ],
                 'resumeInspection' => null,
                 'needsProfile' => true,
+                'placementTracking' => null,
+                'assessmentWindows' => collect(),
             ]);
         }
 
@@ -953,6 +959,68 @@ class DashboardController extends Controller
         $resumeInspection = $student->resumeInspection;
         $isInCompletedGroup = $student->isInCompletedGroup();
 
+        // Fetch placement tracking
+        $placementTracking = $student->placementTracking;
+
+        // Fetch all assessment windows for timeline
+        $assessmentWindows = collect();
+
+        // PPE Windows
+        $ppeWindows = PpeAssessmentWindow::all()->map(function ($window) {
+            $window->module = 'PPE';
+            $window->module_name = 'Professional Practice & Ethics';
+
+            return $window;
+        });
+        $assessmentWindows = $assessmentWindows->merge($ppeWindows);
+
+        // FYP Windows
+        $fypWindows = FypAssessmentWindow::all()->map(function ($window) {
+            $window->module = 'FYP';
+            $window->module_name = 'Final Year Project';
+
+            return $window;
+        });
+        $assessmentWindows = $assessmentWindows->merge($fypWindows);
+
+        // IP Windows
+        $ipWindows = IpAssessmentWindow::all()->map(function ($window) {
+            $window->module = 'IP';
+            $window->module_name = 'Internship Preparation';
+
+            return $window;
+        });
+        $assessmentWindows = $assessmentWindows->merge($ipWindows);
+
+        // OSH Windows
+        $oshWindows = OshAssessmentWindow::all()->map(function ($window) {
+            $window->module = 'OSH';
+            $window->module_name = 'Occupational Safety & Health';
+
+            return $window;
+        });
+        $assessmentWindows = $assessmentWindows->merge($oshWindows);
+
+        // LI Windows
+        $liWindows = LiAssessmentWindow::all()->map(function ($window) {
+            $window->module = 'LI';
+            $window->module_name = 'Industrial Training';
+
+            return $window;
+        });
+        $assessmentWindows = $assessmentWindows->merge($liWindows);
+
+        // Sort by status priority (open first, then upcoming, then closed)
+        $assessmentWindows = $assessmentWindows->sortBy(function ($window) {
+            return match ($window->status) {
+                'open' => 0,
+                'upcoming' => 1,
+                'closed' => 2,
+                'disabled' => 3,
+                default => 4,
+            };
+        });
+
         return view('dashboard-student', compact(
             'student',
             'assignedAt',
@@ -965,7 +1033,9 @@ class DashboardController extends Controller
             'barChartData',
             'ppeDonutData',
             'resumeInspection',
-            'isInCompletedGroup'
+            'isInCompletedGroup',
+            'placementTracking',
+            'assessmentWindows'
         ));
     }
 }

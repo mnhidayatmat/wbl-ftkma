@@ -310,7 +310,7 @@
 
                                 <!-- Company -->
                                 <td class="px-4 py-3 hidden lg:table-cell">
-                                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ $student->company->company_name ?? 'N/A' }}</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ $student->industryCoach?->company?->company_name ?? 'N/A' }}</div>
                                 </td>
                             </tr>
                         @empty

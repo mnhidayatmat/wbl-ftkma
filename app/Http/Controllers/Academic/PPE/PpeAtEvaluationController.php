@@ -24,8 +24,8 @@ class PpeAtEvaluationController extends Controller
      */
     public function index(Request $request): View
     {
-        // Only Admin and Lecturer can access Lecturer evaluation
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        // Only Admin, Lecturer, and PPE Coordinator can access Lecturer evaluation
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -40,8 +40,8 @@ class PpeAtEvaluationController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        // Admin can see all students, Lecturer sees only students if they are the assigned PPE lecturer
-        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin()) {
+        // Admin and PPE Coordinator can see all students, Lecturer sees only students if they are the assigned PPE lecturer
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             // PPE uses single lecturer from course_settings
             $ppeSetting = CourseSetting::where('course_type', 'PPE')->first();
             if ($ppeSetting && $ppeSetting->lecturer_id === auth()->id()) {
@@ -142,8 +142,8 @@ class PpeAtEvaluationController extends Controller
         // Load relationships for display
         $student->load('academicTutor', 'industryCoach', 'group');
 
-        // Check authorization: Admin or assigned PPE lecturer
-        if (! auth()->user()->isAdmin()) {
+        // Check authorization: Admin, PPE Coordinator (view only), or assigned PPE lecturer
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             if (auth()->user()->isLecturer()) {
                 // PPE uses single lecturer from course_settings
                 $ppeSetting = CourseSetting::where('course_type', 'PPE')->first();

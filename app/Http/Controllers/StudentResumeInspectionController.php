@@ -131,8 +131,13 @@ class StudentResumeInspectionController extends Controller
         }
 
         try {
-            // Store new combined document (using resume_file_path to store the combined file)
-            $path = $request->file('document')->store('resumes', 'public');
+            // Generate custom filename: Resume_StudentName.pdf
+            $studentName = preg_replace('/[^A-Za-z0-9\s]/', '', $student->name); // Remove special characters
+            $studentName = str_replace(' ', '_', trim($studentName)); // Replace spaces with underscores
+            $filename = 'Resume_' . $studentName . '.pdf';
+
+            // Store new combined document with custom filename
+            $path = $request->file('document')->storeAs('resumes', $filename, 'public');
 
             if (! $path) {
                 throw new \Exception('Failed to store the file. Please try again.');

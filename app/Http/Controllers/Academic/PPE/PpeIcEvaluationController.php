@@ -28,7 +28,7 @@ class PpeIcEvaluationController extends Controller
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isIndustry() && ! auth()->user()->isPpeCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -43,8 +43,8 @@ class PpeIcEvaluationController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        // Admin can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin()) {
+        // Admin and PPE Coordinator can see all students, IC only sees assigned students
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
 
@@ -169,8 +169,8 @@ class PpeIcEvaluationController extends Controller
      */
     public function show(Student $student): View
     {
-        // Check authorization - all authenticated users can view, but only assigned IC can edit
-        if (! Gate::allows('view', $student)) {
+        // Check authorization - Admin, PPE Coordinator, and assigned IC can view
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isPpeCoordinator() && ! Gate::allows('view', $student)) {
             abort(403, 'You are not authorized to view this student.');
         }
 

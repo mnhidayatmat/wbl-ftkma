@@ -118,17 +118,22 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    @can('edit-at-marks', $student)
-                                        <a href="{{ route('academic.ppe.lecturer.show', $student) }}" 
+                                    @if(auth()->user()->isPpeCoordinator() && !auth()->user()->isAdmin())
+                                        <a href="{{ route('academic.ppe.lecturer.show', $student) }}"
+                                           class="inline-flex items-center px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white rounded-lg transition-colors">
+                                            View
+                                        </a>
+                                    @elsecan('edit-at-marks', $student)
+                                        <a href="{{ route('academic.ppe.lecturer.show', $student) }}"
                                            class="inline-flex items-center px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white rounded-lg transition-colors">
                                             {{ $student->evaluation_status == 'not_started' ? 'Evaluate' : 'Edit' }}
                                         </a>
                                     @else
-                                        <a href="{{ route('academic.ppe.lecturer.show', $student) }}" 
+                                        <a href="{{ route('academic.ppe.lecturer.show', $student) }}"
                                            class="inline-flex items-center px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-colors">
                                             View
                                         </a>
-                                    @endcan
+                                    @endif
                                 </td>
                             </tr>
                         @empty

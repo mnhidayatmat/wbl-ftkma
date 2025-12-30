@@ -153,7 +153,7 @@
     </a>
     @endif
 
-    @if(!$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator && !$isLiCoordinator)
+    @if(!$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator && !$isLiCoordinator && !$isStudent)
     <a href="{{ route('admin.companies.index') }}"
        class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.companies.*') || request()->routeIs('admin.agreements.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
        :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"

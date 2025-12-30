@@ -68,7 +68,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('edit-supervisor-li-marks', function ($user, $student) {
-            if ($user->isAdmin()) {
+            if ($user->isAdmin() || $user->isLiCoordinator()) {
                 return true;
             }
             if ($user->isSupervisorLi()) {
@@ -82,7 +82,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('edit-li-ic-marks', function ($user, $student) {
-            if ($user->isAdmin()) {
+            if ($user->isAdmin() || $user->isLiCoordinator()) {
                 return true;
             }
             if ($user->isIndustry()) {

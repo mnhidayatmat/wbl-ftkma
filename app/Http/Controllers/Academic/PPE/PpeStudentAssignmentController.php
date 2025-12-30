@@ -22,7 +22,7 @@ class PpeStudentAssignmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $query = Student::with(['group', 'academicTutor', 'industryCoach', 'company']);
+        $query = Student::with(['group', 'academicTutor', 'industryCoach.company']);
 
         // Filter by group
         if ($request->filled('group')) {
@@ -159,7 +159,7 @@ class PpeStudentAssignmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $students = Student::with(['group', 'academicTutor', 'industryCoach', 'company'])
+        $students = Student::with(['group', 'academicTutor', 'industryCoach.company'])
             ->orderBy('name')
             ->get();
 
@@ -182,7 +182,7 @@ class PpeStudentAssignmentController extends Controller
                     $student->group->name ?? 'N/A',
                     $student->academicTutor->name ?? 'Not Assigned',
                     $student->industryCoach->name ?? 'Not Assigned',
-                    $student->company->company_name ?? 'N/A',
+                    $student->industryCoach?->company?->company_name ?? 'N/A',
                 ]);
             }
 

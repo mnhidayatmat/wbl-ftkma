@@ -28,6 +28,11 @@ class StudentPolicy
             return true;
         }
 
+        // Module coordinators can view any student
+        if ($user->isModuleCoordinator()) {
+            return true;
+        }
+
         // Lecturer can view students assigned to them
         if ($user->isLecturer()) {
             return $student->at_id === $user->id;
