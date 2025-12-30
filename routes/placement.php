@@ -54,4 +54,6 @@ Route::middleware('auth')->prefix('student/placement')->name('student.placement.
     Route::post('company/{application}/got-interview', [StudentPlacementController::class, 'markAsInterviewed'])->name('company.got-interview');
     Route::post('upload-proof', [StudentPlacementController::class, 'studentUploadProof'])->name('proof.upload');
     Route::get('view-proof', [StudentPlacementController::class, 'studentViewProof'])->name('proof.view');
+    Route::get('download-sal', [StudentPlacementController::class, 'studentDownloadSal'])->name('download-sal');
+    Route::get('download-scl', [StudentPlacementController::class, 'studentDownloadScl'])->name('download-scl');
 });

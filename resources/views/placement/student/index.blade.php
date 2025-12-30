@@ -338,7 +338,7 @@
                             <p class="text-sm text-blue-700 dark:text-blue-300">Start applying to companies</p>
                         </div>
 
-                        @if($tracking->sal_path)
+                        @if($tracking->sal_file_path)
                             <div class="space-y-2">
                                 <a href="{{ route('student.placement.download-sal') }}" target="_blank"
                                    class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
@@ -387,7 +387,7 @@
                             <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Track all your applications</p>
                         </div>
 
-                        @if($tracking->sal_path)
+                        @if($tracking->sal_file_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
                                class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
@@ -438,7 +438,7 @@
                             <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Update when you get an offer letter</p>
                         </div>
 
-                        @if($tracking->sal_path)
+                        @if($tracking->sal_file_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
                                class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
@@ -465,7 +465,7 @@
                             <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Upload your acceptance letter/email</p>
                         </div>
 
-                        @if($tracking->sal_path)
+                        @if($tracking->sal_file_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
                                class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
@@ -504,7 +504,7 @@
                             </div>
                         @endif
 
-                        @if($tracking->sal_path)
+                        @if($tracking->sal_file_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
                                class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
@@ -529,7 +529,7 @@
                             <p class="text-xs opacity-90 mt-1">Congratulations on your placement</p>
                         </div>
 
-                        @if($tracking->scl_path)
+                        @if($tracking->scl_file_path)
                             <div class="space-y-2">
                                 <a href="{{ route('student.placement.download-scl') }}" target="_blank"
                                    class="block px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
@@ -539,7 +539,7 @@
                             </div>
                         @endif
 
-                        @if($tracking->sal_path)
+                        @if($tracking->sal_file_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
                                class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
                                 📋 Download SAL
@@ -641,28 +641,49 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
                 <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 uppercase">Documents</h3>
                 <div class="space-y-2">
-                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">SAL</span>
+                    @if($tracking->sal_file_path)
+                        <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                           class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer border border-green-200 dark:border-green-800">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span class="text-sm font-medium text-green-700 dark:text-green-300">SAL</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200 px-2 py-1 rounded-full">Download</span>
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </div>
+                        </a>
+                    @else
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">SAL</span>
+                            </div>
+                            <span class="text-xs bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">Pending</span>
                         </div>
-                        @if($tracking->sal_path)
-                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Available</span>
-                        @else
-                            <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">Pending</span>
-                        @endif
-                    </div>
-                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">SCL</span>
+                    @endif
+
+                    @if($tracking->scl_file_path)
+                        <a href="{{ route('student.placement.download-scl') }}" target="_blank"
+                           class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors cursor-pointer border border-purple-200 dark:border-purple-800">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span class="text-sm font-medium text-purple-700 dark:text-purple-300">SCL</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">Download</span>
+                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </div>
+                        </a>
+                    @else
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">SCL</span>
+                            </div>
+                            <span class="text-xs bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">Pending</span>
                         </div>
-                        @if($tracking->scl_path)
-                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Available</span>
-                        @else
-                            <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">Pending</span>
-                        @endif
-                    </div>
+                    @endif
                 </div>
             </div>
 

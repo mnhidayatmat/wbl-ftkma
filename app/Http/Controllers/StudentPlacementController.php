@@ -564,18 +564,27 @@ class StudentPlacementController extends Controller
      */
     private function generateSalPdf(Student $student)
     {
+        // Get template from database
+        $template = \App\Models\DocumentTemplate::getSalTemplate();
+
         // Get WBL duration from settings (you may need to create a settings table)
         $wblDuration = '6 months'; // Default, can be fetched from settings
 
-        $pdf = Pdf::loadView('placement.pdf.sal', [
+        $marginTop = $template->settings['margin_top'] ?? 25;
+        $marginBottom = $template->settings['margin_bottom'] ?? 25;
+        $marginLeft = $template->settings['margin_left'] ?? 25;
+        $marginRight = $template->settings['margin_right'] ?? 25;
+
+        $pdf = Pdf::loadView('placement.pdf.sal-template', [
             'student' => $student,
             'wblDuration' => $wblDuration,
             'generatedAt' => now(),
+            'template' => $template,
         ])->setPaper('a4', 'portrait')
-            ->setOption('margin-top', 25)
-            ->setOption('margin-bottom', 25)
-            ->setOption('margin-left', 25)
-            ->setOption('margin-right', 25)
+            ->setOption('margin-top', $marginTop)
+            ->setOption('margin-bottom', $marginBottom)
+            ->setOption('margin-left', $marginLeft)
+            ->setOption('margin-right', $marginRight)
             ->setOption('enable-local-file-access', true);
 
         return $pdf;
@@ -1104,6 +1113,52 @@ class StudentPlacementController extends Controller
             'Content-Type' => $mimeType,
             'Content-Disposition' => 'inline; filename="'.$fileName.'"',
         ]);
+    }
+
+    /**
+     * Student download their own SAL PDF.
+     */
+    public function studentDownloadSal()
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access. This page is for students only.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking || ! $tracking->sal_file_path || ! Storage::exists($tracking->sal_file_path)) {
+            abort(404, 'SAL not found. Please contact your coordinator.');
+        }
+
+        return Storage::download($tracking->sal_file_path, 'SAL_' . $student->matric_no . '.pdf');
+    }
+
+    /**
+     * Student download their own SCL PDF.
+     */
+    public function studentDownloadScl()
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access. This page is for students only.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking || ! $tracking->scl_file_path || ! Storage::exists($tracking->scl_file_path)) {
+            abort(404, 'SCL not found. Please contact your coordinator.');
+        }
+
+        return Storage::download($tracking->scl_file_path, 'SCL_' . $student->matric_no . '.pdf');
     }
 
     /**

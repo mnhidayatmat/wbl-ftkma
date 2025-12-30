@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AssessmentController;
+use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\StudentAssignmentController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\RecruitmentPoolController;
@@ -122,6 +123,26 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
     Route::post('agreements/import/preview', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'importPreview'])->name('agreements.import.preview');
     Route::post('agreements/import/execute', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'importExecute'])->name('agreements.import.execute');
     Route::get('agreements/template', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'downloadTemplate'])->name('agreements.template');
+
+    // Document Templates (Admin Only)
+    Route::middleware('role:admin')->prefix('documents')->name('documents.')->group(function () {
+        // SAL Template
+        Route::get('sal', [DocumentTemplateController::class, 'sal'])->name('sal');
+        Route::get('sal/edit', [DocumentTemplateController::class, 'editSal'])->name('sal.edit');
+        Route::get('sal/designer', [DocumentTemplateController::class, 'designerSal'])->name('sal.designer');
+        Route::put('sal', [DocumentTemplateController::class, 'updateSal'])->name('sal.update');
+        Route::put('sal/canvas', [DocumentTemplateController::class, 'updateSalCanvas'])->name('sal.canvas.update');
+        Route::post('sal/reset', [DocumentTemplateController::class, 'resetSal'])->name('sal.reset');
+        Route::get('sal/preview', [DocumentTemplateController::class, 'previewSal'])->name('sal.preview');
+
+        // SCL Template
+        Route::get('scl', [DocumentTemplateController::class, 'scl'])->name('scl');
+        Route::get('scl/preview', [DocumentTemplateController::class, 'previewScl'])->name('scl.preview');
+
+        // MoU Template
+        Route::get('mou', [DocumentTemplateController::class, 'mou'])->name('mou');
+        Route::get('mou/preview', [DocumentTemplateController::class, 'previewMou'])->name('mou.preview');
+    });
 });
 
 /*

@@ -226,6 +226,7 @@ use Illuminate\Support\Facades\Route;
             }
         }
     </style>
+    @stack('styles')
 </head>
 <body class="font-sans antialiased bg-[#F5F7FA] dark:bg-gray-900 transition-colors duration-200" 
       x-data="sidebarController()"

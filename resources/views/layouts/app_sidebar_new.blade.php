@@ -203,6 +203,53 @@
         </div>
         <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Manage Students</span>
     </a>
+
+    <!-- Documents Section (Admin Only) -->
+    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
+            <span x-show="!isSidebarCollapsed">Documents</span>
+            <span x-show="isSidebarCollapsed" class="block w-8 h-[1px] bg-gray-300 dark:bg-gray-600 mx-auto"></span>
+        </p>
+
+        <!-- Template SAL -->
+        <a href="{{ route('admin.documents.sal') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.documents.sal*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Template SAL' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Template SAL</span>
+        </a>
+
+        <!-- Template SCL -->
+        <a href="{{ route('admin.documents.scl') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.documents.scl') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Template SCL' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Template SCL</span>
+        </a>
+
+        <!-- Template MoU -->
+        <a href="{{ route('admin.documents.mou') }}"
+           class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.documents.mou') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+           :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+           :title="isSidebarCollapsed ? 'Template MoU' : ''">
+            <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Template MoU</span>
+        </a>
+    </div>
     @endif
 
     <!-- Student Placement Tracking (Hidden for FYP, IP, OSH, PPE, and LI Coordinators) -->
