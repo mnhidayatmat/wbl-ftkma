@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DocumentTemplate;
 use App\Models\PlacementApplicationEvidence;
 use App\Models\PlacementCompanyApplication;
 use App\Models\Student;
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\Settings;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class StudentPlacementController extends Controller
 {
@@ -337,11 +341,13 @@ class StudentPlacementController extends Controller
             ]);
         }
 
-        // Generate SAL PDF
-        $pdf = $this->generateSalPdf($student);
+        // Generate SAL PDF (uses Word template if available, otherwise canvas template)
+        $document = $this->generateSalPdf($student);
+
+        // Always save as PDF
         $fileName = 'SAL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
         $filePath = 'placement/sal/'.$fileName;
-        Storage::put($filePath, $pdf->output());
+        Storage::put($filePath, $document->output());
 
         // Update tracking
         $tracking->update([
@@ -406,11 +412,13 @@ class StudentPlacementController extends Controller
                 ]);
             }
 
-            // Generate SAL PDF
-            $pdf = $this->generateSalPdf($student);
+            // Generate SAL PDF (uses Word template if available, otherwise canvas template)
+            $document = $this->generateSalPdf($student);
+
+            // Always save as PDF
             $fileName = 'SAL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
             $filePath = 'placement/sal/'.$fileName;
-            Storage::put($filePath, $pdf->output());
+            Storage::put($filePath, $document->output());
 
             $tracking->update([
                 'status' => 'SAL_RELEASED',
@@ -539,11 +547,26 @@ class StudentPlacementController extends Controller
     public function downloadSal(Student $student)
     {
         $tracking = $student->placementTracking;
-        if (! $tracking || ! $tracking->sal_file_path || ! Storage::exists($tracking->sal_file_path)) {
-            abort(404, 'SAL not found.');
+
+        // Check if SAL has been released for this student
+        if (! $tracking || ! in_array($tracking->status, ['SAL_RELEASED', 'APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])) {
+            abort(404, 'SAL not found. SAL has not been released for this student.');
         }
 
-        return Storage::download($tracking->sal_file_path);
+        // Load student relationships needed for SAL generation
+        $student->load(['user', 'group', 'company']);
+
+        // Generate SAL PDF on-the-fly using the Word template
+        $document = $this->generateSalPdf($student);
+
+        // Get PDF content
+        $pdfContent = $document->output();
+
+        // Return as PDF download
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="SAL_'.$student->matric_no.'.pdf"',
+        ]);
     }
 
     /**
@@ -565,10 +588,30 @@ class StudentPlacementController extends Controller
     private function generateSalPdf(Student $student)
     {
         // Get template from database
-        $template = \App\Models\DocumentTemplate::getSalTemplate();
+        $template = DocumentTemplate::getSalTemplate();
 
-        // Get WBL duration from settings (you may need to create a settings table)
-        $wblDuration = '6 months'; // Default, can be fetched from settings
+        // Use Word template if uploaded, otherwise fall back to canvas template (PDF)
+        if ($template->word_template_path && Storage::disk('public')->exists($template->word_template_path)) {
+            return $this->generateSalFromWordTemplate($student, $template);
+        }
+
+        // Default: use canvas template (PDF)
+        return $this->generateSalFromCanvasTemplate($student, $template);
+    }
+
+    /**
+     * Generate SAL from Canvas template (PDF).
+     */
+    private function generateSalFromCanvasTemplate(Student $student, DocumentTemplate $template)
+    {
+        // Calculate WBL duration
+        $wblDuration = '6 months';
+        if ($student->group && $student->group->start_date && $student->group->end_date) {
+            $start = \Carbon\Carbon::parse($student->group->start_date);
+            $end = \Carbon\Carbon::parse($student->group->end_date);
+            $months = $start->diffInMonths($end);
+            $wblDuration = $months.' '.($months == 1 ? 'month' : 'months');
+        }
 
         $marginTop = $template->settings['margin_top'] ?? 25;
         $marginBottom = $template->settings['margin_bottom'] ?? 25;
@@ -588,6 +631,119 @@ class StudentPlacementController extends Controller
             ->setOption('enable-local-file-access', true);
 
         return $pdf;
+    }
+
+    /**
+     * Generate SAL from Word template.
+     */
+    private function generateSalFromWordTemplate(Student $student, DocumentTemplate $template)
+    {
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Calculate WBL duration
+        $wblDuration = '6 months';
+        $groupStartDate = null;
+        $groupEndDate = null;
+
+        if ($student->group) {
+            $groupStartDate = $student->group->start_date;
+            $groupEndDate = $student->group->end_date;
+
+            if ($groupStartDate && $groupEndDate) {
+                $start = \Carbon\Carbon::parse($groupStartDate);
+                $end = \Carbon\Carbon::parse($groupEndDate);
+                $months = $start->diffInMonths($end);
+                $wblDuration = $months.' '.($months == 1 ? 'month' : 'months');
+            }
+        }
+
+        // Get SAL release date and reference number from settings
+        $salReleaseDate = $template->settings['sal_release_date'] ?? now()->format('Y-m-d');
+        $salReferenceNumber = $template->settings['sal_reference_number'] ?? '';
+
+        // Replace variables
+        $variables = [
+            'student_name' => $student->name ?? $student->user?->name ?? '',
+            'student_matric' => $student->matric_no ?? '',
+            'student_ic' => $student->ic_no ?? '',
+            'student_faculty' => $student->faculty ?? 'Faculty of Technology and Management',
+            'student_programme' => $student->programme ?? '',
+            'student_email' => $student->user?->email ?? '',
+            'student_phone' => $student->phone ?? '',
+            'wbl_duration' => $wblDuration,
+            'current_date' => now()->format('d F Y'),
+            'group_name' => $student->group?->name ?? '',
+            'group_start_date' => $groupStartDate ? \Carbon\Carbon::parse($groupStartDate)->format('d F Y') : '',
+            'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
+            'sal_release_date' => $salReleaseDate ? \Carbon\Carbon::parse($salReleaseDate)->format('d F Y') : '',
+            'sal_reference_number' => $salReferenceNumber,
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions (with :upper suffix)
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Save Word document to temp file
+        $tempDir = storage_path('app/temp');
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $wordPath = $tempDir.'/SAL_'.$student->id.'_'.time().'.docx';
+        $templateProcessor->saveAs($wordPath);
+
+        // Convert Word to PDF using PhpWord with DomPDF renderer
+        $pdfPath = $tempDir.'/SAL_'.$student->id.'_'.time().'.pdf';
+
+        // Set PDF renderer to DomPDF
+        $domPdfPath = base_path('vendor/dompdf/dompdf');
+        Settings::setPdfRendererPath($domPdfPath);
+        Settings::setPdfRendererName('DomPDF');
+
+        // Load the Word document and convert to PDF
+        $phpWord = IOFactory::load($wordPath);
+        $pdfWriter = IOFactory::createWriter($phpWord, 'PDF');
+        $pdfWriter->save($pdfPath);
+
+        // Clean up the temp Word file
+        if (file_exists($wordPath)) {
+            unlink($wordPath);
+        }
+
+        // Return PDF wrapper object
+        return new class($pdfPath)
+        {
+            private $pdfPath;
+
+            public function __construct($pdfPath)
+            {
+                $this->pdfPath = $pdfPath;
+            }
+
+            public function output()
+            {
+                $content = file_get_contents($this->pdfPath);
+
+                // Clean up temp PDF file after reading
+                if (file_exists($this->pdfPath)) {
+                    unlink($this->pdfPath);
+                }
+
+                return $content;
+            }
+
+            public function isWordDocument()
+            {
+                return false;
+            }
+        };
     }
 
     /**
@@ -611,6 +767,161 @@ class StudentPlacementController extends Controller
             ->setOption('enable-local-file-access', true);
 
         return $pdf;
+    }
+
+    /**
+     * Generate SAL Word document (without PDF conversion).
+     */
+    private function generateSalWord(Student $student): string
+    {
+        // Get template from database
+        $template = DocumentTemplate::getSalTemplate();
+
+        // Check if Word template exists
+        if (! $template->word_template_path || ! Storage::disk('public')->exists($template->word_template_path)) {
+            abort(404, 'SAL Word template not found. Please contact administrator.');
+        }
+
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Calculate WBL duration
+        $wblDuration = '6 months';
+        $groupStartDate = null;
+        $groupEndDate = null;
+
+        if ($student->group) {
+            $groupStartDate = $student->group->start_date;
+            $groupEndDate = $student->group->end_date;
+
+            if ($groupStartDate && $groupEndDate) {
+                $start = \Carbon\Carbon::parse($groupStartDate);
+                $end = \Carbon\Carbon::parse($groupEndDate);
+                $months = $start->diffInMonths($end);
+                $wblDuration = $months.' '.($months == 1 ? 'month' : 'months');
+            }
+        }
+
+        // Get SAL release date and reference number from settings
+        $salReleaseDate = $template->settings['sal_release_date'] ?? now()->format('Y-m-d');
+        $salReferenceNumber = $template->settings['sal_reference_number'] ?? '';
+
+        // Replace variables
+        $variables = [
+            'student_name' => $student->name ?? $student->user?->name ?? '',
+            'student_matric' => $student->matric_no ?? '',
+            'student_ic' => $student->ic_no ?? '',
+            'student_faculty' => $student->faculty ?? 'Faculty of Technology and Management',
+            'student_programme' => $student->programme ?? '',
+            'student_email' => $student->user?->email ?? '',
+            'student_phone' => $student->phone ?? '',
+            'wbl_duration' => $wblDuration,
+            'current_date' => now()->format('d F Y'),
+            'group_name' => $student->group?->name ?? '',
+            'group_start_date' => $groupStartDate ? \Carbon\Carbon::parse($groupStartDate)->format('d F Y') : '',
+            'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
+            'sal_release_date' => $salReleaseDate ? \Carbon\Carbon::parse($salReleaseDate)->format('d F Y') : '',
+            'sal_reference_number' => $salReferenceNumber,
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions (with :upper suffix)
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Save Word document to temp file
+        $tempDir = storage_path('app/temp');
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $wordPath = $tempDir.'/SAL_'.$student->id.'_'.time().'.docx';
+        $templateProcessor->saveAs($wordPath);
+
+        return $wordPath;
+    }
+
+    /**
+     * Convert Word document to PDF using LibreOffice.
+     */
+    private function convertWordToPdf(string $wordPath): string
+    {
+        // Generate PDF path
+        $pdfPath = str_replace('.docx', '.pdf', $wordPath);
+        $outputDir = dirname($wordPath);
+
+        // Try to find LibreOffice executable
+        $libreOfficePaths = [
+            '/Applications/LibreOffice.app/Contents/MacOS/soffice', // macOS
+            '/usr/bin/libreoffice', // Linux
+            '/usr/bin/soffice', // Linux alternative
+            'C:\\Program Files\\LibreOffice\\program\\soffice.exe', // Windows
+        ];
+
+        $libreOfficePath = null;
+        foreach ($libreOfficePaths as $path) {
+            if (file_exists($path)) {
+                $libreOfficePath = $path;
+                break;
+            }
+        }
+
+        if (! $libreOfficePath) {
+            // Fallback to PhpWord PDF conversion (less accurate but works)
+            return $this->convertWordToPdfFallback($wordPath);
+        }
+
+        // Use LibreOffice for accurate conversion
+        $command = sprintf(
+            '"%s" --headless --convert-to pdf --outdir "%s" "%s" 2>&1',
+            $libreOfficePath,
+            $outputDir,
+            $wordPath
+        );
+
+        exec($command, $output, $returnCode);
+
+        // Check if PDF was created
+        if (file_exists($pdfPath)) {
+            return $pdfPath;
+        }
+
+        // If LibreOffice failed, try fallback
+        Log::warning('LibreOffice conversion failed', [
+            'command' => $command,
+            'output' => $output,
+            'return_code' => $returnCode,
+        ]);
+
+        return $this->convertWordToPdfFallback($wordPath);
+    }
+
+    /**
+     * Fallback Word to PDF conversion using PhpWord (less accurate).
+     */
+    private function convertWordToPdfFallback(string $wordPath): string
+    {
+        // Set PDF renderer to DomPDF
+        $domPdfPath = base_path('vendor/dompdf/dompdf');
+        Settings::setPdfRendererPath($domPdfPath);
+        Settings::setPdfRendererName('DomPDF');
+
+        // Load the Word document
+        $phpWord = IOFactory::load($wordPath);
+
+        // Generate PDF path
+        $pdfPath = str_replace('.docx', '.pdf', $wordPath);
+
+        // Save as PDF
+        $pdfWriter = IOFactory::createWriter($phpWord, 'PDF');
+        $pdfWriter->save($pdfPath);
+
+        return $pdfPath;
     }
 
     /**
@@ -1130,12 +1441,29 @@ class StudentPlacementController extends Controller
             abort(404, 'Student profile not found.');
         }
 
+        // Load student relationships needed for SAL generation
+        $student->load(['user', 'group', 'company']);
+
         $tracking = $student->placementTracking;
-        if (! $tracking || ! $tracking->sal_file_path || ! Storage::exists($tracking->sal_file_path)) {
-            abort(404, 'SAL not found. Please contact your coordinator.');
+
+        // Check if SAL has been released for this student
+        if (! $tracking || ! in_array($tracking->status, ['SAL_RELEASED', 'APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])) {
+            abort(404, 'SAL not found. Please contact your coordinator to release your SAL.');
         }
 
-        return Storage::download($tracking->sal_file_path, 'SAL_' . $student->matric_no . '.pdf');
+        // Step 1: Generate SAL Word document with variables replaced
+        $wordPath = $this->generateSalWord($student);
+
+        // Step 2: Convert Word document to PDF
+        $pdfPath = $this->convertWordToPdf($wordPath);
+
+        // Clean up the Word file
+        if (file_exists($wordPath)) {
+            unlink($wordPath);
+        }
+
+        // Step 3: Return PDF for download
+        return response()->download($pdfPath, 'SAL_'.$student->matric_no.'.pdf')->deleteFileAfterSend(true);
     }
 
     /**
@@ -1158,7 +1486,7 @@ class StudentPlacementController extends Controller
             abort(404, 'SCL not found. Please contact your coordinator.');
         }
 
-        return Storage::download($tracking->scl_file_path, 'SCL_' . $student->matric_no . '.pdf');
+        return Storage::download($tracking->scl_file_path, 'SCL_'.$student->matric_no.'.pdf');
     }
 
     /**

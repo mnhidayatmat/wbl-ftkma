@@ -135,6 +135,15 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
         Route::post('sal/reset', [DocumentTemplateController::class, 'resetSal'])->name('sal.reset');
         Route::get('sal/preview', [DocumentTemplateController::class, 'previewSal'])->name('sal.preview');
 
+        // SAL Word Template
+        Route::get('sal/word-template', [DocumentTemplateController::class, 'wordTemplateSal'])->name('sal.word-template');
+        Route::post('sal/word-template/upload', [DocumentTemplateController::class, 'uploadWordTemplate'])->name('sal.word-template.upload');
+        Route::delete('sal/word-template', [DocumentTemplateController::class, 'deleteWordTemplate'])->name('sal.word-template.delete');
+        Route::post('sal/template-mode', [DocumentTemplateController::class, 'setTemplateMode'])->name('sal.template-mode');
+        Route::get('sal/word-template/preview', [DocumentTemplateController::class, 'previewWordTemplate'])->name('sal.word-template.preview');
+        Route::get('sal/word-template/preview-docx', [DocumentTemplateController::class, 'previewWordTemplateDocx'])->name('sal.word-template.preview-docx');
+        Route::get('sal/word-template/download', [DocumentTemplateController::class, 'downloadWordTemplate'])->name('sal.word-template.download');
+
         // SCL Template
         Route::get('scl', [DocumentTemplateController::class, 'scl'])->name('scl');
         Route::get('scl/preview', [DocumentTemplateController::class, 'previewScl'])->name('scl.preview');

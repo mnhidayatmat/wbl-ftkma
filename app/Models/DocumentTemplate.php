@@ -21,6 +21,9 @@ class DocumentTemplate extends Model
         'signatory_title',
         'signatory_department',
         'logo_path',
+        'word_template_path',
+        'word_template_original_name',
+        'template_mode',
         'settings',
         'canvas_elements',
         'canvas_width',
@@ -146,12 +149,17 @@ Thank you for your cooperation.',
             '{{student_name}}' => 'Student\'s full name',
             '{{student_matric}}' => 'Student\'s matric number',
             '{{student_ic}}' => 'Student\'s IC number',
-            '{{student_faculty}}' => 'Student\'s faculty/program',
+            '{{student_faculty}}' => 'Student\'s faculty',
+            '{{student_programme}}' => 'Student\'s programme',
             '{{student_email}}' => 'Student\'s email',
             '{{student_phone}}' => 'Student\'s phone number',
             '{{wbl_duration}}' => 'WBL training duration',
             '{{current_date}}' => 'Current date',
             '{{group_name}}' => 'WBL group name',
+            '{{group_start_date}}' => 'Group start date',
+            '{{group_end_date}}' => 'Group end date',
+            '{{sal_release_date}}' => 'SAL release/issue date',
+            '{{sal_reference_number}}' => 'SAL reference number',
         ];
     }
 
@@ -181,7 +189,7 @@ Thank you for your cooperation.',
         $content = $this->body_content;
 
         foreach ($data as $key => $value) {
-            $content = str_replace('{{' . $key . '}}', $value ?? '', $content);
+            $content = str_replace('{{'.$key.'}}', $value ?? '', $content);
         }
 
         return $content;
