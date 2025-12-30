@@ -58,8 +58,30 @@ class ResumeInspectionHistory extends Model
             'COMMENT_ADDED' => 'Comment Added',
             'COMMENT_UPDATED' => 'Comment Updated',
             'RESET' => 'Reset',
+            'STUDENT_REPLY' => 'Student Reply',
+            'STUDENT_REPLY_UPDATED' => 'Student Reply Updated',
             default => ucfirst(str_replace('_', ' ', strtolower($this->action))),
         };
+    }
+
+    /**
+     * Check if this is a student action.
+     */
+    public function isStudentAction(): bool
+    {
+        return in_array($this->action, ['STUDENT_REPLY', 'STUDENT_REPLY_UPDATED'])
+            || ($this->metadata['is_student_action'] ?? false);
+    }
+
+    /**
+     * Get the actor name (student or reviewer).
+     */
+    public function getActorNameAttribute(): ?string
+    {
+        if ($this->isStudentAction()) {
+            return $this->metadata['student_name'] ?? 'Student';
+        }
+        return $this->reviewer?->name;
     }
 
     /**
@@ -72,6 +94,7 @@ class ResumeInspectionHistory extends Model
             'REVISION_REQUESTED' => 'text-orange-600 dark:text-orange-400',
             'COMMENT_ADDED', 'COMMENT_UPDATED' => 'text-blue-600 dark:text-blue-400',
             'RESET' => 'text-red-600 dark:text-red-400',
+            'STUDENT_REPLY', 'STUDENT_REPLY_UPDATED' => 'text-purple-600 dark:text-purple-400',
             default => 'text-gray-600 dark:text-gray-400',
         };
     }

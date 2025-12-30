@@ -139,6 +139,69 @@
                 </div>
             @endif
 
+            <!-- REVIEW HISTORY -->
+            @if(isset($history) && $history->count() > 0)
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-[#003A6C] dark:text-[#0084C5] flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Review History
+                        </h3>
+                        <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">{{ $history->count() }} {{ Str::plural('entry', $history->count()) }}</span>
+                    </div>
+
+                    <div class="space-y-3 max-h-80 overflow-y-auto pr-2">
+                        @foreach($history as $entry)
+                            @php
+                                $isStudentAction = $entry->isStudentAction();
+                                $borderColor = match(true) {
+                                    $entry->action === 'APPROVED' => 'border-green-500',
+                                    $entry->action === 'REVISION_REQUESTED' => 'border-orange-500',
+                                    $entry->action === 'RESET' => 'border-red-500',
+                                    $isStudentAction => 'border-purple-500',
+                                    default => 'border-blue-500',
+                                };
+                                $bgColor = $isStudentAction ? 'bg-purple-50 dark:bg-purple-900/20' : 'bg-gray-50 dark:bg-gray-700/50';
+                            @endphp
+                            <div class="border-l-4 {{ $borderColor }} {{ $bgColor }} rounded-r-lg p-3">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold {{ $entry->action_icon_color }}">
+                                            @if($entry->action === 'APPROVED')
+                                                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            @elseif($entry->action === 'REVISION_REQUESTED')
+                                                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            @elseif($entry->action === 'RESET')
+                                                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                            @elseif($isStudentAction)
+                                                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                                            @else
+                                                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+                                            @endif
+                                            {{ $entry->action_label }}
+                                        </span>
+                                        @if($isStudentAction)
+                                            <span class="text-xs px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded">Student</span>
+                                        @else
+                                            <span class="text-xs px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded">Coordinator</span>
+                                        @endif
+                                    </div>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $entry->created_at->format('d M Y, H:i') }}</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">by {{ $entry->actor_name ?? 'Unknown' }}</p>
+                                @if($entry->comment)
+                                    <div class="bg-white dark:bg-gray-800 rounded p-2 mt-2 border {{ $isStudentAction ? 'border-purple-200 dark:border-purple-700' : 'border-gray-200 dark:border-gray-600' }}">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $entry->comment }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <!-- COMPLIANCE CHECKLIST (if not in completed group) -->
             @if(!isset($isInCompletedGroup) || !$isInCompletedGroup)
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 border-l-4 border-yellow-500">

@@ -52,6 +52,7 @@ class StudentResumeInspectionController extends Controller
                     'inspection' => null,
                     'isInCompletedGroup' => true,
                     'referenceSamples' => $referenceSamples,
+                    'history' => collect(), // Empty collection
                 ]);
             }
             $inspection = StudentResumeInspection::create([
@@ -60,11 +61,18 @@ class StudentResumeInspectionController extends Controller
             ]);
         }
 
+        // Load history logs ordered by most recent first
+        $history = ResumeInspectionHistory::where('inspection_id', $inspection->id)
+            ->with('reviewer')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('resume-inspection.student.index', [
             'student' => $student,
             'inspection' => $inspection->load('reviewer'),
             'isInCompletedGroup' => $isInCompletedGroup,
             'referenceSamples' => $referenceSamples,
+            'history' => $history,
         ]);
     }
 
@@ -282,10 +290,26 @@ class StudentResumeInspectionController extends Controller
             return redirect()->back()->with('error', 'No coordinator comment to reply to.');
         }
 
+        $previousReply = $inspection->student_reply;
+
         $inspection->update([
             'student_reply' => $validated['reply'],
             'student_replied_at' => now(),
         ]);
+
+        // Log student reply to history
+        ResumeInspectionHistory::log(
+            $inspection->id,
+            $previousReply ? 'STUDENT_REPLY_UPDATED' : 'STUDENT_REPLY',
+            $inspection->status,
+            $validated['reply'],
+            $previousReply,
+            [
+                'student_id' => $student->id,
+                'student_name' => $student->name,
+                'is_student_action' => true,
+            ]
+        );
 
         Log::info('Student Replied to Coordinator Comment', [
             'student_id' => $student->id,
