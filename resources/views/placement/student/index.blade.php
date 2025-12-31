@@ -810,24 +810,21 @@
                             </ul>
                         </div>
 
-                        {{-- SCL Auto-Released - Proceed to Download Button --}}
+                        {{-- SCL Auto-Released - Download Directly --}}
                         @if($tracking->scl_file_path)
-                            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border-2 border-purple-300 dark:border-purple-700">
                                 <div class="flex items-start gap-3 mb-3">
                                     <svg class="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     <div>
                                         <p class="text-sm font-bold text-purple-800 dark:text-purple-200">Your SCL is Ready!</p>
-                                        <p class="text-xs text-purple-700 dark:text-purple-300 mt-1">Your Student Confirmation Letter has been automatically generated. Click below to proceed and download.</p>
+                                        <p class="text-xs text-purple-700 dark:text-purple-300 mt-1">Your Student Confirmation Letter has been generated. Download it now!</p>
                                     </div>
                                 </div>
-                                <form action="{{ route('student.placement.proceed-scl') }}" method="POST">
-                                    @csrf
-                                    <button type="submit"
-                                            class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md flex items-center justify-center gap-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                        Proceed to Download SCL
-                                    </button>
-                                </form>
+                                <a href="{{ route('student.placement.download-scl') }}" target="_blank"
+                                   class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Download SCL
+                                </a>
                             </div>
                         @endif
 
@@ -1071,25 +1068,20 @@
                         {{-- Status --}}
                         @if($tracking->scl_file_path)
                             {{-- SCL already auto-released by admin --}}
-                            <div class="p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <div class="p-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-300 dark:border-purple-700 rounded-lg">
+                                <div class="flex items-start gap-3 mb-3">
+                                    <svg class="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     <div>
-                                        <p class="text-sm font-semibold text-purple-800 dark:text-purple-200">Your SCL is Ready!</p>
-                                        <p class="text-xs text-purple-700 dark:text-purple-300 mt-1">Click below to proceed and download your Student Confirmation Letter</p>
+                                        <p class="text-sm font-bold text-purple-800 dark:text-purple-200">Your SCL is Ready!</p>
+                                        <p class="text-xs text-purple-700 dark:text-purple-300 mt-1">Your Student Confirmation Letter has been generated. Download it now!</p>
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- Proceed to Download SCL Button --}}
-                            <form action="{{ route('student.placement.proceed-scl') }}" method="POST">
-                                @csrf
-                                <button type="submit"
-                                        class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md flex items-center justify-center gap-2">
+                                <a href="{{ route('student.placement.download-scl') }}" target="_blank"
+                                   class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md flex items-center justify-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                    Proceed to Download SCL
-                                </button>
-                            </form>
+                                    Download SCL
+                                </a>
+                            </div>
                         @elseif($allRequirementsMet)
                             <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                                 <div class="flex items-start gap-2">
