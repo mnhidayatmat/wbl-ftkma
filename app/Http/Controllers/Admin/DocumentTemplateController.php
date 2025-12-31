@@ -331,6 +331,60 @@ class DocumentTemplateController extends Controller
     }
 
     /**
+     * Update MoU template settings.
+     */
+    public function updateMou(Request $request): RedirectResponse
+    {
+        $template = DocumentTemplate::getMouTemplate();
+
+        $settings = $template->settings ?? [];
+        $settings['mou_number'] = $request->input('mou_number');
+        $settings['company_shortname'] = $request->input('company_shortname');
+        $settings['signed_behalf_name'] = $request->input('signed_behalf_name');
+        $settings['signed_behalf_position'] = $request->input('signed_behalf_position');
+        $settings['witness_name'] = $request->input('witness_name');
+        $settings['witness_position'] = $request->input('witness_position');
+        $settings['liaison_officer'] = $request->input('liaison_officer');
+        $settings['vc_name'] = $request->input('vc_name');
+        $settings['dvc_name'] = $request->input('dvc_name');
+
+        $template->update([
+            'settings' => $settings,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.documents.mou')
+            ->with('success', 'MoU default settings saved successfully.');
+    }
+
+    /**
+     * Display MoU Word template management page.
+     */
+    public function wordTemplateMou(): View
+    {
+        $template = DocumentTemplate::getMouTemplate();
+        $variables = DocumentTemplate::getMouVariables();
+        $detectedVariables = [];
+
+        // Scan template to detect which variables are present
+        if ($template->word_template_path && Storage::disk('public')->exists($template->word_template_path)) {
+            try {
+                $templatePath = Storage::disk('public')->path($template->word_template_path);
+                $templateProcessor = new TemplateProcessor($templatePath);
+                $detectedVariables = $templateProcessor->getVariables();
+            } catch (\Exception $e) {
+                // Silently fail - template might be corrupted
+            }
+        }
+
+        return view('admin.documents.mou-word-template', [
+            'template' => $template,
+            'variables' => $variables,
+            'detectedVariables' => $detectedVariables,
+        ]);
+    }
+
+    /**
      * Upload Word template for MOU.
      */
     public function uploadMouWordTemplate(Request $request): RedirectResponse
@@ -375,7 +429,6 @@ class DocumentTemplateController extends Controller
         $template->update([
             'word_template_path' => null,
             'word_template_original_name' => null,
-            'template_mode' => null,
             'updated_by' => auth()->id(),
         ]);
 
@@ -447,6 +500,9 @@ class DocumentTemplateController extends Controller
             'signed_behalf_position' => 'Chief Executive Officer',
             'witness_name' => 'Encik Mohd Hafiz bin Osman',
             'witness_position' => 'General Manager',
+            'liaison_officer' => 'Encik Ahmad bin Ali',
+            'vc_name' => 'Professor Dr. Yatimah Alias',
+            'dvc_name' => 'Professor Dato Ir. Ts. Dr. Ahmad Ziad Sulaiman',
             'company_name' => 'Syarikat Teknologi Maju Sdn Bhd',
             'hr_name' => 'Puan Siti Aminah binti Hassan',
             'hr_phone' => '09-5551234',
@@ -1277,6 +1333,38 @@ class DocumentTemplateController extends Controller
         $templateProcessor->saveAs($outputPath);
 
         return $outputPath;
+    }
+
+    /**
+     * Toggle SCL auto-release setting.
+     */
+    public function toggleSclAutoRelease(): RedirectResponse
+    {
+        $template = DocumentTemplate::getSclTemplate();
+        $settings = $template->settings ?? [];
+
+        // Toggle the setting
+        $isEnabled = ! ($settings['scl_auto_release_enabled'] ?? false);
+        $settings['scl_auto_release_enabled'] = $isEnabled;
+
+        if ($isEnabled) {
+            $settings['scl_auto_release_enabled_at'] = now()->toIso8601String();
+            $settings['scl_auto_release_enabled_by'] = auth()->id();
+        } else {
+            $settings['scl_auto_release_disabled_at'] = now()->toIso8601String();
+            $settings['scl_auto_release_disabled_by'] = auth()->id();
+        }
+
+        $template->update([
+            'settings' => $settings,
+            'updated_by' => auth()->id(),
+        ]);
+
+        $message = $isEnabled
+            ? 'SCL auto-release enabled. Students will automatically receive SCL when they get offer letters.'
+            : 'SCL auto-release disabled.';
+
+        return redirect()->route('admin.documents.scl')->with('success', $message);
     }
 
     /**

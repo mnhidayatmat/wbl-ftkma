@@ -51,7 +51,7 @@
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('admin.documents.scl.word-template') }}"
-                   class="px-4 py-2 bg-[#003A6C] hover:bg-[#002855] text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm">
+                   class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -386,6 +386,67 @@
                         Save Settings
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCL Auto-Release Toggle -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">SCL Auto-Release</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                        When enabled, SCL will automatically be generated and released when a student receives an offer letter.
+                    </p>
+                    @if($template->settings['scl_auto_release_enabled'] ?? false)
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2.5 py-1 rounded-full font-medium">
+                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                                Auto-Release Active
+                            </span>
+                            @if($template->settings['scl_auto_release_enabled_at'] ?? null)
+                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                    Enabled {{ \Carbon\Carbon::parse($template->settings['scl_auto_release_enabled_at'])->diffForHumans() }}
+                                </span>
+                            @endif
+                        </div>
+                    @else
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 px-2.5 py-1 rounded-full font-medium">
+                                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                                Auto-Release Disabled
+                            </span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            <form action="{{ route('admin.documents.scl.toggle-auto-release') }}" method="POST">
+                @csrf
+                @if($template->settings['scl_auto_release_enabled'] ?? false)
+                    <button type="submit"
+                            onclick="return confirm('Disable SCL auto-release? Students will no longer receive SCL automatically when they get offer letters.')"
+                            class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                        Disable Auto-Release
+                    </button>
+                @else
+                    <button type="submit"
+                            onclick="return confirm('Enable SCL auto-release? SCL will automatically be generated when students receive offer letters.')"
+                            class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Enable SCL Auto-Release
+                    </button>
+                @endif
             </form>
         </div>
     </div>

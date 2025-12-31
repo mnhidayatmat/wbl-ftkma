@@ -489,6 +489,45 @@ class StudentPlacementController extends Controller
     }
 
     /**
+     * Auto-release SCL for a student when offer is received.
+     * This is called automatically when SCL auto-release is enabled.
+     */
+    protected function autoReleaseSclForStudent(Student $student, StudentPlacementTracking $tracking): void
+    {
+        try {
+            // Load student relationships
+            $student->load(['user', 'group', 'company', 'academicTutor', 'industryCoach']);
+
+            // Generate SCL PDF
+            $pdf = $this->generateSclPdf($student);
+            $fileName = 'SCL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
+            $filePath = 'placement/scl/'.$fileName;
+            Storage::put($filePath, $pdf->output());
+
+            // Update tracking with SCL file path (but don't change status yet)
+            $tracking->update([
+                'scl_released_at' => now(),
+                'scl_released_by' => auth()->id(),
+                'scl_file_path' => $filePath,
+            ]);
+
+            // Log action
+            Log::info('SCL Auto-Released on Offer Received', [
+                'student_id' => $student->id,
+                'student_name' => $student->name,
+                'triggered_by' => auth()->id(),
+                'triggered_by_name' => auth()->user()->name,
+            ]);
+        } catch (\Exception $e) {
+            // Log error but don't fail the main operation
+            Log::error('Failed to auto-release SCL', [
+                'student_id' => $student->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Upload confirmation proof.
      */
     public function uploadProof(Request $request, Student $student): RedirectResponse
@@ -1500,6 +1539,17 @@ class StudentPlacementController extends Controller
                     'updated_by' => auth()->id(),
                     'updated_by_name' => auth()->user()->name,
                 ]);
+
+                // Auto-release SCL when status changes to OFFER_RECEIVED and auto-release is enabled
+                if ($validated['status'] === 'OFFER_RECEIVED') {
+                    $sclTemplate = DocumentTemplate::getSclTemplate();
+                    if ($sclTemplate->settings['scl_auto_release_enabled'] ?? false) {
+                        // Check if SCL hasn't been released yet
+                        if (! $tracking->scl_file_path) {
+                            $this->autoReleaseSclForStudent($student, $tracking);
+                        }
+                    }
+                }
             }
         }
 
