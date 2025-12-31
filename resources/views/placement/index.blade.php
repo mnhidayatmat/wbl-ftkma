@@ -510,7 +510,7 @@
                     <option value="OFFER_RECEIVED" {{ request('placement_status') == 'OFFER_RECEIVED' ? 'selected' : '' }}>Offer Received</option>
                     <option value="ACCEPTED" {{ request('placement_status') == 'ACCEPTED' ? 'selected' : '' }}>Accepted</option>
                     <option value="CONFIRMED" {{ request('placement_status') == 'CONFIRMED' ? 'selected' : '' }}>Confirmed</option>
-                    <option value="SCL_RELEASED" {{ request('placement_status') == 'SCL_RELEASED' ? 'selected' : '' }}>SCL Released</option>
+                    <option value="SCL_RELEASED" {{ request('placement_status') == 'SCL_RELEASED' ? 'selected' : '' }}>Hired</option>
                 </select>
             </div>
 
@@ -722,7 +722,7 @@
                                             'OFFER_RECEIVED' => ['label' => 'Offer Received', 'color' => 'bg-yellow-100 text-yellow-800'],
                                             'ACCEPTED' => ['label' => 'Accepted', 'color' => 'bg-green-100 text-green-800'],
                                             'CONFIRMED' => ['label' => 'Confirmed', 'color' => 'bg-green-100 text-green-800'],
-                                            'SCL_RELEASED' => ['label' => 'SCL Released', 'color' => 'bg-green-100 text-green-800'],
+                                            'SCL_RELEASED' => ['label' => 'Hired', 'color' => 'bg-green-100 text-green-800'],
                                         ];
                                         $statusInfo = $statusMap[$tracking->status] ?? ['label' => $tracking->status, 'color' => 'bg-gray-100 text-gray-800'];
                                     @endphp

@@ -62,7 +62,7 @@
                 <div class="text-2xl font-bold text-emerald-600 mt-1">{{ $stats['confirmed'] }}</div>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
-                <div class="text-xs font-medium text-gray-600 dark:text-gray-400">SCL Released</div>
+                <div class="text-xs font-medium text-gray-600 dark:text-gray-400">Hired</div>
                 <div class="text-2xl font-bold text-teal-600 mt-1">{{ $stats['scl_released'] }}</div>
             </div>
         </div>
@@ -175,7 +175,7 @@
                                             <option value="OFFER_RECEIVED" {{ $tracking && $tracking->status === 'OFFER_RECEIVED' ? 'selected' : '' }}>Offer Received</option>
                                             <option value="ACCEPTED" {{ $tracking && $tracking->status === 'ACCEPTED' ? 'selected' : '' }}>Accepted</option>
                                             <option value="CONFIRMED" {{ $tracking && $tracking->status === 'CONFIRMED' ? 'selected' : '' }}>Confirmed</option>
-                                            <option value="SCL_RELEASED" {{ $tracking && $tracking->status === 'SCL_RELEASED' ? 'selected' : '' }}>SCL Released</option>
+                                            <option value="SCL_RELEASED" {{ $tracking && $tracking->status === 'SCL_RELEASED' ? 'selected' : '' }}>Hired</option>
                                         </select>
                                     @elseif(auth()->user()->isStudent() && auth()->user()->id === $student->user_id)
                                         <a href="{{ route('student.placement.index') }}" class="text-blue-600 hover:text-blue-800 underline">
