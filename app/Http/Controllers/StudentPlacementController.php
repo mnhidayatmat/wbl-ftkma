@@ -1180,27 +1180,6 @@ class StudentPlacementController extends Controller
                 ]);
             }
 
-            // Prevent moving to Interviewed without application data
-            if ($validated['status'] === 'INTERVIEWED' && $oldStatus === 'APPLIED' && ! $tracking->hasApplicationData()) {
-                return redirect()->back()->withErrors([
-                    'status' => 'Please complete your application data (number of companies applied and first application date) before moving to Interviewed status.',
-                ]);
-            }
-
-            // Validate application data when moving to APPLIED status
-            if ($validated['status'] === 'APPLIED') {
-                if (empty($validated['companies_applied_count']) || $validated['companies_applied_count'] < 1) {
-                    return redirect()->back()->withErrors([
-                        'companies_applied_count' => 'Please enter the number of companies you have applied to (minimum 1).',
-                    ]);
-                }
-                if (empty($validated['first_application_date'])) {
-                    return redirect()->back()->withErrors([
-                        'first_application_date' => 'Please provide the date of your first application.',
-                    ]);
-                }
-            }
-
             // Prepare update data
             $updateData = [
                 'status' => $validated['status'],
@@ -1229,22 +1208,12 @@ class StudentPlacementController extends Controller
                 // Set applied_status_set_at if this is the first time setting to APPLIED
                 if ($oldStatus !== 'APPLIED') {
                     $updateData['applied_status_set_at'] = now();
-                }
-
-                // Update application tracking data
-                $updateData['companies_applied_count'] = $validated['companies_applied_count'] ?? $tracking->companies_applied_count ?? 0;
-
-                // Ensure count doesn't decrease
-                if ($oldStatus === 'APPLIED' && $tracking->companies_applied_count > 0) {
-                    if ($updateData['companies_applied_count'] < $tracking->companies_applied_count) {
-                        return redirect()->back()->withErrors([
-                            'companies_applied_count' => 'The number of companies applied cannot decrease. Please enter a number equal to or greater than '.$tracking->companies_applied_count.'.',
-                        ]);
+                    // Set default first_application_date to today if not already set
+                    if (! $tracking->first_application_date) {
+                        $updateData['first_application_date'] = now()->toDateString();
                     }
                 }
 
-                $updateData['first_application_date'] = $validated['first_application_date'] ?? $tracking->first_application_date;
-                $updateData['last_application_date'] = $validated['last_application_date'] ?? $tracking->last_application_date;
                 $updateData['application_methods'] = $validated['application_methods'] ?? $tracking->application_methods;
                 $updateData['application_notes'] = $validated['application_notes'] ?? $tracking->application_notes;
             }

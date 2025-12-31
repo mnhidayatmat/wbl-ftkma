@@ -364,25 +364,12 @@
                                 @csrf
                                 <input type="hidden" name="status" value="APPLIED">
 
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Companies Applied</label>
-                                        <input type="number" name="companies_applied_count" min="1" value="1" required
-                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">First Application Date</label>
-                                        <input type="date" name="first_application_date" value="{{ date('Y-m-d') }}" required
-                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                </div>
-
                                 <button type="submit"
                                         class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
                                     📤 I've Sent My Applications
                                 </button>
                             </form>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Enter details and proceed to Applications Sent stage</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to Applications Sent stage</p>
                         </div>
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
@@ -415,13 +402,6 @@
                             </button>
                             <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Track all your applications</p>
                         </div>
-
-                        @if($tracking->sal_file_path)
-                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
-                                📋 Download SAL
-                            </a>
-                        @endif
 
                         <div class="space-y-2">
                             <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
