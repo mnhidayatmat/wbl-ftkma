@@ -496,13 +496,8 @@ class DocumentTemplateController extends Controller
             return back()->with('error', 'No Word template uploaded.');
         }
 
-        $student = Student::with(['user', 'group', 'company'])->first();
-        if (! $student) {
-            return back()->with('error', 'No student found for preview.');
-        }
-
-        // Generate Word document with sample data
-        $docxPath = $this->generateWordDocument($template, $student);
+        // Generate Word document with example placeholder data
+        $docxPath = $this->generateSalWithExampleData($template);
 
         // Convert Word to PDF using LibreOffice
         $pdfPath = $this->convertWordToPdfLibreOffice($docxPath);
@@ -883,7 +878,7 @@ class DocumentTemplateController extends Controller
     }
 
     /**
-     * Preview SCL Word template with sample data.
+     * Preview SCL Word template with sample data (convert to PDF and display in browser).
      */
     public function previewSclWordTemplateDocx()
     {
@@ -894,27 +889,22 @@ class DocumentTemplateController extends Controller
                 ->with('error', 'No Word template uploaded. Please upload a template first.');
         }
 
-        // Get sample student with confirmed placement
-        $student = Student::with(['user', 'group', 'company', 'academicTutor', 'industryCoach'])
-            ->whereHas('placementTracking', function ($q) {
-                $q->whereIn('status', ['CONFIRMED', 'SCL_RELEASED']);
-            })
-            ->first();
+        // Generate Word document with example placeholder data
+        $docxPath = $this->generateSclWithExampleData($template);
 
-        if (! $student) {
-            $student = Student::with(['user', 'group', 'company', 'academicTutor', 'industryCoach'])->first();
+        // Convert Word to PDF using LibreOffice
+        $pdfPath = $this->convertWordToPdfLibreOffice($docxPath);
+
+        // Clean up Word file
+        if (file_exists($docxPath)) {
+            unlink($docxPath);
         }
 
-        if (! $student) {
-            return redirect()->route('admin.documents.scl.word-template')
-                ->with('error', 'No student found for preview.');
-        }
-
-        // Generate preview Word document
-        $docxPath = $this->generateSclFromWordTemplate($student, $template);
-
-        // Return the Word document for download
-        return response()->download($docxPath, 'SCL_Preview.docx')->deleteFileAfterSend(true);
+        // Stream PDF inline (preview in browser)
+        return response()->file($pdfPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="SCL_Preview.pdf"',
+        ])->deleteFileAfterSend(true);
     }
 
     /**
@@ -1066,5 +1056,179 @@ class DocumentTemplateController extends Controller
             '${director_name}' => 'Director of UMPSA Career Centre',
             '${director_signature}' => 'Director signature (image)',
         ];
+    }
+
+    /**
+     * Generate SAL Word document with example placeholder data for preview.
+     */
+    protected function generateSalWithExampleData(DocumentTemplate $template): string
+    {
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Get settings values (these are real values from the template)
+        $salReleaseDate = $template->settings['sal_release_date'] ?? now()->format('Y-m-d');
+        $salReferenceNumber = $template->settings['sal_reference_number'] ?? 'UMPSA/PKU/SAL/2025/001';
+
+        // Example placeholder data
+        $variables = [
+            'student_name' => 'AHMAD BIN ABDULLAH',
+            'student_matric' => 'TM210001',
+            'student_ic' => '010101-01-0001',
+            'student_faculty' => 'Faculty of Technology and Management',
+            'student_programme' => 'Bachelor of Technology Management (Innovation Technology)',
+            'student_programme_short' => 'BTD',
+            'student_email' => 'tm210001@student.umpsa.edu.my',
+            'student_phone' => '012-3456789',
+            'wbl_duration' => '6 months',
+            'current_date' => now()->format('d F Y'),
+            'group_name' => 'WBL 2025/2026 Semester 1',
+            'group_start_date' => '01 March 2025',
+            'group_end_date' => '31 August 2025',
+            'sal_release_date' => $salReleaseDate ? \Carbon\Carbon::parse($salReleaseDate)->format('d F Y') : now()->format('d F Y'),
+            'sal_reference_number' => $salReferenceNumber ?: 'UMPSA/PKU/SAL/2025/001',
+            'wbl_coordinator_name' => 'Dr. Siti Aminah binti Hassan',
+            'wbl_coordinator_email' => 'sitiaminah@umpsa.edu.my',
+            'wbl_coordinator_phone' => '09-5492000',
+            'director_name' => $template->settings['director_name'] ?? 'Prof. Dr. Mohd Razali bin Muhamad',
+            'company_name' => 'Syarikat Teknologi Maju Sdn Bhd',
+            'company_address' => 'No. 123, Jalan Teknologi 1, Taman Perindustrian Gebeng, 26080 Kuantan, Pahang',
+            'company_pic_name' => 'Encik Kamal bin Ismail',
+            'company_pic_position' => 'Human Resource Manager',
+            'company_email' => 'hr@teknologimaju.com.my',
+            'company_phone' => '09-5551234',
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions (with :upper suffix)
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Set director signature image if exists
+        if (isset($template->settings['director_signature_path'])) {
+            $signaturePath = Storage::disk('public')->path($template->settings['director_signature_path']);
+            if (file_exists($signaturePath)) {
+                try {
+                    $templateProcessor->setImageValue('director_signature', [
+                        'path' => $signaturePath,
+                        'width' => 150,
+                        'height' => 50,
+                        'ratio' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    $templateProcessor->setValue('director_signature', '');
+                }
+            } else {
+                $templateProcessor->setValue('director_signature', '');
+            }
+        } else {
+            $templateProcessor->setValue('director_signature', '');
+        }
+
+        // Save to temp file
+        $outputPath = storage_path('app/temp/SAL_Preview_'.time().'.docx');
+
+        // Ensure temp directory exists
+        if (! file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $templateProcessor->saveAs($outputPath);
+
+        return $outputPath;
+    }
+
+    /**
+     * Generate SCL Word document with example placeholder data for preview.
+     */
+    protected function generateSclWithExampleData(DocumentTemplate $template): string
+    {
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Get settings values (these are real values from the template)
+        $sclReleaseDate = $template->settings['scl_release_date'] ?? now()->format('Y-m-d');
+        $sclReferenceNumber = $template->settings['scl_reference_number'] ?? 'UMPSA/PKU/SCL/2025/001';
+
+        // Example placeholder data
+        $variables = [
+            // Student Info
+            'student_name' => 'AHMAD BIN ABDULLAH',
+            'student_matric' => 'TM210001',
+            'student_ic' => '010101-01-0001',
+            'student_programme' => 'Bachelor of Technology Management (Innovation Technology)',
+            'student_programme_short' => 'BTD',
+            // Company Info
+            'company_name' => 'Syarikat Teknologi Maju Sdn Bhd',
+            'company_address' => 'No. 123, Jalan Teknologi 1, Taman Perindustrian Gebeng, 26080 Kuantan, Pahang',
+            'hr_name' => 'Encik Kamal bin Ismail',
+            'hr_position' => 'Human Resource Manager',
+            'company_email' => 'hr@teknologimaju.com.my',
+            'company_phone' => '09-5551234',
+            // Dates
+            'group_start_date' => '01 March 2025',
+            'group_end_date' => '31 August 2025',
+            'accepted_date' => '15 January 2025',
+            'current_date' => now()->format('d F Y'),
+            'scl_release_date' => $sclReleaseDate ? \Carbon\Carbon::parse($sclReleaseDate)->format('d F Y') : now()->format('d F Y'),
+            'scl_reference_number' => $sclReferenceNumber ?: 'UMPSA/PKU/SCL/2025/001',
+            // Supervisors
+            'academic_tutor_name' => 'Dr. Siti Aminah binti Hassan',
+            'academic_tutor_email' => 'sitiaminah@umpsa.edu.my',
+            'academic_tutor_phone' => '09-5492000',
+            'industry_coach_name' => 'Encik Hafiz bin Osman',
+            'industry_coach_email' => 'hafiz@teknologimaju.com.my',
+            'industry_coach_phone' => '012-9876543',
+            // Director
+            'director_name' => $template->settings['scl_director_name'] ?? 'Prof. Dr. Mohd Razali bin Muhamad',
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Set director signature image if exists
+        if (isset($template->settings['scl_director_signature_path'])) {
+            $signaturePath = Storage::disk('public')->path($template->settings['scl_director_signature_path']);
+            if (file_exists($signaturePath)) {
+                try {
+                    $templateProcessor->setImageValue('director_signature', [
+                        'path' => $signaturePath,
+                        'width' => 150,
+                        'height' => 50,
+                        'ratio' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    $templateProcessor->setValue('director_signature', '');
+                }
+            } else {
+                $templateProcessor->setValue('director_signature', '');
+            }
+        } else {
+            $templateProcessor->setValue('director_signature', '');
+        }
+
+        // Save to temp file
+        $outputPath = storage_path('app/temp/SCL_Preview_'.time().'.docx');
+
+        // Ensure temp directory exists
+        if (! file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $templateProcessor->saveAs($outputPath);
+
+        return $outputPath;
     }
 }
