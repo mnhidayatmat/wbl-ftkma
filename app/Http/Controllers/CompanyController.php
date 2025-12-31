@@ -722,7 +722,7 @@ class CompanyController extends Controller
      */
     public function storeContact(Request $request, Company $company): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -750,7 +750,7 @@ class CompanyController extends Controller
      */
     public function updateContact(Request $request, Company $company, CompanyContact $contact): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -778,7 +778,7 @@ class CompanyController extends Controller
      */
     public function destroyContact(Company $company, CompanyContact $contact): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -795,7 +795,7 @@ class CompanyController extends Controller
      */
     public function storeNote(Request $request, Company $company): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -818,12 +818,12 @@ class CompanyController extends Controller
      */
     public function updateNote(Request $request, Company $company, CompanyNote $note): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Only allow update by creator or admin
-        if ($note->created_by !== auth()->id() && ! auth()->user()->isAdmin()) {
+        if ($note->created_by !== auth()->id() && ! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -844,12 +844,12 @@ class CompanyController extends Controller
      */
     public function destroyNote(Company $company, CompanyNote $note): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Only allow deletion by creator or admin
-        if ($note->created_by !== auth()->id() && ! auth()->user()->isAdmin()) {
+        if ($note->created_by !== auth()->id() && ! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -864,7 +864,7 @@ class CompanyController extends Controller
      */
     public function updateNoteStatus(Request $request, Company $company, CompanyNote $note): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLecturer() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -891,7 +891,7 @@ class CompanyController extends Controller
      */
     public function storeDocument(Request $request, Company $company): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -937,7 +937,7 @@ class CompanyController extends Controller
      */
     public function destroyDocument(Company $company, CompanyDocument $document): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -955,7 +955,7 @@ class CompanyController extends Controller
      */
     public function storeMou(Request $request, Company $company): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -997,7 +997,7 @@ class CompanyController extends Controller
      */
     public function storeMoa(Request $request, Company $company): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -1039,7 +1039,7 @@ class CompanyController extends Controller
      */
     public function updateMoa(Request $request, Company $company, Moa $moa): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -1084,7 +1084,7 @@ class CompanyController extends Controller
      */
     public function destroyMoa(Company $company, Moa $moa): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -1103,7 +1103,7 @@ class CompanyController extends Controller
      */
     public function saveMouTemplate(Request $request, Company $company): RedirectResponse
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -1130,7 +1130,7 @@ class CompanyController extends Controller
      */
     public function generateMou(Company $company)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -1205,7 +1205,7 @@ class CompanyController extends Controller
      */
     public function previewMou(Company $company)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -1279,7 +1279,7 @@ class CompanyController extends Controller
      */
     public function downloadMou(Company $company)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 

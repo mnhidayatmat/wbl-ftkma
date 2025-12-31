@@ -12,7 +12,7 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-2">Company Management & MoU/MoA Tracking</p>
             </div>
             <div class="flex gap-2">
-                @if(auth()->user()->isAdmin())
+                @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
                 <a href="{{ route('admin.companies.edit', $company) }}" class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors">
                     Edit Company
                 </a>

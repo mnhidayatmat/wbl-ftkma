@@ -8,7 +8,7 @@
             </div>
         </div>
 
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
         <div x-data="{ showForm: false }" class="mb-6">
             <!-- MoU Button -->
             <div class="flex justify-end mb-4">
@@ -152,7 +152,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-1">No MoU record yet</p>
-            @if(auth()->user()->isAdmin())
+            @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
             <p class="text-gray-400 dark:text-gray-500 text-sm">Click "Create MoU" to get started</p>
             @endif
         </div>
@@ -166,7 +166,7 @@
                 <h3 class="text-xl font-bold text-[#003A6C] dark:text-white">Memorandum of Agreement (MoA)</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Specific program or student-based agreements</p>
             </div>
-            @if(auth()->user()->isAdmin())
+            @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
             <button
                 onclick="document.getElementById('moa-form').scrollIntoView({ behavior: 'smooth' }); document.getElementById('moa-form').querySelector('button').click();"
                 class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#0084C5] hover:bg-[#003A6C] text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md"
@@ -179,7 +179,7 @@
             @endif
         </div>
 
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
         <div id="moa-form" x-data="{ showForm: false }" class="mb-6">
             <div class="flex justify-end mb-4">
                 <button
@@ -314,7 +314,7 @@
                         <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold {{ $badgeColor }}">
                             {{ $moa->status }}
                         </span>
-                        @if(auth()->user()->isAdmin())
+                        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
                         <form action="{{ route('admin.companies.moa.destroy', [$company, $moa]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this MoA?')" class="inline">
                             @csrf
                             @method('DELETE')
@@ -371,7 +371,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-1">No MoA records yet</p>
-                @if(auth()->user()->isAdmin())
+                @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
                 <p class="text-gray-400 dark:text-gray-500 text-sm">Click "Add MoA" to create the first agreement</p>
                 @endif
             </div>

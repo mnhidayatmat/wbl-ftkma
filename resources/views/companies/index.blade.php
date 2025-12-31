@@ -11,7 +11,7 @@
                 <h1 class="text-2xl font-bold text-[#003A6C] dark:text-[#0084C5]">Companies & Agreements</h1>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Unified management of industry partners and agreements</p>
             </div>
-            @if(auth()->user()->isAdmin())
+            @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
             <div class="flex gap-2">
                 <a href="{{ route('admin.companies.create') }}"
                    class="px-3 py-2 text-sm bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors inline-flex items-center gap-2">

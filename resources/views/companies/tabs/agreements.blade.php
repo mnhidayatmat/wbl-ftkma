@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <!-- MoU Template Section -->
-    @if(auth()->user()->isAdmin())
+    @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
         <div class="flex items-center gap-3 mb-4">
             <div class="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
@@ -186,7 +186,7 @@
             <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5]">Company Agreements</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">Unified MoU, MoA, and LOI records</p>
         </div>
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
         <a href="{{ route('admin.agreements.create', ['company_id' => $company->id]) }}"
            class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors inline-flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,7 +295,7 @@
                         </svg>
                     </a>
                     @endif
-                    @if(auth()->user()->isAdmin())
+                    @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
                     <a href="{{ route('admin.agreements.edit', $agreement) }}" 
                        class="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                        title="Edit">
@@ -316,7 +316,7 @@
         </svg>
         <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">No agreements found</p>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            @if(auth()->user()->isAdmin())
+            @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
             <a href="{{ route('admin.agreements.create', ['company_id' => $company->id]) }}" class="text-[#0084C5] hover:underline">Add the first agreement</a>
             for this company.
             @else
@@ -327,7 +327,7 @@
     @endif
 
     <!-- Link to Full Agreements Management -->
-    @if(auth()->user()->isAdmin())
+    @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
     <div class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
         <a href="{{ route('admin.agreements.index', ['company_id' => $company->id]) }}" 
            class="text-[#0084C5] hover:underline text-sm">

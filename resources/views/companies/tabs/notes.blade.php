@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    @if(auth()->user()->isAdmin() || auth()->user()->isLecturer())
+    @if(auth()->user()->isAdmin() || auth()->user()->isLecturer() || auth()->user()->isWblCoordinator())
     <!-- Add Note Section -->
     <div x-data="{ showForm: false }">
         <!-- Add Note Button -->
@@ -155,7 +155,7 @@
                             </div>
                         </div>
                     </div>
-                    @if(auth()->user()->isAdmin() || auth()->user()->isLecturer())
+                    @if(auth()->user()->isAdmin() || auth()->user()->isLecturer() || auth()->user()->isWblCoordinator())
                     @if($note->created_by === auth()->id() || auth()->user()->isAdmin())
                     <div class="flex items-center gap-2">
                         <!-- Edit Button -->
@@ -222,7 +222,7 @@
                             @endif
                         </div>
                     </div>
-                    @if(auth()->user()->isAdmin() || auth()->user()->isLecturer())
+                    @if(auth()->user()->isAdmin() || auth()->user()->isLecturer() || auth()->user()->isWblCoordinator())
                     @if($note->action_status === 'pending')
                     <div class="flex items-center gap-2">
                         <form action="{{ route('admin.companies.notes.update-status', [$company, $note]) }}" method="POST" class="inline">
@@ -366,7 +366,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-1">No follow-up notes yet</p>
-            @if(auth()->user()->isAdmin() || auth()->user()->isLecturer())
+            @if(auth()->user()->isAdmin() || auth()->user()->isLecturer() || auth()->user()->isWblCoordinator())
             <p class="text-gray-400 dark:text-gray-500 text-sm">Click "Add Follow-Up Note" to record communication</p>
             @endif
         </div>

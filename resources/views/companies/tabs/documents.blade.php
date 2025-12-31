@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    @if(auth()->user()->isAdmin())
+    @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
     <!-- Upload Document Section -->
     <div x-data="{ showForm: false }">
         <!-- Upload Button -->
@@ -199,7 +199,7 @@
                                     </svg>
                                     Download
                                 </a>
-                                @if(auth()->user()->isAdmin())
+                                @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
                                 <form action="{{ route('admin.companies.documents.destroy', [$company, $document]) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this document?')">
                                     @csrf
                                     @method('DELETE')
@@ -225,7 +225,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
                                 <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-1">No documents yet</p>
-                                @if(auth()->user()->isAdmin())
+                                @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
                                 <p class="text-gray-400 dark:text-gray-500 text-sm">Click "Upload Document" to add the first document</p>
                                 @endif
                             </div>
