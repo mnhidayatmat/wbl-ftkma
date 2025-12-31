@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\CompanyAgreement;
 use App\Models\DocumentTemplate;
 use App\Models\PlacementApplicationEvidence;
 use App\Models\PlacementCompanyApplication;
@@ -1439,6 +1440,15 @@ class StudentPlacementController extends Controller
                         'company_name' => $companyName,
                     ]);
                     $student->update(['company_id' => $newCompany->id]);
+
+                    // Create a default CompanyAgreement with "Not Started" status
+                    CompanyAgreement::create([
+                        'company_id' => $newCompany->id,
+                        'agreement_type' => 'MoA',
+                        'agreement_title' => 'Industrial Training Agreement - ' . $companyName,
+                        'status' => 'Not Started',
+                        'created_by' => auth()->id(),
+                    ]);
                 }
 
                 // Verify all other offers have been declined
