@@ -68,6 +68,27 @@
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                                placeholder="e.g., General Manager">
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">UMPSA Liaison Officer</label>
+                        <input type="text" name="mou_liaison_officer" value="{{ old('mou_liaison_officer', $company->mou_liaison_officer) }}"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                               placeholder="UMPSA staff handling this MoU">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Vice Chancellor (Naib Canselor)</label>
+                        <input type="text" name="mou_vc_name" value="{{ old('mou_vc_name', $company->mou_vc_name ?? 'Professor Dr. Yatimah Alias') }}"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                               placeholder="Professor Dr. Yatimah Alias">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Deputy VC (Academic & International)</label>
+                        <input type="text" name="mou_dvc_name" value="{{ old('mou_dvc_name', $company->mou_dvc_name ?? 'Professor Dato Ir. Ts. Dr. Ahmad Ziad Sulaiman') }}"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                               placeholder="Professor Dato Ir. Ts. Dr. Ahmad Ziad Sulaiman">
+                    </div>
                 </div>
 
                 <!-- Auto-populated Variables (Read-only display) -->

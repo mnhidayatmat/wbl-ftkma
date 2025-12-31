@@ -268,11 +268,7 @@ class StudentPlacementController extends Controller
             'interviewed' => $students->filter(fn ($s) => $s->placementTracking->status === 'INTERVIEWED')->count(),
             'offer_received' => $students->filter(fn ($s) => $s->placementTracking->status === 'OFFER_RECEIVED')->count(),
             'accepted' => $students->filter(fn ($s) => $s->placementTracking->status === 'ACCEPTED')->count(),
-            // Count ACCEPTED with proof as "confirmed" (confirmation proof indicates completion)
-            'confirmed' => $students->filter(fn ($s) => $s->placementTracking &&
-                $s->placementTracking->status === 'ACCEPTED' &&
-                $s->placementTracking->confirmation_proof_path
-            )->count(),
+            'confirmed' => $students->filter(fn ($s) => $s->placementTracking->status === 'CONFIRMED')->count(),
             'scl_released' => $students->filter(fn ($s) => $s->placementTracking->status === 'SCL_RELEASED')->count(),
         ];
 
@@ -522,11 +518,11 @@ class StudentPlacementController extends Controller
         $tracking = $student->placementTracking;
         // Check if student has accepted offer and uploaded proof (step 6 completed)
         $isStep6Complete = $tracking &&
-            $tracking->status === 'ACCEPTED' &&
+            in_array($tracking->status, ['ACCEPTED', 'CONFIRMED']) &&
             $tracking->confirmation_proof_path;
 
         if (! $isStep6Complete) {
-            return redirect()->back()->with('error', 'Student must have accepted the offer and uploaded confirmation proof before SCL can be released.');
+            return redirect()->back()->with('error', 'Student must have accepted/confirmed the offer and uploaded confirmation proof before SCL can be released.');
         }
 
         // Generate SCL PDF
@@ -2005,10 +2001,10 @@ class StudentPlacementController extends Controller
             abort(404, 'Placement tracking not found.');
         }
 
-        // Only allow if current status is ACCEPTED
-        if ($tracking->status !== 'ACCEPTED') {
+        // Only allow if current status is ACCEPTED or CONFIRMED
+        if (! in_array($tracking->status, ['ACCEPTED', 'CONFIRMED'])) {
             return redirect()->back()->withErrors([
-                'proof' => 'You can only upload confirmation proof when your status is "Accepted".',
+                'proof' => 'You can only upload confirmation proof when your status is "Accepted" or "Confirmed".',
             ]);
         }
 
@@ -2194,9 +2190,9 @@ class StudentPlacementController extends Controller
             abort(404, 'Placement tracking not found.');
         }
 
-        // Only allow if current status is ACCEPTED
-        if ($tracking->status !== 'ACCEPTED') {
-            return redirect()->back()->with('error', 'You can only upload offer letter when your status is "Accepted".');
+        // Only allow if current status is ACCEPTED or CONFIRMED
+        if (! in_array($tracking->status, ['ACCEPTED', 'CONFIRMED'])) {
+            return redirect()->back()->with('error', 'You can only upload offer letter when your status is "Accepted" or "Confirmed".');
         }
 
         $validated = $request->validate([
@@ -2212,19 +2208,21 @@ class StudentPlacementController extends Controller
         $fileName = 'offer_letter_'.$student->matric_no.'_'.time().'.'.$validated['offer_letter']->getClientOriginalExtension();
         $filePath = $validated['offer_letter']->storeAs('placement/offer-letters', $fileName);
 
-        // Update tracking
+        // Update tracking - change status to CONFIRMED when offer letter is uploaded
         $tracking->update([
             'offer_letter_path' => $filePath,
+            'status' => 'CONFIRMED',
+            'confirmed_at' => now(),
             'updated_by' => auth()->id(),
         ]);
 
-        Log::info('Offer Letter Uploaded by Student', [
+        Log::info('Offer Letter Uploaded - Status Changed to CONFIRMED', [
             'student_id' => $student->id,
             'student_name' => $student->name,
             'uploaded_by' => auth()->id(),
         ]);
 
-        return redirect()->back()->with('success', 'Offer letter uploaded successfully!');
+        return redirect()->back()->with('success', 'Offer letter uploaded successfully! Your placement is now confirmed.');
     }
 
     /**
@@ -2283,9 +2281,9 @@ class StudentPlacementController extends Controller
             abort(404, 'Placement tracking not found.');
         }
 
-        // Only allow if current status is ACCEPTED
-        if ($tracking->status !== 'ACCEPTED') {
-            return redirect()->back()->with('error', 'You can only update company details when your status is "Accepted".');
+        // Only allow if current status is ACCEPTED or CONFIRMED
+        if (! in_array($tracking->status, ['ACCEPTED', 'CONFIRMED'])) {
+            return redirect()->back()->with('error', 'You can only update company details when your status is "Accepted" or "Confirmed".');
         }
 
         // Ensure student has a company linked
@@ -2695,9 +2693,9 @@ class StudentPlacementController extends Controller
             return redirect()->back()->with('success', 'Your SCL is ready! You can now download it below.');
         }
 
-        // No auto-released SCL, verify student is at ACCEPTED status
-        if ($tracking->status !== 'ACCEPTED') {
-            return redirect()->back()->with('error', 'You must be at Accepted stage to proceed to SCL Release.');
+        // No auto-released SCL, verify student is at ACCEPTED or CONFIRMED status
+        if (! in_array($tracking->status, ['ACCEPTED', 'CONFIRMED'])) {
+            return redirect()->back()->with('error', 'You must be at Accepted or Confirmed stage to proceed to SCL Release.');
         }
 
         // Verify all requirements are met

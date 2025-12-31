@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DocumentTemplate;
 use App\Models\ReferenceSample;
 use App\Models\ResumeInspectionHistory;
 use App\Models\Student;
+use App\Models\StudentPlacementTracking;
 use App\Models\StudentResumeInspection;
 use App\Models\WblGroup;
 use Illuminate\Http\RedirectResponse;
@@ -142,7 +144,7 @@ class StudentResumeInspectionController extends Controller
             // Generate custom filename: Resume_StudentName.pdf
             $studentName = preg_replace('/[^A-Za-z0-9\s]/', '', $student->name); // Remove special characters
             $studentName = str_replace(' ', '_', trim($studentName)); // Replace spaces with underscores
-            $filename = 'Resume_' . $studentName . '.pdf';
+            $filename = 'Resume_'.$studentName.'.pdf';
 
             // Store new combined document with custom filename
             $path = $request->file('document')->storeAs('resumes', $filename, 'public');
@@ -450,6 +452,14 @@ class StudentResumeInspectionController extends Controller
         }
 
         $inspection->update($updateData);
+
+        // Auto-release SAL when resume is approved and auto-release is enabled
+        if ($validated['status'] === 'PASSED') {
+            $salTemplate = DocumentTemplate::getSalTemplate();
+            if ($salTemplate->settings['sal_auto_release_enabled'] ?? false) {
+                $this->autoReleaseSalForStudent($inspection->student);
+            }
+        }
 
         // Determine action type for history
         $action = 'REVIEWED';
@@ -765,5 +775,64 @@ class StudentResumeInspectionController extends Controller
         }
 
         return response()->download($filePath, basename($samples[$sample]));
+    }
+
+    /**
+     * Auto-release SAL for a student when resume is approved.
+     * This is called automatically when SAL auto-release is enabled.
+     */
+    protected function autoReleaseSalForStudent(Student $student): void
+    {
+        try {
+            // Load student relationships
+            $student->load(['user', 'group', 'company']);
+
+            // Get or create placement tracking
+            $tracking = $student->placementTracking;
+            if (! $tracking) {
+                $tracking = StudentPlacementTracking::create([
+                    'student_id' => $student->id,
+                    'group_id' => $student->group_id,
+                    'status' => 'SAL_RELEASED',
+                ]);
+            }
+
+            // Skip if SAL already released
+            if ($tracking->sal_file_path) {
+                return;
+            }
+
+            // Generate SAL PDF using the StudentPlacementController method
+            $placementController = app(\App\Http\Controllers\StudentPlacementController::class);
+            $document = $placementController->generateSalPdfForAutoRelease($student);
+
+            // Save the PDF
+            $fileName = 'SAL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
+            $filePath = 'placement/sal/'.$fileName;
+            Storage::put($filePath, $document->output());
+
+            // Update tracking
+            $tracking->update([
+                'status' => 'SAL_RELEASED',
+                'sal_released_at' => now(),
+                'sal_released_by' => auth()->id(),
+                'sal_file_path' => $filePath,
+                'updated_by' => auth()->id(),
+            ]);
+
+            // Log action
+            Log::info('SAL Auto-Released on Resume Approval', [
+                'student_id' => $student->id,
+                'student_name' => $student->name,
+                'triggered_by' => auth()->id(),
+                'triggered_by_name' => auth()->user()->name,
+            ]);
+        } catch (\Exception $e) {
+            // Log error but don't fail the main operation
+            Log::error('Failed to auto-release SAL', [
+                'student_id' => $student->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

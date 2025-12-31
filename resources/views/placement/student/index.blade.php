@@ -839,7 +839,7 @@
                             </button>
                         </form>
 
-                    @elseif($tracking->status === 'ACCEPTED')
+                    @elseif(in_array($tracking->status, ['ACCEPTED', 'CONFIRMED']))
                         {{-- Accepted - Complete Requirements --}}
                         @php
                             $acceptedCompany = $student->company;
@@ -1340,7 +1340,7 @@
                     @elseif($tracking->status === 'OFFER_RECEIVED')
                         <p>✓ Offer received</p>
                         <p class="opacity-75">→ Accept offer & upload proof</p>
-                    @elseif($tracking->status === 'ACCEPTED')
+                    @elseif(in_array($tracking->status, ['ACCEPTED', 'CONFIRMED']))
                         <p>✓ Offer accepted</p>
                         <p class="opacity-75">→ Wait for SCL release</p>
                     @elseif($tracking->status === 'SCL_RELEASED')

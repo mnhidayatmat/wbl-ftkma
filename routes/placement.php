@@ -68,4 +68,11 @@ Route::middleware('auth')->prefix('student/placement')->name('student.placement.
 
     // Company details (ACCEPTED stage)
     Route::post('company-details', [StudentPlacementController::class, 'saveCompanyDetails'])->name('company-details.save');
+
+    // Proceed to SCL Release (ACCEPTED stage with all requirements met)
+    Route::post('proceed-scl', [StudentPlacementController::class, 'proceedToSclRelease'])->name('proceed-scl');
+
+    // Medical checkup upload and view (SCL_RELEASED stage)
+    Route::post('medical-checkup/upload', [StudentPlacementController::class, 'uploadMedicalCheckup'])->name('upload-medical-checkup');
+    Route::get('medical-checkup/view', [StudentPlacementController::class, 'viewMedicalCheckup'])->name('view-medical-checkup');
 });

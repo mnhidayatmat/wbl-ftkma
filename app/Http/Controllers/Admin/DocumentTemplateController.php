@@ -1368,6 +1368,38 @@ class DocumentTemplateController extends Controller
     }
 
     /**
+     * Toggle SAL auto-release setting.
+     */
+    public function toggleSalAutoRelease(): RedirectResponse
+    {
+        $template = DocumentTemplate::getSalTemplate();
+        $settings = $template->settings ?? [];
+
+        // Toggle the setting
+        $isEnabled = ! ($settings['sal_auto_release_enabled'] ?? false);
+        $settings['sal_auto_release_enabled'] = $isEnabled;
+
+        if ($isEnabled) {
+            $settings['sal_auto_release_enabled_at'] = now()->toIso8601String();
+            $settings['sal_auto_release_enabled_by'] = auth()->id();
+        } else {
+            $settings['sal_auto_release_disabled_at'] = now()->toIso8601String();
+            $settings['sal_auto_release_disabled_by'] = auth()->id();
+        }
+
+        $template->update([
+            'settings' => $settings,
+            'updated_by' => auth()->id(),
+        ]);
+
+        $message = $isEnabled
+            ? 'SAL auto-release enabled. Students will automatically receive SAL when they are assigned to a group.'
+            : 'SAL auto-release disabled.';
+
+        return redirect()->route('admin.documents.sal')->with('success', $message);
+    }
+
+    /**
      * Generate SCL Word document with example placeholder data for preview.
      */
     protected function generateSclWithExampleData(DocumentTemplate $template): string

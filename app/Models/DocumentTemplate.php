@@ -88,6 +88,11 @@ class DocumentTemplate extends Model
             'type' => 'MOU',
             'title' => 'MEMORANDUM OF UNDERSTANDING (MOU)',
             'subtitle' => 'Work-Based Learning Program',
+            'body_content' => '',
+            'closing_text' => '',
+            'signatory_name' => '',
+            'signatory_title' => '',
+            'signatory_department' => '',
             'settings' => [],
         ];
     }
@@ -105,6 +110,9 @@ class DocumentTemplate extends Model
             '${signed_behalf_position}' => 'Signed behalf position',
             '${witness_name}' => 'Witness name',
             '${witness_position}' => 'Witness position',
+            '${liaison_officer}' => 'UMPSA Liaison Officer name',
+            '${vc_name}' => 'Vice Chancellor (Naib Canselor)',
+            '${dvc_name}' => 'Deputy Vice Chancellor (Academic & International)',
             // Auto-populated Variables
             '${company_name}' => 'Company name',
             '${hr_name}' => 'HR/PIC name',

@@ -402,6 +402,16 @@ class CompanyController extends Controller
             'industry_type' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'website' => ['nullable', 'string', 'max:255'],
+            // MoU Template Variables
+            'mou_company_number' => ['nullable', 'string', 'max:255'],
+            'mou_company_shortname' => ['nullable', 'string', 'max:255'],
+            'mou_signed_behalf_name' => ['nullable', 'string', 'max:255'],
+            'mou_signed_behalf_position' => ['nullable', 'string', 'max:255'],
+            'mou_witness_name' => ['nullable', 'string', 'max:255'],
+            'mou_witness_position' => ['nullable', 'string', 'max:255'],
+            'mou_liaison_officer' => ['nullable', 'string', 'max:255'],
+            'mou_vc_name' => ['nullable', 'string', 'max:255'],
+            'mou_dvc_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Handle position_other field
@@ -1104,6 +1114,9 @@ class CompanyController extends Controller
             'mou_signed_behalf_position' => ['nullable', 'string', 'max:255'],
             'mou_witness_name' => ['nullable', 'string', 'max:255'],
             'mou_witness_position' => ['nullable', 'string', 'max:255'],
+            'mou_liaison_officer' => ['nullable', 'string', 'max:255'],
+            'mou_vc_name' => ['nullable', 'string', 'max:255'],
+            'mou_dvc_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         $company->update($validated);
@@ -1145,6 +1158,9 @@ class CompanyController extends Controller
             'signed_behalf_position' => $company->mou_signed_behalf_position ?? '',
             'witness_name' => $company->mou_witness_name ?? '',
             'witness_position' => $company->mou_witness_position ?? '',
+            'liaison_officer' => $company->mou_liaison_officer ?? '',
+            'vc_name' => $company->mou_vc_name ?? 'Professor Dr. Yatimah Alias',
+            'dvc_name' => $company->mou_dvc_name ?? 'Professor Dato Ir. Ts. Dr. Ahmad Ziad Sulaiman',
             // Auto-populated from company data
             'company_name' => $company->company_name ?? '',
             'hr_name' => $company->pic_name ?? '',
@@ -1217,6 +1233,9 @@ class CompanyController extends Controller
             'signed_behalf_position' => $company->mou_signed_behalf_position ?? '',
             'witness_name' => $company->mou_witness_name ?? '',
             'witness_position' => $company->mou_witness_position ?? '',
+            'liaison_officer' => $company->mou_liaison_officer ?? '',
+            'vc_name' => $company->mou_vc_name ?? 'Professor Dr. Yatimah Alias',
+            'dvc_name' => $company->mou_dvc_name ?? 'Professor Dato Ir. Ts. Dr. Ahmad Ziad Sulaiman',
             'company_name' => $company->company_name ?? '',
             'hr_name' => $company->pic_name ?? '',
             'hr_phone' => $company->phone ?? '',

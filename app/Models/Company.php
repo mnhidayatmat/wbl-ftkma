@@ -38,6 +38,9 @@ class Company extends Model
         'mou_signed_behalf_position',
         'mou_witness_name',
         'mou_witness_position',
+        'mou_liaison_officer',
+        'mou_vc_name',
+        'mou_dvc_name',
         'mou_generated_path',
         'mou_generated_at',
     ];

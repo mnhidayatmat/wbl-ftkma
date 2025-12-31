@@ -29,6 +29,8 @@ class StudentPlacementTracking extends Model
         'scl_released_by',
         'scl_file_path',
         'confirmation_proof_path',
+        'medical_checkup_path',
+        'medical_checkup_uploaded_at',
         'offer_letter_path',
         'company_details_completed',
         'notes',
@@ -51,6 +53,7 @@ class StudentPlacementTracking extends Model
         return [
             'sal_released_at' => 'datetime',
             'scl_released_at' => 'datetime',
+            'medical_checkup_uploaded_at' => 'datetime',
             'applied_status_set_at' => 'datetime',
             'applied_at' => 'datetime',
             'interviewed_at' => 'datetime',
