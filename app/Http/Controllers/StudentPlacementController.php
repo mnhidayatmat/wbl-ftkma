@@ -1119,11 +1119,6 @@ class StudentPlacementController extends Controller
             'application_notes' => ['nullable', 'string', 'max:1000'],
             'evidence_files' => ['nullable', 'array'],
             'evidence_files.*' => ['file', 'mimes:pdf,png,jpg,jpeg', 'max:5120'], // 5MB max
-            // Offer data (required when status is OFFER_RECEIVED)
-            'offer_company_ids' => ['required_if:status,OFFER_RECEIVED', 'nullable', 'array'],
-            'offer_company_ids.*' => ['exists:placement_company_applications,id'],
-        ], [
-            'offer_company_ids.required_if' => 'Please select at least one company that gave you an offer.',
         ]);
 
         $tracking = $student->placementTracking;
@@ -1222,19 +1217,6 @@ class StudentPlacementController extends Controller
 
                 $updateData['application_methods'] = $validated['application_methods'] ?? $tracking->application_methods;
                 $updateData['application_notes'] = $validated['application_notes'] ?? $tracking->application_notes;
-            }
-
-            // Handle offer received - mark multiple companies
-            if ($validated['status'] === 'OFFER_RECEIVED' && ! empty($validated['offer_company_ids'])) {
-                foreach ($validated['offer_company_ids'] as $companyId) {
-                    $offerCompany = PlacementCompanyApplication::find($companyId);
-                    if ($offerCompany && $offerCompany->placement_tracking_id === $tracking->id) {
-                        $offerCompany->update([
-                            'offer_received' => true,
-                            'offer_received_date' => now()->toDateString(),
-                        ]);
-                    }
-                }
             }
 
             // Handle accepted - create Company record and link to student
@@ -1543,6 +1525,62 @@ class StudentPlacementController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Follow-up details updated successfully.');
+    }
+
+    /**
+     * Update company offer status and details.
+     */
+    public function updateCompanyOffer(Request $request, PlacementCompanyApplication $application): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking) {
+            abort(404, 'Placement tracking not found.');
+        }
+
+        // Verify the application belongs to the student's tracking
+        if ($application->placement_tracking_id !== $tracking->id) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Only allow updates in OFFER_RECEIVED status
+        if ($tracking->status !== 'OFFER_RECEIVED') {
+            return redirect()->back()->with('error', 'You can only update offer details in the Offer Received stage.');
+        }
+
+        $validated = $request->validate([
+            'offer_received' => ['nullable', 'boolean'],
+            'offer_received_date' => ['nullable', 'date'],
+            'decline_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $offerReceived = $request->has('offer_received');
+
+        $updateData = [
+            'offer_received' => $offerReceived,
+        ];
+
+        if ($offerReceived) {
+            $updateData['offer_received_date'] = $validated['offer_received_date'] ?? now()->toDateString();
+            $updateData['decline_notes'] = $validated['decline_notes'] ?? $application->decline_notes;
+        } else {
+            // Clear offer data if unchecked
+            $updateData['offer_received_date'] = null;
+            $updateData['decline_notes'] = null;
+        }
+
+        $application->update($updateData);
+
+        return redirect()->back()->with('success', 'Offer details updated successfully.');
     }
 
     /**

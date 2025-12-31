@@ -629,20 +629,117 @@
                         {{-- Offer Received - Need to Accept --}}
                         <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border-l-4 border-orange-500">
                             <p class="text-xs font-bold text-orange-800 dark:text-orange-200 mb-1">🎉 Congratulations!</p>
-                            <p class="text-sm text-orange-700 dark:text-orange-300">Accept your offer and upload proof</p>
+                            <p class="text-sm text-orange-700 dark:text-orange-300">Mark your offers and accept ONE company</p>
                         </div>
 
-                        <div class="space-y-2">
-                            <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
-                                @csrf
-                                <input type="hidden" name="status" value="ACCEPTED">
-                                <button type="submit"
-                                        class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                    ✨ I've Accepted the Offer
-                                </button>
-                            </form>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to Offer Accepted stage</p>
+                        {{-- CRITICAL WARNING --}}
+                        <div class="bg-red-100 dark:bg-red-900/30 rounded-lg p-4 border-2 border-red-500">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <div>
+                                    <p class="text-sm font-bold text-red-800 dark:text-red-200">IMPORTANT: Accept Only ONE Company!</p>
+                                    <p class="text-xs text-red-700 dark:text-red-300 mt-1">Accepting multiple companies is <strong>strictly prohibited</strong> and will damage our university's reputation. You must politely decline all other offers before accepting one.</p>
+                                </div>
+                            </div>
                         </div>
+
+                        {{-- Company Offers List --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div class="bg-gray-50 dark:bg-gray-700 px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Your Company Applications</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Mark companies that gave you offers and set dates</p>
+                            </div>
+                            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                                @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
+                                    @foreach($tracking->companyApplications as $application)
+                                        <div class="p-4 {{ $application->offer_received ? 'bg-orange-50 dark:bg-orange-900/20' : '' }}">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div class="flex items-center gap-2">
+                                                    @if($application->offer_received)
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200">
+                                                            🎁 Offer Received
+                                                        </span>
+                                                    @endif
+                                                    <span class="font-medium text-gray-900 dark:text-white">{{ $application->company_name }}</span>
+                                                </div>
+                                                @if($application->interviewed)
+                                                    <span class="text-xs text-green-600 dark:text-green-400">✓ Interviewed</span>
+                                                @endif
+                                            </div>
+
+                                            {{-- Offer Details Form --}}
+                                            <form action="{{ route('student.placement.company.update-offer', $application) }}" method="POST" class="space-y-3">
+                                                @csrf
+                                                <div class="flex items-center gap-4">
+                                                    <label class="flex items-center gap-2 cursor-pointer">
+                                                        <input type="checkbox" name="offer_received" value="1"
+                                                               {{ $application->offer_received ? 'checked' : '' }}
+                                                               onchange="this.form.submit()"
+                                                               class="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">Got offer from this company</span>
+                                                    </label>
+                                                </div>
+
+                                                @if($application->offer_received)
+                                                    <div class="pl-6 space-y-3 border-l-2 border-orange-300 dark:border-orange-600">
+                                                        <div>
+                                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Offer Received Date</label>
+                                                            <input type="date" name="offer_received_date"
+                                                                   value="{{ $application->offer_received_date ? $application->offer_received_date->format('Y-m-d') : '' }}"
+                                                                   class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500">
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                                Decline Response Notes
+                                                                <span class="font-normal text-gray-500">(if not accepting this offer)</span>
+                                                            </label>
+                                                            <textarea name="decline_notes" rows="2"
+                                                                      placeholder="Draft your polite decline message here... e.g., 'Thank you for the offer, but I have accepted another position.'"
+                                                                      class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500 placeholder:text-gray-400">{{ $application->decline_notes }}</textarea>
+                                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Good work ethics: Always reply professionally to decline offers you won't accept</p>
+                                                        </div>
+
+                                                        <button type="submit"
+                                                                class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                                                            Save Changes
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </form>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                                        <p class="text-sm">No companies in your application list.</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Accept Offer Section --}}
+                        @php
+                            $companiesWithOffers = $tracking->companyApplications ? $tracking->companyApplications->where('offer_received', true)->count() : 0;
+                        @endphp
+
+                        @if($companiesWithOffers > 0)
+                            <div class="space-y-2">
+                                <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                                    @csrf
+                                    <input type="hidden" name="status" value="ACCEPTED">
+                                    <button type="submit"
+                                            class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md"
+                                            onclick="return confirm('IMPORTANT: You should only accept ONE company offer. Have you declined all other offers politely? This action cannot be undone easily.')">
+                                        ✨ I've Accepted ONE Offer
+                                    </button>
+                                </form>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Only proceed after declining other offers</p>
+                            </div>
+                        @else
+                            <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-center">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Mark at least one company with offer received above</p>
+                            </div>
+                        @endif
 
                         @if($tracking->sal_file_path)
                             <a href="{{ route('student.placement.download-sal') }}" target="_blank"
@@ -652,8 +749,13 @@
                         @endif
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
-                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">⚠️ Important</p>
-                            <p class="text-xs text-yellow-700 dark:text-yellow-300">Accept within offer deadline to secure placement</p>
+                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Professional Tips</p>
+                            <ul class="text-xs text-yellow-700 dark:text-yellow-300 list-disc list-inside space-y-1">
+                                <li>Accept within offer deadline to secure placement</li>
+                                <li>Always respond professionally to ALL offers</li>
+                                <li>Decline other offers politely before accepting</li>
+                                <li>Send a thank-you email even when declining</li>
+                            </ul>
                         </div>
 
                         {{-- Go Back Button --}}

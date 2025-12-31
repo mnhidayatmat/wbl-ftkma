@@ -54,6 +54,7 @@ Route::middleware('auth')->prefix('student/placement')->name('student.placement.
     Route::post('company/{application}/got-interview', [StudentPlacementController::class, 'markAsInterviewed'])->name('company.got-interview');
     Route::post('company/{application}/update-interview', [StudentPlacementController::class, 'updateCompanyInterview'])->name('company.update-interview');
     Route::post('company/{application}/update-follow-up', [StudentPlacementController::class, 'updateCompanyFollowUp'])->name('company.update-follow-up');
+    Route::post('company/{application}/update-offer', [StudentPlacementController::class, 'updateCompanyOffer'])->name('company.update-offer');
     Route::get('company/check', [StudentPlacementController::class, 'checkCompanyExists'])->name('company.check');
     Route::post('upload-proof', [StudentPlacementController::class, 'studentUploadProof'])->name('proof.upload');
     Route::get('view-proof', [StudentPlacementController::class, 'studentViewProof'])->name('proof.view');
