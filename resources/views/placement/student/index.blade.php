@@ -706,20 +706,59 @@
                         </div>
 
                         <div class="space-y-2">
-                            <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                            <button type="button" onclick="document.getElementById('offerReceivedSection').classList.toggle('hidden')"
+                                    class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                🎉 I've Received an Offer
+                            </button>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Select the company that gave you an offer</p>
+                        </div>
+
+                        {{-- Offer Received Selection Section --}}
+                        <div id="offerReceivedSection" class="hidden bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-700">
+                            <h4 class="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-3">Which company gave you an offer?</h4>
+                            <form action="{{ route('student.placement.status.update') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="status" value="OFFER_RECEIVED">
-                                <button type="submit"
-                                        class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                    🎉 I've Received an Offer
-                                </button>
+                                <div class="space-y-2 mb-3">
+                                    @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
+                                        @foreach($tracking->companyApplications as $application)
+                                            <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
+                                                <input type="radio" name="offer_company_id" value="{{ $application->id }}" required
+                                                       class="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                                <div class="flex-1">
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $application->company_name }}</span>
+                                                    @if($application->interviewed)
+                                                        <span class="ml-2 text-xs text-green-600 dark:text-green-400">(Interviewed)</span>
+                                                    @endif
+                                                </div>
+                                            </label>
+                                        @endforeach
+                                    @else
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">No companies added yet. Please add companies first.</p>
+                                    @endif
+                                </div>
+                                @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
+                                    <div class="flex gap-2">
+                                        <button type="submit" class="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg">
+                                            Confirm Offer
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('offerReceivedSection').classList.add('hidden')"
+                                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm font-semibold rounded-lg">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                @endif
                             </form>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to Offer Received stage</p>
                         </div>
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
-                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tip</p>
-                            <p class="text-xs text-yellow-700 dark:text-yellow-300">Send thank-you emails after interviews!</p>
+                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tips</p>
+                            <ul class="text-xs text-yellow-700 dark:text-yellow-300 list-disc list-inside space-y-1">
+                                <li>Send thank-you emails after interviews!</li>
+                                <li>Keep frequent follow-up with companies you've applied to</li>
+                                <li>Continue following up even after interviews</li>
+                                <li>Follow up 1 week after application or interview if no response</li>
+                            </ul>
                         </div>
 
                         {{-- Go Back Button --}}

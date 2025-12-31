@@ -1122,6 +1122,10 @@ class StudentPlacementController extends Controller
             'application_notes' => ['nullable', 'string', 'max:1000'],
             'evidence_files' => ['nullable', 'array'],
             'evidence_files.*' => ['file', 'mimes:pdf,png,jpg,jpeg', 'max:5120'], // 5MB max
+            // Offer data (required when status is OFFER_RECEIVED)
+            'offer_company_id' => ['required_if:status,OFFER_RECEIVED', 'nullable', 'exists:placement_company_applications,id'],
+        ], [
+            'offer_company_id.required_if' => 'Please select the company that gave you an offer.',
         ]);
 
         $tracking = $student->placementTracking;
@@ -1220,6 +1224,17 @@ class StudentPlacementController extends Controller
 
                 $updateData['application_methods'] = $validated['application_methods'] ?? $tracking->application_methods;
                 $updateData['application_notes'] = $validated['application_notes'] ?? $tracking->application_notes;
+            }
+
+            // Handle offer received - mark the company
+            if ($validated['status'] === 'OFFER_RECEIVED' && ! empty($validated['offer_company_id'])) {
+                $offerCompany = PlacementCompanyApplication::find($validated['offer_company_id']);
+                if ($offerCompany && $offerCompany->placement_tracking_id === $tracking->id) {
+                    $offerCompany->update([
+                        'offer_received' => true,
+                        'offer_received_date' => now()->toDateString(),
+                    ]);
+                }
             }
 
             // Update tracking
