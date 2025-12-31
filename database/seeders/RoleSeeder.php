@@ -25,6 +25,9 @@ class RoleSeeder extends Seeder
             ['name' => 'ic', 'display_name' => 'Industry Coach (IC)', 'description' => 'PPE/IC/OSH/FYP/WBL evaluation'],
             ['name' => 'supervisor_li', 'display_name' => 'Supervisor LI', 'description' => 'Industrial Training assessments'],
             ['name' => 'student', 'display_name' => 'Student', 'description' => 'Student role for WBL system'],
+            ['name' => 'bta_wbl_coordinator', 'display_name' => 'BTA WBL Coordinator', 'description' => 'Work-Based Learning Coordinator for BTA program'],
+            ['name' => 'btd_wbl_coordinator', 'display_name' => 'BTD WBL Coordinator', 'description' => 'Work-Based Learning Coordinator for BTD program'],
+            ['name' => 'btg_wbl_coordinator', 'display_name' => 'BTG WBL Coordinator', 'description' => 'Work-Based Learning Coordinator for BTG program'],
         ];
 
         foreach ($roles as $role) {
