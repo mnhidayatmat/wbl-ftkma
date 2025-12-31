@@ -441,8 +441,8 @@
                     </div>
                 @endif
 
-                <!-- Update Report Form (Admin/Coordinator Only) -->
-                @if(Auth::user()->isAdmin() || Auth::user()->hasRole('coordinator'))
+                <!-- Update Report Form (Admin/Coordinator/WBL Coordinator Only) -->
+                @if(Auth::user()->isAdmin() || Auth::user()->hasRole('coordinator') || Auth::user()->isWblCoordinator())
                     <div class="card-umpsa p-4">
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Update Report</h3>
 
