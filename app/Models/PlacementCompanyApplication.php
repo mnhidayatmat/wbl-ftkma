@@ -19,6 +19,8 @@ class PlacementCompanyApplication extends Model
         'interviewed',
         'interviewed_at',
         'interview_date',
+        'follow_up_date',
+        'follow_up_notes',
     ];
 
     protected $casts = [
@@ -26,6 +28,7 @@ class PlacementCompanyApplication extends Model
         'interviewed' => 'boolean',
         'interviewed_at' => 'datetime',
         'interview_date' => 'date',
+        'follow_up_date' => 'date',
     ];
 
     /**

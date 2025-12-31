@@ -345,6 +345,57 @@
                                         }
                                     </script>
                                 @endif
+
+                                {{-- Follow-up Section (Available in both APPLIED and INTERVIEWED stages) --}}
+                                @if(($tracking->status === 'APPLIED' || $tracking->status === 'INTERVIEWED') && (!isset($readOnly) || !$readOnly))
+                                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                        <button type="button" onclick="toggleFollowUp_{{ $application->id }}()"
+                                                class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            {{ $application->follow_up_date ? 'Edit Follow-up' : 'Add Follow-up' }}
+                                            @if($application->follow_up_date)
+                                                <span class="text-orange-500">({{ $application->follow_up_date->format('d M') }})</span>
+                                            @endif
+                                        </button>
+                                        <div id="followUpContainer_{{ $application->id }}" class="hidden mt-2">
+                                            <form action="{{ route('student.placement.company.update-follow-up', $application) }}" method="POST" class="space-y-2">
+                                                @csrf
+                                                <div>
+                                                    <label class="text-xs text-gray-600 dark:text-gray-400">Follow-up Date:</label>
+                                                    <input type="date" name="follow_up_date"
+                                                           value="{{ $application->follow_up_date ? $application->follow_up_date->format('Y-m-d') : '' }}"
+                                                           class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white">
+                                                </div>
+                                                <div>
+                                                    <label class="text-xs text-gray-600 dark:text-gray-400">Notes:</label>
+                                                    <textarea name="follow_up_notes" rows="2" placeholder="e.g., Call HR, Send email reminder..."
+                                                              class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white">{{ $application->follow_up_notes }}</textarea>
+                                                </div>
+                                                <button type="submit" class="w-full px-2 py-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded">
+                                                    Save Follow-up
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <script>
+                                        function toggleFollowUp_{{ $application->id }}() {
+                                            const container = document.getElementById('followUpContainer_{{ $application->id }}');
+                                            container.classList.toggle('hidden');
+                                        }
+                                    </script>
+                                @endif
+
+                                {{-- Show follow-up info if set (read-only display) --}}
+                                @if($application->follow_up_date && (isset($readOnly) && $readOnly))
+                                    <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                        <p class="text-xs text-orange-600 dark:text-orange-400">
+                                            <span class="font-medium">Follow-up:</span> {{ $application->follow_up_date->format('d M Y') }}
+                                            @if($application->follow_up_notes)
+                                                - {{ $application->follow_up_notes }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>

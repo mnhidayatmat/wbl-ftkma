@@ -1429,6 +1429,44 @@ class StudentPlacementController extends Controller
     }
 
     /**
+     * Update company follow-up date and notes.
+     */
+    public function updateCompanyFollowUp(Request $request, PlacementCompanyApplication $application): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking) {
+            abort(404, 'Placement tracking not found.');
+        }
+
+        // Verify the application belongs to the student's tracking
+        if ($application->placement_tracking_id !== $tracking->id) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validated = $request->validate([
+            'follow_up_date' => ['nullable', 'date'],
+            'follow_up_notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $application->update([
+            'follow_up_date' => $validated['follow_up_date'],
+            'follow_up_notes' => $validated['follow_up_notes'],
+        ]);
+
+        return redirect()->back()->with('success', 'Follow-up details updated successfully.');
+    }
+
+    /**
      * Student upload confirmation proof/acknowledgment.
      */
     public function studentUploadProof(Request $request): RedirectResponse
