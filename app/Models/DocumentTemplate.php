@@ -69,6 +69,53 @@ class DocumentTemplate extends Model
     }
 
     /**
+     * Get or create the MOU template with default values.
+     */
+    public static function getMouTemplate(): self
+    {
+        return self::firstOrCreate(
+            ['type' => 'MOU'],
+            self::getDefaultMouTemplate()
+        );
+    }
+
+    /**
+     * Get default MOU template values.
+     */
+    public static function getDefaultMouTemplate(): array
+    {
+        return [
+            'type' => 'MOU',
+            'title' => 'MEMORANDUM OF UNDERSTANDING (MOU)',
+            'subtitle' => 'Work-Based Learning Program',
+            'settings' => [],
+        ];
+    }
+
+    /**
+     * Get available template variables for MOU.
+     */
+    public static function getMouVariables(): array
+    {
+        return [
+            // Manual Input Variables
+            '${company_number}' => 'Company/MoU number',
+            '${company_shortname}' => 'Company short name',
+            '${signed_behalf_name}' => 'Signed behalf name (higher position)',
+            '${signed_behalf_position}' => 'Signed behalf position',
+            '${witness_name}' => 'Witness name',
+            '${witness_position}' => 'Witness position',
+            // Auto-populated Variables
+            '${company_name}' => 'Company name',
+            '${hr_name}' => 'HR/PIC name',
+            '${hr_phone}' => 'HR/PIC phone',
+            '${hr_email}' => 'HR/PIC email',
+            '${company_address}' => 'Company address',
+            '${current_date}' => 'Current date',
+        ];
+    }
+
+    /**
      * Get default SAL template values.
      */
     public static function getDefaultSalTemplate(): array

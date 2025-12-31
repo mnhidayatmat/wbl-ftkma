@@ -31,6 +31,24 @@ class Company extends Model
         'ic_phone',
         'ic_email',
         'ic_position',
+        // MoU Template Fields
+        'mou_company_number',
+        'mou_company_shortname',
+        'mou_signed_behalf_name',
+        'mou_signed_behalf_position',
+        'mou_witness_name',
+        'mou_witness_position',
+        'mou_generated_path',
+        'mou_generated_at',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'mou_generated_at' => 'datetime',
     ];
 
     /**

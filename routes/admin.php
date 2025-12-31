@@ -69,6 +69,12 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
         Route::post('moa', [CompanyController::class, 'storeMoa'])->name('moa.store');
         Route::put('moa/{moa}', [CompanyController::class, 'updateMoa'])->name('moa.update');
         Route::delete('moa/{moa}', [CompanyController::class, 'destroyMoa'])->name('moa.destroy');
+
+        // MoU Template
+        Route::post('mou-template', [CompanyController::class, 'saveMouTemplate'])->name('mou-template.save');
+        Route::post('mou-template/generate', [CompanyController::class, 'generateMou'])->name('mou-template.generate');
+        Route::get('mou-template/preview', [CompanyController::class, 'previewMou'])->name('mou-template.preview');
+        Route::get('mou-template/download', [CompanyController::class, 'downloadMou'])->name('mou-template.download');
     });
 
     // Students Management
@@ -161,6 +167,9 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
         // MoU Template
         Route::get('mou', [DocumentTemplateController::class, 'mou'])->name('mou');
         Route::get('mou/preview', [DocumentTemplateController::class, 'previewMou'])->name('mou.preview');
+        Route::post('mou/word-template/upload', [DocumentTemplateController::class, 'uploadMouWordTemplate'])->name('mou.word-template.upload');
+        Route::delete('mou/word-template', [DocumentTemplateController::class, 'deleteMouWordTemplate'])->name('mou.word-template.delete');
+        Route::get('mou/word-template/download', [DocumentTemplateController::class, 'downloadMouWordTemplate'])->name('mou.word-template.download');
     });
 });
 

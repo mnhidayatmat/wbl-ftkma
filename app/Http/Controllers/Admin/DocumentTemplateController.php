@@ -321,24 +321,160 @@ class DocumentTemplateController extends Controller
      */
     public function mou(): View
     {
-        return view('admin.documents.mou');
+        $template = DocumentTemplate::getMouTemplate();
+        $variables = DocumentTemplate::getMouVariables();
+
+        return view('admin.documents.mou', [
+            'template' => $template,
+            'variables' => $variables,
+        ]);
     }
 
     /**
-     * Preview MoU PDF with sample data.
+     * Upload Word template for MOU.
+     */
+    public function uploadMouWordTemplate(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'word_template' => ['required', 'file', 'mimes:docx', 'max:10240'],
+        ]);
+
+        $template = DocumentTemplate::getMouTemplate();
+
+        // Delete old template if exists
+        if ($template->word_template_path && Storage::disk('public')->exists($template->word_template_path)) {
+            Storage::disk('public')->delete($template->word_template_path);
+        }
+
+        // Store new template
+        $file = $request->file('word_template');
+        $path = $file->store('document-templates/mou', 'public');
+
+        $template->update([
+            'word_template_path' => $path,
+            'word_template_original_name' => $file->getClientOriginalName(),
+            'template_mode' => 'word',
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.documents.mou')
+            ->with('success', 'MOU Word template uploaded successfully.');
+    }
+
+    /**
+     * Delete MOU Word template.
+     */
+    public function deleteMouWordTemplate(): RedirectResponse
+    {
+        $template = DocumentTemplate::getMouTemplate();
+
+        if ($template->word_template_path && Storage::disk('public')->exists($template->word_template_path)) {
+            Storage::disk('public')->delete($template->word_template_path);
+        }
+
+        $template->update([
+            'word_template_path' => null,
+            'word_template_original_name' => null,
+            'template_mode' => null,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.documents.mou')
+            ->with('success', 'MOU Word template deleted successfully.');
+    }
+
+    /**
+     * Download MOU Word template.
+     */
+    public function downloadMouWordTemplate()
+    {
+        $template = DocumentTemplate::getMouTemplate();
+
+        if (! $template->word_template_path || ! Storage::disk('public')->exists($template->word_template_path)) {
+            return redirect()->route('admin.documents.mou')
+                ->with('error', 'No MOU Word template uploaded.');
+        }
+
+        return Storage::disk('public')->download(
+            $template->word_template_path,
+            $template->word_template_original_name ?? 'MOU_Template.docx'
+        );
+    }
+
+    /**
+     * Preview MoU PDF with example data.
      */
     public function previewMou()
     {
-        $templatePath = resource_path('views/admin/documents/pdf/mou.blade.php');
-        if (! file_exists($templatePath)) {
-            return back()->with('error', 'MoU template not configured yet.');
+        $template = DocumentTemplate::getMouTemplate();
+
+        if (! $template->word_template_path || ! Storage::disk('public')->exists($template->word_template_path)) {
+            return redirect()->route('admin.documents.mou')
+                ->with('error', 'No MOU Word template uploaded. Please upload a template first.');
         }
 
-        $pdf = Pdf::loadView('admin.documents.pdf.mou', [
-            'generatedAt' => now(),
-        ])->setPaper('a4', 'portrait');
+        // Generate Word document with example data
+        $docxPath = $this->generateMouWithExampleData($template);
 
-        return $pdf->stream('MoU_Template_Preview.pdf');
+        // Convert to PDF using LibreOffice
+        $pdfPath = $this->convertWordToPdfLibreOffice($docxPath);
+
+        // Clean up Word file
+        if (file_exists($docxPath)) {
+            unlink($docxPath);
+        }
+
+        // Stream PDF inline
+        return response()->file($pdfPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="MOU_Preview.pdf"',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Generate MOU Word document with example data for preview.
+     */
+    protected function generateMouWithExampleData(DocumentTemplate $template): string
+    {
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Example placeholder data
+        $variables = [
+            'company_number' => 'MOU/UMPSA/2025/001',
+            'company_shortname' => 'TMJ',
+            'signed_behalf_name' => 'Dato\' Ahmad bin Ibrahim',
+            'signed_behalf_position' => 'Chief Executive Officer',
+            'witness_name' => 'Encik Mohd Hafiz bin Osman',
+            'witness_position' => 'General Manager',
+            'company_name' => 'Syarikat Teknologi Maju Sdn Bhd',
+            'hr_name' => 'Puan Siti Aminah binti Hassan',
+            'hr_phone' => '09-5551234',
+            'hr_email' => 'hr@teknologimaju.com.my',
+            'company_address' => 'No. 123, Jalan Teknologi 1, Taman Perindustrian Gebeng, 26080 Kuantan, Pahang',
+            'current_date' => now()->format('d F Y'),
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Save to temp file
+        $outputPath = storage_path('app/temp/MOU_Preview_'.time().'.docx');
+
+        if (! file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $templateProcessor->saveAs($outputPath);
+
+        return $outputPath;
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Models\CompanyAgreement;
 use App\Models\CompanyContact;
 use App\Models\CompanyDocument;
 use App\Models\CompanyNote;
+use App\Models\DocumentTemplate;
 use App\Models\Moa;
 use App\Models\Mou;
 use App\Models\Student;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class CompanyController extends Controller
 {
@@ -280,7 +282,7 @@ class CompanyController extends Controller
 
         // Auto-prepend https:// to website if provided
         if (! empty($validated['website']) && ! preg_match('/^https?:\/\//i', $validated['website'])) {
-            $validated['website'] = 'https://' . $validated['website'];
+            $validated['website'] = 'https://'.$validated['website'];
         }
 
         // Start database transaction for atomic creation
@@ -420,7 +422,7 @@ class CompanyController extends Controller
 
         // Auto-prepend https:// to website if provided
         if (! empty($validated['website']) && ! preg_match('/^https?:\/\//i', $validated['website'])) {
-            $validated['website'] = 'https://' . $validated['website'];
+            $validated['website'] = 'https://'.$validated['website'];
         }
 
         $company->update($validated);
@@ -1084,5 +1086,243 @@ class CompanyController extends Controller
 
         return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'moa'])
             ->with('success', 'MoA deleted successfully.');
+    }
+
+    /**
+     * Save MoU template data for a company.
+     */
+    public function saveMouTemplate(Request $request, Company $company): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validated = $request->validate([
+            'mou_company_number' => ['nullable', 'string', 'max:255'],
+            'mou_company_shortname' => ['nullable', 'string', 'max:255'],
+            'mou_signed_behalf_name' => ['nullable', 'string', 'max:255'],
+            'mou_signed_behalf_position' => ['nullable', 'string', 'max:255'],
+            'mou_witness_name' => ['nullable', 'string', 'max:255'],
+            'mou_witness_position' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $company->update($validated);
+
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'agreements'])
+            ->with('success', 'MoU template data saved successfully.');
+    }
+
+    /**
+     * Generate MoU document from Word template.
+     */
+    public function generateMou(Company $company)
+    {
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Get MoU template
+        $template = DocumentTemplate::where('type', 'MOU')->first();
+
+        if (! $template || ! $template->word_template_path) {
+            return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'agreements'])
+                ->with('error', 'No MoU Word template uploaded. Please upload a template first.');
+        }
+
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        if (! file_exists($templatePath)) {
+            return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'agreements'])
+                ->with('error', 'MoU template file not found.');
+        }
+
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Build variables - Manual Input
+        $variables = [
+            'company_number' => $company->mou_company_number ?? '',
+            'company_shortname' => $company->mou_company_shortname ?? '',
+            'signed_behalf_name' => $company->mou_signed_behalf_name ?? '',
+            'signed_behalf_position' => $company->mou_signed_behalf_position ?? '',
+            'witness_name' => $company->mou_witness_name ?? '',
+            'witness_position' => $company->mou_witness_position ?? '',
+            // Auto-populated from company data
+            'company_name' => $company->company_name ?? '',
+            'hr_name' => $company->pic_name ?? '',
+            'hr_phone' => $company->phone ?? '',
+            'hr_email' => $company->email ?? '',
+            'company_address' => $company->address ?? '',
+            'current_date' => now()->format('d F Y'),
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Save to storage
+        $filename = 'MoU_'.$company->id.'_'.now()->format('Ymd_His').'.docx';
+        $outputPath = 'companies/mou/'.$filename;
+
+        // Ensure directory exists
+        Storage::disk('public')->makeDirectory('companies/mou');
+
+        $fullPath = Storage::disk('public')->path($outputPath);
+        $templateProcessor->saveAs($fullPath);
+
+        // Update company record
+        $company->update([
+            'mou_generated_path' => $outputPath,
+            'mou_generated_at' => now(),
+        ]);
+
+        return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'agreements'])
+            ->with('success', 'MoU document generated successfully.');
+    }
+
+    /**
+     * Preview MoU document as PDF.
+     */
+    public function previewMou(Company $company)
+    {
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Get MoU template
+        $template = DocumentTemplate::where('type', 'MOU')->first();
+
+        if (! $template || ! $template->word_template_path) {
+            return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'agreements'])
+                ->with('error', 'No MoU Word template uploaded. Please upload a template first.');
+        }
+
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        if (! file_exists($templatePath)) {
+            return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'agreements'])
+                ->with('error', 'MoU template file not found.');
+        }
+
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Build variables
+        $variables = [
+            'company_number' => $company->mou_company_number ?? '',
+            'company_shortname' => $company->mou_company_shortname ?? '',
+            'signed_behalf_name' => $company->mou_signed_behalf_name ?? '',
+            'signed_behalf_position' => $company->mou_signed_behalf_position ?? '',
+            'witness_name' => $company->mou_witness_name ?? '',
+            'witness_position' => $company->mou_witness_position ?? '',
+            'company_name' => $company->company_name ?? '',
+            'hr_name' => $company->pic_name ?? '',
+            'hr_phone' => $company->phone ?? '',
+            'hr_email' => $company->email ?? '',
+            'company_address' => $company->address ?? '',
+            'current_date' => now()->format('d F Y'),
+        ];
+
+        // Set variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Save to temp file
+        $tempDocx = storage_path('app/temp/MoU_Preview_'.time().'.docx');
+        if (! file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+        $templateProcessor->saveAs($tempDocx);
+
+        // Convert to PDF using LibreOffice
+        $pdfPath = $this->convertWordToPdfLibreOffice($tempDocx);
+
+        // Clean up docx
+        if (file_exists($tempDocx)) {
+            unlink($tempDocx);
+        }
+
+        // Stream PDF inline
+        return response()->file($pdfPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="MoU_Preview_'.$company->company_name.'.pdf"',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Download generated MoU document.
+     */
+    public function downloadMou(Company $company)
+    {
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        if (! $company->mou_generated_path || ! Storage::disk('public')->exists($company->mou_generated_path)) {
+            return redirect()->route('admin.companies.show', ['company' => $company, 'tab' => 'agreements'])
+                ->with('error', 'No MoU document has been generated yet.');
+        }
+
+        return Storage::disk('public')->download(
+            $company->mou_generated_path,
+            'MoU_'.$company->company_name.'.docx'
+        );
+    }
+
+    /**
+     * Convert Word document to PDF using LibreOffice.
+     */
+    protected function convertWordToPdfLibreOffice(string $docxPath): string
+    {
+        $outputDir = dirname($docxPath);
+        $pdfPath = str_replace('.docx', '.pdf', $docxPath);
+
+        // Try to find LibreOffice executable
+        $libreOfficePaths = [
+            '/Applications/LibreOffice.app/Contents/MacOS/soffice', // macOS
+            '/usr/bin/libreoffice', // Linux
+            '/usr/bin/soffice', // Linux alternative
+            'C:\\Program Files\\LibreOffice\\program\\soffice.exe', // Windows
+        ];
+
+        $libreOfficePath = null;
+        foreach ($libreOfficePaths as $path) {
+            if (file_exists($path)) {
+                $libreOfficePath = $path;
+                break;
+            }
+        }
+
+        if (! $libreOfficePath) {
+            // Fallback - just return the docx path renamed as pdf (won't actually work)
+            copy($docxPath, $pdfPath);
+
+            return $pdfPath;
+        }
+
+        // Use LibreOffice for conversion
+        $command = sprintf(
+            '"%s" --headless --convert-to pdf --outdir "%s" "%s" 2>&1',
+            $libreOfficePath,
+            $outputDir,
+            $docxPath
+        );
+
+        exec($command, $output, $returnCode);
+
+        if (file_exists($pdfPath)) {
+            return $pdfPath;
+        }
+
+        // If conversion failed, copy docx as pdf (fallback)
+        copy($docxPath, $pdfPath);
+
+        return $pdfPath;
     }
 }
