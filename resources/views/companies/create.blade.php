@@ -158,13 +158,14 @@
 
                 <!-- Address -->
                 <div class="mb-4">
-                    <label for="address" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Address</label>
-                    <textarea name="address" id="address" rows="2"
-                              placeholder="Company address"
-                              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white @error('address') border-red-500 @enderror">{{ old('address') }}</textarea>
+                    <label for="address" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Company Address</label>
+                    <textarea name="address" id="address" rows="5"
+                              placeholder="No. Street Name&#10;Postcode City&#10;State"
+                              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 @error('address') border-red-500 @enderror">{{ old('address') }}</textarea>
                     @error('address')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">This address will be used in official documents like SAL.</p>
                 </div>
 
                 <!-- Website -->

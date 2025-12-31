@@ -639,6 +639,9 @@ class DocumentTemplateController extends Controller
         // Get WBL Coordinator based on student's programme
         $wblCoordinator = Student::getWblCoordinator($student->programme);
 
+        // Get company information if student has a company assigned
+        $company = $student->company;
+
         // Replace variables using ${variable} format
         $variables = [
             'student_name' => $student->name ?? $student->user?->name ?? '',
@@ -660,6 +663,12 @@ class DocumentTemplateController extends Controller
             'wbl_coordinator_email' => $wblCoordinator?->email ?? '',
             'wbl_coordinator_phone' => $wblCoordinator?->phone ?? '',
             'director_name' => $template->settings['director_name'] ?? '',
+            'company_name' => $company?->company_name ?? '',
+            'company_address' => $company?->address ?? '',
+            'company_pic_name' => $company?->pic_name ?? '',
+            'company_pic_position' => $company?->position ?? '',
+            'company_email' => $company?->email ?? '',
+            'company_phone' => $company?->phone ?? '',
         ];
 
         // Set normal variables
@@ -733,6 +742,12 @@ class DocumentTemplateController extends Controller
             '${wbl_coordinator_phone}' => 'WBL Coordinator phone number',
             '${director_name}' => 'Director of UMPSA Career Centre',
             '${director_signature}' => 'Director signature (image)',
+            '${company_name}' => 'Company name',
+            '${company_address}' => 'Company address',
+            '${company_pic_name}' => 'Company PIC name',
+            '${company_pic_position}' => 'Company PIC position',
+            '${company_email}' => 'Company email',
+            '${company_phone}' => 'Company phone',
         ];
     }
 }

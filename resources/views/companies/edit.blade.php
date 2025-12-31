@@ -104,21 +104,13 @@
             @enderror
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-                <label for="staff_pic_name" class="block text-sm font-semibold text-umpsa-deep-blue dark:text-gray-300 mb-2">Staff PIC Name</label>
-                <input type="text" name="staff_pic_name" id="staff_pic_name" value="{{ old('staff_pic_name', $company->staff_pic_name) }}" placeholder="e.g., Dr. Ahmad Bin Ali" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal @error('staff_pic_name') border-red-500 @enderror">
-                @error('staff_pic_name')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-            <div>
-                <label for="staff_pic_phone" class="block text-sm font-semibold text-umpsa-deep-blue dark:text-gray-300 mb-2">Staff PIC Phone Number</label>
-                <input type="text" name="staff_pic_phone" id="staff_pic_phone" value="{{ old('staff_pic_phone', $company->staff_pic_phone) }}" placeholder="e.g., +60123456789" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal @error('staff_pic_phone') border-red-500 @enderror">
-                @error('staff_pic_phone')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+        <div class="mb-4">
+            <label for="address" class="block text-sm font-semibold text-umpsa-deep-blue dark:text-gray-300 mb-2">Company Address</label>
+            <textarea name="address" id="address" rows="5" placeholder="No. Street Name&#10;Postcode City&#10;State" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal placeholder-gray-400 dark:placeholder-gray-500 @error('address') border-red-500 @enderror">{{ old('address', $company->address) }}</textarea>
+            @error('address')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">This address will be used in official documents like SAL.</p>
         </div>
 
         <div class="flex items-center justify-end space-x-4">

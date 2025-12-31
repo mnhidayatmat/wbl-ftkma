@@ -166,6 +166,12 @@ Thank you for your cooperation.',
             '{{wbl_coordinator_phone}}' => 'WBL Coordinator phone number',
             '{{director_name}}' => 'Director of UMPSA Career Centre name',
             '{{director_signature}}' => 'Director signature image',
+            '{{company_name}}' => 'Company name',
+            '{{company_address}}' => 'Company address',
+            '{{company_pic_name}}' => 'Company person in charge name',
+            '{{company_pic_position}}' => 'Company PIC position',
+            '{{company_email}}' => 'Company email',
+            '{{company_phone}}' => 'Company phone',
         ];
     }
 

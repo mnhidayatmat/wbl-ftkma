@@ -272,6 +272,12 @@ class CompanyController extends Controller
             $validated['category'] = $request->category_other;
         }
 
+        // Convert newlines in address to commas
+        if (isset($validated['address']) && $validated['address']) {
+            $validated['address'] = preg_replace('/\r\n|\r|\n/', ', ', trim($validated['address']));
+            $validated['address'] = preg_replace('/,\s*,/', ',', $validated['address']); // Remove double commas
+        }
+
         // Start database transaction for atomic creation
         DB::beginTransaction();
 
@@ -399,6 +405,12 @@ class CompanyController extends Controller
         // Handle category_other field (Industry Type)
         if ($request->has('category_other') && $request->category_other) {
             $validated['category'] = $request->category_other;
+        }
+
+        // Convert newlines in address to commas
+        if (isset($validated['address']) && $validated['address']) {
+            $validated['address'] = preg_replace('/\r\n|\r|\n/', ', ', trim($validated['address']));
+            $validated['address'] = preg_replace('/,\s*,/', ',', $validated['address']); // Remove double commas
         }
 
         $company->update($validated);
