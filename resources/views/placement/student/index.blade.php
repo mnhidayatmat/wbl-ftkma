@@ -203,19 +203,23 @@
                 <div id="addCompanyForm" class="hidden mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                     <form action="{{ route('student.placement.company.add') }}" method="POST">
                         @csrf
+                        <input type="hidden" name="placement_tracking_id" value="{{ $tracking->id }}">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <input type="text" name="company_name" required placeholder="Company Name *"
                                    class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
                             <input type="date" name="application_deadline" placeholder="Deadline"
                                    class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                            <select name="application_method" required
+                            <select name="application_method" id="applicationMethodSelect" required
+                                    onchange="toggleOtherMethodInput()"
                                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
                                 <option value="">Application Method *</option>
+                                <option value="through_coordinator">Through Coordinator</option>
                                 <option value="job_portal">Job Portal</option>
                                 <option value="company_website">Company Website</option>
                                 <option value="email">Email</option>
                                 <option value="career_fair">Career Fair</option>
                                 <option value="referral">Referral</option>
+                                <option value="other">Other</option>
                             </select>
                             <div class="flex gap-2">
                                 <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg">Add</button>
@@ -223,8 +227,28 @@
                                         class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm font-semibold rounded-lg">Cancel</button>
                             </div>
                         </div>
+                        {{-- Other Method Input (shown when "Other" is selected) --}}
+                        <div id="otherMethodContainer" class="hidden mt-3">
+                            <input type="text" name="application_method_other" id="otherMethodInput" placeholder="Please specify the application method *"
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                        </div>
                     </form>
                 </div>
+                <script>
+                    function toggleOtherMethodInput() {
+                        const select = document.getElementById('applicationMethodSelect');
+                        const container = document.getElementById('otherMethodContainer');
+                        const input = document.getElementById('otherMethodInput');
+                        if (select.value === 'other') {
+                            container.classList.remove('hidden');
+                            input.required = true;
+                        } else {
+                            container.classList.add('hidden');
+                            input.required = false;
+                            input.value = '';
+                        }
+                    }
+                </script>
 
                 {{-- Companies Grid --}}
                 @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
