@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\DocumentTemplate;
 use App\Models\PlacementApplicationEvidence;
 use App\Models\PlacementCompanyApplication;
@@ -1083,7 +1084,10 @@ class StudentPlacementController extends Controller
             $readOnly = true;
         }
 
-        return view('placement.student.index', compact('student', 'tracking', 'statuses', 'currentStep', 'canApply', 'resumeInspection', 'step1Label', 'isStudentView', 'readOnly', 'isInCompletedGroup'));
+        // Get existing companies for selection
+        $existingCompanies = Company::orderBy('company_name')->get(['id', 'company_name']);
+
+        return view('placement.student.index', compact('student', 'tracking', 'statuses', 'currentStep', 'canApply', 'resumeInspection', 'step1Label', 'isStudentView', 'readOnly', 'isInCompletedGroup', 'existingCompanies'));
     }
 
     /**
@@ -1256,6 +1260,33 @@ class StudentPlacementController extends Controller
     }
 
     /**
+     * Check if a company with similar name already exists (AJAX).
+     */
+    public function checkCompanyExists(Request $request)
+    {
+        $name = $request->query('name', '');
+
+        if (strlen($name) < 3) {
+            return response()->json(['exists' => false]);
+        }
+
+        // Check for exact or similar company name (case-insensitive)
+        $company = Company::whereRaw('LOWER(company_name) = ?', [strtolower($name)])
+            ->orWhereRaw('LOWER(company_name) LIKE ?', ['%' . strtolower($name) . '%'])
+            ->first();
+
+        if ($company) {
+            return response()->json([
+                'exists' => true,
+                'company_id' => $company->id,
+                'company_name' => $company->company_name,
+            ]);
+        }
+
+        return response()->json(['exists' => false]);
+    }
+
+    /**
      * Add a company application.
      */
     public function addCompany(Request $request): RedirectResponse
@@ -1277,7 +1308,8 @@ class StudentPlacementController extends Controller
 
         $validated = $request->validate([
             'placement_tracking_id' => ['required', 'exists:student_placement_tracking,id'],
-            'company_name' => ['required', 'string', 'max:255'],
+            'company_id' => ['nullable', 'exists:companies,id'],
+            'company_name' => ['required_without:company_id', 'nullable', 'string', 'max:255'],
             'application_deadline' => ['nullable', 'date'],
             'application_method' => ['required', 'in:through_coordinator,job_portal,company_website,email,career_fair,referral,other'],
             'application_method_other' => ['required_if:application_method,other', 'nullable', 'string', 'max:255'],
@@ -1288,14 +1320,47 @@ class StudentPlacementController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        PlacementCompanyApplication::create($validated);
+        // Determine company name
+        $companyName = '';
+        if (! empty($validated['company_id'])) {
+            // Using existing company
+            $company = Company::find($validated['company_id']);
+            $companyName = $company->company_name;
+        } elseif (! empty($validated['company_name'])) {
+            // Check if a company with this name already exists
+            $existingCompany = Company::whereRaw('LOWER(company_name) = ?', [strtolower($validated['company_name'])])->first();
+
+            if ($existingCompany) {
+                return redirect()->back()->withErrors([
+                    'company_name' => 'A company named "' . $existingCompany->company_name . '" already exists. Please select it from the dropdown.',
+                ])->withInput();
+            }
+
+            // Create new company
+            $newCompany = Company::create([
+                'company_name' => $validated['company_name'],
+            ]);
+            $companyName = $newCompany->company_name;
+        } else {
+            return redirect()->back()->withErrors([
+                'company_name' => 'Please select an existing company or enter a new company name.',
+            ])->withInput();
+        }
+
+        PlacementCompanyApplication::create([
+            'placement_tracking_id' => $validated['placement_tracking_id'],
+            'company_name' => $companyName,
+            'application_deadline' => $validated['application_deadline'] ?? null,
+            'application_method' => $validated['application_method'],
+            'application_method_other' => $validated['application_method_other'] ?? null,
+        ]);
 
         // Update companies_applied_count
         $tracking->update([
             'companies_applied_count' => $tracking->companyApplications()->count(),
         ]);
 
-        return redirect()->back()->with('success', 'Company added successfully.');
+        return redirect()->back()->with('success', 'Company application added successfully.');
     }
 
     /**
