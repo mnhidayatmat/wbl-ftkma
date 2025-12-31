@@ -93,6 +93,7 @@
                         <option value="ready" {{ request('placement_status') === 'ready' ? 'selected' : '' }}>Ready for Placement</option>
                         <option value="not_applied" {{ request('placement_status') === 'not_applied' ? 'selected' : '' }}>Not Applied</option>
                         <option value="applied" {{ request('placement_status') === 'applied' ? 'selected' : '' }}>Applied</option>
+                        <option value="no_offer" {{ request('placement_status') === 'no_offer' ? 'selected' : '' }}>Not Received Offers</option>
                         <option value="offer_received" {{ request('placement_status') === 'offer_received' ? 'selected' : '' }}>Offer Received</option>
                     </select>
                 </div>
