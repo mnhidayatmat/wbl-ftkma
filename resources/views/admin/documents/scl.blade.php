@@ -357,13 +357,9 @@
                                      class="h-12 object-contain bg-white rounded border border-gray-200 dark:border-gray-600 p-1">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Current signature</span>
                             </div>
-                            <form action="{{ route('admin.documents.scl.director-signature.delete') }}" method="POST" class="inline" onsubmit="return confirm('Delete this signature?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-medium">
-                                    Remove
-                                </button>
-                            </form>
+                            <button type="button" onclick="deleteSclDirectorSignature()" class="text-red-500 hover:text-red-700 text-sm font-medium">
+                                Remove
+                            </button>
                         </div>
                     </div>
                     @endif
@@ -412,6 +408,12 @@
     </div>
 </div>
 
+<!-- Hidden form for deleting director signature (outside main form to avoid nesting) -->
+<form id="deleteSclSignatureForm" action="{{ route('admin.documents.scl.director-signature.delete') }}" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
+
 <script>
 function previewSignature(input) {
     const fileNameElement = document.getElementById('signatureFileName');
@@ -421,6 +423,12 @@ function previewSignature(input) {
     } else {
         fileNameElement.textContent = 'Upload signature image';
         fileNameElement.classList.remove('text-purple-600', 'dark:text-purple-400', 'font-medium');
+    }
+}
+
+function deleteSclDirectorSignature() {
+    if (confirm('Delete this signature?')) {
+        document.getElementById('deleteSclSignatureForm').submit();
     }
 }
 </script>
