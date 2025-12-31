@@ -30,6 +30,69 @@
         <p class="text-gray-600 dark:text-gray-400">Track your WBL journey, submit documents, and monitor your progress</p>
     </div>
 
+    {{-- Follow-up Reminders Notification --}}
+    @if(isset($followUpReminders) && $followUpReminders->count() > 0)
+        @php
+            $overdueCount = $followUpReminders->where('is_overdue', true)->count();
+            $todayCount = $followUpReminders->where('is_today', true)->count();
+            $upcomingCount = $followUpReminders->where('is_upcoming', true)->count();
+        @endphp
+        @if($overdueCount > 0 || $todayCount > 0 || $upcomingCount > 0)
+        <div class="mb-6">
+            <div class="bg-gradient-to-r {{ $overdueCount > 0 ? 'from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-300 dark:border-red-700' : ($todayCount > 0 ? 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-300 dark:border-amber-700' : 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-300 dark:border-blue-700') }} rounded-xl shadow-md p-4 border">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full {{ $overdueCount > 0 ? 'bg-red-100 dark:bg-red-900/30' : ($todayCount > 0 ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-blue-100 dark:bg-blue-900/30') }} flex items-center justify-center">
+                            <svg class="w-5 h-5 {{ $overdueCount > 0 ? 'text-red-600 dark:text-red-400' : ($todayCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold {{ $overdueCount > 0 ? 'text-red-800 dark:text-red-300' : ($todayCount > 0 ? 'text-amber-800 dark:text-amber-300' : 'text-blue-800 dark:text-blue-300') }} mb-1">
+                            @if($overdueCount > 0)
+                                Company Follow-up Overdue!
+                            @elseif($todayCount > 0)
+                                Follow-up Due Today!
+                            @else
+                                Upcoming Follow-ups
+                            @endif
+                        </h3>
+                        <div class="space-y-1">
+                            @foreach($followUpReminders->take(3) as $reminder)
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-700 dark:text-gray-300">
+                                        <span class="font-medium">{{ $reminder->company_name }}</span>
+                                        @if($reminder->follow_up_notes)
+                                            <span class="text-gray-500 dark:text-gray-400 text-xs">- {{ Str::limit($reminder->follow_up_notes, 30) }}</span>
+                                        @endif
+                                    </span>
+                                    <span class="{{ $reminder->is_overdue ? 'text-red-600 dark:text-red-400' : ($reminder->is_today ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400') }} text-xs font-medium">
+                                        @if($reminder->is_overdue)
+                                            {{ $reminder->follow_up_date->diffForHumans() }}
+                                        @elseif($reminder->is_today)
+                                            Today
+                                        @else
+                                            {{ $reminder->follow_up_date->format('d M') }}
+                                        @endif
+                                    </span>
+                                </div>
+                            @endforeach
+                            @if($followUpReminders->count() > 3)
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">+{{ $followUpReminders->count() - 3 }} more follow-ups</p>
+                            @endif
+                        </div>
+                        <a href="{{ route('student.placement.index') }}" class="inline-flex items-center gap-1 text-xs font-medium {{ $overdueCount > 0 ? 'text-red-700 dark:text-red-400 hover:text-red-800' : ($todayCount > 0 ? 'text-amber-700 dark:text-amber-400 hover:text-amber-800' : 'text-blue-700 dark:text-blue-400 hover:text-blue-800') }} mt-2">
+                            View Placement Tracking
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endif
+
     @if($student)
     <!-- Priority Actions Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">

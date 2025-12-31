@@ -962,6 +962,21 @@ class DashboardController extends Controller
         // Fetch placement tracking
         $placementTracking = $student->placementTracking;
 
+        // Fetch follow-up reminders (upcoming and overdue)
+        $followUpReminders = collect();
+        if ($placementTracking) {
+            $followUpReminders = $placementTracking->companyApplications()
+                ->whereNotNull('follow_up_date')
+                ->orderBy('follow_up_date')
+                ->get()
+                ->map(function ($application) {
+                    $application->is_overdue = $application->follow_up_date->isPast();
+                    $application->is_today = $application->follow_up_date->isToday();
+                    $application->is_upcoming = $application->follow_up_date->isFuture() && $application->follow_up_date->diffInDays(now()) <= 7;
+                    return $application;
+                });
+        }
+
         // Fetch all assessment windows for timeline
         $assessmentWindows = collect();
 
@@ -1035,7 +1050,8 @@ class DashboardController extends Controller
             'resumeInspection',
             'isInCompletedGroup',
             'placementTracking',
-            'assessmentWindows'
+            'assessmentWindows',
+            'followUpReminders'
         ));
     }
 }
