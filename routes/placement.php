@@ -32,6 +32,7 @@ Route::middleware(['auth'])->prefix('placement')->name('placement.')->group(func
 
     // SCL operations (Admin & Coordinator only)
     Route::post('student/{student}/release-scl', [StudentPlacementController::class, 'releaseScl'])->name('student.scl.release');
+    Route::post('bulk-release-scl', [StudentPlacementController::class, 'bulkReleaseScl'])->name('bulk.scl.release');
 
     // Proof upload (students can upload their own, admin/coordinator can upload any)
     Route::post('student/{student}/upload-proof', [StudentPlacementController::class, 'uploadProof'])->name('student.proof.upload');

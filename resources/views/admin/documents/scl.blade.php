@@ -456,15 +456,19 @@
         <div class="flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-semibold">Ready to Generate SCL?</h3>
-                <p class="text-purple-100 text-sm mt-1">Release SCL letters to students with confirmed placements</p>
+                <p class="text-purple-100 text-sm mt-1">Release SCL letters to students who have received offer letters</p>
             </div>
-            <a href="{{ route('placement.index') }}"
-               class="px-5 py-2.5 bg-white text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
-                Release SCL to Students
-            </a>
+            <form action="{{ route('placement.bulk.scl.release') }}" method="POST" class="inline"
+                  onsubmit="return confirm('Release SCL to all students with Offer Received status? This will generate SCL documents for eligible students.');">
+                @csrf
+                <button type="submit"
+                        class="px-5 py-2.5 bg-white text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Release SCL to Students
+                </button>
+            </form>
         </div>
     </div>
 </div>

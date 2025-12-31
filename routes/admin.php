@@ -150,6 +150,7 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
         Route::get('sal/word-template/preview', [DocumentTemplateController::class, 'previewWordTemplate'])->name('sal.word-template.preview');
         Route::get('sal/word-template/preview-docx', [DocumentTemplateController::class, 'previewWordTemplateDocx'])->name('sal.word-template.preview-docx');
         Route::get('sal/word-template/download', [DocumentTemplateController::class, 'downloadWordTemplate'])->name('sal.word-template.download');
+        Route::post('sal/toggle-auto-release', [DocumentTemplateController::class, 'toggleSalAutoRelease'])->name('sal.toggle-auto-release');
 
         // SCL Template
         Route::get('scl', [DocumentTemplateController::class, 'scl'])->name('scl');

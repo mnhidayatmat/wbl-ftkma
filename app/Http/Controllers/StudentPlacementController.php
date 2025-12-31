@@ -443,6 +443,73 @@ class StudentPlacementController extends Controller
     }
 
     /**
+     * Bulk release SCL for students who have received offers.
+     */
+    public function bulkReleaseScl(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isAdmin() && ! $user->isCoordinator()) {
+            abort(403, 'Only Admin and Coordinator can release SCL.');
+        }
+
+        // Get all students with OFFER_RECEIVED status who haven't received SCL yet
+        $students = Student::whereHas('placementTracking', function ($q) {
+            $q->where('status', 'OFFER_RECEIVED')
+              ->whereNull('scl_file_path');
+        })
+            ->with(['placementTracking', 'user', 'group', 'company', 'academicTutor', 'industryCoach'])
+            ->get();
+
+        $released = 0;
+        foreach ($students as $student) {
+            $tracking = $student->placementTracking;
+            if (! $tracking || $tracking->status !== 'OFFER_RECEIVED') {
+                continue;
+            }
+
+            // Skip if SCL already released
+            if ($tracking->scl_file_path) {
+                continue;
+            }
+
+            try {
+                // Generate SCL PDF
+                $pdf = $this->generateSclPdf($student);
+                $fileName = 'SCL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
+                $filePath = 'placement/scl/'.$fileName;
+                Storage::put($filePath, $pdf->output());
+
+                // Update tracking with SCL file path
+                $tracking->update([
+                    'scl_released_at' => now(),
+                    'scl_released_by' => auth()->id(),
+                    'scl_file_path' => $filePath,
+                    'updated_by' => auth()->id(),
+                ]);
+
+                $released++;
+            } catch (\Exception $e) {
+                Log::error('Failed to release SCL for student', [
+                    'student_id' => $student->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('Bulk SCL Release', [
+            'released_count' => $released,
+            'released_by' => auth()->id(),
+            'released_by_name' => auth()->user()->name,
+        ]);
+
+        if ($released === 0) {
+            return redirect()->back()->with('info', 'No eligible students found. Students must have "Offer Received" status to receive SCL.');
+        }
+
+        return redirect()->back()->with('success', "SCL released for {$released} student(s) who received offers.");
+    }
+
+    /**
      * Release SCL for a single student.
      */
     public function releaseScl(Student $student): RedirectResponse
