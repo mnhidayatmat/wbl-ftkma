@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -196,7 +195,7 @@ class Student extends Model
      */
     public function hasSkill(string $skill): bool
     {
-        if (!$this->skills) {
+        if (! $this->skills) {
             return false;
         }
 
@@ -243,5 +242,81 @@ class Student extends Model
         return $query->whereHas('resumeInspection', function ($q) {
             $q->where('status', 'RECOMMENDED');
         })->whereNotNull('resume_pdf_path');
+    }
+
+    /**
+     * Programme name to short code mapping.
+     */
+    public const PROGRAMME_SHORT_CODES = [
+        'Bachelor of Mechanical Engineering Technology (Automotive) with Honours' => 'BTA',
+        'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours' => 'BTD',
+        'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours' => 'BTG',
+    ];
+
+    /**
+     * Programme short code to WBL Coordinator role mapping.
+     */
+    public const PROGRAMME_WBL_COORDINATOR_ROLES = [
+        'BTA' => 'bta_wbl_coordinator',
+        'BTD' => 'btd_wbl_coordinator',
+        'BTG' => 'btg_wbl_coordinator',
+    ];
+
+    /**
+     * Get the short code for a programme name.
+     */
+    public static function getProgrammeShortCode(?string $programme): string
+    {
+        if (! $programme) {
+            return 'N/A';
+        }
+
+        return self::PROGRAMME_SHORT_CODES[$programme] ?? $programme;
+    }
+
+    /**
+     * Get the short programme code attribute.
+     */
+    public function getProgrammeShortAttribute(): string
+    {
+        return self::getProgrammeShortCode($this->programme);
+    }
+
+    /**
+     * Get the WBL Coordinator role name for a programme.
+     */
+    public static function getWblCoordinatorRole(?string $programme): ?string
+    {
+        if (! $programme) {
+            return null;
+        }
+
+        $shortCode = self::getProgrammeShortCode($programme);
+
+        return self::PROGRAMME_WBL_COORDINATOR_ROLES[$shortCode] ?? null;
+    }
+
+    /**
+     * Get the WBL Coordinator user for a student's programme.
+     */
+    public static function getWblCoordinator(?string $programme): ?User
+    {
+        $roleName = self::getWblCoordinatorRole($programme);
+
+        if (! $roleName) {
+            return null;
+        }
+
+        return User::whereHas('roles', function ($query) use ($roleName) {
+            $query->where('name', $roleName);
+        })->first();
+    }
+
+    /**
+     * Get this student's WBL Coordinator.
+     */
+    public function getWblCoordinatorAttribute(): ?User
+    {
+        return self::getWblCoordinator($this->programme);
     }
 }

@@ -183,7 +183,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('admin.documents.sal.update') }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.documents.sal.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 @method('PUT')
 
@@ -234,6 +234,69 @@
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Variable: <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-blue-600 dark:text-blue-400">@{{ sal_reference_number }}</code></p>
                 </div>
 
+                <!-- Divider -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Director of UMPSA Career Centre</p>
+                </div>
+
+                <!-- Director Name -->
+                <div>
+                    <label for="director_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Director Name
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <input type="text" name="director_name" id="director_name"
+                               value="{{ $template->settings['director_name'] ?? '' }}"
+                               placeholder="e.g., Dr. Ahmad bin Abdullah"
+                               class="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Variable: <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-blue-600 dark:text-blue-400">@{{ director_name }}</code></p>
+                </div>
+
+                <!-- Director Signature -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Director Signature
+                    </label>
+
+                    @if(isset($template->settings['director_signature_path']))
+                    <!-- Current Signature Preview -->
+                    <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="{{ Storage::url($template->settings['director_signature_path']) }}"
+                                     alt="Director Signature"
+                                     class="h-12 object-contain bg-white rounded border border-gray-200 dark:border-gray-600 p-1">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Current signature</span>
+                            </div>
+                            <form action="{{ route('admin.documents.sal.director-signature.delete') }}" method="POST" class="inline" onsubmit="return confirm('Delete this signature?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-medium">
+                                    Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="relative">
+                        <input type="file" name="director_signature" id="director_signature" accept="image/png,image/jpeg,image/jpg" class="hidden" onchange="previewSignature(this)">
+                        <label for="director_signature" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-[#003A6C] dark:hover:border-[#0084C5] transition-colors">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span id="signatureFileName" class="text-gray-600 dark:text-gray-400">{{ isset($template->settings['director_signature_path']) ? 'Upload new signature' : 'Upload signature image' }}</span>
+                        </label>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG or JPG, max 2MB. Variable: <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-blue-600 dark:text-blue-400">@{{ director_signature }}</code></p>
+                </div>
+
                 <!-- Save Button -->
                 <div class="pt-2">
                     <button type="submit"
@@ -265,4 +328,17 @@
         </div>
     </div>
 </div>
+
+<script>
+function previewSignature(input) {
+    const fileNameElement = document.getElementById('signatureFileName');
+    if (input.files && input.files[0]) {
+        fileNameElement.textContent = input.files[0].name;
+        fileNameElement.classList.add('text-[#003A6C]', 'dark:text-[#0084C5]', 'font-medium');
+    } else {
+        fileNameElement.textContent = 'Upload signature image';
+        fileNameElement.classList.remove('text-[#003A6C]', 'dark:text-[#0084C5]', 'font-medium');
+    }
+}
+</script>
 @endsection

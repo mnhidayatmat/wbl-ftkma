@@ -134,6 +134,7 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
         Route::put('sal/canvas', [DocumentTemplateController::class, 'updateSalCanvas'])->name('sal.canvas.update');
         Route::post('sal/reset', [DocumentTemplateController::class, 'resetSal'])->name('sal.reset');
         Route::get('sal/preview', [DocumentTemplateController::class, 'previewSal'])->name('sal.preview');
+        Route::delete('sal/director-signature', [DocumentTemplateController::class, 'deleteDirectorSignature'])->name('sal.director-signature.delete');
 
         // SAL Word Template
         Route::get('sal/word-template', [DocumentTemplateController::class, 'wordTemplateSal'])->name('sal.word-template');

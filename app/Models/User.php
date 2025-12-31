@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'role', // Keep for backward compatibility
         'company_id',
@@ -291,13 +292,60 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if user is BTA WBL Coordinator
+     */
+    public function isBtaWblCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'bta_wbl_coordinator' && $this->hasRole('bta_wbl_coordinator');
+        }
+
+        return $this->hasRole('bta_wbl_coordinator');
+    }
+
+    /**
+     * Check if user is BTD WBL Coordinator
+     */
+    public function isBtdWblCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'btd_wbl_coordinator' && $this->hasRole('btd_wbl_coordinator');
+        }
+
+        return $this->hasRole('btd_wbl_coordinator');
+    }
+
+    /**
+     * Check if user is BTG WBL Coordinator
+     */
+    public function isBtgWblCoordinator(): bool
+    {
+        $activeRole = $this->getActiveRole();
+        if ($activeRole) {
+            return $activeRole === 'btg_wbl_coordinator' && $this->hasRole('btg_wbl_coordinator');
+        }
+
+        return $this->hasRole('btg_wbl_coordinator');
+    }
+
+    /**
+     * Check if user is any WBL Coordinator (BTA, BTD, BTG)
+     */
+    public function isWblCoordinator(): bool
+    {
+        return $this->isBtaWblCoordinator() || $this->isBtdWblCoordinator() || $this->isBtgWblCoordinator();
+    }
+
+    /**
      * Check if user is any module coordinator
      */
     public function isModuleCoordinator(): bool
     {
         return $this->isFypCoordinator() || $this->isIpCoordinator() ||
                $this->isOshCoordinator() || $this->isPpeCoordinator() ||
-               $this->isLiCoordinator();
+               $this->isLiCoordinator() || $this->isWblCoordinator();
     }
 
     /**

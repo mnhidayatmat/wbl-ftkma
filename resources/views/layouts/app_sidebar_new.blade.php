@@ -14,6 +14,13 @@
     $isOshCoordinator = $user->isOshCoordinator();
     $isPpeCoordinator = $user->isPpeCoordinator();
     $isLiCoordinator = $user->isLiCoordinator();
+
+    // WBL Coordinators (Program-specific)
+    $isBtaWblCoordinator = $user->isBtaWblCoordinator();
+    $isBtdWblCoordinator = $user->isBtdWblCoordinator();
+    $isBtgWblCoordinator = $user->isBtgWblCoordinator();
+    $isWblCoordinator = $user->isWblCoordinator();
+
     $isModuleCoordinator = $user->isModuleCoordinator();
 
     $lecturerIsAt = $isLecturer && $isAt;

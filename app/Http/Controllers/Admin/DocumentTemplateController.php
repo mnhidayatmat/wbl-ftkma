@@ -64,6 +64,8 @@ class DocumentTemplateController extends Controller
             'signatory_department' => ['nullable', 'string', 'max:255'],
             'sal_release_date' => ['nullable', 'date'],
             'sal_reference_number' => ['nullable', 'string', 'max:255'],
+            'director_name' => ['nullable', 'string', 'max:255'],
+            'director_signature' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
             'settings' => ['nullable', 'array'],
             'settings.font_size' => ['nullable', 'string'],
             'settings.line_height' => ['nullable', 'string'],
@@ -126,6 +128,23 @@ class DocumentTemplateController extends Controller
         }
         if ($request->has('sal_reference_number')) {
             $settings['sal_reference_number'] = $validated['sal_reference_number'];
+        }
+
+        // Store director_name in settings
+        if ($request->has('director_name')) {
+            $settings['director_name'] = $validated['director_name'];
+        }
+
+        // Handle director signature upload
+        if ($request->hasFile('director_signature')) {
+            // Delete old signature if exists
+            if (isset($currentSettings['director_signature_path'])) {
+                Storage::disk('public')->delete($currentSettings['director_signature_path']);
+            }
+
+            // Store new signature
+            $signaturePath = $request->file('director_signature')->store('document-templates/signatures', 'public');
+            $settings['director_signature_path'] = $signaturePath;
         }
 
         $updateData['settings'] = $settings;
@@ -320,6 +339,26 @@ class DocumentTemplateController extends Controller
         ])->setPaper('a4', 'portrait');
 
         return $pdf->stream('MoU_Template_Preview.pdf');
+    }
+
+    /**
+     * Delete director signature.
+     */
+    public function deleteDirectorSignature(): RedirectResponse
+    {
+        $template = DocumentTemplate::getSalTemplate();
+        $settings = $template->settings ?? [];
+
+        if (isset($settings['director_signature_path'])) {
+            Storage::disk('public')->delete($settings['director_signature_path']);
+            unset($settings['director_signature_path']);
+            $template->update([
+                'settings' => $settings,
+                'updated_by' => auth()->id(),
+            ]);
+        }
+
+        return redirect()->route('admin.documents.sal')->with('success', 'Director signature deleted successfully.');
     }
 
     /**
@@ -597,6 +636,9 @@ class DocumentTemplateController extends Controller
         $salReleaseDate = $template->settings['sal_release_date'] ?? now()->format('Y-m-d');
         $salReferenceNumber = $template->settings['sal_reference_number'] ?? '';
 
+        // Get WBL Coordinator based on student's programme
+        $wblCoordinator = Student::getWblCoordinator($student->programme);
+
         // Replace variables using ${variable} format
         $variables = [
             'student_name' => $student->name ?? $student->user?->name ?? '',
@@ -604,6 +646,7 @@ class DocumentTemplateController extends Controller
             'student_ic' => $student->ic_no ?? '',
             'student_faculty' => $student->faculty ?? 'Faculty of Technology and Management',
             'student_programme' => $student->programme ?? '',
+            'student_programme_short' => Student::getProgrammeShortCode($student->programme),
             'student_email' => $student->user?->email ?? '',
             'student_phone' => $student->phone ?? '',
             'wbl_duration' => $wblDuration,
@@ -613,6 +656,10 @@ class DocumentTemplateController extends Controller
             'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
             'sal_release_date' => $salReleaseDate ? \Carbon\Carbon::parse($salReleaseDate)->format('d F Y') : '',
             'sal_reference_number' => $salReferenceNumber,
+            'wbl_coordinator_name' => $wblCoordinator?->name ?? '',
+            'wbl_coordinator_email' => $wblCoordinator?->email ?? '',
+            'wbl_coordinator_phone' => $wblCoordinator?->phone ?? '',
+            'director_name' => $template->settings['director_name'] ?? '',
         ];
 
         // Set normal variables
@@ -623,6 +670,28 @@ class DocumentTemplateController extends Controller
         // Set uppercase versions (with :upper suffix)
         foreach ($variables as $key => $value) {
             $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Set director signature image if exists
+        if (isset($template->settings['director_signature_path'])) {
+            $signaturePath = Storage::disk('public')->path($template->settings['director_signature_path']);
+            if (file_exists($signaturePath)) {
+                try {
+                    $templateProcessor->setImageValue('director_signature', [
+                        'path' => $signaturePath,
+                        'width' => 150,
+                        'height' => 50,
+                        'ratio' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    // If image replacement fails, just remove the placeholder
+                    $templateProcessor->setValue('director_signature', '');
+                }
+            } else {
+                $templateProcessor->setValue('director_signature', '');
+            }
+        } else {
+            $templateProcessor->setValue('director_signature', '');
         }
 
         // Save to temp file
@@ -649,6 +718,7 @@ class DocumentTemplateController extends Controller
             '${student_ic}' => 'Student\'s IC number',
             '${student_faculty}' => 'Student\'s faculty',
             '${student_programme}' => 'Student\'s programme',
+            '${student_programme_short}' => 'Programme short code (BTA/BTD/BTG)',
             '${student_email}' => 'Student\'s email',
             '${student_phone}' => 'Student\'s phone number',
             '${wbl_duration}' => 'WBL training duration',
@@ -658,6 +728,11 @@ class DocumentTemplateController extends Controller
             '${group_end_date}' => 'Group end date',
             '${sal_release_date}' => 'SAL release/issue date',
             '${sal_reference_number}' => 'SAL reference number',
+            '${wbl_coordinator_name}' => 'WBL Coordinator name (by programme)',
+            '${wbl_coordinator_email}' => 'WBL Coordinator email',
+            '${wbl_coordinator_phone}' => 'WBL Coordinator phone number',
+            '${director_name}' => 'Director of UMPSA Career Centre',
+            '${director_signature}' => 'Director signature (image)',
         ];
     }
 }

@@ -268,7 +268,7 @@ class DashboardController extends Controller
             ->get();
 
         return [
-            'labels' => $data->pluck('programme')->toArray(),
+            'labels' => $data->pluck('programme')->map(fn ($p) => Student::getProgrammeShortCode($p))->toArray(),
             'data' => $data->pluck('total')->toArray(),
         ];
     }
@@ -325,7 +325,7 @@ class DashboardController extends Controller
                     'student_name' => $tracking->student->name ?? 'Unknown',
                     'matric_no' => $tracking->student->matric_no ?? '',
                     'group' => $tracking->student->group->name ?? 'N/A',
-                    'programme' => $tracking->student->programme ?? 'N/A',
+                    'programme' => Student::getProgrammeShortCode($tracking->student->programme),
                     'status' => $tracking->status_display,
                     'days_stuck' => $daysStuck,
                     'risk_level' => $daysStuck > 30 ? 'high' : ($daysStuck > 14 ? 'medium' : 'low'),
@@ -761,7 +761,7 @@ class DashboardController extends Controller
             ->get();
 
         $programChartData = [
-            'labels' => $studentsByProgram->pluck('programme')->toArray(),
+            'labels' => $studentsByProgram->pluck('programme')->map(fn ($p) => Student::getProgrammeShortCode($p))->toArray(),
             'data' => $studentsByProgram->pluck('total')->toArray(),
         ];
 
@@ -798,7 +798,7 @@ class DashboardController extends Controller
         foreach ($studentsByProgramAndGroup as $programme => $data) {
             $color = $colors[$colorIndex % count($colors)];
             $programGroupChartData['datasets'][] = [
-                'label' => $programme ?: 'Unknown Programme',
+                'label' => $programme ? Student::getProgrammeShortCode($programme) : 'Unknown Programme',
                 'data' => $data,
                 'backgroundColor' => $color['bg'],
                 'borderColor' => $color['border'],

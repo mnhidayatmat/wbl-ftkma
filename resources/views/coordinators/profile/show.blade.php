@@ -45,11 +45,16 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $coordinatorType }} Coordinator</p>
 
                     <!-- Role Badge -->
-                    <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-sm font-medium">
+                    @php
+                        $isWblType = str_contains($coordinatorType, 'WBL');
+                        $badgeColor = $isWblType ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200';
+                        $badgeLabel = $isWblType ? 'WBL Coordinator' : 'Module Coordinator';
+                    @endphp
+                    <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full {{ $badgeColor }} text-sm font-medium">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                         </svg>
-                        Module Coordinator
+                        {{ $badgeLabel }}
                     </div>
 
                     <!-- Contact Info -->

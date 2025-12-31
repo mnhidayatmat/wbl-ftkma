@@ -50,6 +50,19 @@ class EnsureRole
                 $hasRequiredRole = true;
                 break;
             }
+            // WBL Coordinators
+            if ($role === 'bta_wbl_coordinator' && $user->isBtaWblCoordinator()) {
+                $hasRequiredRole = true;
+                break;
+            }
+            if ($role === 'btd_wbl_coordinator' && $user->isBtdWblCoordinator()) {
+                $hasRequiredRole = true;
+                break;
+            }
+            if ($role === 'btg_wbl_coordinator' && $user->isBtgWblCoordinator()) {
+                $hasRequiredRole = true;
+                break;
+            }
         }
 
         // If user has any required role, allow access

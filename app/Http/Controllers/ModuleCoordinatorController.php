@@ -1464,6 +1464,12 @@ class ModuleCoordinatorController extends Controller
             $coordinatorType = 'PPE';
         } elseif ($user->isLiCoordinator()) {
             $coordinatorType = 'LI';
+        } elseif ($user->isBtaWblCoordinator()) {
+            $coordinatorType = 'BTA WBL';
+        } elseif ($user->isBtdWblCoordinator()) {
+            $coordinatorType = 'BTD WBL';
+        } elseif ($user->isBtgWblCoordinator()) {
+            $coordinatorType = 'BTG WBL';
         }
 
         return view('coordinators.profile.show', compact('user', 'coordinatorType'));
@@ -1492,9 +1498,9 @@ class ModuleCoordinatorController extends Controller
             $user->phone = $validated['phone'];
         }
 
-        // Update password if provided
+        // Update password if provided (User model has 'hashed' cast, so no bcrypt needed)
         if (! empty($validated['password'])) {
-            $user->password = bcrypt($validated['password']);
+            $user->password = $validated['password'];
         }
 
         $user->save();
