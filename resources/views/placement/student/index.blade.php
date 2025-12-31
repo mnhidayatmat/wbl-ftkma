@@ -63,7 +63,7 @@
     {{-- QUICK STATS GRID --}}
     @php
         $totalApplications = $tracking->companyApplications ? $tracking->companyApplications->count() : 0;
-        $interviewedCount = $tracking->companyApplications ? $tracking->companyApplications->where('status', 'interviewed')->count() : 0;
+        $interviewedCount = $tracking->companyApplications ? $tracking->companyApplications->where('interviewed', true)->count() : 0;
         $offersCount = $tracking->status === 'OFFER_RECEIVED' || $tracking->status === 'ACCEPTED' || $tracking->status === 'SCL_RELEASED' ? 1 : 0;
         $progressPercentage = (($currentStep - 1) / (count($statuses) - 1)) * 100;
     @endphp
