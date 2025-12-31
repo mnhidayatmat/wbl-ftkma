@@ -17,6 +17,34 @@ use Maatwebsite\Excel\Facades\Excel;
 class StudentController extends Controller
 {
     /**
+     * Check if WBL coordinator can access a specific student.
+     */
+    private function authorizeWblCoordinatorAccess(Student $student): void
+    {
+        $user = auth()->user();
+
+        // Admin can access all students
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        // WBL Coordinators can only access students from their programme
+        if ($user->isBtaWblCoordinator()) {
+            if ($student->programme !== 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours') {
+                abort(403, 'You can only access BTA students.');
+            }
+        } elseif ($user->isBtdWblCoordinator()) {
+            if ($student->programme !== 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours') {
+                abort(403, 'You can only access BTD students.');
+            }
+        } elseif ($user->isBtgWblCoordinator()) {
+            if ($student->programme !== 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours') {
+                abort(403, 'You can only access BTG students.');
+            }
+        }
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request): View
@@ -69,6 +97,15 @@ class StudentController extends Controller
         } else {
             // Lecturer/AT/IC/Supervisor LI can only see students in active groups
             $query->inActiveGroups();
+        }
+
+        // Filter by programme for WBL Coordinators
+        if ($user->isBtaWblCoordinator()) {
+            $query->where('programme', 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours');
+        } elseif ($user->isBtdWblCoordinator()) {
+            $query->where('programme', 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours');
+        } elseif ($user->isBtgWblCoordinator()) {
+            $query->where('programme', 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours');
         }
 
         // Handle per_page parameter (supports 'all' for showing all records)
@@ -180,6 +217,8 @@ class StudentController extends Controller
      */
     public function show(Student $student): View
     {
+        $this->authorizeWblCoordinatorAccess($student);
+
         $student->load(['group', 'company', 'academicTutor', 'industryCoach', 'academicAdvisor', 'courseAssignments.lecturer']);
 
         return view('students.show', compact('student'));
@@ -190,6 +229,8 @@ class StudentController extends Controller
      */
     public function edit(Student $student): View
     {
+        $this->authorizeWblCoordinatorAccess($student);
+
         // Only show active groups for assignment (or current group if completed)
         $groups = WblGroup::where(function ($q) use ($student) {
             $q->where('status', 'ACTIVE')
@@ -207,6 +248,8 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student): RedirectResponse
     {
+        $this->authorizeWblCoordinatorAccess($student);
+
         // Ensure optional fields are always present, even if null
         $request->merge([
             'at_id' => $request->input('at_id', $student->at_id),
@@ -306,6 +349,8 @@ class StudentController extends Controller
      */
     public function destroy(Request $request, Student $student): RedirectResponse
     {
+        $this->authorizeWblCoordinatorAccess($student);
+
         // Delete associated user account if exists and user only has student role
         if ($student->user) {
             $user = $student->user;
