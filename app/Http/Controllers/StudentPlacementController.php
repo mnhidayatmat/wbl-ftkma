@@ -1123,9 +1123,10 @@ class StudentPlacementController extends Controller
             'evidence_files' => ['nullable', 'array'],
             'evidence_files.*' => ['file', 'mimes:pdf,png,jpg,jpeg', 'max:5120'], // 5MB max
             // Offer data (required when status is OFFER_RECEIVED)
-            'offer_company_id' => ['required_if:status,OFFER_RECEIVED', 'nullable', 'exists:placement_company_applications,id'],
+            'offer_company_ids' => ['required_if:status,OFFER_RECEIVED', 'nullable', 'array'],
+            'offer_company_ids.*' => ['exists:placement_company_applications,id'],
         ], [
-            'offer_company_id.required_if' => 'Please select the company that gave you an offer.',
+            'offer_company_ids.required_if' => 'Please select at least one company that gave you an offer.',
         ]);
 
         $tracking = $student->placementTracking;
@@ -1226,14 +1227,42 @@ class StudentPlacementController extends Controller
                 $updateData['application_notes'] = $validated['application_notes'] ?? $tracking->application_notes;
             }
 
-            // Handle offer received - mark the company
-            if ($validated['status'] === 'OFFER_RECEIVED' && ! empty($validated['offer_company_id'])) {
-                $offerCompany = PlacementCompanyApplication::find($validated['offer_company_id']);
-                if ($offerCompany && $offerCompany->placement_tracking_id === $tracking->id) {
-                    $offerCompany->update([
-                        'offer_received' => true,
-                        'offer_received_date' => now()->toDateString(),
-                    ]);
+            // Handle offer received - mark multiple companies
+            if ($validated['status'] === 'OFFER_RECEIVED' && ! empty($validated['offer_company_ids'])) {
+                foreach ($validated['offer_company_ids'] as $companyId) {
+                    $offerCompany = PlacementCompanyApplication::find($companyId);
+                    if ($offerCompany && $offerCompany->placement_tracking_id === $tracking->id) {
+                        $offerCompany->update([
+                            'offer_received' => true,
+                            'offer_received_date' => now()->toDateString(),
+                        ]);
+                    }
+                }
+            }
+
+            // Handle accepted - create Company record and link to student
+            if ($validated['status'] === 'ACCEPTED') {
+                // Find the company application with offer_received = true
+                $acceptedCompanyApplication = $tracking->companyApplications()
+                    ->where('offer_received', true)
+                    ->first();
+
+                if ($acceptedCompanyApplication) {
+                    $companyName = $acceptedCompanyApplication->company_name;
+
+                    // Check if company already exists (case-insensitive)
+                    $existingCompany = Company::whereRaw('LOWER(company_name) = ?', [strtolower($companyName)])->first();
+
+                    if ($existingCompany) {
+                        // Use existing company
+                        $student->update(['company_id' => $existingCompany->id]);
+                    } else {
+                        // Create new company and link to student
+                        $newCompany = Company::create([
+                            'company_name' => $companyName,
+                        ]);
+                        $student->update(['company_id' => $newCompany->id]);
+                    }
                 }
             }
 
@@ -1287,7 +1316,7 @@ class StudentPlacementController extends Controller
 
         // Check for exact or similar company name (case-insensitive)
         $company = Company::whereRaw('LOWER(company_name) = ?', [strtolower($name)])
-            ->orWhereRaw('LOWER(company_name) LIKE ?', ['%' . strtolower($name) . '%'])
+            ->orWhereRaw('LOWER(company_name) LIKE ?', ['%'.strtolower($name).'%'])
             ->first();
 
         if ($company) {
@@ -1323,8 +1352,7 @@ class StudentPlacementController extends Controller
 
         $validated = $request->validate([
             'placement_tracking_id' => ['required', 'exists:student_placement_tracking,id'],
-            'company_id' => ['nullable', 'exists:companies,id'],
-            'company_name' => ['required_without:company_id', 'nullable', 'string', 'max:255'],
+            'company_name' => ['required', 'string', 'max:255'],
             'application_deadline' => ['nullable', 'date'],
             'application_method' => ['required', 'in:through_coordinator,job_portal,company_website,email,career_fair,referral,other'],
             'application_method_other' => ['required_if:application_method,other', 'nullable', 'string', 'max:255'],
@@ -1335,36 +1363,10 @@ class StudentPlacementController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        // Determine company name
-        $companyName = '';
-        if (! empty($validated['company_id'])) {
-            // Using existing company
-            $company = Company::find($validated['company_id']);
-            $companyName = $company->company_name;
-        } elseif (! empty($validated['company_name'])) {
-            // Check if a company with this name already exists
-            $existingCompany = Company::whereRaw('LOWER(company_name) = ?', [strtolower($validated['company_name'])])->first();
-
-            if ($existingCompany) {
-                return redirect()->back()->withErrors([
-                    'company_name' => 'A company named "' . $existingCompany->company_name . '" already exists. Please select it from the dropdown.',
-                ])->withInput();
-            }
-
-            // Create new company
-            $newCompany = Company::create([
-                'company_name' => $validated['company_name'],
-            ]);
-            $companyName = $newCompany->company_name;
-        } else {
-            return redirect()->back()->withErrors([
-                'company_name' => 'Please select an existing company or enter a new company name.',
-            ])->withInput();
-        }
-
+        // Just store company name as text - Company record will be created when student accepts offer
         PlacementCompanyApplication::create([
             'placement_tracking_id' => $validated['placement_tracking_id'],
-            'company_name' => $companyName,
+            'company_name' => $validated['company_name'],
             'application_deadline' => $validated['application_deadline'] ?? null,
             'application_method' => $validated['application_method'],
             'application_method_other' => $validated['application_method_other'] ?? null,

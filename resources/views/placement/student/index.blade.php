@@ -64,7 +64,7 @@
     @php
         $totalApplications = $tracking->companyApplications ? $tracking->companyApplications->count() : 0;
         $interviewedCount = $tracking->companyApplications ? $tracking->companyApplications->where('interviewed', true)->count() : 0;
-        $offersCount = $tracking->status === 'OFFER_RECEIVED' || $tracking->status === 'ACCEPTED' || $tracking->status === 'SCL_RELEASED' ? 1 : 0;
+        $offersCount = $tracking->companyApplications ? $tracking->companyApplications->where('offer_received', true)->count() : 0;
         $progressPercentage = (($currentStep - 1) / (count($statuses) - 1)) * 100;
     @endphp
 
@@ -201,54 +201,20 @@
 
                 {{-- Add Company Form (Collapsible) --}}
                 <div id="addCompanyForm" class="hidden mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <form action="{{ route('student.placement.company.add') }}" method="POST" id="addCompanyFormElement">
+                    <form action="{{ route('student.placement.company.add') }}" method="POST">
                         @csrf
                         <input type="hidden" name="placement_tracking_id" value="{{ $tracking->id }}">
-                        <input type="hidden" name="company_id" id="selectedCompanyId" value="">
 
-                        {{-- Step 1: Select or Create Company --}}
-                        <div class="mb-4">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Select Company or Create New</label>
-                            <div class="relative">
-                                <select name="existing_company" id="existingCompanySelect" onchange="handleCompanySelection()"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                                    <option value="">-- Select existing company or create new --</option>
-                                    <option value="new">+ Create New Company</option>
-                                    @if(isset($existingCompanies) && $existingCompanies->count() > 0)
-                                        <optgroup label="Existing Companies">
-                                            @foreach($existingCompanies as $company)
-                                                <option value="{{ $company->id }}" data-name="{{ $company->company_name }}">{{ $company->company_name }}</option>
-                                            @endforeach
-                                        </optgroup>
-                                    @endif
-                                </select>
+                        <div class="space-y-4">
+                            {{-- Company Name --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Company Name <span class="text-red-500">*</span></label>
+                                <input type="text" name="company_name" required placeholder="Enter company name"
+                                       class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Company will be officially registered when you accept an offer</p>
                             </div>
-                        </div>
 
-                        {{-- New Company Name (shown when "Create New" is selected) --}}
-                        <div id="newCompanyContainer" class="hidden mb-4">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">New Company Name <span class="text-red-500">*</span></label>
-                            <input type="text" name="company_name" id="newCompanyName" placeholder="Enter company name"
-                                   onkeyup="checkCompanyExists()"
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                            <div id="companyExistsWarning" class="hidden mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg">
-                                <p class="text-sm text-amber-700 dark:text-amber-400">
-                                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                    <span id="companyExistsMessage">A company with similar name already exists. Please select from the dropdown above.</span>
-                                </p>
-                            </div>
-                        </div>
-
-                        {{-- Selected Company Display --}}
-                        <div id="selectedCompanyDisplay" class="hidden mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-lg">
-                            <p class="text-sm text-green-700 dark:text-green-400">
-                                <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                Selected: <span id="selectedCompanyName" class="font-semibold"></span>
-                            </p>
-                        </div>
-
-                        {{-- Application Details --}}
-                        <div id="applicationDetailsSection" class="hidden">
+                            {{-- Application Details --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Application Deadline</label>
@@ -271,90 +237,22 @@
                                     </select>
                                 </div>
                             </div>
+
                             {{-- Other Method Input --}}
-                            <div id="otherMethodContainer" class="hidden mt-3">
+                            <div id="otherMethodContainer" class="hidden">
                                 <input type="text" name="application_method_other" id="otherMethodInput" placeholder="Please specify the application method *"
                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
                             </div>
-                            <div class="flex gap-2 mt-4">
-                                <button type="submit" id="submitCompanyBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg">Add Application</button>
-                                <button type="button" onclick="resetAndCloseForm()"
+
+                            <div class="flex gap-2">
+                                <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg">Add Application</button>
+                                <button type="button" onclick="document.getElementById('addCompanyForm').classList.add('hidden')"
                                         class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm font-semibold rounded-lg">Cancel</button>
                             </div>
                         </div>
                     </form>
                 </div>
                 <script>
-                    let companyCheckTimeout = null;
-
-                    function handleCompanySelection() {
-                        const select = document.getElementById('existingCompanySelect');
-                        const newCompanyContainer = document.getElementById('newCompanyContainer');
-                        const selectedCompanyDisplay = document.getElementById('selectedCompanyDisplay');
-                        const applicationDetailsSection = document.getElementById('applicationDetailsSection');
-                        const selectedCompanyId = document.getElementById('selectedCompanyId');
-                        const selectedCompanyName = document.getElementById('selectedCompanyName');
-                        const newCompanyNameInput = document.getElementById('newCompanyName');
-
-                        if (select.value === 'new') {
-                            newCompanyContainer.classList.remove('hidden');
-                            selectedCompanyDisplay.classList.add('hidden');
-                            applicationDetailsSection.classList.add('hidden');
-                            selectedCompanyId.value = '';
-                            newCompanyNameInput.required = true;
-                            newCompanyNameInput.focus();
-                        } else if (select.value !== '') {
-                            const selectedOption = select.options[select.selectedIndex];
-                            newCompanyContainer.classList.add('hidden');
-                            selectedCompanyDisplay.classList.remove('hidden');
-                            applicationDetailsSection.classList.remove('hidden');
-                            selectedCompanyId.value = select.value;
-                            selectedCompanyName.textContent = selectedOption.dataset.name;
-                            newCompanyNameInput.required = false;
-                            newCompanyNameInput.value = '';
-                        } else {
-                            newCompanyContainer.classList.add('hidden');
-                            selectedCompanyDisplay.classList.add('hidden');
-                            applicationDetailsSection.classList.add('hidden');
-                            selectedCompanyId.value = '';
-                            newCompanyNameInput.required = false;
-                        }
-                    }
-
-                    function checkCompanyExists() {
-                        const companyName = document.getElementById('newCompanyName').value.trim();
-                        const warningDiv = document.getElementById('companyExistsWarning');
-                        const applicationDetailsSection = document.getElementById('applicationDetailsSection');
-                        const submitBtn = document.getElementById('submitCompanyBtn');
-
-                        if (companyName.length < 3) {
-                            warningDiv.classList.add('hidden');
-                            applicationDetailsSection.classList.add('hidden');
-                            return;
-                        }
-
-                        clearTimeout(companyCheckTimeout);
-                        companyCheckTimeout = setTimeout(() => {
-                            fetch(`{{ route('student.placement.company.check') }}?name=${encodeURIComponent(companyName)}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.exists) {
-                                        warningDiv.classList.remove('hidden');
-                                        document.getElementById('companyExistsMessage').textContent =
-                                            `"${data.company_name}" already exists. Please select it from the dropdown above.`;
-                                        applicationDetailsSection.classList.add('hidden');
-                                    } else {
-                                        warningDiv.classList.add('hidden');
-                                        applicationDetailsSection.classList.remove('hidden');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error checking company:', error);
-                                    applicationDetailsSection.classList.remove('hidden');
-                                });
-                        }, 500);
-                    }
-
                     function toggleOtherMethodInput() {
                         const select = document.getElementById('applicationMethodSelect');
                         const container = document.getElementById('otherMethodContainer');
@@ -367,17 +265,6 @@
                             input.required = false;
                             input.value = '';
                         }
-                    }
-
-                    function resetAndCloseForm() {
-                        document.getElementById('addCompanyForm').classList.add('hidden');
-                        document.getElementById('existingCompanySelect').value = '';
-                        document.getElementById('newCompanyName').value = '';
-                        document.getElementById('selectedCompanyId').value = '';
-                        document.getElementById('newCompanyContainer').classList.add('hidden');
-                        document.getElementById('selectedCompanyDisplay').classList.add('hidden');
-                        document.getElementById('applicationDetailsSection').classList.add('hidden');
-                        document.getElementById('companyExistsWarning').classList.add('hidden');
                     }
                 </script>
 
@@ -715,20 +602,25 @@
 
                         {{-- Offer Received Selection Section --}}
                         <div id="offerReceivedSection" class="hidden bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-700">
-                            <h4 class="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-3">Which company gave you an offer?</h4>
-                            <form action="{{ route('student.placement.status.update') }}" method="POST">
+                            <h4 class="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-1">Which company gave you an offer?</h4>
+                            <p class="text-xs text-orange-600 dark:text-orange-400 mb-3">Select all companies that gave you offers</p>
+                            <form action="{{ route('student.placement.status.update') }}" method="POST" id="offerForm">
                                 @csrf
                                 <input type="hidden" name="status" value="OFFER_RECEIVED">
                                 <div class="space-y-2 mb-3">
                                     @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
                                         @foreach($tracking->companyApplications as $application)
                                             <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
-                                                <input type="radio" name="offer_company_id" value="{{ $application->id }}" required
-                                                       class="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                                <input type="checkbox" name="offer_company_ids[]" value="{{ $application->id }}"
+                                                       {{ $application->offer_received ? 'checked' : '' }}
+                                                       class="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                                 <div class="flex-1">
                                                     <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $application->company_name }}</span>
                                                     @if($application->interviewed)
                                                         <span class="ml-2 text-xs text-green-600 dark:text-green-400">(Interviewed)</span>
+                                                    @endif
+                                                    @if($application->offer_received)
+                                                        <span class="ml-2 text-xs text-orange-600 dark:text-orange-400">(Offer received)</span>
                                                     @endif
                                                 </div>
                                             </label>
@@ -739,8 +631,9 @@
                                 </div>
                                 @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
                                     <div class="flex gap-2">
-                                        <button type="submit" class="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg">
-                                            Confirm Offer
+                                        <button type="submit" class="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg"
+                                                onclick="return validateOfferSelection()">
+                                            Confirm Offer(s)
                                         </button>
                                         <button type="button" onclick="document.getElementById('offerReceivedSection').classList.add('hidden')"
                                                 class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm font-semibold rounded-lg">
@@ -749,6 +642,16 @@
                                     </div>
                                 @endif
                             </form>
+                            <script>
+                                function validateOfferSelection() {
+                                    const checkboxes = document.querySelectorAll('input[name="offer_company_ids[]"]:checked');
+                                    if (checkboxes.length === 0) {
+                                        alert('Please select at least one company that gave you an offer.');
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                            </script>
                         </div>
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
