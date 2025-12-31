@@ -34,6 +34,17 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3 rounded-lg">
+            <p class="text-sm font-semibold text-red-800 dark:text-red-200 mb-2">Please fix the following errors:</p>
+            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if(isset($isInCompletedGroup) && $isInCompletedGroup)
         <div class="mb-6 bg-gray-100 dark:bg-gray-700 border-l-4 border-gray-500 p-3 rounded-lg">
             <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">WBL Group Completed - Read-only access</p>
@@ -348,12 +359,30 @@
                             </div>
                         @endif
 
-                        <div class="space-y-2">
-                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                    class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                📤 Update to "Applied" Status
-                            </button>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">After submitting applications</p>
+                        <div class="space-y-3">
+                            <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full space-y-3">
+                                @csrf
+                                <input type="hidden" name="status" value="APPLIED">
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Companies Applied</label>
+                                        <input type="number" name="companies_applied_count" min="1" value="1" required
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">First Application Date</label>
+                                        <input type="date" name="first_application_date" value="{{ date('Y-m-d') }}" required
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+
+                                <button type="submit"
+                                        class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                    📤 I've Sent My Applications
+                                </button>
+                            </form>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Enter details and proceed to Applications Sent stage</p>
                         </div>
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
@@ -395,17 +424,32 @@
                         @endif
 
                         <div class="space-y-2">
-                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                    class="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                💼 Got Interview Invitation?
-                            </button>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Update when companies call you</p>
+                            <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                                @csrf
+                                <input type="hidden" name="status" value="INTERVIEWED">
+                                <button type="submit"
+                                        class="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                    💼 I've Been Interviewed
+                                </button>
+                            </form>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to Interviews stage</p>
                         </div>
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
                             <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tip</p>
                             <p class="text-xs text-yellow-700 dark:text-yellow-300">Follow up with companies 3-5 days after applying</p>
                         </div>
+
+                        {{-- Go Back Button --}}
+                        <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                            @csrf
+                            <input type="hidden" name="status" value="SAL_RELEASED">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-all text-sm"
+                                    onclick="return confirm('Are you sure you want to go back to SAL Released stage?')">
+                                ← Go Back to SAL Released
+                            </button>
+                        </form>
 
                     @elseif($tracking->status === 'INTERVIEWED')
                         {{-- Interviewed - Waiting for Offers --}}
@@ -431,11 +475,15 @@
                         </button>
 
                         <div class="space-y-2">
-                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                    class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                    🎉 Report Offer Received
-                            </button>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Update when you get an offer letter</p>
+                            <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                                @csrf
+                                <input type="hidden" name="status" value="OFFER_RECEIVED">
+                                <button type="submit"
+                                        class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                    🎉 I've Received an Offer
+                                </button>
+                            </form>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to Offer Received stage</p>
                         </div>
 
                         @if($tracking->sal_file_path)
@@ -450,6 +498,17 @@
                             <p class="text-xs text-yellow-700 dark:text-yellow-300">Send thank-you emails after interviews!</p>
                         </div>
 
+                        {{-- Go Back Button --}}
+                        <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                            @csrf
+                            <input type="hidden" name="status" value="APPLIED">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-all text-sm"
+                                    onclick="return confirm('Are you sure you want to go back to Applications Sent stage?')">
+                                ← Go Back to Applications Sent
+                            </button>
+                        </form>
+
                     @elseif($tracking->status === 'OFFER_RECEIVED')
                         {{-- Offer Received - Need to Accept --}}
                         <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border-l-4 border-orange-500">
@@ -458,11 +517,15 @@
                         </div>
 
                         <div class="space-y-2">
-                            <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                    class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                    ✨ Accept Offer & Upload Proof
-                            </button>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Upload your acceptance letter/email</p>
+                            <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                                @csrf
+                                <input type="hidden" name="status" value="ACCEPTED">
+                                <button type="submit"
+                                        class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                    ✨ I've Accepted the Offer
+                                </button>
+                            </form>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to Offer Accepted stage</p>
                         </div>
 
                         @if($tracking->sal_file_path)
@@ -476,6 +539,17 @@
                             <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">⚠️ Important</p>
                             <p class="text-xs text-yellow-700 dark:text-yellow-300">Accept within offer deadline to secure placement</p>
                         </div>
+
+                        {{-- Go Back Button --}}
+                        <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                            @csrf
+                            <input type="hidden" name="status" value="INTERVIEWED">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-all text-sm"
+                                    onclick="return confirm('Are you sure you want to go back to Interviews stage?')">
+                                ← Go Back to Interviews
+                            </button>
+                        </form>
 
                     @elseif($tracking->status === 'ACCEPTED')
                         {{-- Accepted - Waiting for SCL --}}
@@ -495,12 +569,26 @@
                                 </div>
                             </div>
                         @else
-                            <div class="space-y-2">
-                                <button onclick="document.getElementById('statusUpdateModal').classList.remove('hidden')"
-                                        class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                            <div class="space-y-3">
+                                <form action="{{ route('student.placement.proof.upload') }}" method="POST" enctype="multipart/form-data" class="w-full space-y-2">
+                                    @csrf
+                                    <label class="block">
+                                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Select acceptance proof file</span>
+                                        <input type="file" name="proof_file" required accept=".pdf,.jpg,.jpeg,.png"
+                                               class="w-full text-sm text-gray-500 dark:text-gray-400
+                                                      file:mr-2 file:py-2 file:px-3
+                                                      file:rounded-lg file:border-0
+                                                      file:text-sm file:font-semibold
+                                                      file:bg-blue-50 file:text-blue-700
+                                                      hover:file:bg-blue-100
+                                                      dark:file:bg-blue-900/30 dark:file:text-blue-300">
+                                    </label>
+                                    <button type="submit"
+                                            class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
                                         📎 Upload Acceptance Proof
-                                </button>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Required for SCL processing</p>
+                                    </button>
+                                </form>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Required for SCL processing (PDF, JPG, PNG)</p>
                             </div>
                         @endif
 
@@ -520,6 +608,17 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Go Back Button --}}
+                        <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                            @csrf
+                            <input type="hidden" name="status" value="OFFER_RECEIVED">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-all text-sm"
+                                    onclick="return confirm('Are you sure you want to go back to Offer Received stage?')">
+                                ← Go Back to Offer Received
+                            </button>
+                        </form>
 
                     @elseif($tracking->status === 'SCL_RELEASED')
                         {{-- SCL Released - Journey Complete --}}

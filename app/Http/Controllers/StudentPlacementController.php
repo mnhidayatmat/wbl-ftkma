@@ -662,6 +662,9 @@ class StudentPlacementController extends Controller
         $salReleaseDate = $template->settings['sal_release_date'] ?? now()->format('Y-m-d');
         $salReferenceNumber = $template->settings['sal_reference_number'] ?? '';
 
+        // Get WBL Coordinator based on student's programme
+        $wblCoordinator = Student::getWblCoordinator($student->programme);
+
         // Replace variables
         $variables = [
             'student_name' => $student->name ?? $student->user?->name ?? '',
@@ -669,6 +672,7 @@ class StudentPlacementController extends Controller
             'student_ic' => $student->ic_no ?? '',
             'student_faculty' => $student->faculty ?? 'Faculty of Technology and Management',
             'student_programme' => $student->programme ?? '',
+            'student_programme_short' => Student::getProgrammeShortCode($student->programme),
             'student_email' => $student->user?->email ?? '',
             'student_phone' => $student->phone ?? '',
             'wbl_duration' => $wblDuration,
@@ -678,6 +682,10 @@ class StudentPlacementController extends Controller
             'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
             'sal_release_date' => $salReleaseDate ? \Carbon\Carbon::parse($salReleaseDate)->format('d F Y') : '',
             'sal_reference_number' => $salReferenceNumber,
+            'wbl_coordinator_name' => $wblCoordinator?->name ?? '',
+            'wbl_coordinator_email' => $wblCoordinator?->email ?? '',
+            'wbl_coordinator_phone' => $wblCoordinator?->phone ?? '',
+            'director_name' => $template->settings['director_name'] ?? '',
         ];
 
         // Set normal variables
@@ -688,6 +696,28 @@ class StudentPlacementController extends Controller
         // Set uppercase versions (with :upper suffix)
         foreach ($variables as $key => $value) {
             $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Set director signature image if exists
+        if (isset($template->settings['director_signature_path'])) {
+            $signaturePath = Storage::disk('public')->path($template->settings['director_signature_path']);
+            if (file_exists($signaturePath)) {
+                try {
+                    $templateProcessor->setImageValue('director_signature', [
+                        'path' => $signaturePath,
+                        'width' => 150,
+                        'height' => 50,
+                        'ratio' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    // If image replacement fails, just remove the placeholder
+                    $templateProcessor->setValue('director_signature', '');
+                }
+            } else {
+                $templateProcessor->setValue('director_signature', '');
+            }
+        } else {
+            $templateProcessor->setValue('director_signature', '');
         }
 
         // Save Word document to temp file
@@ -806,6 +836,9 @@ class StudentPlacementController extends Controller
         $salReleaseDate = $template->settings['sal_release_date'] ?? now()->format('Y-m-d');
         $salReferenceNumber = $template->settings['sal_reference_number'] ?? '';
 
+        // Get WBL Coordinator based on student's programme
+        $wblCoordinator = Student::getWblCoordinator($student->programme);
+
         // Replace variables
         $variables = [
             'student_name' => $student->name ?? $student->user?->name ?? '',
@@ -813,6 +846,7 @@ class StudentPlacementController extends Controller
             'student_ic' => $student->ic_no ?? '',
             'student_faculty' => $student->faculty ?? 'Faculty of Technology and Management',
             'student_programme' => $student->programme ?? '',
+            'student_programme_short' => Student::getProgrammeShortCode($student->programme),
             'student_email' => $student->user?->email ?? '',
             'student_phone' => $student->phone ?? '',
             'wbl_duration' => $wblDuration,
@@ -822,6 +856,10 @@ class StudentPlacementController extends Controller
             'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
             'sal_release_date' => $salReleaseDate ? \Carbon\Carbon::parse($salReleaseDate)->format('d F Y') : '',
             'sal_reference_number' => $salReferenceNumber,
+            'wbl_coordinator_name' => $wblCoordinator?->name ?? '',
+            'wbl_coordinator_email' => $wblCoordinator?->email ?? '',
+            'wbl_coordinator_phone' => $wblCoordinator?->phone ?? '',
+            'director_name' => $template->settings['director_name'] ?? '',
         ];
 
         // Set normal variables
@@ -832,6 +870,28 @@ class StudentPlacementController extends Controller
         // Set uppercase versions (with :upper suffix)
         foreach ($variables as $key => $value) {
             $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Set director signature image if exists
+        if (isset($template->settings['director_signature_path'])) {
+            $signaturePath = Storage::disk('public')->path($template->settings['director_signature_path']);
+            if (file_exists($signaturePath)) {
+                try {
+                    $templateProcessor->setImageValue('director_signature', [
+                        'path' => $signaturePath,
+                        'width' => 150,
+                        'height' => 50,
+                        'ratio' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    // If image replacement fails, just remove the placeholder
+                    $templateProcessor->setValue('director_signature', '');
+                }
+            } else {
+                $templateProcessor->setValue('director_signature', '');
+            }
+        } else {
+            $templateProcessor->setValue('director_signature', '');
         }
 
         // Save Word document to temp file
@@ -1092,10 +1152,24 @@ class StudentPlacementController extends Controller
             $oldIndex = array_search($oldStatus, $statusOrder);
             $newIndex = array_search($validated['status'], $statusOrder);
 
-            // Allow forward progression only (students can move forward but not backward)
-            if ($newIndex !== false && $oldIndex !== false && $newIndex <= $oldIndex && $oldStatus !== 'NOT_APPLIED') {
+            // Students cannot go back to NOT_APPLIED (admin-controlled status)
+            if ($validated['status'] === 'NOT_APPLIED') {
                 return redirect()->back()->withErrors([
-                    'status' => 'You can only progress forward in the placement process. Please select a status that comes after your current status.',
+                    'status' => 'You cannot go back to this status as it is controlled by the administrator.',
+                ]);
+            }
+
+            // Students can only go back to SAL_RELEASED if they have SAL file (meaning admin released it)
+            if ($validated['status'] === 'SAL_RELEASED' && ! $tracking->sal_file_path) {
+                return redirect()->back()->withErrors([
+                    'status' => 'You cannot go back to SAL Released status. Please wait for administrator to release your SAL.',
+                ]);
+            }
+
+            // Students cannot go back from SCL_RELEASED (final status)
+            if ($oldStatus === 'SCL_RELEASED') {
+                return redirect()->back()->withErrors([
+                    'status' => 'Your placement journey is complete. You cannot change your status.',
                 ]);
             }
 
