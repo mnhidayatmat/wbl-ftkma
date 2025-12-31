@@ -800,13 +800,6 @@
                             </div>
                         @endif
 
-                        @if($tracking->sal_file_path)
-                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
-                                📋 Download SAL
-                            </a>
-                        @endif
-
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
                             <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Work Ethics - Declining Offers Professionally</p>
                             <ul class="text-xs text-yellow-700 dark:text-yellow-300 list-disc list-inside space-y-1">
