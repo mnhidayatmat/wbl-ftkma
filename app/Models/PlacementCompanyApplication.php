@@ -24,6 +24,8 @@ class PlacementCompanyApplication extends Model
         'offer_received',
         'offer_received_date',
         'decline_notes',
+        'decline_sent',
+        'is_accepted',
     ];
 
     protected $casts = [
@@ -34,6 +36,8 @@ class PlacementCompanyApplication extends Model
         'follow_up_date' => 'date',
         'offer_received' => 'boolean',
         'offer_received_date' => 'date',
+        'decline_sent' => 'boolean',
+        'is_accepted' => 'boolean',
     ];
 
     /**

@@ -1221,27 +1221,40 @@ class StudentPlacementController extends Controller
 
             // Handle accepted - create Company record and link to student
             if ($validated['status'] === 'ACCEPTED') {
-                // Find the company application with offer_received = true
+                // Find the company application that student selected to accept
                 $acceptedCompanyApplication = $tracking->companyApplications()
-                    ->where('offer_received', true)
+                    ->where('is_accepted', true)
                     ->first();
 
-                if ($acceptedCompanyApplication) {
-                    $companyName = $acceptedCompanyApplication->company_name;
+                if (! $acceptedCompanyApplication) {
+                    return redirect()->back()->with('error', 'Please select ONE company to accept in the Offer Received stage.');
+                }
 
-                    // Check if company already exists (case-insensitive)
-                    $existingCompany = Company::whereRaw('LOWER(company_name) = ?', [strtolower($companyName)])->first();
+                $companyName = $acceptedCompanyApplication->company_name;
 
-                    if ($existingCompany) {
-                        // Use existing company
-                        $student->update(['company_id' => $existingCompany->id]);
-                    } else {
-                        // Create new company and link to student
-                        $newCompany = Company::create([
-                            'company_name' => $companyName,
-                        ]);
-                        $student->update(['company_id' => $newCompany->id]);
-                    }
+                // Check if company already exists (case-insensitive)
+                $existingCompany = Company::whereRaw('LOWER(company_name) = ?', [strtolower($companyName)])->first();
+
+                if ($existingCompany) {
+                    // Use existing company
+                    $student->update(['company_id' => $existingCompany->id]);
+                } else {
+                    // Create new company and link to student
+                    $newCompany = Company::create([
+                        'company_name' => $companyName,
+                    ]);
+                    $student->update(['company_id' => $newCompany->id]);
+                }
+
+                // Verify all other offers have been declined
+                $otherOffers = $tracking->companyApplications()
+                    ->where('offer_received', true)
+                    ->where('is_accepted', false)
+                    ->where('decline_sent', false)
+                    ->count();
+
+                if ($otherOffers > 0) {
+                    return redirect()->back()->with('error', 'Please confirm you have sent decline messages to all other companies before accepting.');
                 }
             }
 
@@ -1557,30 +1570,70 @@ class StudentPlacementController extends Controller
             return redirect()->back()->with('error', 'You can only update offer details in the Offer Received stage.');
         }
 
-        $validated = $request->validate([
-            'offer_received' => ['nullable', 'boolean'],
-            'offer_received_date' => ['nullable', 'date'],
-            'decline_notes' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $action = $request->input('action', 'toggle_offer');
 
-        $offerReceived = $request->has('offer_received');
+        switch ($action) {
+            case 'toggle_offer':
+                // Toggle offer received status
+                $offerReceived = $request->has('offer_received');
+                $application->update([
+                    'offer_received' => $offerReceived,
+                    'offer_received_date' => $offerReceived ? ($application->offer_received_date ?? now()->toDateString()) : null,
+                    // Clear is_accepted if unchecking offer
+                    'is_accepted' => $offerReceived ? $application->is_accepted : false,
+                    'decline_sent' => $offerReceived ? $application->decline_sent : false,
+                ]);
+                break;
 
-        $updateData = [
-            'offer_received' => $offerReceived,
-        ];
+            case 'select_accept':
+                // First, clear is_accepted for all other applications with offers
+                PlacementCompanyApplication::where('placement_tracking_id', $tracking->id)
+                    ->where('id', '!=', $application->id)
+                    ->where('offer_received', true)
+                    ->update(['is_accepted' => false]);
 
-        if ($offerReceived) {
-            $updateData['offer_received_date'] = $validated['offer_received_date'] ?? now()->toDateString();
-            $updateData['decline_notes'] = $validated['decline_notes'] ?? $application->decline_notes;
-        } else {
-            // Clear offer data if unchecked
-            $updateData['offer_received_date'] = null;
-            $updateData['decline_notes'] = null;
+                // Set this one as accepted
+                $application->update(['is_accepted' => true]);
+                break;
+
+            case 'mark_decline_sent':
+                $declineSent = $request->has('decline_sent');
+                $application->update(['decline_sent' => $declineSent]);
+                break;
+
+            case 'save_decline_notes':
+                $validated = $request->validate([
+                    'decline_notes' => ['nullable', 'string', 'max:1000'],
+                ]);
+                $application->update(['decline_notes' => $validated['decline_notes']]);
+
+                return redirect()->back()->with('success', 'Decline notes saved.');
+
+            default:
+                // Legacy support - handle old form submissions
+                $validated = $request->validate([
+                    'offer_received' => ['nullable', 'boolean'],
+                    'offer_received_date' => ['nullable', 'date'],
+                    'decline_notes' => ['nullable', 'string', 'max:1000'],
+                ]);
+
+                $offerReceived = $request->has('offer_received');
+                $updateData = ['offer_received' => $offerReceived];
+
+                if ($offerReceived) {
+                    $updateData['offer_received_date'] = $validated['offer_received_date'] ?? now()->toDateString();
+                    $updateData['decline_notes'] = $validated['decline_notes'] ?? $application->decline_notes;
+                } else {
+                    $updateData['offer_received_date'] = null;
+                    $updateData['decline_notes'] = null;
+                    $updateData['is_accepted'] = false;
+                    $updateData['decline_sent'] = false;
+                }
+
+                $application->update($updateData);
         }
 
-        $application->update($updateData);
-
-        return redirect()->back()->with('success', 'Offer details updated successfully.');
+        return redirect()->back();
     }
 
     /**
