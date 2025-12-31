@@ -1142,8 +1142,8 @@ class StudentPlacementController extends Controller
                 ]);
             }
 
-            // Students cannot set SAL_RELEASED or SCL_RELEASED (admin only)
-            if (in_array($validated['status'], ['SAL_RELEASED', 'SCL_RELEASED'])) {
+            // Students cannot set SCL_RELEASED (admin only)
+            if ($validated['status'] === 'SCL_RELEASED') {
                 return redirect()->back()->with('error', 'You cannot set this status. Please contact administrator.');
             }
 
