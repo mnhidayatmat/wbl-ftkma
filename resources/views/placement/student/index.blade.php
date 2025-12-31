@@ -1197,13 +1197,6 @@
                                     📜 Download SCL (Student Confirmation Letter)
                                 </a>
                             @endif
-
-                            @if($tracking->sal_file_path)
-                                <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                                   class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
-                                    📋 Download SAL (Student Acceptance Letter)
-                                </a>
-                            @endif
                         </div>
 
                         {{-- Medical Checkup Upload Section --}}
