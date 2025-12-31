@@ -1406,7 +1406,9 @@ class StudentPlacementController extends Controller
 
         $validated = $request->validate([
             'interviewed' => ['required', 'boolean'],
-            'interview_date' => ['nullable', 'date'],
+            'interview_date' => ['required_if:interviewed,1', 'nullable', 'date'],
+        ], [
+            'interview_date.required_if' => 'Please select the interview date.',
         ]);
 
         $updateData = [
@@ -1415,7 +1417,7 @@ class StudentPlacementController extends Controller
 
         if ($validated['interviewed']) {
             $updateData['interviewed_at'] = $application->interviewed_at ?? now();
-            $updateData['interview_date'] = $validated['interview_date'] ?? null;
+            $updateData['interview_date'] = $validated['interview_date'];
         } else {
             $updateData['interviewed_at'] = null;
             $updateData['interview_date'] = null;

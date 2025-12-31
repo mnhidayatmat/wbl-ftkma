@@ -305,28 +305,45 @@
 
                                 {{-- INTERVIEWED stage: Show checkbox and date input --}}
                                 @if($tracking->status === 'INTERVIEWED' && (!isset($readOnly) || !$readOnly))
-                                    <form action="{{ route('student.placement.company.update-interview', $application) }}" method="POST" class="mt-3 space-y-2">
+                                    <form action="{{ route('student.placement.company.update-interview', $application) }}" method="POST" class="mt-3 space-y-2" id="interviewForm_{{ $application->id }}">
                                         @csrf
                                         <div class="flex items-center gap-2">
                                             <input type="checkbox" name="interviewed" id="interviewed_{{ $application->id }}" value="1"
                                                    {{ $application->interviewed ? 'checked' : '' }}
-                                                   onchange="this.form.submit()"
+                                                   onchange="toggleInterviewDate_{{ $application->id }}(this)"
                                                    class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                             <label for="interviewed_{{ $application->id }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Got Interview
                                             </label>
                                         </div>
-                                        @if($application->interviewed)
+                                        <div id="interviewDateContainer_{{ $application->id }}" class="{{ $application->interviewed ? '' : 'hidden' }}">
                                             <div class="flex items-center gap-2">
-                                                <label class="text-xs text-gray-600 dark:text-gray-400">Interview Date:</label>
-                                                <input type="date" name="interview_date"
+                                                <label class="text-xs text-gray-600 dark:text-gray-400">Interview Date <span class="text-red-500">*</span>:</label>
+                                                <input type="date" name="interview_date" id="interviewDate_{{ $application->id }}"
                                                        value="{{ $application->interview_date ? $application->interview_date->format('Y-m-d') : '' }}"
-                                                       onchange="this.form.submit()"
+                                                       {{ $application->interviewed ? 'required' : '' }}
                                                        class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white">
                                                 <input type="hidden" name="interviewed" value="1">
+                                                <button type="submit" class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded">Save</button>
                                             </div>
-                                        @endif
+                                        </div>
                                     </form>
+                                    <script>
+                                        function toggleInterviewDate_{{ $application->id }}(checkbox) {
+                                            const container = document.getElementById('interviewDateContainer_{{ $application->id }}');
+                                            const dateInput = document.getElementById('interviewDate_{{ $application->id }}');
+                                            const form = document.getElementById('interviewForm_{{ $application->id }}');
+                                            if (checkbox.checked) {
+                                                container.classList.remove('hidden');
+                                                dateInput.required = true;
+                                            } else {
+                                                container.classList.add('hidden');
+                                                dateInput.required = false;
+                                                dateInput.value = '';
+                                                form.submit();
+                                            }
+                                        }
+                                    </script>
                                 @endif
                             </div>
                         @endforeach
@@ -517,13 +534,6 @@
                             </form>
                             <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to Offer Received stage</p>
                         </div>
-
-                        @if($tracking->sal_file_path)
-                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
-                                📋 Download SAL
-                            </a>
-                        @endif
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
                             <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tip</p>
