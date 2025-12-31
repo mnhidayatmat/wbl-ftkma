@@ -988,15 +988,28 @@ class StudentPlacementController extends Controller
             unlink($wordPath);
         }
 
-        // Load and return PDF
-        $pdf = Pdf::loadFile($pdfPath);
+        // Read PDF content
+        $pdfContent = file_get_contents($pdfPath);
 
-        // Clean up temp PDF after loading
+        // Clean up temp PDF after reading
         if (file_exists($pdfPath)) {
             unlink($pdfPath);
         }
 
-        return $pdf;
+        // Return a simple object with output() method to match Dompdf interface
+        return new class($pdfContent) {
+            private string $content;
+
+            public function __construct(string $content)
+            {
+                $this->content = $content;
+            }
+
+            public function output(): string
+            {
+                return $this->content;
+            }
+        };
     }
 
     /**
