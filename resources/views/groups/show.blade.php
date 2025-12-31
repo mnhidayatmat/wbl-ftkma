@@ -11,7 +11,7 @@
         @endif
     </div>
     <div>
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
             @if($group->isActive())
                 <form action="{{ route('admin.groups.mark-completed', $group) }}" method="POST" class="inline mr-2" onsubmit="return confirm('Mark this group as completed?');">
                     @csrf

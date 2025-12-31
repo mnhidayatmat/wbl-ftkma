@@ -48,8 +48,8 @@ class GroupController extends Controller
     public function create(): View
     {
         // Only admin can create groups
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Only administrators can create groups.');
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
+            abort(403, 'Unauthorized access.');
         }
 
         return view('groups.create');
@@ -61,8 +61,8 @@ class GroupController extends Controller
     public function store(Request $request): RedirectResponse
     {
         // Only admin can create groups
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Only administrators can create groups.');
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
+            abort(403, 'Unauthorized access.');
         }
 
         $validated = $request->validate([
@@ -110,8 +110,8 @@ class GroupController extends Controller
     public function edit(WblGroup $group): View
     {
         // Only admin can edit groups
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Only administrators can edit groups.');
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
+            abort(403, 'Unauthorized access.');
         }
 
         // Prevent editing completed groups (use reopen instead)
@@ -129,8 +129,8 @@ class GroupController extends Controller
     public function update(Request $request, WblGroup $group): RedirectResponse
     {
         // Only admin can update groups
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Only administrators can update groups.');
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
+            abort(403, 'Unauthorized access.');
         }
 
         $validated = $request->validate([
@@ -151,8 +151,8 @@ class GroupController extends Controller
     public function destroy(WblGroup $group): RedirectResponse
     {
         // Only admin can delete groups
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Only administrators can delete groups.');
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
+            abort(403, 'Unauthorized access.');
         }
 
         $group->delete();
@@ -167,8 +167,8 @@ class GroupController extends Controller
     public function markCompleted(WblGroup $group): RedirectResponse
     {
         // Only admin can mark groups as completed
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Only administrators can close groups.');
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
+            abort(403, 'Unauthorized access.');
         }
 
         if ($group->isCompleted()) {
@@ -189,8 +189,8 @@ class GroupController extends Controller
     public function reopen(WblGroup $group): RedirectResponse
     {
         // Only admin can reopen groups
-        if (! auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized access. Only administrators can reopen groups.');
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isWblCoordinator()) {
+            abort(403, 'Unauthorized access.');
         }
 
         if ($group->isActive()) {

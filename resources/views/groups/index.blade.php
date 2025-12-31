@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-[#003A6C] dark:text-[#0084C5]">Group Control</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">Manage group lifecycle: Activate or close groups to control visibility for all users</p>
         </div>
-    @if(auth()->user()->isAdmin())
+    @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
         <a href="{{ route('admin.groups.create') }}" class="px-4 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-colors flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -132,33 +132,33 @@
                                    class="text-[#0084C5] hover:text-[#003A6C] transition-colors">
                                     View
                                 </a>
-                        @if(auth()->user()->isAdmin())
+                        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
                                     @if($group->isActive())
-                                        <form action="{{ route('admin.groups.mark-completed', $group) }}" 
-                                              method="POST" 
+                                        <form action="{{ route('admin.groups.mark-completed', $group) }}"
+                                              method="POST"
                                               class="inline"
                                               onsubmit="return confirm('Are you sure you want to mark this group as COMPLETED?\\n\\nThis will:\\n- Archive the group\\n- Disable student access\\n- Data will remain available for reporting\\n\\nThis action can be reversed by reopening the group.');">
                                             @csrf
-                                            <button type="submit" 
+                                            <button type="submit"
                                                     class="text-orange-600 hover:text-orange-800 transition-colors"
                                                     title="Close WBL Group">
                                                 Close Group
                                             </button>
                                         </form>
                                     @else
-                                        <form action="{{ route('admin.groups.reopen', $group) }}" 
-                                              method="POST" 
+                                        <form action="{{ route('admin.groups.reopen', $group) }}"
+                                              method="POST"
                                               class="inline"
                                               onsubmit="return confirm('Are you sure you want to reopen this group? Students will regain full access.');">
                             @csrf
-                                            <button type="submit" 
+                                            <button type="submit"
                                                     class="text-green-600 hover:text-green-800 transition-colors"
                                                     title="Reopen Group">
                                                 Reopen
                                             </button>
                         </form>
                         @endif
-                                    <a href="{{ route('admin.groups.edit', $group) }}" 
+                                    <a href="{{ route('admin.groups.edit', $group) }}"
                                        class="text-[#0084C5] hover:text-[#003A6C] transition-colors">
                                         Edit
                                     </a>
