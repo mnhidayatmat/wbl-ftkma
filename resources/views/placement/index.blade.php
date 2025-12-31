@@ -693,9 +693,29 @@
 
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($hasInterviewed)
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        {{ $interviewedCompanies->count() }} Interview{{ $interviewedCompanies->count() > 1 ? 's' : '' }}
-                                    </span>
+                                    <div x-data="{ open: false }" class="relative">
+                                        <button @click="open = !open" type="button"
+                                                class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 cursor-pointer transition-colors">
+                                            {{ $interviewedCompanies->count() }} Interview{{ $interviewedCompanies->count() > 1 ? 's' : '' }}
+                                            <svg class="inline w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
+                                        <div x-show="open" @click.away="open = false" x-transition
+                                             class="absolute z-50 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 left-0">
+                                            <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                                                <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Interviewed Companies</p>
+                                            </div>
+                                            <ul class="py-1 max-h-48 overflow-y-auto">
+                                                @foreach($interviewedCompanies as $interview)
+                                                    <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $interview->company_name }}</p>
+                                                        @if($interview->interviewed_at)
+                                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($interview->interviewed_at)->format('d M Y') }}</p>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
                                 @else
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                                         None
@@ -767,14 +787,6 @@
                                             </form>
                                         @endif
 
-                                        @if($tracking && $tracking->sal_file_path)
-                                            <a href="{{ route('placement.student.sal.download', $student) }}"
-                                               class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                                                <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                </svg>
-                                            </a>
-                                        @endif
                                     @endif
                                 </div>
                             </td>
