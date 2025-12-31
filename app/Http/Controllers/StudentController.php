@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\StudentsErrorsExport;
+use App\Exports\StudentsTemplateExport;
+use App\Imports\StudentsImport;
+use App\Imports\StudentsPreviewImport;
 use App\Models\Company;
 use App\Models\Student;
 use App\Models\WblGroup;
-use App\Imports\StudentsImport;
-use App\Imports\StudentsPreviewImport;
-use App\Exports\StudentsTemplateExport;
-use App\Exports\StudentsErrorsExport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -149,7 +149,9 @@ class StudentController extends Controller
         $baseUrl = route('admin.students.index');
         $currentParams = $request->only(['group', 'search']);
 
-        return view('students.index', compact('students', 'tabs', 'activeTab', 'sortBy', 'sortDirection', 'baseUrl', 'currentParams'));
+        $isWblCoordinator = $user->isWblCoordinator();
+
+        return view('students.index', compact('students', 'tabs', 'activeTab', 'sortBy', 'sortDirection', 'baseUrl', 'currentParams', 'isWblCoordinator'));
     }
 
     /**
@@ -398,7 +400,7 @@ class StudentController extends Controller
         ]);
 
         try {
-            $import = new StudentsImport();
+            $import = new StudentsImport;
             Excel::import($import, $request->file('file'));
 
             $errors = $import->getErrors();
@@ -417,12 +419,12 @@ class StudentController extends Controller
                 foreach ($failures as $failure) {
                     $row = $failure->row();
                     $attribute = $failure->attribute();
-                    $errorMessages[] = "Row {$row}: {$attribute} - " . implode(', ', $failure->errors());
+                    $errorMessages[] = "Row {$row}: {$attribute} - ".implode(', ', $failure->errors());
                 }
 
                 // Return with errors but also success for rows that were imported
                 return redirect()->route('admin.students.index')
-                    ->with('warning', 'Import completed with some errors. ' . count($errorMessages) . ' row(s) failed.')
+                    ->with('warning', 'Import completed with some errors. '.count($errorMessages).' row(s) failed.')
                     ->with('import_errors', $errorMessages);
             }
 
@@ -431,7 +433,7 @@ class StudentController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->route('admin.students.index')
-                ->with('error', 'Import failed: ' . $e->getMessage());
+                ->with('error', 'Import failed: '.$e->getMessage());
         }
     }
 
@@ -440,7 +442,7 @@ class StudentController extends Controller
      */
     public function downloadTemplate()
     {
-        return Excel::download(new StudentsTemplateExport(), 'students_import_template.xlsx');
+        return Excel::download(new StudentsTemplateExport, 'students_import_template.xlsx');
     }
 
     /**
@@ -454,15 +456,15 @@ class StudentController extends Controller
 
         try {
             // Parse and validate the file
-            $import = new StudentsPreviewImport();
+            $import = new StudentsPreviewImport;
             Excel::import($import, $request->file('file'));
             $previewData = $import->getPreviewData();
 
             // Calculate statistics
             $stats = [
                 'total' => count($previewData),
-                'valid' => count(array_filter($previewData, fn($row) => $row['valid'])),
-                'invalid' => count(array_filter($previewData, fn($row) => !$row['valid'])),
+                'valid' => count(array_filter($previewData, fn ($row) => $row['valid'])),
+                'invalid' => count(array_filter($previewData, fn ($row) => ! $row['valid'])),
             ];
 
             // Store in session
@@ -471,7 +473,7 @@ class StudentController extends Controller
                     'data' => $previewData,
                     'stats' => $stats,
                     'uploaded_at' => now()->timestamp,
-                ]
+                ],
             ]);
 
             // Redirect to preview page
@@ -482,7 +484,7 @@ class StudentController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->route('admin.students.index')
-                ->with('error', 'Failed to process file: ' . $e->getMessage());
+                ->with('error', 'Failed to process file: '.$e->getMessage());
         }
     }
 
@@ -494,7 +496,7 @@ class StudentController extends Controller
         // Check if preview data exists in session
         $previewSession = session('student_import_preview');
 
-        if (!$previewSession) {
+        if (! $previewSession) {
             return redirect()->route('admin.students.index')
                 ->with('error', 'No import data found. Please upload a file first.');
         }
@@ -513,7 +515,7 @@ class StudentController extends Controller
 
                     // Parse skills if needed
                     $skills = null;
-                    if (!empty($data['skills'])) {
+                    if (! empty($data['skills'])) {
                         if (is_string($data['skills'])) {
                             $skills = array_map('trim', explode(',', $data['skills']));
                         } else {
@@ -562,7 +564,7 @@ class StudentController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->route('admin.students.index')
-                ->with('error', 'Import failed: ' . $e->getMessage());
+                ->with('error', 'Import failed: '.$e->getMessage());
         }
     }
 
@@ -573,13 +575,13 @@ class StudentController extends Controller
     {
         $previewSession = session('student_import_preview');
 
-        if (!$previewSession) {
+        if (! $previewSession) {
             return redirect()->route('admin.students.index')
                 ->with('error', 'No import data found.');
         }
 
         // Get only invalid rows
-        $invalidRows = array_filter($previewSession['data'], fn($row) => !$row['valid']);
+        $invalidRows = array_filter($previewSession['data'], fn ($row) => ! $row['valid']);
 
         if (empty($invalidRows)) {
             return redirect()->back()
@@ -587,6 +589,7 @@ class StudentController extends Controller
         }
 
         $timestamp = date('Y-m-d_His');
+
         return Excel::download(
             new StudentsErrorsExport(array_values($invalidRows)),
             "students_import_errors_{$timestamp}.xlsx"

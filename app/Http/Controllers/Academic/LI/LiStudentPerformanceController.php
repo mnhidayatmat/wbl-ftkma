@@ -13,6 +13,24 @@ use Illuminate\View\View;
 class LiStudentPerformanceController extends Controller
 {
     /**
+     * Get the programme filter for WBL coordinators.
+     */
+    private function getWblCoordinatorProgrammeFilter(): ?string
+    {
+        $user = auth()->user();
+
+        if ($user->isBtaWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours';
+        } elseif ($user->isBtdWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours';
+        } elseif ($user->isBtgWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours';
+        }
+
+        return null;
+    }
+
+    /**
      * Display student performance overview for LI.
      */
     public function index(Request $request): View
@@ -35,15 +53,21 @@ class LiStudentPerformanceController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
+        // Filter by programme for WBL coordinators
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
+
         // Admin and LI Coordinator can see all, Lecturers/Industry have restricted views
         // For performance index, usually Admin-only or restricted to ATs/ICs
-        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             // If they are a supervisor_li (stored via StudentCourseAssignment)
             $assignedStudentIds = \App\Models\StudentCourseAssignment::where('lecturer_id', auth()->id())
                 ->where('course_type', 'Industrial Training')
                 ->pluck('student_id');
             $query->whereIn('id', $assignedStudentIds);
-        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
 
@@ -134,7 +158,7 @@ class LiStudentPerformanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -170,7 +194,7 @@ class LiStudentPerformanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -230,12 +254,18 @@ class LiStudentPerformanceController extends Controller
 
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
-        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        // Filter by programme for WBL coordinators
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
+
+        if (auth()->user()->isLecturer() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             $assignedStudentIds = \App\Models\StudentCourseAssignment::where('lecturer_id', auth()->id())
                 ->where('course_type', 'Industrial Training')
                 ->pluck('student_id');
             $query->whereIn('id', $assignedStudentIds);
-        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        } elseif (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
 

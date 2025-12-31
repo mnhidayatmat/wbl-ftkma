@@ -15,11 +15,29 @@ use Illuminate\View\View;
 class LiModerationController extends Controller
 {
     /**
+     * Get the programme filter for WBL coordinators.
+     */
+    private function getWblCoordinatorProgrammeFilter(): ?string
+    {
+        $user = auth()->user();
+
+        if ($user->isBtaWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours';
+        } elseif ($user->isBtdWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours';
+        } elseif ($user->isBtgWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours';
+        }
+
+        return null;
+    }
+
+    /**
      * Display moderation overview page.
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -37,6 +55,12 @@ class LiModerationController extends Controller
 
         // Build query for students
         $query = Student::with(['group', 'company']);
+
+        // Filter by programme for WBL coordinators
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
 
         // Apply search filter
         if ($request->filled('search')) {
@@ -135,8 +159,14 @@ class LiModerationController extends Controller
      */
     public function show(Student $student): View
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
+        }
+
+        // WBL coordinators can only view students from their programme
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter && $student->programme !== $programmeFilter) {
+            abort(403, 'You can only view students from your programme.');
         }
 
         // Get active assessments
@@ -198,8 +228,14 @@ class LiModerationController extends Controller
      */
     public function store(Request $request, Student $student)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
+        }
+
+        // WBL coordinators can only moderate students from their programme
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter && $student->programme !== $programmeFilter) {
+            abort(403, 'You can only moderate students from your programme.');
         }
 
         $validated = $request->validate([

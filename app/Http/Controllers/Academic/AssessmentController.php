@@ -32,7 +32,7 @@ class AssessmentController extends Controller
             ($courseCode === 'FYP' && $user->isFypCoordinator()) ||
             ($courseCode === 'IP' && $user->isIpCoordinator()) ||
             ($courseCode === 'OSH' && $user->isOshCoordinator()) ||
-            ($courseCode === 'LI' && $user->isLiCoordinator()) ||
+            ($courseCode === 'LI' && ($user->isLiCoordinator() || $user->isWblCoordinator())) ||
             ($courseCode === 'PPE' && $user->isPpeCoordinator());
     }
 

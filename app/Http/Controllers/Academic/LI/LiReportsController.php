@@ -19,16 +19,39 @@ use Maatwebsite\Excel\Facades\Excel;
 class LiReportsController extends Controller
 {
     /**
+     * Get the programme filter for WBL coordinators.
+     */
+    private function getWblCoordinatorProgrammeFilter(): ?string
+    {
+        $user = auth()->user();
+
+        if ($user->isBtaWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours';
+        } elseif ($user->isBtdWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours';
+        } elseif ($user->isBtgWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours';
+        }
+
+        return null;
+    }
+
+    /**
      * Display reports overview page.
      */
     public function index(): View
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
-        // Get statistics
-        $totalStudents = Student::count();
+        // Get statistics (filtered by programme for WBL coordinators)
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        $studentQuery = Student::query();
+        if ($programmeFilter) {
+            $studentQuery->where('programme', $programmeFilter);
+        }
+        $totalStudents = $studentQuery->count();
         $totalGroups = WblGroup::count();
         $totalCompanies = Company::whereHas('students')->distinct()->count();
 
@@ -50,14 +73,20 @@ class LiReportsController extends Controller
      */
     public function exportCohort(Request $request)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         $format = $request->query('format', 'excel');
 
-        // Get all students with performance data
-        $studentsWithPerformance = $this->getStudentsWithPerformance();
+        // Get students (filtered by programme for WBL coordinators)
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        $studentQuery = Student::with(['group', 'company']);
+        if ($programmeFilter) {
+            $studentQuery->where('programme', $programmeFilter);
+        }
+        $students = $studentQuery->get();
+        $studentsWithPerformance = $this->getStudentsWithPerformance($students);
 
         if ($studentsWithPerformance->isEmpty()) {
             return redirect()->back()
@@ -89,14 +118,19 @@ class LiReportsController extends Controller
      */
     public function exportGroup(Request $request, WblGroup $group)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         $format = $request->query('format', 'excel');
 
-        // Get students in this group
-        $students = $group->students;
+        // Get students in this group (filtered by programme for WBL coordinators)
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        $studentsQuery = $group->students();
+        if ($programmeFilter) {
+            $studentsQuery->where('programme', $programmeFilter);
+        }
+        $students = $studentsQuery->get();
         $studentsWithPerformance = $this->getStudentsWithPerformance($students);
 
         if ($studentsWithPerformance->isEmpty()) {
@@ -131,14 +165,19 @@ class LiReportsController extends Controller
      */
     public function exportCompany(Request $request, Company $company)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         $format = $request->query('format', 'excel');
 
-        // Get students in this company
-        $students = $company->students;
+        // Get students in this company (filtered by programme for WBL coordinators)
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        $studentsQuery = $company->students();
+        if ($programmeFilter) {
+            $studentsQuery->where('programme', $programmeFilter);
+        }
+        $students = $studentsQuery->get();
         $studentsWithPerformance = $this->getStudentsWithPerformance($students);
 
         if ($studentsWithPerformance->isEmpty()) {

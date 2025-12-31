@@ -13,16 +13,40 @@ use Illuminate\View\View;
 class LiFinalisationController extends Controller
 {
     /**
+     * Get the programme filter for WBL coordinators.
+     */
+    private function getWblCoordinatorProgrammeFilter(): ?string
+    {
+        $user = auth()->user();
+
+        if ($user->isBtaWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours';
+        } elseif ($user->isBtdWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours';
+        } elseif ($user->isBtgWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours';
+        }
+
+        return null;
+    }
+
+    /**
      * Display result finalisation overview.
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         // Build query for students
         $query = Student::with(['group', 'company']);
+
+        // Filter by programme for WBL coordinators
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
 
         // Apply search filter
         if ($request->filled('search')) {
@@ -89,8 +113,14 @@ class LiFinalisationController extends Controller
      */
     public function finaliseStudent(Request $request, Student $student)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
+        }
+
+        // WBL coordinators can only finalise students from their programme
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter && $student->programme !== $programmeFilter) {
+            abort(403, 'You can only finalise students from your programme.');
         }
 
         $validated = $request->validate([
@@ -141,7 +171,7 @@ class LiFinalisationController extends Controller
      */
     public function finaliseGroup(Request $request)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -152,8 +182,13 @@ class LiFinalisationController extends Controller
 
         $group = WblGroup::findOrFail($validated['group_id']);
 
-        // Get all students in the group
-        $students = $group->students;
+        // Get students in the group (filtered by programme for WBL coordinators)
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        $studentsQuery = $group->students();
+        if ($programmeFilter) {
+            $studentsQuery->where('programme', $programmeFilter);
+        }
+        $students = $studentsQuery->get();
 
         if ($students->isEmpty()) {
             return redirect()->back()
@@ -204,7 +239,7 @@ class LiFinalisationController extends Controller
      */
     public function finaliseCourse(Request $request)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -213,8 +248,13 @@ class LiFinalisationController extends Controller
             'confirm' => ['required', 'accepted'],
         ]);
 
-        // Get all students
-        $students = Student::all();
+        // Get students (filtered by programme for WBL coordinators)
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        $studentsQuery = Student::query();
+        if ($programmeFilter) {
+            $studentsQuery->where('programme', $programmeFilter);
+        }
+        $students = $studentsQuery->get();
 
         if ($students->isEmpty()) {
             return redirect()->back()
