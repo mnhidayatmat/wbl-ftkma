@@ -1084,10 +1084,7 @@ class StudentPlacementController extends Controller
             $readOnly = true;
         }
 
-        // Get existing companies for selection
-        $existingCompanies = Company::orderBy('company_name')->get(['id', 'company_name']);
-
-        return view('placement.student.index', compact('student', 'tracking', 'statuses', 'currentStep', 'canApply', 'resumeInspection', 'step1Label', 'isStudentView', 'readOnly', 'isInCompletedGroup', 'existingCompanies'));
+        return view('placement.student.index', compact('student', 'tracking', 'statuses', 'currentStep', 'canApply', 'resumeInspection', 'step1Label', 'isStudentView', 'readOnly', 'isInCompletedGroup'));
     }
 
     /**

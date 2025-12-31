@@ -593,65 +593,15 @@
                         </div>
 
                         <div class="space-y-2">
-                            <button type="button" onclick="document.getElementById('offerReceivedSection').classList.toggle('hidden')"
-                                    class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                🎉 I've Received an Offer
-                            </button>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Select the company that gave you an offer</p>
-                        </div>
-
-                        {{-- Offer Received Selection Section --}}
-                        <div id="offerReceivedSection" class="hidden bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-700">
-                            <h4 class="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-1">Which company gave you an offer?</h4>
-                            <p class="text-xs text-orange-600 dark:text-orange-400 mb-3">Select all companies that gave you offers</p>
-                            <form action="{{ route('student.placement.status.update') }}" method="POST" id="offerForm">
+                            <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
                                 @csrf
                                 <input type="hidden" name="status" value="OFFER_RECEIVED">
-                                <div class="space-y-2 mb-3">
-                                    @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
-                                        @foreach($tracking->companyApplications as $application)
-                                            <label class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
-                                                <input type="checkbox" name="offer_company_ids[]" value="{{ $application->id }}"
-                                                       {{ $application->offer_received ? 'checked' : '' }}
-                                                       class="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                                <div class="flex-1">
-                                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $application->company_name }}</span>
-                                                    @if($application->interviewed)
-                                                        <span class="ml-2 text-xs text-green-600 dark:text-green-400">(Interviewed)</span>
-                                                    @endif
-                                                    @if($application->offer_received)
-                                                        <span class="ml-2 text-xs text-orange-600 dark:text-orange-400">(Offer received)</span>
-                                                    @endif
-                                                </div>
-                                            </label>
-                                        @endforeach
-                                    @else
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">No companies added yet. Please add companies first.</p>
-                                    @endif
-                                </div>
-                                @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
-                                    <div class="flex gap-2">
-                                        <button type="submit" class="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg"
-                                                onclick="return validateOfferSelection()">
-                                            Confirm Offer(s)
-                                        </button>
-                                        <button type="button" onclick="document.getElementById('offerReceivedSection').classList.add('hidden')"
-                                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm font-semibold rounded-lg">
-                                            Cancel
-                                        </button>
-                                    </div>
-                                @endif
+                                <button type="submit"
+                                        class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
+                                    🎉 I've Received an Offer
+                                </button>
                             </form>
-                            <script>
-                                function validateOfferSelection() {
-                                    const checkboxes = document.querySelectorAll('input[name="offer_company_ids[]"]:checked');
-                                    if (checkboxes.length === 0) {
-                                        alert('Please select at least one company that gave you an offer.');
-                                        return false;
-                                    }
-                                    return true;
-                                }
-                            </script>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Proceed to mark which companies gave you offers</p>
                         </div>
 
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">

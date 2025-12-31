@@ -23,6 +23,7 @@ class PlacementCompanyApplication extends Model
         'follow_up_notes',
         'offer_received',
         'offer_received_date',
+        'decline_notes',
     ];
 
     protected $casts = [
