@@ -1054,10 +1054,20 @@
                                     <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     <div>
                                         <p class="text-sm font-semibold text-green-800 dark:text-green-200">All Requirements Complete!</p>
-                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">Waiting for admin to release your SCL</p>
+                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">Click below to proceed to download SCL</p>
                                     </div>
                                 </div>
                             </div>
+
+                            {{-- Proceed to SCL Release Button --}}
+                            <form action="{{ route('student.placement.proceed-scl') }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                        class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                    Proceed to Download SCL
+                                </button>
+                            </form>
                         @else
                             <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                                 <div class="flex items-start gap-2">
@@ -1089,26 +1099,91 @@
                             <p class="text-xs opacity-90 mt-1">Congratulations on your placement</p>
                         </div>
 
-                        @if($tracking->scl_file_path)
-                            <div class="space-y-2">
+                        {{-- Download Documents Section --}}
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Download Documents
+                            </h4>
+
+                            @if($tracking->scl_file_path)
                                 <a href="{{ route('student.placement.download-scl') }}" target="_blank"
                                    class="block px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
-                                    📜 Download SCL
+                                    📜 Download SCL (Student Confirmation Letter)
                                 </a>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Student Confirmation Letter</p>
-                            </div>
-                        @endif
+                            @endif
 
-                        @if($tracking->sal_file_path)
-                            <a href="{{ route('student.placement.download-sal') }}" target="_blank"
-                               class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
-                                📋 Download SAL
-                            </a>
-                        @endif
+                            @if($tracking->sal_file_path)
+                                <a href="{{ route('student.placement.download-sal') }}" target="_blank"
+                                   class="block px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
+                                    📋 Download SAL (Student Acceptance Letter)
+                                </a>
+                            @endif
+                        </div>
+
+                        {{-- Medical Checkup Upload Section --}}
+                        <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Medical Checkup Document
+                            </h4>
+
+                            @if($tracking->medical_checkup_path)
+                                {{-- Already Uploaded --}}
+                                <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg mb-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span class="text-sm font-medium text-green-800 dark:text-green-200">Medical Checkup Uploaded</span>
+                                        </div>
+                                        <a href="{{ route('student.placement.view-medical-checkup') }}" target="_blank"
+                                           class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 font-medium">
+                                            View
+                                        </a>
+                                    </div>
+                                    @if($tracking->medical_checkup_uploaded_at)
+                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">
+                                            Uploaded {{ $tracking->medical_checkup_uploaded_at->format('d M Y, h:i A') }}
+                                        </p>
+                                    @endif
+                                </div>
+
+                                {{-- Replace Upload Form --}}
+                                <form action="{{ route('student.placement.upload-medical-checkup') }}" method="POST" enctype="multipart/form-data" class="space-y-2">
+                                    @csrf
+                                    <label class="block text-xs text-gray-600 dark:text-gray-400">Replace with new document:</label>
+                                    <div class="flex gap-2">
+                                        <input type="file" name="medical_checkup" accept=".pdf,.jpg,.jpeg,.png" required
+                                               class="flex-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-gray-600 dark:file:text-gray-200">
+                                        <button type="submit" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors">
+                                            Replace
+                                        </button>
+                                    </div>
+                                </form>
+                            @else
+                                {{-- Upload Form --}}
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                                    Upload your medical checkup document to give to the company. This is required for your internship.
+                                </p>
+                                <form action="{{ route('student.placement.upload-medical-checkup') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                                    @csrf
+                                    <div>
+                                        <input type="file" name="medical_checkup" accept=".pdf,.jpg,.jpeg,.png" required
+                                               class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-900/30 dark:file:text-purple-300">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Accepted: PDF, JPG, PNG (max 5MB)</p>
+                                    </div>
+                                    <button type="submit"
+                                            class="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all text-sm">
+                                        📤 Upload Medical Checkup
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
 
                         <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-500">
                             <p class="text-xs font-semibold text-blue-800 dark:text-blue-200 mb-1">📚 What's Next?</p>
                             <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                                <li>• Submit medical checkup to your company</li>
                                 <li>• Prepare for your internship</li>
                                 <li>• Review company guidelines</li>
                                 <li>• Stay in touch with coordinator</li>
@@ -1223,8 +1298,8 @@
                         </div>
                     @endif
 
-                    @if($tracking->scl_file_path && in_array($tracking->status, ['ACCEPTED', 'SCL_RELEASED']))
-                        {{-- SCL available for download after offer accepted --}}
+                    @if($tracking->scl_file_path && in_array($tracking->status, ['OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED']))
+                        {{-- SCL available for download --}}
                         <a href="{{ route('student.placement.download-scl') }}" target="_blank"
                            class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors cursor-pointer border border-purple-200 dark:border-purple-800">
                             <div class="flex items-center gap-2">
@@ -1236,15 +1311,6 @@
                                 <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             </div>
                         </a>
-                    @elseif($tracking->scl_file_path && $tracking->status === 'OFFER_RECEIVED')
-                        {{-- SCL generated but waiting for offer acceptance --}}
-                        <div class="flex items-center justify-between p-3 bg-purple-50/50 dark:bg-purple-900/10 rounded-lg border border-purple-200 dark:border-purple-800">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                <span class="text-sm font-medium text-purple-500 dark:text-purple-400">SCL</span>
-                            </div>
-                            <span class="text-xs bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300 px-2 py-1 rounded-full">Accept offer to download</span>
-                        </div>
                     @else
                         <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div class="flex items-center gap-2">
