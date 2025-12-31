@@ -844,8 +844,9 @@
                         @php
                             $acceptedCompany = $student->company;
                             $hasOfferLetter = !empty($tracking->offer_letter_path);
+                            $hasConfirmationProof = !empty($tracking->confirmation_proof_path);
                             $hasCompanyDetails = $tracking->company_details_completed;
-                            $allRequirementsMet = $hasOfferLetter && $hasCompanyDetails;
+                            $allRequirementsMet = $hasOfferLetter && $hasConfirmationProof && $hasCompanyDetails;
                         @endphp
 
                         <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border-l-4 border-green-500">
@@ -875,12 +876,22 @@
                                     <span class="text-sm {{ $hasOfferLetter ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300' }}">Upload Offer Letter</span>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    @if($hasCompanyDetails)
+                                    @if($hasConfirmationProof)
                                         <span class="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                         </span>
                                     @else
                                         <span class="flex-shrink-0 w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">2</span>
+                                    @endif
+                                    <span class="text-sm {{ $hasConfirmationProof ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300' }}">Upload Confirmation Proof</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    @if($hasCompanyDetails)
+                                        <span class="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </span>
+                                    @else
+                                        <span class="flex-shrink-0 w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">3</span>
                                     @endif
                                     <span class="text-sm {{ $hasCompanyDetails ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300' }}">Complete Company Details</span>
                                 </div>
@@ -926,11 +937,51 @@
                             </div>
                         </div>
 
-                        {{-- Step 2: Company Details Form --}}
+                        {{-- Step 2: Upload Confirmation Proof --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border {{ $hasConfirmationProof ? 'border-green-300 dark:border-green-700' : 'border-orange-300 dark:border-orange-700' }} overflow-hidden">
+                            <div class="{{ $hasConfirmationProof ? 'bg-green-50 dark:bg-green-900/20' : 'bg-orange-50 dark:bg-orange-900/20' }} px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <h4 class="text-sm font-semibold {{ $hasConfirmationProof ? 'text-green-800 dark:text-green-200' : 'text-orange-800 dark:text-orange-200' }}">
+                                    Step 2: Upload Confirmation Proof
+                                    @if($hasConfirmationProof) ✓ @endif
+                                </h4>
+                                <p class="text-xs {{ $hasConfirmationProof ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400' }}">Upload proof that you have confirmed acceptance with the company (e.g., email confirmation)</p>
+                            </div>
+                            <div class="p-4">
+                                @if($hasConfirmationProof)
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span class="text-sm text-green-700 dark:text-green-400">Confirmation proof uploaded</span>
+                                        </div>
+                                        <a href="{{ route('student.placement.proof.view') }}" target="_blank" class="text-xs text-blue-600 hover:underline">View</a>
+                                    </div>
+                                @else
+                                    <form action="{{ route('student.placement.proof.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                                        @csrf
+                                        <div>
+                                            <input type="file" name="proof" required accept=".pdf,.jpg,.jpeg,.png"
+                                                   class="w-full text-sm text-gray-500 dark:text-gray-400
+                                                          file:mr-2 file:py-2 file:px-3
+                                                          file:rounded-lg file:border-0
+                                                          file:text-sm file:font-semibold
+                                                          file:bg-orange-50 file:text-orange-700
+                                                          hover:file:bg-orange-100
+                                                          dark:file:bg-orange-900/30 dark:file:text-orange-300">
+                                        </div>
+                                        <button type="submit" class="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg">
+                                            📧 Upload Confirmation Proof
+                                        </button>
+                                        <p class="text-xs text-gray-500 text-center">PDF, JPG, PNG (max 10MB)</p>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Step 3: Company Details Form --}}
                         <div class="bg-white dark:bg-gray-800 rounded-lg border {{ $hasCompanyDetails ? 'border-green-300 dark:border-green-700' : 'border-orange-300 dark:border-orange-700' }} overflow-hidden">
                             <div class="{{ $hasCompanyDetails ? 'bg-green-50 dark:bg-green-900/20' : 'bg-orange-50 dark:bg-orange-900/20' }} px-4 py-2 border-b border-gray-200 dark:border-gray-600">
                                 <h4 class="text-sm font-semibold {{ $hasCompanyDetails ? 'text-green-800 dark:text-green-200' : 'text-orange-800 dark:text-orange-200' }}">
-                                    Step 2: Company Details
+                                    Step 3: Company Details
                                     @if($hasCompanyDetails) ✓ @endif
                                 </h4>
                                 <p class="text-xs {{ $hasCompanyDetails ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400' }}">This information will be added to the official company database</p>
