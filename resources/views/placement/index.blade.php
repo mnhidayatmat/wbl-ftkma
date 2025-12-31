@@ -579,10 +579,11 @@
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Student</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Group</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Resume Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">SAL</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Interview</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Company</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">SAL</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">SCL</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -631,6 +632,22 @@
                             }
 
                             $canReleaseSal = $resumeInspection && $resumeInspection->status === 'PASSED' && $tracking && $tracking->status === 'NOT_APPLIED';
+
+                            // SCL Status
+                            $sclStatus = 'Not Released';
+                            $sclStatusColor = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                            if ($tracking && $tracking->scl_file_path) {
+                                if (in_array($tracking->status, ['ACCEPTED', 'SCL_RELEASED'])) {
+                                    $sclStatus = 'Released';
+                                    $sclStatusColor = 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+                                } else {
+                                    $sclStatus = 'Pending Acceptance';
+                                    $sclStatusColor = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                                }
+                            } elseif ($tracking && in_array($tracking->status, ['OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED'])) {
+                                $sclStatus = 'Pending';
+                                $sclStatusColor = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                            }
                         @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ $isInCompletedGroup ? 'opacity-60' : '' }}">
                             @if(auth()->user()->isAdmin() || auth()->user()->isCoordinator())
@@ -658,6 +675,20 @@
                                 <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $resumeStatusColor }}">
                                     {{ $resumeStatus }}
                                 </span>
+                            </td>
+
+                            {{-- SAL Column (moved next to Resume Status) --}}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-col gap-1">
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $salStatusColor }}">
+                                        {{ $salStatus }}
+                                    </span>
+                                    @if($tracking && $tracking->sal_released_at)
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $tracking->sal_released_at->format('d M Y') }}
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -703,14 +734,15 @@
                                 @endif
                             </td>
 
+                            {{-- SCL Column (at the end before Actions) --}}
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex flex-col gap-1">
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $salStatusColor }}">
-                                        {{ $salStatus }}
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $sclStatusColor }}">
+                                        {{ $sclStatus }}
                                     </span>
-                                    @if($tracking && $tracking->sal_released_at)
+                                    @if($tracking && $tracking->scl_released_at)
                                         <span class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $tracking->sal_released_at->format('d M Y') }}
+                                            {{ $tracking->scl_released_at->format('d M Y') }}
                                         </span>
                                     @endif
                                 </div>
@@ -749,7 +781,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="10" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                 <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                                 </svg>
