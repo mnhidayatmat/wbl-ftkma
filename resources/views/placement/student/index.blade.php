@@ -254,9 +254,16 @@
                 @if($tracking->companyApplications && $tracking->companyApplications->count() > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         @foreach($tracking->companyApplications as $application)
-                            <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+                            <div class="border-2 {{ $application->interviewed ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700' }} rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
                                 <div class="flex items-start justify-between mb-2">
-                                    <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ $application->company_name }}</h4>
+                                    <div class="flex items-center gap-2">
+                                        @if($application->interviewed)
+                                            <span class="text-green-600 dark:text-green-400">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                            </span>
+                                        @endif
+                                        <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ $application->company_name }}</h4>
+                                    </div>
                                     @if(!isset($readOnly) || !$readOnly)
                                         <form action="{{ route('student.placement.company.delete', $application) }}" method="POST"
                                               onsubmit="return confirm('Remove this company?');" class="inline">
@@ -277,7 +284,15 @@
                                         <span class="font-medium">Method:</span>
                                         {{ $application->application_method_display }}
                                     </p>
+                                    @if($application->interviewed && $application->interview_date)
+                                        <p class="text-green-600 dark:text-green-400">
+                                            <span class="font-medium">Interview Date:</span>
+                                            {{ $application->interview_date->format('d M Y') }}
+                                        </p>
+                                    @endif
                                 </div>
+
+                                {{-- APPLIED stage: Show "Got Interview" button --}}
                                 @if($tracking->status === 'APPLIED' && (!isset($readOnly) || !$readOnly))
                                     <form action="{{ route('student.placement.company.got-interview', $application) }}" method="POST"
                                           onsubmit="return confirm('Mark as interviewed for {{ $application->company_name }}?');" class="mt-3">
@@ -285,6 +300,32 @@
                                         <button type="submit" class="w-full px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition-colors">
                                             Got Interview
                                         </button>
+                                    </form>
+                                @endif
+
+                                {{-- INTERVIEWED stage: Show checkbox and date input --}}
+                                @if($tracking->status === 'INTERVIEWED' && (!isset($readOnly) || !$readOnly))
+                                    <form action="{{ route('student.placement.company.update-interview', $application) }}" method="POST" class="mt-3 space-y-2">
+                                        @csrf
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" name="interviewed" id="interviewed_{{ $application->id }}" value="1"
+                                                   {{ $application->interviewed ? 'checked' : '' }}
+                                                   onchange="this.form.submit()"
+                                                   class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                            <label for="interviewed_{{ $application->id }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Got Interview
+                                            </label>
+                                        </div>
+                                        @if($application->interviewed)
+                                            <div class="flex items-center gap-2">
+                                                <label class="text-xs text-gray-600 dark:text-gray-400">Interview Date:</label>
+                                                <input type="date" name="interview_date"
+                                                       value="{{ $application->interview_date ? $application->interview_date->format('Y-m-d') : '' }}"
+                                                       onchange="this.form.submit()"
+                                                       class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white">
+                                                <input type="hidden" name="interviewed" value="1">
+                                            </div>
+                                        @endif
                                     </form>
                                 @endif
                             </div>
@@ -420,14 +461,6 @@
                         </div>
 
                         <div class="space-y-2">
-                            <button onclick="document.getElementById('addCompanyForm').classList.toggle('hidden')"
-                                    class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                🏢 Add Company Application
-                            </button>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Track all your applications</p>
-                        </div>
-
-                        <div class="space-y-2">
                             <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
                                 @csrf
                                 <input type="hidden" name="status" value="INTERVIEWED">
@@ -472,11 +505,6 @@
                                 <svg class="w-10 h-10 text-purple-300 dark:text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                             </div>
                         </div>
-
-                        <button onclick="document.getElementById('addCompanyForm').classList.toggle('hidden')"
-                                class="w-full px-4 py-3 bg-[#0084C5] hover:bg-[#003A6C] text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                🏢 Add More Companies
-                        </button>
 
                         <div class="space-y-2">
                             <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">

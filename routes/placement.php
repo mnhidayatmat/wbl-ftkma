@@ -52,6 +52,7 @@ Route::middleware('auth')->prefix('student/placement')->name('student.placement.
     Route::post('company/add', [StudentPlacementController::class, 'addCompany'])->name('company.add');
     Route::delete('company/{application}', [StudentPlacementController::class, 'deleteCompany'])->name('company.delete');
     Route::post('company/{application}/got-interview', [StudentPlacementController::class, 'markAsInterviewed'])->name('company.got-interview');
+    Route::post('company/{application}/update-interview', [StudentPlacementController::class, 'updateCompanyInterview'])->name('company.update-interview');
     Route::post('upload-proof', [StudentPlacementController::class, 'studentUploadProof'])->name('proof.upload');
     Route::get('view-proof', [StudentPlacementController::class, 'studentViewProof'])->name('proof.view');
     Route::get('download-sal', [StudentPlacementController::class, 'studentDownloadSal'])->name('download-sal');

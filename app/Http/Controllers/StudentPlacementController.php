@@ -1380,6 +1380,53 @@ class StudentPlacementController extends Controller
     }
 
     /**
+     * Update company interview status and date.
+     */
+    public function updateCompanyInterview(Request $request, PlacementCompanyApplication $application): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking) {
+            abort(404, 'Placement tracking not found.');
+        }
+
+        // Verify the application belongs to the student's tracking
+        if ($application->placement_tracking_id !== $tracking->id) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validated = $request->validate([
+            'interviewed' => ['required', 'boolean'],
+            'interview_date' => ['nullable', 'date'],
+        ]);
+
+        $updateData = [
+            'interviewed' => $validated['interviewed'],
+        ];
+
+        if ($validated['interviewed']) {
+            $updateData['interviewed_at'] = $application->interviewed_at ?? now();
+            $updateData['interview_date'] = $validated['interview_date'] ?? null;
+        } else {
+            $updateData['interviewed_at'] = null;
+            $updateData['interview_date'] = null;
+        }
+
+        $application->update($updateData);
+
+        return redirect()->back()->with('success', 'Interview status updated successfully.');
+    }
+
+    /**
      * Student upload confirmation proof/acknowledgment.
      */
     public function studentUploadProof(Request $request): RedirectResponse

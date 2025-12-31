@@ -18,12 +18,14 @@ class PlacementCompanyApplication extends Model
         'application_method_other',
         'interviewed',
         'interviewed_at',
+        'interview_date',
     ];
 
     protected $casts = [
         'application_deadline' => 'date',
         'interviewed' => 'boolean',
         'interviewed_at' => 'datetime',
+        'interview_date' => 'date',
     ];
 
     /**
