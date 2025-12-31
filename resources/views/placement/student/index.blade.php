@@ -850,8 +850,8 @@
                         @endphp
 
                         <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border-l-4 border-green-500">
-                            <p class="text-xs font-bold text-green-800 dark:text-green-200 mb-1">✅ Offer Accepted!</p>
-                            <p class="text-sm text-green-700 dark:text-green-300">
+                            <p class="text-xs font-bold text-green-800 dark:text-green-200 mb-1">🏢 Accepted Company</p>
+                            <p class="text-sm font-semibold text-green-700 dark:text-green-300">
                                 @if($acceptedCompany)
                                     {{ $acceptedCompany->company_name }}
                                 @endif
