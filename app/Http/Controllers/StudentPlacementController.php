@@ -1453,6 +1453,8 @@ class StudentPlacementController extends Controller
                         'status' => 'Not Started',
                         'created_by' => auth()->id(),
                     ]);
+
+                    Log::info('Created CompanyAgreement for company: ' . $companyName . ' with status Not Started');
                 }
 
                 // Verify all other offers have been declined
@@ -2186,6 +2188,13 @@ class StudentPlacementController extends Controller
             $website = 'https://'.$website;
         }
 
+        // Convert address newlines to commas for single line view
+        $address = $validated['address'];
+        if ($address) {
+            $address = preg_replace('/\r\n|\r|\n/', ', ', trim($address));
+            $address = preg_replace('/,\s*,/', ',', $address); // Remove double commas
+        }
+
         // Update company record
         $company = Company::find($student->company_id);
         if (! $company) {
@@ -2199,7 +2208,7 @@ class StudentPlacementController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'website' => $website,
-            'address' => $validated['address'],
+            'address' => $address,
             'ic_name' => $validated['ic_name'],
             'ic_phone' => $validated['ic_phone'],
             'ic_email' => $validated['ic_email'],
