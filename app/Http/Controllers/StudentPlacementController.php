@@ -1434,16 +1434,20 @@ class StudentPlacementController extends Controller
                 if ($existingCompany) {
                     // Use existing company
                     $student->update(['company_id' => $existingCompany->id]);
+                    $companyForAgreement = $existingCompany;
                 } else {
                     // Create new company and link to student
                     $newCompany = Company::create([
                         'company_name' => $companyName,
                     ]);
                     $student->update(['company_id' => $newCompany->id]);
+                    $companyForAgreement = $newCompany;
+                }
 
-                    // Create a default CompanyAgreement with "Not Started" status
+                // Create a default CompanyAgreement with "Not Started" status if company has no agreements
+                if ($companyForAgreement->agreements()->count() === 0) {
                     CompanyAgreement::create([
-                        'company_id' => $newCompany->id,
+                        'company_id' => $companyForAgreement->id,
                         'agreement_type' => 'MoA',
                         'agreement_title' => 'Industrial Training Agreement - ' . $companyName,
                         'status' => 'Not Started',
