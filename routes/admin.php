@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordinator,ppe_coordinator,li_coordinator'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordinator,ppe_coordinator,li_coordinator,bta_wbl_coordinator,btd_wbl_coordinator,btg_wbl_coordinator'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Profile
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [AdminProfileController::class, 'show'])->name('show');
