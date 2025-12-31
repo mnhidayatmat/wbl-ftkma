@@ -18,12 +18,30 @@ class LiIcEvaluationController extends Controller
     use ChecksAssessmentWindow;
 
     /**
+     * Get the programme filter for WBL coordinators.
+     */
+    private function getWblCoordinatorProgrammeFilter(): ?string
+    {
+        $user = auth()->user();
+
+        if ($user->isBtaWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours';
+        } elseif ($user->isBtdWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours';
+        } elseif ($user->isBtgWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours';
+        }
+
+        return null;
+    }
+
+    /**
      * Display the list of students for IC evaluation.
      */
     public function index(Request $request): View
     {
         // Authorization checked via middleware, but double-check here
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isIndustry()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isIndustry() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -38,8 +56,14 @@ class LiIcEvaluationController extends Controller
         // Build query for students
         $query = Student::with(['group', 'company', 'academicTutor', 'industryCoach']);
 
+        // Filter by programme for WBL coordinators
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
+
         // Admin and LI Coordinator can see all students, IC only sees assigned students
-        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (auth()->user()->isIndustry() && ! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             $query->where('ic_id', auth()->id());
         }
 
@@ -128,9 +152,22 @@ class LiIcEvaluationController extends Controller
      */
     public function show(Student $student): View
     {
-        // Check authorization using Gate
-        if (! Gate::allows('edit-li-ic-marks', $student)) {
-            abort(403, 'You are not authorized to edit IC marks for this student.');
+        // WBL coordinators can view but not edit - check programme access
+        $isWblCoordinator = auth()->user()->isWblCoordinator();
+        $viewOnly = false;
+
+        if ($isWblCoordinator) {
+            // WBL coordinators can only view students from their programme
+            $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+            if ($programmeFilter && $student->programme !== $programmeFilter) {
+                abort(403, 'You can only view students from your programme.');
+            }
+            $viewOnly = true;
+        } else {
+            // Check authorization using Gate
+            if (! Gate::allows('edit-li-ic-marks', $student)) {
+                abort(403, 'You are not authorized to edit IC marks for this student.');
+            }
         }
 
         // Load relationships
@@ -207,7 +244,8 @@ class LiIcEvaluationController extends Controller
             'totalContribution',
             'supervisorAssessments',
             'supervisorMarks',
-            'supervisorTotalContribution'
+            'supervisorTotalContribution',
+            'viewOnly'
         ));
     }
 
@@ -216,6 +254,11 @@ class LiIcEvaluationController extends Controller
      */
     public function store(Request $request, Student $student): RedirectResponse
     {
+        // WBL coordinators can only view, not submit evaluations
+        if (auth()->user()->isWblCoordinator()) {
+            abort(403, 'WBL Coordinators can only view evaluations, not submit them.');
+        }
+
         // Check authorization using gate
         if (! Gate::allows('edit-li-ic-marks', $student)) {
             abort(403, 'You are not authorized to edit IC marks for this student.');

@@ -13,16 +13,40 @@ use Illuminate\View\View;
 class LiStudentAssignmentController extends Controller
 {
     /**
+     * Get the programme filter for WBL coordinators.
+     */
+    private function getWblCoordinatorProgrammeFilter(): ?string
+    {
+        $user = auth()->user();
+
+        if ($user->isBtaWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours';
+        } elseif ($user->isBtdWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours';
+        } elseif ($user->isBtgWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours';
+        }
+
+        return null;
+    }
+
+    /**
      * Display the student assignment page with inline edit table.
      * For LI: Lecturer can be assigned individually per student, IC is set by student during registration.
      */
     public function index(Request $request): View
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
         $query = Student::with(['group', 'academicTutor', 'industryCoach.company']);
+
+        // Filter by programme for WBL coordinators
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
 
         // Filter by group
         if ($request->filled('group')) {
@@ -72,13 +96,17 @@ class LiStudentAssignmentController extends Controller
         // Get groups for filter
         $groups = WblGroup::orderBy('name')->get();
 
-        // Calculate statistics
+        // Calculate statistics (filtered by programme for WBL coordinators)
+        $statsQuery = Student::query();
+        if ($programmeFilter) {
+            $statsQuery->where('programme', $programmeFilter);
+        }
         $stats = [
-            'total' => Student::count(),
-            'at_assigned' => Student::whereNotNull('at_id')->count(),
-            'at_unassigned' => Student::whereNull('at_id')->count(),
-            'ic_assigned' => Student::whereNotNull('ic_id')->count(),
-            'ic_unassigned' => Student::whereNull('ic_id')->count(),
+            'total' => (clone $statsQuery)->count(),
+            'at_assigned' => (clone $statsQuery)->whereNotNull('at_id')->count(),
+            'at_unassigned' => (clone $statsQuery)->whereNull('at_id')->count(),
+            'ic_assigned' => (clone $statsQuery)->whereNotNull('ic_id')->count(),
+            'ic_unassigned' => (clone $statsQuery)->whereNull('ic_id')->count(),
         ];
 
         return view('academic.li.assign-students.index', compact(
@@ -94,8 +122,14 @@ class LiStudentAssignmentController extends Controller
      */
     public function update(Request $request, Student $student): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
+        }
+
+        // WBL coordinators can only update students from their programme
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter && $student->programme !== $programmeFilter) {
+            abort(403, 'You can only manage students from your programme.');
         }
 
         $validated = $request->validate([
@@ -123,7 +157,7 @@ class LiStudentAssignmentController extends Controller
      */
     public function bulkUpdate(Request $request): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -133,6 +167,13 @@ class LiStudentAssignmentController extends Controller
             'bulk_at_id' => ['required', 'exists:users,id'],
         ]);
 
+        // WBL coordinators can only update students from their programme
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        $query = Student::whereIn('id', $validated['student_ids']);
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
+
         // Verify lecturer role
         $at = User::findOrFail($validated['bulk_at_id']);
         if (! $at->hasRole('lecturer') && $at->role !== 'lecturer') {
@@ -140,7 +181,7 @@ class LiStudentAssignmentController extends Controller
                 ->with('error', 'Selected user must be a lecturer.');
         }
 
-        $count = Student::whereIn('id', $validated['student_ids'])->update(['at_id' => $validated['bulk_at_id']]);
+        $count = $query->update(['at_id' => $validated['bulk_at_id']]);
 
         return redirect()->route('academic.li.assign-students.index', $request->query())
             ->with('success', "Supervisor LI assigned to {$count} student(s).");
@@ -151,8 +192,14 @@ class LiStudentAssignmentController extends Controller
      */
     public function clearAssignment(Request $request, Student $student): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
+        }
+
+        // WBL coordinators can only clear assignments for students from their programme
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter && $student->programme !== $programmeFilter) {
+            abort(403, 'You can only manage students from your programme.');
         }
 
         $student->update(['at_id' => null]);
@@ -166,13 +213,19 @@ class LiStudentAssignmentController extends Controller
      */
     public function export(Request $request)
     {
-        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator()) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->isLiCoordinator() && ! auth()->user()->isWblCoordinator()) {
             abort(403, 'Unauthorized access.');
         }
 
-        $students = Student::with(['group', 'academicTutor', 'industryCoach.company'])
-            ->orderBy('name')
-            ->get();
+        $query = Student::with(['group', 'academicTutor', 'industryCoach.company']);
+
+        // Filter by programme for WBL coordinators
+        $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+        if ($programmeFilter) {
+            $query->where('programme', $programmeFilter);
+        }
+
+        $students = $query->orderBy('name')->get();
 
         // Return as CSV download
         $headers = [

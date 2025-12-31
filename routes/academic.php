@@ -557,8 +557,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Industrial Training (LI) Module Routes
     Route::prefix('academic/li')->name('academic.li.')->group(function () {
-        // Assessments (Admin and LI Coordinator)
-        Route::middleware('role:admin,li_coordinator')->group(function () {
+        // Assessments (Admin, LI Coordinator, and WBL Coordinators)
+        Route::middleware('role:admin,li_coordinator,bta_wbl_coordinator,btd_wbl_coordinator,btg_wbl_coordinator')->group(function () {
             Route::get('assessments', function () {
                 return app(AssessmentController::class)->index(request(), 'LI');
             })->name('assessments.index');
@@ -614,8 +614,8 @@ Route::middleware(['auth'])->group(function () {
             });
         });
 
-        // CLO-PLO Analysis (Admin, Coordinator, Lecturer, LI Coordinator)
-        Route::middleware('role:admin,coordinator,lecturer,li_coordinator')->group(function () {
+        // CLO-PLO Analysis (Admin, Coordinator, Lecturer, LI Coordinator, WBL Coordinators)
+        Route::middleware('role:admin,coordinator,lecturer,li_coordinator,bta_wbl_coordinator,btd_wbl_coordinator,btg_wbl_coordinator')->group(function () {
             Route::get('clo-plo', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'index'])->name('clo-plo.index');
             Route::post('clo-plo', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'store'])->name('clo-plo.store');
             Route::post('clo-plo/update-count', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'updateCount'])->name('clo-plo.update-count');
@@ -623,29 +623,29 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('clo-plo/{cloPloMapping}', [\App\Http\Controllers\Academic\LI\LiCloPloController::class, 'destroy'])->name('clo-plo.destroy');
         });
 
-        // Supervisor Evaluation (Admin, Supervisor LI, and LI Coordinator)
-        Route::middleware('role:admin,supervisor_li,li_coordinator')->group(function () {
+        // Supervisor Evaluation (Admin, Supervisor LI, LI Coordinator, WBL Coordinators)
+        Route::middleware('role:admin,supervisor_li,li_coordinator,bta_wbl_coordinator,btd_wbl_coordinator,btg_wbl_coordinator')->group(function () {
             Route::get('lecturer', [LiSupervisorEvaluationController::class, 'index'])->name('lecturer.index');
             Route::get('lecturer/{student}', [LiSupervisorEvaluationController::class, 'show'])->name('lecturer.show');
             Route::post('lecturer/{student}', [LiSupervisorEvaluationController::class, 'store'])->name('lecturer.store');
         });
 
-        // IC Evaluation (Admin, Industry Coach, and LI Coordinator)
-        Route::middleware('role:admin,industry,li_coordinator')->group(function () {
+        // IC Evaluation (Admin, Industry Coach, LI Coordinator, WBL Coordinators)
+        Route::middleware('role:admin,industry,li_coordinator,bta_wbl_coordinator,btd_wbl_coordinator,btg_wbl_coordinator')->group(function () {
             Route::get('ic', [LiIcEvaluationController::class, 'index'])->name('ic.index');
             Route::get('ic/{student}', [LiIcEvaluationController::class, 'show'])->name('ic.show');
             Route::post('ic/{student}', [LiIcEvaluationController::class, 'store'])->name('ic.store');
         });
 
-        // Logbook Evaluation (Admin, Industry Coach, and LI Coordinator)
-        Route::middleware('role:admin,industry,li_coordinator')->prefix('logbook')->name('logbook.')->group(function () {
+        // Logbook Evaluation (Admin, Industry Coach, LI Coordinator, WBL Coordinators)
+        Route::middleware('role:admin,industry,li_coordinator,bta_wbl_coordinator,btd_wbl_coordinator,btg_wbl_coordinator')->prefix('logbook')->name('logbook.')->group(function () {
             Route::get('/', [LiLogbookController::class, 'index'])->name('index');
             Route::get('/{student}', [LiLogbookController::class, 'show'])->name('show');
             Route::post('/{student}', [LiLogbookController::class, 'store'])->name('store');
         });
 
-        // Student Performance (Admin, Supervisor LI, IC, and LI Coordinator)
-        Route::middleware('role:admin,supervisor_li,industry,li_coordinator')->group(function () {
+        // Student Performance (Admin, Supervisor LI, IC, LI Coordinator, WBL Coordinators)
+        Route::middleware('role:admin,supervisor_li,industry,li_coordinator,bta_wbl_coordinator,btd_wbl_coordinator,btg_wbl_coordinator')->group(function () {
             Route::get('performance', [LiStudentPerformanceController::class, 'index'])->name('performance.index');
             Route::get('performance/export/excel', [LiStudentPerformanceController::class, 'exportExcel'])->name('performance.export.excel');
             Route::get('performance/export/pdf', [LiStudentPerformanceController::class, 'exportPdf'])->name('performance.export.pdf');

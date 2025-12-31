@@ -756,7 +756,7 @@
         @endif
 
         <!-- Industrial Training (LI) (Hidden for FYP, IP, OSH, and PPE Coordinators) -->
-        @if(($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin || $isLiCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator)
+        @if(($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin || $isLiCoordinator || $isWblCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator)
         <div class="mb-1">
             <button type="button"
                     @click="toggleMenu('li')"
@@ -789,51 +789,51 @@
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="ml-6 mt-1 space-y-1">
-                @if($isAdmin || $isLiCoordinator)
+                @if($isAdmin || $isLiCoordinator || $isWblCoordinator)
                 <a href="{{ route('academic.li.assign-students.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.assign-students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
-                <a href="{{ route('academic.li.assessments.index') }}" 
+                <a href="{{ route('academic.li.assessments.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assessments
                 </a>
-                <a href="{{ route('academic.li.schedule.index') }}" 
+                <a href="{{ route('academic.li.schedule.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.schedule.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assessment Schedule
                 </a>
                 @endif
-                @if($isAdmin || $isLiCoordinator || $isCoordinator || $isLecturer)
+                @if($isAdmin || $isLiCoordinator || $isCoordinator || $isLecturer || $isWblCoordinator)
                 <a href="{{ route('academic.li.clo-plo.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.clo-plo.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     CLO–PLO Analysis
                 </a>
                 @endif
-                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isAdmin || $isLiCoordinator)
+                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isAdmin || $isLiCoordinator || $isWblCoordinator)
                 <a href="{{ route('academic.li.lecturer.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.lecturer.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Supervisor Evaluation
                 </a>
                 @endif
-                @if($isIc || $isAdmin || $isLiCoordinator)
+                @if($isIc || $isAdmin || $isLiCoordinator || $isWblCoordinator)
                 <a href="{{ route('academic.li.ic.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.ic.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     IC Evaluation
                 </a>
                 @endif
-                @if($isAdmin || $isLiCoordinator)
+                @if($isAdmin || $isLiCoordinator || $isWblCoordinator)
                 <a href="{{ route('academic.li.progress.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.progress.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Evaluation Progress
                 </a>
                 @endif
-                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin || $isLiCoordinator)
+                @if($isSupervisorLi || ($isLecturer && $lecturerIsSupervisorLi) || $isIc || $isAdmin || $isLiCoordinator || $isWblCoordinator)
                 <a href="{{ route('academic.li.performance.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.performance.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Student Performance
                 </a>
                 @endif
-                @if($isAdmin || $isLiCoordinator)
+                @if($isAdmin || $isLiCoordinator || $isWblCoordinator)
                 <a href="{{ route('academic.li.moderation.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.moderation.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Moderation
