@@ -102,9 +102,16 @@
                                 $tracking = $student->placementTracking;
                             @endphp
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $student->name }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ $student->matric_no }}</div>
+                                    @if($tracking && $tracking->companyApplications->where('interviewed', true)->count() > 0)
+                                        <div class="mt-1">
+                                            @foreach($tracking->companyApplications->where('interviewed', true) as $application)
+                                                <div class="text-xs text-gray-400 dark:text-gray-500">• {{ $application->company_name }}</div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($tracking)

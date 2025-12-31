@@ -242,7 +242,7 @@ class StudentPlacementController extends Controller
 
         // Get all students in this group with their placement tracking
         $students = Student::where('group_id', $group->id)
-            ->with(['placementTracking.updatedByUser'])
+            ->with(['placementTracking.updatedByUser', 'placementTracking.companyApplications'])
             ->orderBy('name')
             ->get();
 
