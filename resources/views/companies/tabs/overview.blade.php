@@ -402,14 +402,14 @@
     </div>
     @endif
 
-    <!-- Industry Coaches & Supervised Students -->
+    <!-- Industry Coaches Information -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 bg-gradient-to-r from-[#003A6C] to-[#0084C5]">
             <h3 class="text-lg font-bold text-white flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
-                Industry Coaches & Supervised Students
+                Industry Coaches Information
                 <span class="ml-2 px-2 py-0.5 text-xs font-semibold bg-white/20 rounded-full">
                     {{ $company->industryCoaches->count() }} IC{{ $company->industryCoaches->count() > 1 ? 's' : '' }}
                 </span>
@@ -417,114 +417,74 @@
         </div>
         <div class="p-6">
             @if($company->industryCoaches->count() > 0)
-            <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($company->industryCoaches as $ic)
-                <div class="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-700/50 dark:to-[#0084C5]/10 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-                    <!-- IC Header -->
-                    <div class="px-5 py-4 bg-white/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-600">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <!-- IC Avatar -->
-                                <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#0084C5] to-[#003A6C] rounded-full flex items-center justify-center shadow-lg">
-                                    <span class="text-white font-bold text-lg">
-                                        {{ strtoupper(substr($ic->name, 0, 2)) }}
-                                    </span>
-                                </div>
-                                <!-- IC Info -->
-                                <div>
-                                    <h4 class="text-lg font-bold text-gray-900 dark:text-white">{{ $ic->name }}</h4>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-[#0084C5]/10 text-[#0084C5] dark:bg-[#0084C5]/30 dark:text-[#00AEEF]">
-                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                            </svg>
-                                            Industry Coach
-                                        </span>
-                                        @if($ic->email)
-                                        <a href="mailto:{{ $ic->email }}" class="text-xs text-gray-600 dark:text-gray-400 hover:text-[#0084C5] dark:hover:text-[#00AEEF] transition-colors inline-flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                            </svg>
-                                            {{ $ic->email }}
-                                        </a>
-                                        @endif
-                                    </div>
-                                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden hover:shadow-md transition-shadow">
+                    <!-- IC Card -->
+                    <div class="p-5">
+                        <div class="flex items-start gap-4">
+                            <!-- IC Avatar -->
+                            <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#0084C5] to-[#003A6C] rounded-full flex items-center justify-center shadow-lg">
+                                <span class="text-white font-bold text-lg">
+                                    {{ strtoupper(substr($ic->name, 0, 2)) }}
+                                </span>
                             </div>
-                            <!-- Student Count Badge -->
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-[#0084C5] dark:text-[#00AEEF]">
-                                    {{ $ic->assignedStudents->count() }}
-                                </div>
-                                <div class="text-xs text-gray-600 dark:text-gray-400">
-                                    Student{{ $ic->assignedStudents->count() !== 1 ? 's' : '' }}
-                                </div>
+                            <!-- IC Info -->
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-base font-bold text-gray-900 dark:text-white truncate">{{ $ic->name }}</h4>
+                                @if($ic->position)
+                                <span class="inline-flex items-center mt-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#0084C5]/10 text-[#0084C5] dark:bg-[#0084C5]/30 dark:text-[#00AEEF]">
+                                    {{ $ic->position }}
+                                </span>
+                                @else
+                                <span class="inline-flex items-center mt-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#0084C5]/10 text-[#0084C5] dark:bg-[#0084C5]/30 dark:text-[#00AEEF]">
+                                    Industry Coach
+                                </span>
+                                @endif
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Supervised Students List -->
-                    @if($ic->assignedStudents->count() > 0)
-                    <div class="p-5">
-                        <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            Supervised Students ({{ $ic->assignedStudents->count() }})
-                        </h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            @foreach($ic->assignedStudents as $student)
-                            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600 hover:shadow-md hover:border-[#0084C5] dark:hover:border-[#00AEEF] transition-all group">
-                                <div class="flex items-start gap-3">
-                                    <!-- Student Avatar -->
-                                    <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-[#00AEEF] to-[#0084C5] rounded-full flex items-center justify-center">
-                                        <span class="text-white font-semibold text-xs">
-                                            {{ strtoupper(substr($student->name, 0, 2)) }}
-                                        </span>
-                                    </div>
-                                    <!-- Student Info -->
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-semibold text-sm text-gray-900 dark:text-white truncate group-hover:text-[#0084C5] dark:group-hover:text-[#00AEEF] transition-colors">
-                                            {{ $student->name }}
-                                        </p>
-                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                                            {{ $student->matric_no }}
-                                        </p>
-                                        @if($student->group)
-                                        <span class="inline-flex items-center mt-1.5 px-2 py-0.5 rounded text-xs font-medium bg-[#003A6C]/10 text-[#003A6C] dark:bg-[#003A6C]/30 dark:text-[#0084C5]">
-                                            {{ $student->group->name }}
-                                        </span>
-                                        @endif
-                                        @if($student->programme)
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate" title="{{ $student->programme }}">
-                                            {{ Str::limit($student->programme, 30) }}
-                                        </p>
-                                        @endif
-                                    </div>
+                        <!-- Contact Details -->
+                        <div class="mt-4 space-y-3">
+                            @if($ic->email)
+                            <div class="flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800 rounded-lg">
+                                <div class="flex-shrink-0 w-8 h-8 bg-[#0084C5]/10 dark:bg-[#0084C5]/30 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
                                 </div>
-                                <!-- View Student Link -->
-                                <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                                    <a href="{{ route('admin.students.show', $student->id) }}"
-                                       class="text-xs text-[#0084C5] dark:text-[#00AEEF] hover:text-[#003A6C] dark:hover:text-[#0084C5] font-medium inline-flex items-center gap-1 transition-colors">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                        View Details
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Email</p>
+                                    <a href="mailto:{{ $ic->email }}" class="text-sm text-[#0084C5] hover:text-[#003A6C] dark:hover:text-[#00AEEF] font-medium truncate block">
+                                        {{ $ic->email }}
                                     </a>
                                 </div>
                             </div>
-                            @endforeach
+                            @endif
+
+                            @if($ic->phone)
+                            <div class="flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800 rounded-lg">
+                                <div class="flex-shrink-0 w-8 h-8 bg-[#00AEEF]/10 dark:bg-[#00AEEF]/30 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Phone</p>
+                                    <a href="tel:{{ $ic->phone }}" class="text-sm text-[#0084C5] hover:text-[#003A6C] dark:hover:text-[#00AEEF] font-medium">
+                                        {{ $ic->phone }}
+                                    </a>
+                                </div>
+                            </div>
+                            @endif
+
+                            @if(!$ic->email && !$ic->phone)
+                            <div class="text-center py-2 text-sm text-gray-400 dark:text-gray-500">
+                                No contact information available
+                            </div>
+                            @endif
                         </div>
                     </div>
-                    @else
-                    <div class="p-5 text-center text-sm text-gray-500 dark:text-gray-400">
-                        <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        No students assigned to this Industry Coach yet.
-                    </div>
-                    @endif
                 </div>
                 @endforeach
             </div>
