@@ -248,7 +248,7 @@ class CompanyController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'industry_type' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'string', 'max:255'],
 
             // Agreement fields
             'agreement_type' => ['required', 'in:MoU,MoA,LOI'],
@@ -276,6 +276,11 @@ class CompanyController extends Controller
         if (isset($validated['address']) && $validated['address']) {
             $validated['address'] = preg_replace('/\r\n|\r|\n/', ', ', trim($validated['address']));
             $validated['address'] = preg_replace('/,\s*,/', ',', $validated['address']); // Remove double commas
+        }
+
+        // Auto-prepend https:// to website if provided
+        if (! empty($validated['website']) && ! preg_match('/^https?:\/\//i', $validated['website'])) {
+            $validated['website'] = 'https://' . $validated['website'];
         }
 
         // Start database transaction for atomic creation
@@ -394,7 +399,7 @@ class CompanyController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'industry_type' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Handle position_other field
@@ -411,6 +416,11 @@ class CompanyController extends Controller
         if (isset($validated['address']) && $validated['address']) {
             $validated['address'] = preg_replace('/\r\n|\r|\n/', ', ', trim($validated['address']));
             $validated['address'] = preg_replace('/,\s*,/', ',', $validated['address']); // Remove double commas
+        }
+
+        // Auto-prepend https:// to website if provided
+        if (! empty($validated['website']) && ! preg_match('/^https?:\/\//i', $validated['website'])) {
+            $validated['website'] = 'https://' . $validated['website'];
         }
 
         $company->update($validated);

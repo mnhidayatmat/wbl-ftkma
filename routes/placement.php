@@ -60,4 +60,11 @@ Route::middleware('auth')->prefix('student/placement')->name('student.placement.
     Route::get('view-proof', [StudentPlacementController::class, 'studentViewProof'])->name('proof.view');
     Route::get('download-sal', [StudentPlacementController::class, 'studentDownloadSal'])->name('download-sal');
     Route::get('download-scl', [StudentPlacementController::class, 'studentDownloadScl'])->name('download-scl');
+
+    // Offer letter upload and view (ACCEPTED stage)
+    Route::post('offer-letter/upload', [StudentPlacementController::class, 'uploadOfferLetter'])->name('offer-letter.upload');
+    Route::get('offer-letter/view', [StudentPlacementController::class, 'viewOfferLetter'])->name('offer-letter.view');
+
+    // Company details (ACCEPTED stage)
+    Route::post('company-details', [StudentPlacementController::class, 'saveCompanyDetails'])->name('company-details.save');
 });

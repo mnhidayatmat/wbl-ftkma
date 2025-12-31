@@ -782,20 +782,104 @@ class StudentPlacementController extends Controller
      */
     private function generateSclPdf(Student $student)
     {
+        // Get template from database
+        $template = DocumentTemplate::getSclTemplate();
+
+        // Use Word template if uploaded, otherwise fall back to PDF template
+        if ($template->word_template_path && Storage::disk('public')->exists($template->word_template_path)) {
+            return $this->generateSclFromWordTemplate($student, $template);
+        }
+
+        // Default: use PDF template
+        return $this->generateSclFromPdfTemplate($student, $template);
+    }
+
+    /**
+     * Generate SCL from PDF template (Blade view).
+     */
+    private function generateSclFromPdfTemplate(Student $student, DocumentTemplate $template)
+    {
         $tracking = $student->placementTracking;
         $group = $student->group;
+
+        // Get company from student's accepted placement
+        $company = $student->company;
+
+        // Get supervisors
+        $academicTutor = $student->academicTutor;
+        $industryCoach = $student->industryCoach;
+
+        // Get dates
+        $groupStartDate = $group?->start_date ? \Carbon\Carbon::parse($group->start_date)->format('d F Y') : '';
+        $groupEndDate = $group?->end_date ? \Carbon\Carbon::parse($group->end_date)->format('d F Y') : '';
+        $acceptedDate = $tracking?->accepted_at ? \Carbon\Carbon::parse($tracking->accepted_at)->format('d F Y') : '';
+
+        // Get SCL settings from template
+        $sclReleaseDate = isset($template->settings['scl_release_date'])
+            ? \Carbon\Carbon::parse($template->settings['scl_release_date'])->format('d F Y')
+            : now()->format('d F Y');
+        $sclReferenceNumber = $template->settings['scl_reference_number'] ?? '';
+        $directorName = $template->settings['scl_director_name'] ?? '';
+
+        // Get director signature path
+        $directorSignaturePath = null;
+        if (isset($template->settings['scl_director_signature_path'])) {
+            $directorSignaturePath = Storage::disk('public')->path($template->settings['scl_director_signature_path']);
+        }
+
+        // Get programme short code
+        $studentProgrammeShort = Student::getProgrammeShortCode($student->programme);
 
         $pdf = Pdf::loadView('placement.pdf.scl', [
             'student' => $student,
             'tracking' => $tracking,
             'group' => $group,
+            'template' => $template,
+            'company' => $company,
+            'academicTutor' => $academicTutor,
+            'industryCoach' => $industryCoach,
+            'groupStartDate' => $groupStartDate,
+            'groupEndDate' => $groupEndDate,
+            'acceptedDate' => $acceptedDate,
+            'sclReleaseDate' => $sclReleaseDate,
+            'sclReferenceNumber' => $sclReferenceNumber,
+            'directorName' => $directorName,
+            'directorSignaturePath' => $directorSignaturePath,
+            'studentProgrammeShort' => $studentProgrammeShort,
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait')
-            ->setOption('margin-top', 25)
-            ->setOption('margin-bottom', 25)
-            ->setOption('margin-left', 25)
-            ->setOption('margin-right', 25)
+            ->setOption('margin-top', $template->settings['margin_top'] ?? 25)
+            ->setOption('margin-bottom', $template->settings['margin_bottom'] ?? 25)
+            ->setOption('margin-left', $template->settings['margin_left'] ?? 25)
+            ->setOption('margin-right', $template->settings['margin_right'] ?? 25)
             ->setOption('enable-local-file-access', true);
+
+        return $pdf;
+    }
+
+    /**
+     * Generate SCL from Word template.
+     */
+    private function generateSclFromWordTemplate(Student $student, DocumentTemplate $template)
+    {
+        // Generate Word document
+        $wordPath = $this->generateSclWord($student);
+
+        // Convert to PDF using LibreOffice
+        $pdfPath = $this->convertWordToPdf($wordPath);
+
+        // Clean up Word file
+        if (file_exists($wordPath)) {
+            unlink($wordPath);
+        }
+
+        // Load and return PDF
+        $pdf = Pdf::loadFile($pdfPath);
+
+        // Clean up temp PDF after loading
+        if (file_exists($pdfPath)) {
+            unlink($pdfPath);
+        }
 
         return $pdf;
     }
@@ -902,6 +986,117 @@ class StudentPlacementController extends Controller
         }
 
         $wordPath = $tempDir.'/SAL_'.$student->id.'_'.time().'.docx';
+        $templateProcessor->saveAs($wordPath);
+
+        return $wordPath;
+    }
+
+    /**
+     * Generate SCL Word document (without PDF conversion).
+     */
+    private function generateSclWord(Student $student): string
+    {
+        // Get template from database
+        $template = DocumentTemplate::getSclTemplate();
+
+        // Check if Word template exists
+        if (! $template->word_template_path || ! Storage::disk('public')->exists($template->word_template_path)) {
+            abort(404, 'SCL Word template not found. Please contact administrator.');
+        }
+
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Get tracking and dates
+        $tracking = $student->placementTracking;
+        $group = $student->group;
+        $groupStartDate = $group?->start_date;
+        $groupEndDate = $group?->end_date;
+        $acceptedDate = $tracking?->accepted_at;
+
+        // Get SCL settings from template
+        $sclReleaseDate = $template->settings['scl_release_date'] ?? now()->format('Y-m-d');
+        $sclReferenceNumber = $template->settings['scl_reference_number'] ?? '';
+
+        // Get supervisors
+        $academicTutor = $student->academicTutor;
+        $industryCoach = $student->industryCoach;
+
+        // Get company
+        $company = $student->company;
+
+        // Build variables array
+        $variables = [
+            // Student Info
+            'student_name' => $student->name ?? $student->user?->name ?? '',
+            'student_matric' => $student->matric_no ?? '',
+            'student_ic' => $student->ic_no ?? '',
+            'student_programme' => $student->programme ?? '',
+            'student_programme_short' => Student::getProgrammeShortCode($student->programme),
+            // Company Info
+            'company_name' => $company?->company_name ?? '',
+            'company_address' => $company?->address ?? '',
+            'hr_name' => $company?->pic_name ?? '',
+            'hr_position' => $company?->position ?? '',
+            'company_email' => $company?->email ?? '',
+            'company_phone' => $company?->phone ?? '',
+            // Dates
+            'group_start_date' => $groupStartDate ? \Carbon\Carbon::parse($groupStartDate)->format('d F Y') : '',
+            'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
+            'accepted_date' => $acceptedDate ? \Carbon\Carbon::parse($acceptedDate)->format('d F Y') : '',
+            'current_date' => now()->format('d F Y'),
+            'scl_release_date' => $sclReleaseDate ? \Carbon\Carbon::parse($sclReleaseDate)->format('d F Y') : '',
+            'scl_reference_number' => $sclReferenceNumber,
+            // Supervisors
+            'academic_tutor_name' => $academicTutor?->name ?? '',
+            'academic_tutor_email' => $academicTutor?->email ?? '',
+            'academic_tutor_phone' => $academicTutor?->phone ?? '',
+            'industry_coach_name' => $industryCoach?->name ?? '',
+            'industry_coach_email' => $industryCoach?->email ?? '',
+            'industry_coach_phone' => $industryCoach?->phone ?? '',
+            // Director
+            'director_name' => $template->settings['scl_director_name'] ?? '',
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions (with :upper suffix)
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Set director signature image if exists
+        if (isset($template->settings['scl_director_signature_path'])) {
+            $signaturePath = Storage::disk('public')->path($template->settings['scl_director_signature_path']);
+            if (file_exists($signaturePath)) {
+                try {
+                    $templateProcessor->setImageValue('director_signature', [
+                        'path' => $signaturePath,
+                        'width' => 150,
+                        'height' => 50,
+                        'ratio' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    // If image replacement fails, just remove the placeholder
+                    $templateProcessor->setValue('director_signature', '');
+                }
+            } else {
+                $templateProcessor->setValue('director_signature', '');
+            }
+        } else {
+            $templateProcessor->setValue('director_signature', '');
+        }
+
+        // Save Word document to temp file
+        $tempDir = storage_path('app/temp');
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $wordPath = $tempDir.'/SCL_'.$student->id.'_'.time().'.docx';
         $templateProcessor->saveAs($wordPath);
 
         return $wordPath;
@@ -1823,6 +2018,195 @@ class StudentPlacementController extends Controller
             'Content-Type' => $mimeType,
             'Content-Disposition' => 'inline; filename="'.$fileName.'"',
         ]);
+    }
+
+    /**
+     * Upload offer letter (Student - ACCEPTED stage).
+     */
+    public function uploadOfferLetter(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access. This page is for students only.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking) {
+            abort(404, 'Placement tracking not found.');
+        }
+
+        // Only allow if current status is ACCEPTED
+        if ($tracking->status !== 'ACCEPTED') {
+            return redirect()->back()->with('error', 'You can only upload offer letter when your status is "Accepted".');
+        }
+
+        $validated = $request->validate([
+            'offer_letter' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'], // 10MB max
+        ]);
+
+        // Delete old offer letter if exists
+        if ($tracking->offer_letter_path && Storage::exists($tracking->offer_letter_path)) {
+            Storage::delete($tracking->offer_letter_path);
+        }
+
+        // Store new offer letter
+        $fileName = 'offer_letter_'.$student->matric_no.'_'.time().'.'.$validated['offer_letter']->getClientOriginalExtension();
+        $filePath = $validated['offer_letter']->storeAs('placement/offer-letters', $fileName);
+
+        // Update tracking
+        $tracking->update([
+            'offer_letter_path' => $filePath,
+            'updated_by' => auth()->id(),
+        ]);
+
+        Log::info('Offer Letter Uploaded by Student', [
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'uploaded_by' => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', 'Offer letter uploaded successfully!');
+    }
+
+    /**
+     * View offer letter file (Student viewing their own offer letter).
+     */
+    public function viewOfferLetter()
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access. This page is for students only.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking || ! $tracking->offer_letter_path) {
+            abort(404, 'Offer letter not found.');
+        }
+
+        // Check if file exists
+        if (! Storage::exists($tracking->offer_letter_path)) {
+            abort(404, 'Offer letter file not found.');
+        }
+
+        // Get file mime type
+        $mimeType = Storage::mimeType($tracking->offer_letter_path);
+        $fileName = basename($tracking->offer_letter_path);
+
+        // Return file response
+        return Storage::response($tracking->offer_letter_path, $fileName, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="'.$fileName.'"',
+        ]);
+    }
+
+    /**
+     * Save company details (Student - ACCEPTED stage).
+     */
+    public function saveCompanyDetails(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access. This page is for students only.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking) {
+            abort(404, 'Placement tracking not found.');
+        }
+
+        // Only allow if current status is ACCEPTED
+        if ($tracking->status !== 'ACCEPTED') {
+            return redirect()->back()->with('error', 'You can only update company details when your status is "Accepted".');
+        }
+
+        // Ensure student has a company linked
+        if (! $student->company_id) {
+            return redirect()->back()->with('error', 'No company linked to your account. Please contact administrator.');
+        }
+
+        $validated = $request->validate([
+            'category' => ['required', 'string', 'max:255'],
+            'category_other' => ['nullable', 'string', 'max:255'],
+            'pic_name' => ['required', 'string', 'max:255'],
+            'position' => ['required', 'string', 'max:255'],
+            'position_other' => ['nullable', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:50'],
+            'website' => ['nullable', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:1000'],
+            'ic_name' => ['required', 'string', 'max:255'],
+            'ic_phone' => ['required', 'string', 'max:50'],
+            'ic_email' => ['required', 'email', 'max:255'],
+            'ic_position' => ['required', 'string', 'max:255'],
+        ]);
+
+        // Handle "Other" selections
+        $category = $validated['category'];
+        if ($category === 'Other' && ! empty($validated['category_other'])) {
+            $category = $validated['category_other'];
+        }
+
+        $position = $validated['position'];
+        if ($position === 'Other' && ! empty($validated['position_other'])) {
+            $position = $validated['position_other'];
+        }
+
+        // Auto-prepend https:// to website if provided
+        $website = $validated['website'];
+        if ($website && ! preg_match('/^https?:\/\//i', $website)) {
+            $website = 'https://'.$website;
+        }
+
+        // Update company record
+        $company = Company::find($student->company_id);
+        if (! $company) {
+            return redirect()->back()->with('error', 'Company not found. Please contact administrator.');
+        }
+
+        $company->update([
+            'category' => $category,
+            'pic_name' => $validated['pic_name'],
+            'position' => $position,
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'website' => $website,
+            'address' => $validated['address'],
+            'ic_name' => $validated['ic_name'],
+            'ic_phone' => $validated['ic_phone'],
+            'ic_email' => $validated['ic_email'],
+            'ic_position' => $validated['ic_position'],
+        ]);
+
+        // Mark company details as completed
+        $tracking->update([
+            'company_details_completed' => true,
+            'updated_by' => auth()->id(),
+        ]);
+
+        Log::info('Company Details Updated by Student', [
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'company_id' => $company->id,
+            'company_name' => $company->company_name,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', 'Company details saved successfully! The company information has been added to the official database.');
     }
 
     /**

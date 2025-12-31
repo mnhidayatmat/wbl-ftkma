@@ -27,6 +27,10 @@ class Company extends Model
         'website',
         'staff_pic_name',
         'staff_pic_phone',
+        'ic_name',
+        'ic_phone',
+        'ic_email',
+        'ic_position',
     ];
 
     /**

@@ -123,15 +123,15 @@ class DocumentTemplateController extends Controller
         }
 
         // Store sal_release_date and sal_reference_number in settings
-        if ($request->has('sal_release_date')) {
+        if (array_key_exists('sal_release_date', $validated)) {
             $settings['sal_release_date'] = $validated['sal_release_date'];
         }
-        if ($request->has('sal_reference_number')) {
+        if (array_key_exists('sal_reference_number', $validated)) {
             $settings['sal_reference_number'] = $validated['sal_reference_number'];
         }
 
-        // Store director_name in settings
-        if ($request->has('director_name')) {
+        // Store director_name in settings - always update from form
+        if (array_key_exists('director_name', $validated)) {
             $settings['director_name'] = $validated['director_name'];
         }
 
@@ -748,6 +748,323 @@ class DocumentTemplateController extends Controller
             '${company_pic_position}' => 'Company PIC position',
             '${company_email}' => 'Company email',
             '${company_phone}' => 'Company phone',
+        ];
+    }
+
+    /**
+     * Update SCL template settings.
+     */
+    public function updateScl(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'scl_release_date' => ['nullable', 'date'],
+            'scl_reference_number' => ['nullable', 'string', 'max:255'],
+            'scl_director_name' => ['nullable', 'string', 'max:255'],
+            'scl_director_signature' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $template = DocumentTemplate::getSclTemplate();
+        $settings = $template->settings ?? [];
+
+        // Store SCL settings - always update from validated form data
+        if (array_key_exists('scl_release_date', $validated)) {
+            $settings['scl_release_date'] = $validated['scl_release_date'];
+        }
+        if (array_key_exists('scl_reference_number', $validated)) {
+            $settings['scl_reference_number'] = $validated['scl_reference_number'];
+        }
+        if (array_key_exists('scl_director_name', $validated)) {
+            $settings['scl_director_name'] = $validated['scl_director_name'];
+        }
+
+        // Handle director signature upload
+        if ($request->hasFile('scl_director_signature')) {
+            // Delete old signature if exists
+            if (isset($settings['scl_director_signature_path'])) {
+                Storage::disk('public')->delete($settings['scl_director_signature_path']);
+            }
+
+            // Store new signature
+            $signaturePath = $request->file('scl_director_signature')->store('document-templates/signatures', 'public');
+            $settings['scl_director_signature_path'] = $signaturePath;
+        }
+
+        $template->update([
+            'settings' => $settings,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.documents.scl')->with('success', 'SCL settings saved successfully.');
+    }
+
+    /**
+     * Delete SCL director signature.
+     */
+    public function deleteSclDirectorSignature(): RedirectResponse
+    {
+        $template = DocumentTemplate::getSclTemplate();
+        $settings = $template->settings ?? [];
+
+        if (isset($settings['scl_director_signature_path'])) {
+            Storage::disk('public')->delete($settings['scl_director_signature_path']);
+            unset($settings['scl_director_signature_path']);
+            $template->update([
+                'settings' => $settings,
+                'updated_by' => auth()->id(),
+            ]);
+        }
+
+        return redirect()->route('admin.documents.scl')->with('success', 'Director signature deleted successfully.');
+    }
+
+    /**
+     * Display Word template upload page for SCL.
+     */
+    public function wordTemplateScl(): View
+    {
+        $template = DocumentTemplate::getSclTemplate();
+        $variables = self::getSclWordTemplateVariables();
+
+        return view('admin.documents.scl-word-template', [
+            'template' => $template,
+            'variables' => $variables,
+        ]);
+    }
+
+    /**
+     * Upload Word template for SCL.
+     */
+    public function uploadSclWordTemplate(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'word_template' => ['required', 'file', 'mimes:docx', 'max:10240'],
+        ]);
+
+        $template = DocumentTemplate::getSclTemplate();
+
+        // Delete old template if exists
+        if ($template->word_template_path) {
+            Storage::disk('public')->delete($template->word_template_path);
+        }
+
+        // Store new template
+        $file = $request->file('word_template');
+        $originalName = $file->getClientOriginalName();
+        $path = $file->store('document-templates/scl', 'public');
+
+        $template->update([
+            'word_template_path' => $path,
+            'word_template_original_name' => $originalName,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.documents.scl.word-template')
+            ->with('success', 'Word template uploaded successfully.');
+    }
+
+    /**
+     * Delete Word template for SCL.
+     */
+    public function deleteSclWordTemplate(): RedirectResponse
+    {
+        $template = DocumentTemplate::getSclTemplate();
+
+        if ($template->word_template_path) {
+            Storage::disk('public')->delete($template->word_template_path);
+            $template->update([
+                'word_template_path' => null,
+                'word_template_original_name' => null,
+                'updated_by' => auth()->id(),
+            ]);
+        }
+
+        return redirect()->route('admin.documents.scl.word-template')
+            ->with('success', 'Word template deleted successfully.');
+    }
+
+    /**
+     * Preview SCL Word template with sample data.
+     */
+    public function previewSclWordTemplateDocx()
+    {
+        $template = DocumentTemplate::getSclTemplate();
+
+        if (! $template->word_template_path || ! Storage::disk('public')->exists($template->word_template_path)) {
+            return redirect()->route('admin.documents.scl.word-template')
+                ->with('error', 'No Word template uploaded. Please upload a template first.');
+        }
+
+        // Get sample student with confirmed placement
+        $student = Student::with(['user', 'group', 'company', 'academicTutor', 'industryCoach'])
+            ->whereHas('placementTracking', function ($q) {
+                $q->whereIn('status', ['CONFIRMED', 'SCL_RELEASED']);
+            })
+            ->first();
+
+        if (! $student) {
+            $student = Student::with(['user', 'group', 'company', 'academicTutor', 'industryCoach'])->first();
+        }
+
+        if (! $student) {
+            return redirect()->route('admin.documents.scl.word-template')
+                ->with('error', 'No student found for preview.');
+        }
+
+        // Generate preview Word document
+        $docxPath = $this->generateSclFromWordTemplate($student, $template);
+
+        // Return the Word document for download
+        return response()->download($docxPath, 'SCL_Preview.docx')->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Download SCL Word template.
+     */
+    public function downloadSclWordTemplate()
+    {
+        $template = DocumentTemplate::getSclTemplate();
+
+        if (! $template->word_template_path || ! Storage::disk('public')->exists($template->word_template_path)) {
+            return redirect()->route('admin.documents.scl.word-template')
+                ->with('error', 'No Word template uploaded.');
+        }
+
+        return Storage::disk('public')->download(
+            $template->word_template_path,
+            $template->word_template_original_name ?? 'SCL_Template.docx'
+        );
+    }
+
+    /**
+     * Generate SCL from Word template.
+     */
+    private function generateSclFromWordTemplate(Student $student, DocumentTemplate $template): string
+    {
+        $templatePath = Storage::disk('public')->path($template->word_template_path);
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        // Get dates
+        $groupStartDate = $student->group?->start_date;
+        $groupEndDate = $student->group?->end_date;
+        $acceptedDate = $student->placementTracking?->accepted_at;
+
+        // Get settings
+        $sclReleaseDate = $template->settings['scl_release_date'] ?? now()->format('Y-m-d');
+        $sclReferenceNumber = $template->settings['scl_reference_number'] ?? '';
+
+        // Build variables
+        $variables = [
+            // Student Info
+            'student_name' => $student->name ?? $student->user?->name ?? '',
+            'student_matric' => $student->matric_no ?? '',
+            'student_ic' => $student->ic_no ?? '',
+            'student_programme' => $student->programme ?? '',
+            'student_programme_short' => Student::getProgrammeShortCode($student->programme),
+            // Company Info
+            'company_name' => $student->company?->company_name ?? '',
+            'company_address' => $student->company?->address ?? '',
+            'hr_name' => $student->company?->pic_name ?? '',
+            'hr_position' => $student->company?->position ?? '',
+            'company_email' => $student->company?->email ?? '',
+            'company_phone' => $student->company?->phone ?? '',
+            // Dates
+            'group_start_date' => $groupStartDate ? \Carbon\Carbon::parse($groupStartDate)->format('d F Y') : '',
+            'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
+            'accepted_date' => $acceptedDate ? \Carbon\Carbon::parse($acceptedDate)->format('d F Y') : '',
+            'current_date' => now()->format('d F Y'),
+            'scl_release_date' => $sclReleaseDate ? \Carbon\Carbon::parse($sclReleaseDate)->format('d F Y') : '',
+            'scl_reference_number' => $sclReferenceNumber,
+            // Supervisors
+            'academic_tutor_name' => $student->academicTutor?->name ?? '',
+            'academic_tutor_email' => $student->academicTutor?->email ?? '',
+            'academic_tutor_phone' => $student->academicTutor?->phone ?? '',
+            'industry_coach_name' => $student->industryCoach?->name ?? '',
+            'industry_coach_email' => $student->industryCoach?->email ?? '',
+            'industry_coach_phone' => $student->industryCoach?->phone ?? '',
+            // Director
+            'director_name' => $template->settings['scl_director_name'] ?? '',
+        ];
+
+        // Set normal variables
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key, $value);
+        }
+
+        // Set uppercase versions
+        foreach ($variables as $key => $value) {
+            $templateProcessor->setValue($key.':upper', strtoupper($value));
+        }
+
+        // Set director signature image if exists
+        if (isset($template->settings['scl_director_signature_path'])) {
+            $signaturePath = Storage::disk('public')->path($template->settings['scl_director_signature_path']);
+            if (file_exists($signaturePath)) {
+                try {
+                    $templateProcessor->setImageValue('director_signature', [
+                        'path' => $signaturePath,
+                        'width' => 150,
+                        'height' => 50,
+                        'ratio' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    $templateProcessor->setValue('director_signature', '');
+                }
+            } else {
+                $templateProcessor->setValue('director_signature', '');
+            }
+        } else {
+            $templateProcessor->setValue('director_signature', '');
+        }
+
+        // Save to temp file
+        $outputPath = storage_path('app/temp/SCL_'.time().'.docx');
+
+        // Ensure temp directory exists
+        if (! file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $templateProcessor->saveAs($outputPath);
+
+        return $outputPath;
+    }
+
+    /**
+     * Get available SCL Word template variables formatted for display.
+     */
+    public static function getSclWordTemplateVariables(): array
+    {
+        return [
+            // Student Info
+            '${student_name}' => 'Student\'s full name',
+            '${student_matric}' => 'Student\'s matric number',
+            '${student_ic}' => 'Student\'s IC number',
+            '${student_programme}' => 'Student\'s programme',
+            '${student_programme_short}' => 'Programme short code (BTA/BTD/BTG)',
+            // Company Info
+            '${company_name}' => 'Company name (accepted offer)',
+            '${company_address}' => 'Company address',
+            '${hr_name}' => 'HR/PIC name',
+            '${hr_position}' => 'HR/PIC position',
+            '${company_email}' => 'Company email',
+            '${company_phone}' => 'Company phone',
+            // Dates
+            '${group_start_date}' => 'WBL start date',
+            '${group_end_date}' => 'WBL end date',
+            '${accepted_date}' => 'Offer accepted date',
+            '${current_date}' => 'Current date',
+            '${scl_release_date}' => 'SCL release/issue date',
+            '${scl_reference_number}' => 'SCL reference number',
+            // Supervisors
+            '${academic_tutor_name}' => 'Academic Tutor (AT) name',
+            '${academic_tutor_email}' => 'Academic Tutor email',
+            '${academic_tutor_phone}' => 'Academic Tutor phone',
+            '${industry_coach_name}' => 'Industry Coach (IC) name',
+            '${industry_coach_email}' => 'Industry Coach email',
+            '${industry_coach_phone}' => 'Industry Coach phone',
+            // Director
+            '${director_name}' => 'Director of UMPSA Career Centre',
+            '${director_signature}' => 'Director signature (image)',
         ];
     }
 }

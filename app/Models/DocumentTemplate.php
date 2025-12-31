@@ -181,15 +181,36 @@ Thank you for your cooperation.',
     public static function getSclVariables(): array
     {
         return [
+            // Auto-populated - Student Info
             '{{student_name}}' => 'Student\'s full name',
             '{{student_matric}}' => 'Student\'s matric number',
             '{{student_ic}}' => 'Student\'s IC number',
-            '{{company_name}}' => 'Company name',
+            '{{student_programme}}' => 'Student\'s programme',
+            '{{student_programme_short}}' => 'Programme short code (BTA/BTD/BTG)',
+            // Auto-populated - Company Info
+            '{{company_name}}' => 'Company name (accepted offer)',
             '{{company_address}}' => 'Company address',
-            '{{start_date}}' => 'Placement start date',
-            '{{end_date}}' => 'Placement end date',
-            '{{current_date}}' => 'Current date',
+            '{{hr_name}}' => 'HR/PIC name from company',
+            '{{hr_position}}' => 'HR/PIC position',
+            '{{company_email}}' => 'Company email',
+            '{{company_phone}}' => 'Company phone',
+            // Auto-populated - Dates
+            '{{group_start_date}}' => 'WBL start date',
+            '{{group_end_date}}' => 'WBL end date',
             '{{accepted_date}}' => 'Offer accepted date',
+            '{{current_date}}' => 'Current date',
+            // Auto-populated - Supervisors
+            '{{academic_tutor_name}}' => 'Academic Tutor (AT) name',
+            '{{academic_tutor_email}}' => 'Academic Tutor email',
+            '{{academic_tutor_phone}}' => 'Academic Tutor phone',
+            '{{industry_coach_name}}' => 'Industry Coach (IC) name',
+            '{{industry_coach_email}}' => 'Industry Coach email',
+            '{{industry_coach_phone}}' => 'Industry Coach phone',
+            // Manual Input
+            '{{scl_release_date}}' => 'SCL release/issue date',
+            '{{scl_reference_number}}' => 'SCL reference number',
+            '{{director_name}}' => 'Director of UMPSA Career Centre',
+            '{{director_signature}}' => 'Director signature (image)',
         ];
     }
 

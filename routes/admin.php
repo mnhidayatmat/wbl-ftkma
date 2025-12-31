@@ -147,7 +147,16 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
 
         // SCL Template
         Route::get('scl', [DocumentTemplateController::class, 'scl'])->name('scl');
+        Route::put('scl', [DocumentTemplateController::class, 'updateScl'])->name('scl.update');
         Route::get('scl/preview', [DocumentTemplateController::class, 'previewScl'])->name('scl.preview');
+        Route::delete('scl/director-signature', [DocumentTemplateController::class, 'deleteSclDirectorSignature'])->name('scl.director-signature.delete');
+
+        // SCL Word Template
+        Route::get('scl/word-template', [DocumentTemplateController::class, 'wordTemplateScl'])->name('scl.word-template');
+        Route::post('scl/word-template/upload', [DocumentTemplateController::class, 'uploadSclWordTemplate'])->name('scl.word-template.upload');
+        Route::delete('scl/word-template', [DocumentTemplateController::class, 'deleteSclWordTemplate'])->name('scl.word-template.delete');
+        Route::get('scl/word-template/preview-docx', [DocumentTemplateController::class, 'previewSclWordTemplateDocx'])->name('scl.word-template.preview-docx');
+        Route::get('scl/word-template/download', [DocumentTemplateController::class, 'downloadSclWordTemplate'])->name('scl.word-template.download');
 
         // MoU Template
         Route::get('mou', [DocumentTemplateController::class, 'mou'])->name('mou');

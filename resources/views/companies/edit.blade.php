@@ -61,11 +61,10 @@
                 <option value="HR" {{ old('position', $company->position) === 'HR' ? 'selected' : '' }}>HR</option>
                 <option value="Manager" {{ old('position', $company->position) === 'Manager' ? 'selected' : '' }}>Manager</option>
                 <option value="Director" {{ old('position', $company->position) === 'Director' ? 'selected' : '' }}>Director</option>
-                <option value="Supervisor" {{ old('position', $company->position) === 'Supervisor' ? 'selected' : '' }}>Supervisor</option>
-                <option value="Other" {{ old('position', $company->position) && !in_array(old('position', $company->position), ['HR', 'Manager', 'Director', 'Supervisor', '']) ? 'selected' : '' }}>Other</option>
+                <option value="Other" {{ old('position', $company->position) && !in_array(old('position', $company->position), ['HR', 'Manager', 'Director', '']) ? 'selected' : '' }}>Other</option>
             </select>
-            <div id="position_other_container" style="display: {{ old('position', $company->position) && !in_array(old('position', $company->position), ['HR', 'Manager', 'Director', 'Supervisor', '']) ? 'block' : 'none' }};" class="mt-2">
-                <input type="text" name="position_other" id="position_other" value="{{ old('position', $company->position) && !in_array(old('position', $company->position), ['HR', 'Manager', 'Director', 'Supervisor', '']) ? old('position', $company->position) : '' }}" placeholder="Specify position" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal">
+            <div id="position_other_container" style="display: {{ old('position', $company->position) && !in_array(old('position', $company->position), ['HR', 'Manager', 'Director', '']) ? 'block' : 'none' }};" class="mt-2">
+                <input type="text" name="position_other" id="position_other" value="{{ old('position', $company->position) && !in_array(old('position', $company->position), ['HR', 'Manager', 'Director', '']) ? old('position', $company->position) : '' }}" placeholder="Specify position" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal">
             </div>
             @error('position')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -98,7 +97,10 @@
 
         <div class="mb-4">
             <label for="website" class="block text-sm font-semibold text-umpsa-deep-blue dark:text-gray-300 mb-2">Website</label>
-            <input type="url" name="website" id="website" value="{{ old('website', $company->website) }}" placeholder="https://example.com" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal @error('website') border-red-500 @enderror">
+            <div class="flex">
+                <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 dark:bg-gray-600 dark:text-gray-300 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-md">https://</span>
+                <input type="text" name="website" id="website" value="{{ old('website', str_replace(['https://', 'http://'], '', $company->website ?? '')) }}" placeholder="www.example.com" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-r-md focus:outline-none focus:ring-2 focus:ring-umpsa-teal focus:border-umpsa-teal @error('website') border-red-500 @enderror">
+            </div>
             @error('website')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror

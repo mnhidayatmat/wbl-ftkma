@@ -29,6 +29,8 @@ class StudentPlacementTracking extends Model
         'scl_released_by',
         'scl_file_path',
         'confirmation_proof_path',
+        'offer_letter_path',
+        'company_details_completed',
         'notes',
         'updated_by',
         'companies_applied_count',
@@ -59,6 +61,7 @@ class StudentPlacementTracking extends Model
             'last_application_date' => 'date',
             'application_methods' => 'array',
             'companies_applied_count' => 'integer',
+            'company_details_completed' => 'boolean',
         ];
     }
 

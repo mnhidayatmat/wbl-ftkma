@@ -822,55 +822,253 @@
                         </form>
 
                     @elseif($tracking->status === 'ACCEPTED')
-                        {{-- Accepted - Waiting for SCL --}}
+                        {{-- Accepted - Complete Requirements --}}
+                        @php
+                            $acceptedCompany = $student->company;
+                            $hasOfferLetter = !empty($tracking->offer_letter_path);
+                            $hasCompanyDetails = $tracking->company_details_completed;
+                            $allRequirementsMet = $hasOfferLetter && $hasCompanyDetails;
+                        @endphp
+
                         <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border-l-4 border-green-500">
                             <p class="text-xs font-bold text-green-800 dark:text-green-200 mb-1">✅ Offer Accepted!</p>
-                            <p class="text-sm text-green-700 dark:text-green-300">Waiting for SCL release</p>
+                            <p class="text-sm text-green-700 dark:text-green-300">
+                                @if($acceptedCompany)
+                                    {{ $acceptedCompany->company_name }}
+                                @endif
+                            </p>
                         </div>
 
-                        @if($tracking->confirmation_proof_path)
+                        {{-- Requirements Checklist --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-200">Complete These Requirements</h4>
+                                <p class="text-xs text-blue-600 dark:text-blue-400">Required before SCL can be released</p>
+                            </div>
+                            <div class="p-4 space-y-3">
+                                <div class="flex items-center gap-3">
+                                    @if($hasOfferLetter)
+                                        <span class="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </span>
+                                    @else
+                                        <span class="flex-shrink-0 w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">1</span>
+                                    @endif
+                                    <span class="text-sm {{ $hasOfferLetter ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300' }}">Upload Offer Letter</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    @if($hasCompanyDetails)
+                                        <span class="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </span>
+                                    @else
+                                        <span class="flex-shrink-0 w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">2</span>
+                                    @endif
+                                    <span class="text-sm {{ $hasCompanyDetails ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300' }}">Complete Company Details</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Step 1: Upload Offer Letter --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border {{ $hasOfferLetter ? 'border-green-300 dark:border-green-700' : 'border-orange-300 dark:border-orange-700' }} overflow-hidden">
+                            <div class="{{ $hasOfferLetter ? 'bg-green-50 dark:bg-green-900/20' : 'bg-orange-50 dark:bg-orange-900/20' }} px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <h4 class="text-sm font-semibold {{ $hasOfferLetter ? 'text-green-800 dark:text-green-200' : 'text-orange-800 dark:text-orange-200' }}">
+                                    Step 1: Upload Offer Letter
+                                    @if($hasOfferLetter) ✓ @endif
+                                </h4>
+                            </div>
+                            <div class="p-4">
+                                @if($hasOfferLetter)
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span class="text-sm text-green-700 dark:text-green-400">Offer letter uploaded</span>
+                                        </div>
+                                        <a href="{{ route('student.placement.offer-letter.view') }}" target="_blank" class="text-xs text-blue-600 hover:underline">View</a>
+                                    </div>
+                                @else
+                                    <form action="{{ route('student.placement.offer-letter.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                                        @csrf
+                                        <div>
+                                            <input type="file" name="offer_letter" required accept=".pdf,.jpg,.jpeg,.png"
+                                                   class="w-full text-sm text-gray-500 dark:text-gray-400
+                                                          file:mr-2 file:py-2 file:px-3
+                                                          file:rounded-lg file:border-0
+                                                          file:text-sm file:font-semibold
+                                                          file:bg-orange-50 file:text-orange-700
+                                                          hover:file:bg-orange-100
+                                                          dark:file:bg-orange-900/30 dark:file:text-orange-300">
+                                        </div>
+                                        <button type="submit" class="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg">
+                                            📄 Upload Offer Letter
+                                        </button>
+                                        <p class="text-xs text-gray-500 text-center">PDF, JPG, PNG (max 10MB)</p>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Step 2: Company Details Form --}}
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border {{ $hasCompanyDetails ? 'border-green-300 dark:border-green-700' : 'border-orange-300 dark:border-orange-700' }} overflow-hidden">
+                            <div class="{{ $hasCompanyDetails ? 'bg-green-50 dark:bg-green-900/20' : 'bg-orange-50 dark:bg-orange-900/20' }} px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <h4 class="text-sm font-semibold {{ $hasCompanyDetails ? 'text-green-800 dark:text-green-200' : 'text-orange-800 dark:text-orange-200' }}">
+                                    Step 2: Company Details
+                                    @if($hasCompanyDetails) ✓ @endif
+                                </h4>
+                                <p class="text-xs {{ $hasCompanyDetails ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400' }}">This information will be added to the official company database</p>
+                            </div>
+                            <div class="p-4">
+                                <form action="{{ route('student.placement.company-details.save') }}" method="POST" class="space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
+                                        <input type="text" name="company_name" value="{{ old('company_name', $acceptedCompany->company_name ?? '') }}" readonly
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Industry Type <span class="text-red-500">*</span></label>
+                                        <select name="category" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500" onchange="handleCategoryChange(this)">
+                                            <option value="">Select Industry Type</option>
+                                            @foreach(['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage'] as $type)
+                                                <option value="{{ $type }}" {{ old('category', $acceptedCompany->category ?? '') === $type ? 'selected' : '' }}>{{ $type }}</option>
+                                            @endforeach
+                                            <option value="Other" {{ old('category', $acceptedCompany->category ?? '') && !in_array(old('category', $acceptedCompany->category ?? ''), ['Oil and Gas', 'Design', 'Automotive', 'Manufacturing', 'Construction', 'Information Technology', 'Telecommunications', 'Healthcare', 'Education', 'Finance', 'Retail', 'Food and Beverage', '']) ? 'selected' : '' }}>Other</option>
+                                        </select>
+                                        <div id="category_other_container" class="mt-2 hidden">
+                                            <input type="text" name="category_other" placeholder="Specify industry type"
+                                                   class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Person in Charge (PIC) Name <span class="text-red-500">*</span></label>
+                                        <input type="text" name="pic_name" value="{{ old('pic_name', $acceptedCompany->pic_name ?? '') }}" required placeholder="e.g., Ahmad bin Abdullah"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">⚠️ This is your HR contact, not your Industry Coach (IC)</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Position <span class="text-red-500">*</span></label>
+                                        <select name="position" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500" onchange="handlePositionChange(this)">
+                                            <option value="">Select Position</option>
+                                            @foreach(['HR', 'Manager', 'Director'] as $pos)
+                                                <option value="{{ $pos }}" {{ old('position', $acceptedCompany->position ?? '') === $pos ? 'selected' : '' }}>{{ $pos }}</option>
+                                            @endforeach
+                                            <option value="Other" {{ old('position', $acceptedCompany->position ?? '') && !in_array(old('position', $acceptedCompany->position ?? ''), ['HR', 'Manager', 'Director', '']) ? 'selected' : '' }}>Other</option>
+                                        </select>
+                                        <div id="position_other_container" class="mt-2 hidden">
+                                            <input type="text" name="position_other" placeholder="Specify position"
+                                                   class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Email <span class="text-red-500">*</span></label>
+                                        <input type="email" name="email" value="{{ old('email', $acceptedCompany->email ?? '') }}" required placeholder="hr@company.com"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Phone <span class="text-red-500">*</span></label>
+                                        <input type="text" name="phone" value="{{ old('phone', $acceptedCompany->phone ?? '') }}" required placeholder="03-1234567 / 012-3456789"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Website</label>
+                                        <div class="flex">
+                                            <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 dark:bg-gray-600 dark:text-gray-300 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg">https://</span>
+                                            <input type="text" name="website" value="{{ old('website', str_replace(['https://', 'http://'], '', $acceptedCompany->website ?? '')) }}" placeholder="www.company.com"
+                                                   class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-r-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Company Address <span class="text-red-500">*</span></label>
+                                        <textarea name="address" rows="3" required placeholder="No. Street Name&#10;Postcode City&#10;State"
+                                                  class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400">{{ old('address', $acceptedCompany->address ?? '') }}</textarea>
+                                        <p class="text-xs text-gray-500 mt-1">This address will be used in official documents like SAL/SCL</p>
+                                    </div>
+
+                                    {{-- Industry Coach Section --}}
+                                    <div class="border-t border-gray-200 dark:border-gray-600 pt-4 mt-4">
+                                        <h5 class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Industry Coach (IC) Information</h5>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">The person who will supervise you during WBL</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Industry Coach Name <span class="text-red-500">*</span></label>
+                                        <input type="text" name="ic_name" value="{{ old('ic_name', $acceptedCompany->ic_name ?? '') }}" required placeholder="e.g., Encik Mohd Ali"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Industry Coach Phone <span class="text-red-500">*</span></label>
+                                        <input type="text" name="ic_phone" value="{{ old('ic_phone', $acceptedCompany->ic_phone ?? '') }}" required placeholder="012-3456789"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Industry Coach Email <span class="text-red-500">*</span></label>
+                                        <input type="email" name="ic_email" value="{{ old('ic_email', $acceptedCompany->ic_email ?? '') }}" required placeholder="ic@company.com"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Industry Coach Position <span class="text-red-500">*</span></label>
+                                        <input type="text" name="ic_position" value="{{ old('ic_position', $acceptedCompany->ic_position ?? '') }}" required placeholder="e.g., Senior Engineer, Supervisor"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <button type="submit" class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all text-sm">
+                                        💾 Save Company Details
+                                    </button>
+                                </form>
+
+                                <script>
+                                    function handleCategoryChange(select) {
+                                        const container = document.getElementById('category_other_container');
+                                        if (select.value === 'Other') {
+                                            container.classList.remove('hidden');
+                                        } else {
+                                            container.classList.add('hidden');
+                                        }
+                                    }
+                                    function handlePositionChange(select) {
+                                        const container = document.getElementById('position_other_container');
+                                        if (select.value === 'Other') {
+                                            container.classList.remove('hidden');
+                                        } else {
+                                            container.classList.add('hidden');
+                                        }
+                                    }
+                                </script>
+                            </div>
+                        </div>
+
+                        {{-- Status --}}
+                        @if($allRequirementsMet)
                             <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                                 <div class="flex items-start gap-2">
                                     <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     <div>
-                                        <p class="text-sm font-semibold text-green-800 dark:text-green-200">Proof Uploaded</p>
-                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">Acceptance proof submitted</p>
+                                        <p class="text-sm font-semibold text-green-800 dark:text-green-200">All Requirements Complete!</p>
+                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">Waiting for admin to release your SCL</p>
                                     </div>
                                 </div>
                             </div>
                         @else
-                            <div class="space-y-3">
-                                <form action="{{ route('student.placement.proof.upload') }}" method="POST" enctype="multipart/form-data" class="w-full space-y-2">
-                                    @csrf
-                                    <label class="block">
-                                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Select acceptance proof file</span>
-                                        <input type="file" name="proof_file" required accept=".pdf,.jpg,.jpeg,.png"
-                                               class="w-full text-sm text-gray-500 dark:text-gray-400
-                                                      file:mr-2 file:py-2 file:px-3
-                                                      file:rounded-lg file:border-0
-                                                      file:text-sm file:font-semibold
-                                                      file:bg-blue-50 file:text-blue-700
-                                                      hover:file:bg-blue-100
-                                                      dark:file:bg-blue-900/30 dark:file:text-blue-300">
-                                    </label>
-                                    <button type="submit"
-                                            class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-sm shadow-md">
-                                        📎 Upload Acceptance Proof
-                                    </button>
-                                </form>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Required for SCL processing (PDF, JPG, PNG)</p>
-                            </div>
-                        @endif
-
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                            <div class="flex items-start gap-2">
-                                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <div>
-                                    <p class="text-xs font-semibold text-blue-800 dark:text-blue-200">Waiting...</p>
-                                    <p class="text-xs text-blue-700 dark:text-blue-300">Admin will release your SCL soon</p>
+                            <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-200">Action Required</p>
+                                        <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">Please complete all requirements above for SCL processing</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
                         {{-- Go Back Button --}}
                         <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
