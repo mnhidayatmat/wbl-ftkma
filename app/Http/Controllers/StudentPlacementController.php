@@ -455,7 +455,7 @@ class StudentPlacementController extends Controller
         // Get all students with OFFER_RECEIVED status who haven't received SCL yet
         $students = Student::whereHas('placementTracking', function ($q) {
             $q->where('status', 'OFFER_RECEIVED')
-              ->whereNull('scl_file_path');
+                ->whereNull('scl_file_path');
         })
             ->with(['placementTracking', 'user', 'group', 'company', 'academicTutor', 'industryCoach'])
             ->get();
@@ -688,6 +688,14 @@ class StudentPlacementController extends Controller
         }
 
         return Storage::download($tracking->scl_file_path);
+    }
+
+    /**
+     * Generate SAL PDF for auto-release (public wrapper for other controllers).
+     */
+    public function generateSalPdfForAutoRelease(Student $student)
+    {
+        return $this->generateSalPdf($student);
     }
 
     /**
@@ -1555,12 +1563,12 @@ class StudentPlacementController extends Controller
                     CompanyAgreement::create([
                         'company_id' => $companyForAgreement->id,
                         'agreement_type' => 'MoA',
-                        'agreement_title' => 'Industrial Training Agreement - ' . $companyName,
+                        'agreement_title' => 'Industrial Training Agreement - '.$companyName,
                         'status' => 'Not Started',
                         'created_by' => auth()->id(),
                     ]);
 
-                    Log::info('Created CompanyAgreement for company: ' . $companyName . ' with status Not Started');
+                    Log::info('Created CompanyAgreement for company: '.$companyName.' with status Not Started');
                 }
 
                 // Verify all other offers have been declined
@@ -2631,5 +2639,165 @@ class StudentPlacementController extends Controller
             'FAILED' => 'Pending Review', // Failed, but can resubmit
             default => 'Not started Resume Preparation',
         };
+    }
+
+    /**
+     * Proceed to SCL Release - Student action when all requirements are met.
+     * If SCL was auto-released by admin, student can proceed directly to download.
+     */
+    public function proceedToSclRelease(): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking) {
+            return redirect()->back()->with('error', 'Placement tracking not found.');
+        }
+
+        // Check if SCL was already auto-released by admin
+        if ($tracking->scl_file_path) {
+            // SCL already exists (auto-released), just update status to SCL_RELEASED
+            if ($tracking->status !== 'SCL_RELEASED') {
+                $tracking->update([
+                    'status' => 'SCL_RELEASED',
+                    'scl_released_at' => $tracking->scl_released_at ?? now(),
+                    'updated_by' => auth()->id(),
+                ]);
+
+                Log::info('Student Proceeded to Download SCL (Auto-Released)', [
+                    'student_id' => $student->id,
+                    'student_name' => $student->name,
+                    'action_by' => auth()->id(),
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Your SCL is ready! You can now download it below.');
+        }
+
+        // No auto-released SCL, verify student is at ACCEPTED status
+        if ($tracking->status !== 'ACCEPTED') {
+            return redirect()->back()->with('error', 'You must be at Accepted stage to proceed to SCL Release.');
+        }
+
+        // Verify all requirements are met
+        $hasOfferLetter = ! empty($tracking->offer_letter_path);
+        $hasConfirmationProof = ! empty($tracking->confirmation_proof_path);
+        $hasCompanyDetails = $tracking->company_details_completed ?? false;
+
+        if (! $hasOfferLetter || ! $hasConfirmationProof || ! $hasCompanyDetails) {
+            return redirect()->back()->with('error', 'Please complete all requirements before proceeding to SCL Release.');
+        }
+
+        // Generate SCL PDF
+        $pdf = $this->generateSclPdf($student);
+        $fileName = 'SCL_'.$student->matric_no.'_'.now()->format('Y-m-d_His').'.pdf';
+        $filePath = 'placement/scl/'.$fileName;
+        Storage::put($filePath, $pdf->output());
+
+        // Update tracking to SCL_RELEASED
+        $tracking->update([
+            'status' => 'SCL_RELEASED',
+            'scl_released_at' => now(),
+            'scl_released_by' => auth()->id(),
+            'scl_file_path' => $filePath,
+            'updated_by' => auth()->id(),
+        ]);
+
+        Log::info('Student Proceeded to SCL Release', [
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'action_by' => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', 'Congratulations! Your SCL has been released. You can now download it and upload your medical checkup document.');
+    }
+
+    /**
+     * Upload medical checkup document.
+     */
+    public function uploadMedicalCheckup(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking) {
+            return redirect()->back()->with('error', 'Placement tracking not found.');
+        }
+
+        // Only allow at SCL_RELEASED status
+        if ($tracking->status !== 'SCL_RELEASED') {
+            return redirect()->back()->with('error', 'Medical checkup can only be uploaded at SCL Released stage.');
+        }
+
+        $validated = $request->validate([
+            'medical_checkup' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // 5MB max
+        ]);
+
+        // Delete old file if exists
+        if ($tracking->medical_checkup_path && Storage::exists($tracking->medical_checkup_path)) {
+            Storage::delete($tracking->medical_checkup_path);
+        }
+
+        // Store new file
+        $fileName = 'medical_checkup_'.$student->matric_no.'_'.time().'.'.$validated['medical_checkup']->getClientOriginalExtension();
+        $filePath = $validated['medical_checkup']->storeAs('placement/medical-checkup', $fileName);
+
+        // Update tracking
+        $tracking->update([
+            'medical_checkup_path' => $filePath,
+            'medical_checkup_uploaded_at' => now(),
+            'updated_by' => auth()->id(),
+        ]);
+
+        Log::info('Medical Checkup Uploaded', [
+            'student_id' => $student->id,
+            'student_name' => $student->name,
+            'file_path' => $filePath,
+        ]);
+
+        return redirect()->back()->with('success', 'Medical checkup document uploaded successfully.');
+    }
+
+    /**
+     * View medical checkup document.
+     */
+    public function viewMedicalCheckup()
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        $tracking = $student->placementTracking;
+        if (! $tracking || ! $tracking->medical_checkup_path || ! Storage::exists($tracking->medical_checkup_path)) {
+            abort(404, 'Medical checkup document not found.');
+        }
+
+        $mimeType = Storage::mimeType($tracking->medical_checkup_path);
+
+        return response(Storage::get($tracking->medical_checkup_path))
+            ->header('Content-Type', $mimeType)
+            ->header('Content-Disposition', 'inline; filename="medical_checkup_'.$student->matric_no.'"');
     }
 }
