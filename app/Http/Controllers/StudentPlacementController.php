@@ -153,23 +153,24 @@ class StudentPlacementController extends Controller
             }
         }
 
-        // Calculate comprehensive statistics
+        // Calculate comprehensive statistics (exact current status counts)
         $stats = [
             'total' => Student::count(),
             'resume_recommended' => Student::whereHas('resumeInspection', function ($q) {
                 $q->where('status', 'PASSED');
             })->count(),
-            'sal_released' => StudentPlacementTracking::whereNotNull('sal_file_path')->count(),
-            'applied' => StudentPlacementTracking::whereIn('status', ['APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
+            'sal_released' => StudentPlacementTracking::where('status', 'SAL_RELEASED')->count(),
+            'applied' => StudentPlacementTracking::where('status', 'APPLIED')->count(),
             'pending_sal' => Student::whereHas('resumeInspection', function ($q) {
                 $q->where('status', 'PASSED');
             })->whereHas('placementTracking', function ($q) {
                 $q->where('status', 'NOT_APPLIED');
             })->count(),
-            'interviewed' => StudentPlacementTracking::whereIn('status', ['INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
-            'offer_received' => StudentPlacementTracking::whereIn('status', ['OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
-            'accepted' => StudentPlacementTracking::whereIn('status', ['ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
-            'scl_released' => StudentPlacementTracking::whereNotNull('scl_file_path')->count(),
+            'interviewed' => StudentPlacementTracking::where('status', 'INTERVIEWED')->count(),
+            'offer_received' => StudentPlacementTracking::where('status', 'OFFER_RECEIVED')->count(),
+            'accepted' => StudentPlacementTracking::where('status', 'ACCEPTED')->count(),
+            'confirmed' => StudentPlacementTracking::where('status', 'CONFIRMED')->count(),
+            'scl_released' => StudentPlacementTracking::where('status', 'SCL_RELEASED')->count(),
         ];
 
         // Placement funnel data (for chart)
@@ -180,10 +181,11 @@ class StudentPlacementController extends Controller
             'interviewed' => $stats['interviewed'],
             'offer_received' => $stats['offer_received'],
             'accepted' => $stats['accepted'],
+            'confirmed' => $stats['confirmed'],
             'scl_released' => $stats['scl_released'],
         ];
 
-        // Group-wise statistics (for comparison chart)
+        // Group-wise statistics (for comparison chart) - exact current status counts
         $groupStats = WblGroup::withCount(['students' => function ($q) {
             // Only count students with placement tracking
         }])->get()->map(function ($group) {
@@ -199,9 +201,11 @@ class StudentPlacementController extends Controller
                 'name' => $group->name,
                 'total' => $studentsInGroup->count(),
                 'resume_ok' => $resumeOkCount,
-                'sal_released' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->whereNotNull('sal_file_path')->count(),
-                'applied' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->whereIn('status', ['APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
-                'accepted' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->whereIn('status', ['ACCEPTED', 'CONFIRMED', 'SCL_RELEASED'])->count(),
+                'sal_released' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->where('status', 'SAL_RELEASED')->count(),
+                'applied' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->where('status', 'APPLIED')->count(),
+                'accepted' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->where('status', 'ACCEPTED')->count(),
+                'confirmed' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->where('status', 'CONFIRMED')->count(),
+                'scl_released' => StudentPlacementTracking::whereIn('student_id', $studentsInGroup)->where('status', 'SCL_RELEASED')->count(),
             ];
         })->filter(function ($group) {
             return $group['total'] > 0; // Only include groups with students
