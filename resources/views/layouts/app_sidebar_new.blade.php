@@ -262,7 +262,7 @@
     @endif
 
     <!-- Student Placement Tracking (Hidden for FYP, IP, OSH, PPE, and LI Coordinators) -->
-    @if(($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator && !$isLiCoordinator)
+    @if(($isAdmin || $isCoordinator || $isLecturer || $isAt || $isSupervisorLi || $isIc || $isWblCoordinator) && !$isFypCoordinator && !$isIpCoordinator && !$isOshCoordinator && !$isPpeCoordinator && !$isLiCoordinator)
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
             <span x-show="!isSidebarCollapsed">PLACEMENT</span>

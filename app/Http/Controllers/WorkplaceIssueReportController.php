@@ -16,6 +16,24 @@ use Illuminate\View\View;
 class WorkplaceIssueReportController extends Controller
 {
     /**
+     * Get the programme filter for WBL coordinators.
+     */
+    private function getWblCoordinatorProgrammeFilter(): ?string
+    {
+        $user = Auth::user();
+
+        if ($user->isBtaWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Automotive) with Honours';
+        } elseif ($user->isBtdWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Design and Analysis) with Honours';
+        } elseif ($user->isBtgWblCoordinator()) {
+            return 'Bachelor of Mechanical Engineering Technology (Oil and Gas) with Honours';
+        }
+
+        return null;
+    }
+
+    /**
      * Display a listing of workplace issue reports.
      */
     public function index(Request $request): View
@@ -35,6 +53,13 @@ class WorkplaceIssueReportController extends Controller
             // Industry coaches can see reports from their students
             $studentIds = $user->assignedStudents()->pluck('id');
             $query->whereIn('student_id', $studentIds);
+        } elseif ($user->isWblCoordinator()) {
+            // WBL coordinators can only see reports from students in their programme
+            $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+            if ($programmeFilter) {
+                $studentIds = Student::where('programme', $programmeFilter)->pluck('id');
+                $query->whereIn('student_id', $studentIds);
+            }
         }
         // Admins and coordinators can see all reports (no filter)
 
@@ -226,6 +251,15 @@ class WorkplaceIssueReportController extends Controller
             if (!$studentIds->contains($workplaceIssue->student_id)) {
                 abort(403, 'Unauthorized access');
             }
+        } elseif ($user->isWblCoordinator()) {
+            // WBL coordinators can only view reports from their programme
+            $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+            if ($programmeFilter) {
+                $student = $workplaceIssue->student;
+                if (!$student || $student->programme !== $programmeFilter) {
+                    abort(403, 'You can only view reports from students in your programme');
+                }
+            }
         }
 
         $workplaceIssue->load([
@@ -250,9 +284,20 @@ class WorkplaceIssueReportController extends Controller
     {
         $user = Auth::user();
 
-        // Only coordinators and admins can update
-        if (!$user->isAdmin() && !$user->hasRole('coordinator')) {
+        // Only coordinators, admins, and WBL coordinators can update
+        if (!$user->isAdmin() && !$user->hasRole('coordinator') && !$user->isWblCoordinator()) {
             abort(403, 'Unauthorized action');
+        }
+
+        // WBL coordinators can only update reports from their programme
+        if ($user->isWblCoordinator()) {
+            $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+            if ($programmeFilter) {
+                $student = $workplaceIssue->student;
+                if (!$student || $student->programme !== $programmeFilter) {
+                    abort(403, 'You can only update reports from students in your programme');
+                }
+            }
         }
 
         $validated = $request->validate([
@@ -370,6 +415,15 @@ class WorkplaceIssueReportController extends Controller
             if (!$studentIds->contains($report->student_id)) {
                 abort(403, 'Unauthorized access');
             }
+        } elseif ($user->isWblCoordinator()) {
+            // WBL coordinators can only download attachments from their programme students
+            $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+            if ($programmeFilter) {
+                $student = $report->student;
+                if (!$student || $student->programme !== $programmeFilter) {
+                    abort(403, 'You can only access attachments from students in your programme');
+                }
+            }
         }
 
         if (!Storage::exists($attachment->file_path)) {
@@ -386,8 +440,20 @@ class WorkplaceIssueReportController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->isAdmin() && !$user->hasRole('coordinator')) {
+        if (!$user->isAdmin() && !$user->hasRole('coordinator') && !$user->isWblCoordinator()) {
             abort(403, 'Unauthorized action');
+        }
+
+        // WBL coordinators can only delete attachments from their programme students
+        if ($user->isWblCoordinator()) {
+            $programmeFilter = $this->getWblCoordinatorProgrammeFilter();
+            if ($programmeFilter) {
+                $report = $attachment->issueReport;
+                $student = $report->student;
+                if (!$student || $student->programme !== $programmeFilter) {
+                    abort(403, 'You can only delete attachments from students in your programme');
+                }
+            }
         }
 
         DB::beginTransaction();
