@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Assessment extends Model
 {
@@ -73,6 +74,14 @@ class Assessment extends Model
     public function evaluators()
     {
         return $this->hasMany(AssessmentEvaluator::class)->ordered();
+    }
+
+    /**
+     * Get the rubric report for this assessment.
+     */
+    public function rubricReport(): HasOne
+    {
+        return $this->hasOne(AssessmentRubricReport::class);
     }
 
     /**

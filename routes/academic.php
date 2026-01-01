@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Academic\AssessmentController;
+use App\Http\Controllers\Academic\AssessmentRubricReportController;
 use App\Http\Controllers\Academic\FYP\FypAtEvaluationController;
 use App\Http\Controllers\Academic\FYP\FypAuditController;
 use App\Http\Controllers\Academic\FYP\FypFinalisationController;
@@ -95,6 +96,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('assessments/{assessment}/toggle-active', function (\App\Models\Assessment $assessment) {
                 return app(AssessmentController::class)->toggleActive($assessment, 'PPE');
             })->name('assessments.toggle-active');
+
+            // Rubric Report routes
+            Route::get('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'show'])->name('assessments.rubric-report.show');
+            Route::get('assessments/{assessment}/rubric-report/create', [AssessmentRubricReportController::class, 'create'])->name('assessments.rubric-report.create');
+            Route::post('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'store'])->name('assessments.rubric-report.store');
+            Route::get('assessments/{assessment}/rubric-report/edit', [AssessmentRubricReportController::class, 'edit'])->name('assessments.rubric-report.edit');
+            Route::put('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'update'])->name('assessments.rubric-report.update');
+            Route::delete('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'destroy'])->name('assessments.rubric-report.destroy');
+            Route::get('assessments/{assessment}/rubric-report/download', [AssessmentRubricReportController::class, 'download'])->name('assessments.rubric-report.download');
+            Route::get('assessments/{assessment}/rubric-report/export-pdf', [AssessmentRubricReportController::class, 'exportPdf'])->name('assessments.rubric-report.export-pdf');
         });
 
         // Assessment Schedule (Admin and PPE Coordinator)
@@ -226,6 +237,16 @@ Route::middleware(['auth'])->group(function () {
                 return app(AssessmentController::class)->toggleActive($assessment, 'IP');
             })->name('assessments.toggle-active');
 
+            // Rubric Report routes
+            Route::get('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'show'])->name('assessments.rubric-report.show');
+            Route::get('assessments/{assessment}/rubric-report/create', [AssessmentRubricReportController::class, 'create'])->name('assessments.rubric-report.create');
+            Route::post('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'store'])->name('assessments.rubric-report.store');
+            Route::get('assessments/{assessment}/rubric-report/edit', [AssessmentRubricReportController::class, 'edit'])->name('assessments.rubric-report.edit');
+            Route::put('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'update'])->name('assessments.rubric-report.update');
+            Route::delete('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'destroy'])->name('assessments.rubric-report.destroy');
+            Route::get('assessments/{assessment}/rubric-report/download', [AssessmentRubricReportController::class, 'download'])->name('assessments.rubric-report.download');
+            Route::get('assessments/{assessment}/rubric-report/export-pdf', [AssessmentRubricReportController::class, 'exportPdf'])->name('assessments.rubric-report.export-pdf');
+
             // Assessment Schedule (Admin only)
             Route::get('schedule', [IpScheduleController::class, 'index'])->name('schedule.index');
             Route::post('schedule/window', [IpScheduleController::class, 'updateWindow'])->name('schedule.update-window');
@@ -332,6 +353,16 @@ Route::middleware(['auth'])->group(function () {
                 return app(AssessmentController::class)->toggleActive($assessment, 'OSH');
             })->name('assessments.toggle-active');
 
+            // Rubric Report routes
+            Route::get('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'show'])->name('assessments.rubric-report.show');
+            Route::get('assessments/{assessment}/rubric-report/create', [AssessmentRubricReportController::class, 'create'])->name('assessments.rubric-report.create');
+            Route::post('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'store'])->name('assessments.rubric-report.store');
+            Route::get('assessments/{assessment}/rubric-report/edit', [AssessmentRubricReportController::class, 'edit'])->name('assessments.rubric-report.edit');
+            Route::put('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'update'])->name('assessments.rubric-report.update');
+            Route::delete('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'destroy'])->name('assessments.rubric-report.destroy');
+            Route::get('assessments/{assessment}/rubric-report/download', [AssessmentRubricReportController::class, 'download'])->name('assessments.rubric-report.download');
+            Route::get('assessments/{assessment}/rubric-report/export-pdf', [AssessmentRubricReportController::class, 'exportPdf'])->name('assessments.rubric-report.export-pdf');
+
             // Assessment Schedule (Admin only)
             Route::get('schedule', [OshScheduleController::class, 'index'])->name('schedule.index');
             Route::post('schedule/window', [OshScheduleController::class, 'updateWindow'])->name('schedule.update-window');
@@ -431,6 +462,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('assessments/reorder-components', function (\Illuminate\Http\Request $request) {
                 return app(AssessmentController::class)->reorderComponents($request);
             })->name('assessments.reorder-components');
+
+            // Rubric Report routes
+            Route::get('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'show'])->name('assessments.rubric-report.show');
+            Route::get('assessments/{assessment}/rubric-report/create', [AssessmentRubricReportController::class, 'create'])->name('assessments.rubric-report.create');
+            Route::post('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'store'])->name('assessments.rubric-report.store');
+            Route::get('assessments/{assessment}/rubric-report/edit', [AssessmentRubricReportController::class, 'edit'])->name('assessments.rubric-report.edit');
+            Route::put('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'update'])->name('assessments.rubric-report.update');
+            Route::delete('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'destroy'])->name('assessments.rubric-report.destroy');
+            Route::get('assessments/{assessment}/rubric-report/download', [AssessmentRubricReportController::class, 'download'])->name('assessments.rubric-report.download');
+            Route::get('assessments/{assessment}/rubric-report/export-pdf', [AssessmentRubricReportController::class, 'exportPdf'])->name('assessments.rubric-report.export-pdf');
 
             // Assessment Schedule (Admin only)
             Route::get('schedule', [FypScheduleController::class, 'index'])->name('schedule.index');
@@ -580,6 +621,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('assessments/{assessment}/toggle-active', function (\App\Models\Assessment $assessment) {
                 return app(AssessmentController::class)->toggleActive($assessment, 'LI');
             })->name('assessments.toggle-active');
+
+            // Rubric Report routes
+            Route::get('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'show'])->name('assessments.rubric-report.show');
+            Route::get('assessments/{assessment}/rubric-report/create', [AssessmentRubricReportController::class, 'create'])->name('assessments.rubric-report.create');
+            Route::post('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'store'])->name('assessments.rubric-report.store');
+            Route::get('assessments/{assessment}/rubric-report/edit', [AssessmentRubricReportController::class, 'edit'])->name('assessments.rubric-report.edit');
+            Route::put('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'update'])->name('assessments.rubric-report.update');
+            Route::delete('assessments/{assessment}/rubric-report', [AssessmentRubricReportController::class, 'destroy'])->name('assessments.rubric-report.destroy');
+            Route::get('assessments/{assessment}/rubric-report/download', [AssessmentRubricReportController::class, 'download'])->name('assessments.rubric-report.download');
+            Route::get('assessments/{assessment}/rubric-report/export-pdf', [AssessmentRubricReportController::class, 'exportPdf'])->name('assessments.rubric-report.export-pdf');
 
             // Assessment Schedule, Progress, Moderation, Finalisation, Reports, Audit
             Route::get('schedule', [\App\Http\Controllers\Academic\LI\LiScheduleController::class, 'index'])->name('schedule.index');

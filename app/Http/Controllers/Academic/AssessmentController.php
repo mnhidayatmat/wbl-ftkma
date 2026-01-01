@@ -57,7 +57,7 @@ class AssessmentController extends Controller
         // For FYP, IP, PPE, LI, and OSH, group by assessment name to handle multiple CLOs per assessment
         if (in_array($courseCode, ['FYP', 'IP', 'PPE', 'LI', 'OSH'])) {
             $assessments = Assessment::where('course_code', $courseCode)
-                ->with(['creator', 'clos'])
+                ->with(['creator', 'clos', 'rubricReport'])
                 ->orderBy('assessment_name')
                 ->get()
                 ->groupBy('assessment_name');
