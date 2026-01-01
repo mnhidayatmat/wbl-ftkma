@@ -2,21 +2,104 @@
 
 @section('title', 'My Dashboard')
 
+@push('styles')
+<style>
+    /* Animated gradient background */
+    .hero-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Card hover effects */
+    .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Floating animation for icons */
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+    }
+
+    /* Pulse animation */
+    .pulse-soft {
+        animation: pulseSoft 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseSoft {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    /* Shimmer effect for score cards */
+    .shimmer {
+        position: relative;
+        overflow: hidden;
+    }
+    .shimmer::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    /* Progress ring animation */
+    .progress-ring {
+        transition: stroke-dashoffset 0.5s ease;
+    }
+
+    /* Emoji bounce */
+    .emoji-bounce {
+        display: inline-block;
+        animation: emojiBounce 2s ease infinite;
+    }
+
+    @keyframes emojiBounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="min-h-screen bg-umpsa-soft-gray dark:bg-gray-900 -mx-10 -my-6 px-10 py-6">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 -mx-10 -my-6 px-10 py-6">
     @if(isset($needsProfile) && $needsProfile)
-        <!-- Profile Required Message -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 mb-6">
+        <!-- Profile Required Message - Vibrant Version -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-6 border border-purple-100 dark:border-purple-800">
             <div class="text-center">
-                <div class="w-16 h-16 rounded-full bg-[#003A6C]/10 dark:bg-[#003A6C]/20 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-[#003A6C] dark:text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-6 float-animation">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-[#003A6C] dark:text-[#0084C5] mb-2">Profile Required</h2>
-                <p class="text-gray-600 dark:text-gray-400 mb-6">You need to create your student profile to access the dashboard.</p>
-                <a href="{{ route('students.profile.create') }}" class="inline-flex items-center px-6 py-3 bg-[#003A6C] hover:bg-[#0084C5] text-white font-semibold rounded-lg shadow-md transition-colors">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">Let's Get Started! <span class="emoji-bounce">🚀</span></h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-8 text-lg">Create your student profile to unlock your personalized dashboard</p>
+                <a href="{{ route('students.profile.create') }}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
                     Create My Profile
@@ -24,10 +107,35 @@
             </div>
         </div>
     @else
-    <!-- Welcome Header -->
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-[#003A6C] dark:text-[#0084C5] mb-2">Welcome, {{ $student->name ?? 'Student' }}!</h1>
-        <p class="text-gray-600 dark:text-gray-400">Track your WBL journey, submit documents, and monitor your progress</p>
+    <!-- Vibrant Welcome Header -->
+    <div class="hero-gradient rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+        <!-- Decorative circles -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative z-10">
+            <div class="flex items-center gap-4 mb-2">
+                <span class="text-4xl emoji-bounce">👋</span>
+                <h1 class="text-3xl md:text-4xl font-bold">Hey, {{ $student->name ?? 'Student' }}!</h1>
+            </div>
+            <p class="text-white/90 text-lg ml-14">Ready to crush your WBL journey today? Let's make it happen! ✨</p>
+
+            <!-- Quick Stats -->
+            <div class="flex flex-wrap gap-4 mt-6 ml-14">
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 flex items-center gap-2">
+                    <span class="text-2xl">📚</span>
+                    <span class="font-semibold">5 Modules</span>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 flex items-center gap-2">
+                    <span class="text-2xl">🎯</span>
+                    <span class="font-semibold">Track Progress</span>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 flex items-center gap-2">
+                    <span class="text-2xl">💼</span>
+                    <span class="font-semibold">Get Placed</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- Follow-up Reminders Notification --}}
@@ -38,36 +146,34 @@
             $upcomingCount = $followUpReminders->where('is_upcoming', true)->count();
         @endphp
         @if($overdueCount > 0 || $todayCount > 0 || $upcomingCount > 0)
-        <div class="mb-6">
-            <div class="bg-gradient-to-r {{ $overdueCount > 0 ? 'from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-300 dark:border-red-700' : ($todayCount > 0 ? 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-300 dark:border-amber-700' : 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-300 dark:border-blue-700') }} rounded-xl shadow-md p-4 border">
-                <div class="flex items-start gap-3">
+        <div class="mb-8">
+            <div class="bg-gradient-to-r {{ $overdueCount > 0 ? 'from-red-500 to-orange-500' : ($todayCount > 0 ? 'from-amber-500 to-yellow-500' : 'from-blue-500 to-cyan-500') }} rounded-2xl shadow-lg p-5 text-white">
+                <div class="flex items-start gap-4">
                     <div class="flex-shrink-0">
-                        <div class="w-10 h-10 rounded-full {{ $overdueCount > 0 ? 'bg-red-100 dark:bg-red-900/30' : ($todayCount > 0 ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-blue-100 dark:bg-blue-900/30') }} flex items-center justify-center">
-                            <svg class="w-5 h-5 {{ $overdueCount > 0 ? 'text-red-600 dark:text-red-400' : ($todayCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                            </svg>
+                        <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center float-animation">
+                            <span class="text-2xl">{{ $overdueCount > 0 ? '⚠️' : ($todayCount > 0 ? '📅' : '🔔') }}</span>
                         </div>
                     </div>
                     <div class="flex-1">
-                        <h3 class="text-sm font-semibold {{ $overdueCount > 0 ? 'text-red-800 dark:text-red-300' : ($todayCount > 0 ? 'text-amber-800 dark:text-amber-300' : 'text-blue-800 dark:text-blue-300') }} mb-1">
+                        <h3 class="text-lg font-bold mb-2">
                             @if($overdueCount > 0)
-                                Company Follow-up Overdue!
+                                Heads up! Company Follow-up Overdue 🏃
                             @elseif($todayCount > 0)
-                                Follow-up Due Today!
+                                Today's the Day! Follow-up Due 📞
                             @else
-                                Upcoming Follow-ups
+                                Upcoming Follow-ups 📌
                             @endif
                         </h3>
-                        <div class="space-y-1">
+                        <div class="space-y-2">
                             @foreach($followUpReminders->take(3) as $reminder)
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-700 dark:text-gray-300">
-                                        <span class="font-medium">{{ $reminder->company_name }}</span>
+                                <div class="flex items-center justify-between bg-white/10 rounded-lg px-3 py-2">
+                                    <span class="font-medium">
+                                        {{ $reminder->company_name }}
                                         @if($reminder->follow_up_notes)
-                                            <span class="text-gray-500 dark:text-gray-400 text-xs">- {{ Str::limit($reminder->follow_up_notes, 30) }}</span>
+                                            <span class="opacity-75 text-sm">- {{ Str::limit($reminder->follow_up_notes, 30) }}</span>
                                         @endif
                                     </span>
-                                    <span class="{{ $reminder->is_overdue ? 'text-red-600 dark:text-red-400' : ($reminder->is_today ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400') }} text-xs font-medium">
+                                    <span class="text-sm font-semibold bg-white/20 px-2 py-1 rounded-full">
                                         @if($reminder->is_overdue)
                                             {{ $reminder->follow_up_date->diffForHumans() }}
                                         @elseif($reminder->is_today)
@@ -79,12 +185,12 @@
                                 </div>
                             @endforeach
                             @if($followUpReminders->count() > 3)
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">+{{ $followUpReminders->count() - 3 }} more follow-ups</p>
+                                <p class="text-sm opacity-75 mt-2">+{{ $followUpReminders->count() - 3 }} more follow-ups</p>
                             @endif
                         </div>
-                        <a href="{{ route('student.placement.index') }}" class="inline-flex items-center gap-1 text-xs font-medium {{ $overdueCount > 0 ? 'text-red-700 dark:text-red-400 hover:text-red-800' : ($todayCount > 0 ? 'text-amber-700 dark:text-amber-400 hover:text-amber-800' : 'text-blue-700 dark:text-blue-400 hover:text-blue-800') }} mt-2">
+                        <a href="{{ route('student.placement.index') }}" class="inline-flex items-center gap-2 mt-3 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-semibold transition-colors">
                             View Placement Tracking
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </a>
                     </div>
                 </div>
@@ -94,385 +200,415 @@
     @endif
 
     @if($student)
-    <!-- Priority Actions Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Priority Actions Section - Vibrant Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Resume Submission Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-l-4 {{ $resumeInspection && $resumeInspection->isApproved() ? 'border-green-500' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'border-red-500' : 'border-amber-500') }}">
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl {{ $resumeInspection && $resumeInspection->isApproved() ? 'bg-green-100 dark:bg-green-900/30' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'bg-red-100 dark:bg-red-900/30' : 'bg-amber-100 dark:bg-amber-900/30') }} flex items-center justify-center">
-                        <svg class="w-6 h-6 {{ $resumeInspection && $resumeInspection->isApproved() ? 'text-green-600 dark:text-green-400' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Resume Submission</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Step 1: Submit for inspection</p>
+        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-l-4 {{ $resumeInspection && $resumeInspection->isApproved() ? 'border-emerald-500' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'border-rose-500' : 'border-amber-500') }} relative overflow-hidden">
+            <!-- Decorative background -->
+            <div class="absolute top-0 right-0 w-24 h-24 {{ $resumeInspection && $resumeInspection->isApproved() ? 'bg-emerald-500/10' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'bg-rose-500/10' : 'bg-amber-500/10') }} rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+            <div class="relative">
+                <div class="flex items-start justify-between mb-5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl {{ $resumeInspection && $resumeInspection->isApproved() ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'bg-gradient-to-br from-rose-400 to-pink-500' : 'bg-gradient-to-br from-amber-400 to-orange-500') }} flex items-center justify-center shadow-lg float-animation">
+                            <span class="text-2xl">📄</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Resume</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Step 1: Get it approved!</p>
+                        </div>
                     </div>
                 </div>
+
+                <div class="mb-5">
+                    @if($resumeInspection && $resumeInspection->isApproved())
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md">
+                            <span>✅</span> Approved
+                        </span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Awesome! Your resume is approved. Start applying now! 🎉</p>
+                    @elseif($resumeInspection && $resumeInspection->isRevisionRequired())
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md">
+                            <span>🔄</span> Needs Revision
+                        </span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Check the feedback and make it even better! 💪</p>
+                    @elseif($resumeInspection && $resumeInspection->resume_file_path)
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md pulse-soft">
+                            <span>⏳</span> Under Review
+                        </span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Hang tight! Your resume is being reviewed.</p>
+                    @else
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md">
+                            <span>📝</span> Not Submitted
+                        </span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Upload your resume to kick off your journey!</p>
+                    @endif
+                </div>
+
+                <a href="{{ route('student.resume.index') }}" class="inline-flex items-center justify-center w-full px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg">
+                    <span class="mr-2">{{ $resumeInspection && $resumeInspection->resume_file_path ? '👀 View Status' : '📤 Submit Resume' }}</span>
+                </a>
             </div>
-            <div class="mb-4">
-                @if($resumeInspection && $resumeInspection->isApproved())
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Approved
-                    </span>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Your resume has been approved. You can proceed with placement applications.</p>
-                @elseif($resumeInspection && $resumeInspection->isRevisionRequired())
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        Revision Required
-                    </span>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Please review coordinator comments and resubmit.</p>
-                @elseif($resumeInspection && $resumeInspection->resume_file_path)
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Pending Review
-                    </span>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Your resume is being reviewed by the coordinator.</p>
-                @else
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        Not Submitted
-                    </span>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Submit your resume to begin the placement process.</p>
-                @endif
-            </div>
-            <a href="{{ route('student.resume.index') }}" class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-[#003A6C] hover:bg-[#0084C5] text-white font-semibold rounded-lg transition-colors">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-                {{ $resumeInspection && $resumeInspection->resume_file_path ? 'View Resume Status' : 'Submit Resume' }}
-            </a>
         </div>
 
         <!-- Placement Tracking Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-l-4 {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'border-green-500' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'border-blue-500' : 'border-amber-500') }}">
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'bg-green-100 dark:bg-green-900/30' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-amber-100 dark:bg-amber-900/30') }} flex items-center justify-center">
-                        <svg class="w-6 h-6 {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'text-green-600 dark:text-green-400' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.255M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Placement Tracking</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Step 2: Track your placement</p>
+        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-l-4 {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'border-emerald-500' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'border-blue-500' : 'border-violet-500') }} relative overflow-hidden">
+            <!-- Decorative background -->
+            <div class="absolute top-0 right-0 w-24 h-24 {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'bg-emerald-500/10' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'bg-blue-500/10' : 'bg-violet-500/10') }} rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+            <div class="relative">
+                <div class="flex items-start justify-between mb-5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'bg-gradient-to-br from-blue-400 to-indigo-500' : 'bg-gradient-to-br from-violet-400 to-purple-500') }} flex items-center justify-center shadow-lg float-animation">
+                            <span class="text-2xl">💼</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Placement</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Step 2: Land that role!</p>
+                        </div>
                     </div>
                 </div>
+
+                <div class="mb-5">
+                    @php
+                        $statusLabels = [
+                            'NOT_APPLIED' => ['label' => 'Not Started', 'emoji' => '🎯', 'gradient' => 'from-violet-500 to-purple-500'],
+                            'SAL_RELEASED' => ['label' => 'SAL Released', 'emoji' => '📋', 'gradient' => 'from-blue-500 to-indigo-500'],
+                            'APPLIED' => ['label' => 'Applied', 'emoji' => '📨', 'gradient' => 'from-blue-500 to-cyan-500'],
+                            'INTERVIEWED' => ['label' => 'Interviewed', 'emoji' => '🎤', 'gradient' => 'from-indigo-500 to-purple-500'],
+                            'OFFER_RECEIVED' => ['label' => 'Offer Received', 'emoji' => '🎁', 'gradient' => 'from-pink-500 to-rose-500'],
+                            'ACCEPTED' => ['label' => 'Accepted', 'emoji' => '🤝', 'gradient' => 'from-emerald-500 to-teal-500'],
+                            'SCL_RELEASED' => ['label' => 'Completed', 'emoji' => '🏆', 'gradient' => 'from-emerald-500 to-green-500'],
+                        ];
+                        $currentStatus = $placementTracking->status ?? 'NOT_APPLIED';
+                        $statusInfo = $statusLabels[$currentStatus] ?? ['label' => 'Unknown', 'emoji' => '❓', 'gradient' => 'from-gray-500 to-gray-600'];
+                    @endphp
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r {{ $statusInfo['gradient'] }} text-white shadow-md">
+                        <span>{{ $statusInfo['emoji'] }}</span> {{ $statusInfo['label'] }}
+                    </span>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                        @if(!$resumeInspection || !$resumeInspection->isApproved())
+                            Get your resume approved first! 📄
+                        @elseif($currentStatus === 'NOT_APPLIED')
+                            Time to explore and apply to companies! 🚀
+                        @elseif($currentStatus === 'SCL_RELEASED')
+                            You did it! Placement complete! 🎊
+                        @else
+                            Keep pushing! You're making progress! 💪
+                        @endif
+                    </p>
+                </div>
+
+                <a href="{{ route('student.placement.index') }}" class="inline-flex items-center justify-center w-full px-5 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg {{ !$resumeInspection || !$resumeInspection->isApproved() ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$resumeInspection || !$resumeInspection->isApproved() ? 'disabled' : '' }}>
+                    <span class="mr-2">📊 Track Progress</span>
+                </a>
             </div>
-            <div class="mb-4">
-                @php
-                    $statusLabels = [
-                        'NOT_APPLIED' => ['label' => 'Not Started', 'color' => 'amber'],
-                        'SAL_RELEASED' => ['label' => 'SAL Released', 'color' => 'blue'],
-                        'APPLIED' => ['label' => 'Applied', 'color' => 'blue'],
-                        'INTERVIEWED' => ['label' => 'Interviewed', 'color' => 'blue'],
-                        'OFFER_RECEIVED' => ['label' => 'Offer Received', 'color' => 'blue'],
-                        'ACCEPTED' => ['label' => 'Accepted', 'color' => 'green'],
-                        'SCL_RELEASED' => ['label' => 'Completed', 'color' => 'green'],
-                    ];
-                    $currentStatus = $placementTracking->status ?? 'NOT_APPLIED';
-                    $statusInfo = $statusLabels[$currentStatus] ?? ['label' => 'Unknown', 'color' => 'gray'];
-                @endphp
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-{{ $statusInfo['color'] }}-100 text-{{ $statusInfo['color'] }}-800 dark:bg-{{ $statusInfo['color'] }}-900/30 dark:text-{{ $statusInfo['color'] }}-400">
-                    @if($statusInfo['color'] === 'green')
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    @else
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    @endif
-                    {{ $statusInfo['label'] }}
-                </span>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    @if(!$resumeInspection || !$resumeInspection->isApproved())
-                        Resume approval required before applying.
-                    @elseif($currentStatus === 'NOT_APPLIED')
-                        Start applying to companies for your placement.
-                    @elseif($currentStatus === 'SCL_RELEASED')
-                        Congratulations! Your placement is complete.
-                    @else
-                        Continue tracking your placement progress.
-                    @endif
-                </p>
-            </div>
-            <a href="{{ route('student.placement.index') }}" class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-[#003A6C] hover:bg-[#0084C5] text-white font-semibold rounded-lg transition-colors {{ !$resumeInspection || !$resumeInspection->isApproved() ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$resumeInspection || !$resumeInspection->isApproved() ? 'disabled' : '' }}>
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                Track Placement
-            </a>
         </div>
 
         <!-- Quick Actions Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-l-4 border-[#003A6C]">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-xl bg-[#003A6C]/10 dark:bg-[#003A6C]/20 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-[#003A6C] dark:text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
+        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-l-4 border-cyan-500 relative overflow-hidden">
+            <!-- Decorative background -->
+            <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+            <div class="relative">
+                <div class="flex items-center gap-4 mb-5">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-lg float-animation">
+                        <span class="text-2xl">⚡</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Quick Access</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Jump to your modules</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Access important features</p>
+
+                <div class="space-y-2">
+                    <a href="{{ route('student.fyp.overview') }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-purple-50 dark:from-gray-700 dark:to-purple-900/20 hover:from-purple-100 hover:to-pink-100 dark:hover:from-gray-600 dark:hover:to-purple-800/30 transition-all duration-300 group">
+                        <span class="flex items-center gap-3">
+                            <span class="text-xl">🎓</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">FYP Overview</span>
+                        </span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    <a href="{{ route('student.ppe.overview') }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-blue-50 dark:from-gray-700 dark:to-blue-900/20 hover:from-blue-100 hover:to-cyan-100 dark:hover:from-gray-600 dark:hover:to-blue-800/30 transition-all duration-300 group">
+                        <span class="flex items-center gap-3">
+                            <span class="text-xl">📊</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">PPE Overview</span>
+                        </span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    <a href="{{ route('student.li.overview') }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-teal-50 dark:from-gray-700 dark:to-teal-900/20 hover:from-teal-100 hover:to-emerald-100 dark:hover:from-gray-600 dark:hover:to-teal-800/30 transition-all duration-300 group">
+                        <span class="flex items-center gap-3">
+                            <span class="text-xl">🔗</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">LI Overview</span>
+                        </span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    <a href="{{ route('students.profile.edit', $student) }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-pink-50 dark:from-gray-700 dark:to-pink-900/20 hover:from-pink-100 hover:to-rose-100 dark:hover:from-gray-600 dark:hover:to-pink-800/30 transition-all duration-300 group">
+                        <span class="flex items-center gap-3">
+                            <span class="text-xl">👤</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">My Profile</span>
+                        </span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-pink-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
                 </div>
-            </div>
-            <div class="space-y-2">
-                <a href="{{ route('student.fyp.overview') }}" class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">FYP Overview</span>
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('student.ppe.overview') }}" class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">PPE Overview</span>
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('student.li.overview') }}" class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">LI Overview</span>
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('students.profile.edit', $student) }}" class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">My Profile</span>
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
             </div>
         </div>
     </div>
 
     <!-- Assessment Timeline Section -->
     @if($assessmentWindows->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#003A6C] to-[#0084C5] flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">Assessment Timeline</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Track evaluation periods for all modules</p>
+    <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 relative overflow-hidden">
+        <!-- Decorative background -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+        <div class="relative">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <span class="text-2xl">📅</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Assessment Timeline</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Stay on top of your evaluations! 🎯</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach($assessmentWindows->take(6) as $window)
-                @php
-                    $statusColors = [
-                        'open' => ['bg' => 'bg-green-100 dark:bg-green-900/30', 'text' => 'text-green-800 dark:text-green-400', 'border' => 'border-green-500', 'icon' => 'text-green-500'],
-                        'upcoming' => ['bg' => 'bg-blue-100 dark:bg-blue-900/30', 'text' => 'text-blue-800 dark:text-blue-400', 'border' => 'border-blue-500', 'icon' => 'text-blue-500'],
-                        'closed' => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-600 dark:text-gray-400', 'border' => 'border-gray-400', 'icon' => 'text-gray-400'],
-                        'disabled' => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-500 dark:text-gray-500', 'border' => 'border-gray-300', 'icon' => 'text-gray-400'],
-                    ];
-                    $colors = $statusColors[$window->status] ?? $statusColors['closed'];
-                @endphp
-                <div class="border-l-4 {{ $colors['border'] }} bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                    <div class="flex items-start justify-between mb-2">
-                        <div>
-                            <span class="text-xs font-semibold uppercase tracking-wider {{ $colors['text'] }}">{{ $window->module }}</span>
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mt-1">{{ ucfirst(str_replace('_', ' ', $window->evaluator_role)) }} Evaluation</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($assessmentWindows->take(6) as $window)
+                    @php
+                        $statusStyles = [
+                            'open' => ['gradient' => 'from-emerald-500 to-teal-500', 'bg' => 'bg-emerald-50 dark:bg-emerald-900/20', 'text' => 'text-emerald-700 dark:text-emerald-400', 'emoji' => '🟢'],
+                            'upcoming' => ['gradient' => 'from-blue-500 to-indigo-500', 'bg' => 'bg-blue-50 dark:bg-blue-900/20', 'text' => 'text-blue-700 dark:text-blue-400', 'emoji' => '🔵'],
+                            'closed' => ['gradient' => 'from-gray-400 to-gray-500', 'bg' => 'bg-gray-50 dark:bg-gray-700', 'text' => 'text-gray-600 dark:text-gray-400', 'emoji' => '⚪'],
+                            'disabled' => ['gradient' => 'from-gray-300 to-gray-400', 'bg' => 'bg-gray-50 dark:bg-gray-700', 'text' => 'text-gray-500 dark:text-gray-500', 'emoji' => '⚫'],
+                        ];
+                        $style = $statusStyles[$window->status] ?? $statusStyles['closed'];
+                    @endphp
+                    <div class="card-hover {{ $style['bg'] }} rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <span class="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider {{ $style['text'] }} mb-1">
+                                    {{ $style['emoji'] }} {{ $window->module }}
+                                </span>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ ucfirst(str_replace('_', ' ', $window->evaluator_role)) }} Evaluation</h4>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r {{ $style['gradient'] }} text-white shadow-sm">
+                                @if($window->status === 'open')
+                                    <span class="w-1.5 h-1.5 rounded-full bg-white mr-1.5 animate-pulse"></span>
+                                @endif
+                                {{ $window->status_label }}
+                            </span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $colors['bg'] }} {{ $colors['text'] }}">
-                            @if($window->status === 'open')
-                                <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                            @if($window->start_at)
+                                <p class="flex items-center gap-1"><span>🗓️</span> Start: {{ $window->start_at->format('d M Y, H:i') }}</p>
                             @endif
-                            {{ $window->status_label }}
-                        </span>
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                        @if($window->start_at)
-                            <p><span class="font-medium">Start:</span> {{ $window->start_at->format('d M Y, H:i') }}</p>
-                        @endif
-                        @if($window->end_at)
-                            <p><span class="font-medium">End:</span> {{ $window->end_at->format('d M Y, H:i') }}</p>
-                        @endif
-                        @if($window->status === 'open' && $window->end_at)
-                            @php
-                                $daysLeft = now()->diffInDays($window->end_at, false);
-                            @endphp
-                            @if($daysLeft > 0)
-                                <p class="text-amber-600 dark:text-amber-400 font-medium">{{ $daysLeft }} days remaining</p>
-                            @elseif($daysLeft === 0)
-                                <p class="text-red-600 dark:text-red-400 font-medium">Ends today!</p>
+                            @if($window->end_at)
+                                <p class="flex items-center gap-1"><span>🏁</span> End: {{ $window->end_at->format('d M Y, H:i') }}</p>
                             @endif
-                        @endif
+                            @if($window->status === 'open' && $window->end_at)
+                                @php
+                                    $daysLeft = now()->diffInDays($window->end_at, false);
+                                @endphp
+                                @if($daysLeft > 0)
+                                    <p class="font-bold text-amber-600 dark:text-amber-400 mt-2">⏰ {{ $daysLeft }} days left!</p>
+                                @elseif($daysLeft === 0)
+                                    <p class="font-bold text-rose-600 dark:text-rose-400 mt-2">🔥 Ends today!</p>
+                                @endif
+                            @endif
+                        </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
-
-        @if($assessmentWindows->count() > 6)
-            <div class="mt-4 text-center">
-                <p class="text-sm text-gray-500 dark:text-gray-400">And {{ $assessmentWindows->count() - 6 }} more assessment windows...</p>
+                @endforeach
             </div>
-        @endif
+
+            @if($assessmentWindows->count() > 6)
+                <div class="mt-6 text-center">
+                    <span class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-full">
+                        <span>📋</span> And {{ $assessmentWindows->count() - 6 }} more assessment windows...
+                    </span>
+                </div>
+            @endif
+        </div>
     </div>
     @endif
 
-    <!-- Course Progress Summary -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0084C5] to-[#00AEEF] flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-            </div>
-            <div>
-                <h2 class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">Course Progress Summary</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your scores across all WBL modules</p>
-            </div>
-        </div>
+    <!-- Course Progress Summary - Vibrant Score Cards -->
+    <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 relative overflow-hidden">
+        <!-- Decorative background -->
+        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <!-- PPE Score Card -->
-            <div class="bg-gradient-to-br from-[#003A6C] to-[#0084C5] rounded-xl p-4 text-white">
-                <h3 class="text-sm font-semibold mb-2 opacity-90">PPE</h3>
-                <p class="text-3xl font-bold mb-1">{{ number_format($courseScores['PPE']['score'], 1) }}%</p>
-                <p class="text-xs opacity-75">AT: {{ number_format($courseScores['PPE']['at_score'], 1) }} | IC: {{ number_format($courseScores['PPE']['ic_score'], 1) }}</p>
+        <div class="relative">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center shadow-lg">
+                    <span class="text-2xl">📈</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent">Your Scores</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">You're doing great! Keep it up! 🌟</p>
+                </div>
             </div>
 
-            <!-- FYP Score Card -->
-            <div class="bg-gradient-to-br from-[#0084C5] to-[#00AEEF] rounded-xl p-4 text-white">
-                <h3 class="text-sm font-semibold mb-2 opacity-90">FYP</h3>
-                <p class="text-3xl font-bold mb-1">{{ number_format($courseScores['FYP']['score'], 1) }}%</p>
-                <p class="text-xs opacity-75">Max: {{ $courseScores['FYP']['max'] }}%</p>
-            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <!-- PPE Score Card -->
+                <div class="shimmer bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-5 text-white shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">📊</span>
+                        <h3 class="text-sm font-bold opacity-90">PPE</h3>
+                    </div>
+                    <p class="text-4xl font-black mb-1">{{ number_format($courseScores['PPE']['score'], 1) }}<span class="text-lg">%</span></p>
+                    <p class="text-xs opacity-80">AT: {{ number_format($courseScores['PPE']['at_score'], 1) }} | IC: {{ number_format($courseScores['PPE']['ic_score'], 1) }}</p>
+                </div>
 
-            <!-- IP Score Card -->
-            <div class="bg-gradient-to-br from-[#00AEEF] to-[#66C3FF] rounded-xl p-4 text-white">
-                <h3 class="text-sm font-semibold mb-2 opacity-90">IP</h3>
-                <p class="text-3xl font-bold mb-1">{{ number_format($courseScores['IP']['score'], 1) }}%</p>
-                <p class="text-xs opacity-75">Max: {{ $courseScores['IP']['max'] }}%</p>
-            </div>
+                <!-- FYP Score Card -->
+                <div class="shimmer bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 rounded-2xl p-5 text-white shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">🎓</span>
+                        <h3 class="text-sm font-bold opacity-90">FYP</h3>
+                    </div>
+                    <p class="text-4xl font-black mb-1">{{ number_format($courseScores['FYP']['score'], 1) }}<span class="text-lg">%</span></p>
+                    <p class="text-xs opacity-80">Max: {{ $courseScores['FYP']['max'] }}%</p>
+                </div>
 
-            <!-- OSH Score Card -->
-            <div class="bg-gradient-to-br from-[#003A6C] to-[#00AEEF] rounded-xl p-4 text-white">
-                <h3 class="text-sm font-semibold mb-2 opacity-90">OSH</h3>
-                <p class="text-3xl font-bold mb-1">{{ number_format($courseScores['OSH']['score'], 1) }}%</p>
-                <p class="text-xs opacity-75">Max: {{ $courseScores['OSH']['max'] }}%</p>
-            </div>
+                <!-- IP Score Card -->
+                <div class="shimmer bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 rounded-2xl p-5 text-white shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">🏭</span>
+                        <h3 class="text-sm font-bold opacity-90">IP</h3>
+                    </div>
+                    <p class="text-4xl font-black mb-1">{{ number_format($courseScores['IP']['score'], 1) }}<span class="text-lg">%</span></p>
+                    <p class="text-xs opacity-80">Max: {{ $courseScores['IP']['max'] }}%</p>
+                </div>
 
-            <!-- LI Score Card -->
-            <div class="bg-gradient-to-br from-[#0084C5] to-[#66C3FF] rounded-xl p-4 text-white">
-                <h3 class="text-sm font-semibold mb-2 opacity-90">LI</h3>
-                <p class="text-3xl font-bold mb-1">{{ number_format($courseScores['LI']['score'], 1) }}%</p>
-                <p class="text-xs opacity-75">Max: {{ $courseScores['LI']['max'] }}%</p>
+                <!-- OSH Score Card -->
+                <div class="shimmer bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-5 text-white shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">🦺</span>
+                        <h3 class="text-sm font-bold opacity-90">OSH</h3>
+                    </div>
+                    <p class="text-4xl font-black mb-1">{{ number_format($courseScores['OSH']['score'], 1) }}<span class="text-lg">%</span></p>
+                    <p class="text-xs opacity-80">Max: {{ $courseScores['OSH']['max'] }}%</p>
+                </div>
+
+                <!-- LI Score Card -->
+                <div class="shimmer bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500 rounded-2xl p-5 text-white shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">🔗</span>
+                        <h3 class="text-sm font-bold opacity-90">LI</h3>
+                    </div>
+                    <p class="text-4xl font-black mb-1">{{ number_format($courseScores['LI']['score'], 1) }}<span class="text-lg">%</span></p>
+                    <p class="text-xs opacity-80">Max: {{ $courseScores['LI']['max'] }}%</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Charts and Supervisors Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Bar Chart - Course Scores Comparison -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-            <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5] mb-4">Course Scores Overview</h3>
-            <div style="height: 280px;">
-                <canvas id="courseScoresChart"></canvas>
+        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+            <div class="relative">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">📊</span>
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Score Overview</h3>
+                </div>
+                <div style="height: 280px;">
+                    <canvas id="courseScoresChart"></canvas>
+                </div>
             </div>
         </div>
 
         <!-- Assigned Supervisors Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-            <h3 class="text-lg font-semibold text-[#003A6C] dark:text-[#0084C5] mb-4">Your Supervisors & Lecturers</h3>
-            <div class="space-y-3">
-                <!-- Academic Tutor -->
-                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#003A6C]/10 dark:bg-[#003A6C]/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-[#003A6C] dark:text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Academic Tutor (FYP)</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignedAt->name ?? 'Not Assigned' }}</p>
-                        </div>
-                    </div>
-                    @if($assignedAt)
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Assigned</span>
-                    @else
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
-                    @endif
+        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+            <div class="relative">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">👥</span>
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Your Mentors</h3>
                 </div>
 
-                <!-- Industry Coach -->
-                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#0084C5]/10 dark:bg-[#0084C5]/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.255M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
+                <div class="space-y-3">
+                    <!-- Academic Tutor -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-100 dark:border-purple-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-md">
+                                <span class="text-lg">🎓</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-purple-600 dark:text-purple-400">Academic Tutor (FYP)</p>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $assignedAt->name ?? 'Not Assigned' }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Industry Coach (IC)</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignedIc->name ?? 'Not Assigned' }}</p>
-                        </div>
+                        @if($assignedAt)
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">✓ Assigned</span>
+                        @else
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
+                        @endif
                     </div>
-                    @if($assignedIc)
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Assigned</span>
-                    @else
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
-                    @endif
-                </div>
 
-                <!-- Supervisor LI -->
-                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#00AEEF]/10 dark:bg-[#00AEEF]/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                    <!-- Industry Coach -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-100 dark:border-blue-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-md">
+                                <span class="text-lg">💼</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-blue-600 dark:text-blue-400">Industry Coach (IC)</p>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $assignedIc->name ?? 'Not Assigned' }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Supervisor LI</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignedSupervisorLi->name ?? 'Not Assigned' }}</p>
-                        </div>
+                        @if($assignedIc)
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">✓ Assigned</span>
+                        @else
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
+                        @endif
                     </div>
-                    @if($assignedSupervisorLi)
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Assigned</span>
-                    @else
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
-                    @endif
-                </div>
 
-                <!-- PPE Lecturer -->
-                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#003A6C]/10 dark:bg-[#003A6C]/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-[#003A6C] dark:text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
+                    <!-- Supervisor LI -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/20 dark:to-emerald-900/20 border border-teal-100 dark:border-teal-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-md">
+                                <span class="text-lg">🔗</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-teal-600 dark:text-teal-400">Supervisor LI</p>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $assignedSupervisorLi->name ?? 'Not Assigned' }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">PPE Lecturer</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignedPpeLecturer->name ?? 'Not Assigned' }}</p>
-                        </div>
+                        @if($assignedSupervisorLi)
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">✓ Assigned</span>
+                        @else
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
+                        @endif
                     </div>
-                    @if($assignedPpeLecturer)
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Assigned</span>
-                    @else
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
-                    @endif
+
+                    <!-- PPE Lecturer -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-100 dark:border-orange-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-md">
+                                <span class="text-lg">📚</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-orange-600 dark:text-orange-400">PPE Lecturer</p>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $assignedPpeLecturer->name ?? 'Not Assigned' }}</p>
+                            </div>
+                        </div>
+                        @if($assignedPpeLecturer)
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">✓ Assigned</span>
+                        @else
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400">Pending</span>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -483,18 +619,21 @@
 
     @push('scripts')
     <script>
-        // UMPSA Color Palette
-        const UMPSA_COLORS = {
-            primary: '#003A6C',
-            secondary: '#0084C5',
-            accent: '#00AEEF',
-            light: '#66C3FF',
-            darkNavy: '#002244',
-            softGray: '#F4F7FC',
-            neutralGray: '#E6ECF2',
+        // Vibrant Color Palette for Students
+        const VIBRANT_COLORS = {
+            purple: '#8B5CF6',
+            indigo: '#6366F1',
+            blue: '#3B82F6',
+            cyan: '#06B6D4',
+            teal: '#14B8A6',
+            emerald: '#10B981',
+            pink: '#EC4899',
+            rose: '#F43F5E',
+            orange: '#F97316',
+            amber: '#F59E0B',
         };
 
-        // Bar Chart - Course Scores
+        // Bar Chart - Course Scores with vibrant colors
         const courseScoresCtx = document.getElementById('courseScoresChart');
         if (courseScoresCtx) {
             new Chart(courseScoresCtx, {
@@ -505,13 +644,21 @@
                         label: 'Score (%)',
                         data: @json($barChartData['scores']),
                         backgroundColor: [
-                            UMPSA_COLORS.primary,
-                            UMPSA_COLORS.secondary,
-                            UMPSA_COLORS.accent,
-                            UMPSA_COLORS.primary + 'CC',
-                            UMPSA_COLORS.secondary + 'CC',
+                            'rgba(139, 92, 246, 0.8)',  // purple
+                            'rgba(59, 130, 246, 0.8)',  // blue
+                            'rgba(20, 184, 166, 0.8)',  // teal
+                            'rgba(249, 115, 22, 0.8)',  // orange
+                            'rgba(236, 72, 153, 0.8)',  // pink
                         ],
-                        borderRadius: 8,
+                        borderColor: [
+                            'rgb(139, 92, 246)',
+                            'rgb(59, 130, 246)',
+                            'rgb(20, 184, 166)',
+                            'rgb(249, 115, 22)',
+                            'rgb(236, 72, 153)',
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 12,
                         borderSkipped: false,
                     }]
                 },
@@ -523,8 +670,8 @@
                             display: false
                         },
                         tooltip: {
-                            backgroundColor: UMPSA_COLORS.primary,
-                            padding: 12,
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            padding: 14,
                             titleFont: {
                                 size: 14,
                                 weight: 'bold'
@@ -532,10 +679,11 @@
                             bodyFont: {
                                 size: 13
                             },
-                            cornerRadius: 8,
+                            cornerRadius: 12,
+                            displayColors: true,
                             callbacks: {
                                 label: function(context) {
-                                    return 'Score: ' + context.parsed.y.toFixed(1) + '%';
+                                    return '🎯 Score: ' + context.parsed.y.toFixed(1) + '%';
                                 }
                             }
                         }
@@ -545,12 +693,14 @@
                             beginAtZero: true,
                             max: 100,
                             grid: {
-                                color: UMPSA_COLORS.neutralGray
+                                color: 'rgba(156, 163, 175, 0.2)',
+                                drawBorder: false,
                             },
                             ticks: {
                                 color: '#6B7280',
                                 font: {
-                                    size: 12
+                                    size: 12,
+                                    weight: '500'
                                 },
                                 callback: function(value) {
                                     return value + '%';
@@ -564,7 +714,8 @@
                             ticks: {
                                 color: '#6B7280',
                                 font: {
-                                    size: 12
+                                    size: 12,
+                                    weight: '600'
                                 }
                             }
                         }
