@@ -7,6 +7,7 @@ use App\Exports\StudentsTemplateExport;
 use App\Imports\StudentsImport;
 use App\Imports\StudentsPreviewImport;
 use App\Models\Company;
+use App\Models\Programme;
 use App\Models\Student;
 use App\Models\WblGroup;
 use Illuminate\Http\RedirectResponse;
@@ -162,8 +163,9 @@ class StudentController extends Controller
         // Only show active groups for assignment
         $groups = WblGroup::where('status', 'ACTIVE')->orderBy('name')->get();
         $companies = Company::orderBy('company_name')->get();
+        $programmes = Programme::active()->ordered()->get();
 
-        return view('students.create', compact('groups', 'companies'));
+        return view('students.create', compact('groups', 'companies', 'programmes'));
     }
 
     /**
@@ -241,8 +243,9 @@ class StudentController extends Controller
         $companies = Company::orderBy('company_name')->get();
         $lecturers = \App\Models\User::where('role', 'lecturer')->orderBy('name')->get();
         $industryCoaches = \App\Models\User::where('role', 'industry')->orderBy('name')->get();
+        $programmes = Programme::active()->ordered()->get();
 
-        return view('students.edit', compact('student', 'groups', 'companies', 'lecturers', 'industryCoaches'));
+        return view('students.edit', compact('student', 'groups', 'companies', 'lecturers', 'industryCoaches', 'programmes'));
     }
 
     /**

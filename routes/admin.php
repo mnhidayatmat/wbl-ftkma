@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AssessmentController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
+use App\Http\Controllers\Admin\ProgrammeController;
 use App\Http\Controllers\Admin\StudentAssignmentController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\RecruitmentPoolController;
@@ -108,6 +109,12 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
     Route::resource('groups', \App\Http\Controllers\GroupController::class);
     Route::post('groups/{group}/mark-completed', [\App\Http\Controllers\GroupController::class, 'markCompleted'])->name('groups.mark-completed');
     Route::post('groups/{group}/reopen', [\App\Http\Controllers\GroupController::class, 'reopen'])->name('groups.reopen');
+
+    // Programmes Management (Admin only)
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('programmes', ProgrammeController::class);
+        Route::post('programmes/{programme}/toggle-active', [ProgrammeController::class, 'toggleActive'])->name('programmes.toggle-active');
+    });
 
     // Company Agreements Management (MoU/MoA/LOI)
     // Redirect old agreements index to new unified companies page

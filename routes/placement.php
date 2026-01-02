@@ -75,4 +75,7 @@ Route::middleware('auth')->prefix('student/placement')->name('student.placement.
     // Medical checkup upload and view (SCL_RELEASED stage)
     Route::post('medical-checkup/upload', [StudentPlacementController::class, 'uploadMedicalCheckup'])->name('upload-medical-checkup');
     Route::get('medical-checkup/view', [StudentPlacementController::class, 'viewMedicalCheckup'])->name('view-medical-checkup');
+
+    // Placement preferences (skills, interests, preferred industry, location)
+    Route::post('preferences', [StudentPlacementController::class, 'updatePreferences'])->name('preferences.update');
 });

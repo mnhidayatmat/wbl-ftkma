@@ -46,6 +46,9 @@ class Student extends Model
     protected $casts = [
         'cgpa' => 'decimal:2',
         'skills' => 'array',
+        'interests' => 'array',
+        'preferred_industry' => 'array',
+        'preferred_location' => 'array',
     ];
 
     /**

@@ -21,12 +21,34 @@ class EnsureRole
 
         $user = auth()->user();
 
+        // Explicitly deny students from admin/coordinator-only routes
+        if ($user->isStudent() && !in_array('student', $roles)) {
+            abort(403, 'Students are not authorized to access this page.');
+        }
+
         // Check if user has any of the required roles
         $hasRequiredRole = false;
         foreach ($roles as $role) {
             if ($user->hasRole($role)) {
                 $hasRequiredRole = true;
                 break;
+            }
+
+            // Handle 'coordinator' as a wildcard for any coordinator role
+            if ($role === 'coordinator') {
+                // Check if user has any coordinator role
+                if ($user->isIpCoordinator() || $user->isFypCoordinator() ||
+                    $user->isOshCoordinator() || $user->isPpeCoordinator() ||
+                    $user->isLiCoordinator() || $user->isBtaWblCoordinator() ||
+                    $user->isBtdWblCoordinator() || $user->isBtgWblCoordinator()) {
+                    $hasRequiredRole = true;
+                    break;
+                }
+                // Also check if user has any role containing 'coordinator'
+                if ($user->roles()->where('name', 'like', '%coordinator%')->exists()) {
+                    $hasRequiredRole = true;
+                    break;
+                }
             }
 
             // Also check coordinator-specific methods

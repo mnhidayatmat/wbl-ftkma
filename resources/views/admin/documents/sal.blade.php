@@ -2,6 +2,15 @@
 
 @section('title', 'Template SAL - Documents')
 
+@push('styles')
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }
+</style>
+@endpush
+
 @section('content')
 <div class="max-w-5xl mx-auto">
     <!-- Success Message -->
@@ -82,87 +91,195 @@
                 </div>
                 <div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white">Auto-populated Variables</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Automatically filled from student data</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Automatically filled from student/company data</p>
                 </div>
             </div>
 
-            <div class="space-y-3">
-                <!-- Student Name -->
-                <div class="flex items-center justify-between py-2.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-white dark:bg-gray-600 rounded-full flex items-center justify-center shadow-sm">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Student Name</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">@{{ student_name }}</p>
-                        </div>
+            <div class="space-y-2 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+                <!-- Student Info Section -->
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider pt-1">Student Information</p>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_name}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Student's full name</span>
                     </div>
                     <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
                 </div>
 
-                <!-- Student Matric -->
-                <div class="flex items-center justify-between py-2.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-white dark:bg-gray-600 rounded-full flex items-center justify-center shadow-sm">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Student Matric</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">@{{ student_matric }}</p>
-                        </div>
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_matric}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Matric number</span>
                     </div>
                     <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
                 </div>
 
-                <!-- Student Programme -->
-                <div class="flex items-center justify-between py-2.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-white dark:bg-gray-600 rounded-full flex items-center justify-center shadow-sm">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Student Programme</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">@{{ student_programme }}</p>
-                        </div>
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_ic}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">IC number</span>
                     </div>
                     <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
                 </div>
 
-                <!-- Group Start Date -->
-                <div class="flex items-center justify-between py-2.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-white dark:bg-gray-600 rounded-full flex items-center justify-center shadow-sm">
-                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Group Start Date</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">@{{ group_start_date }}</p>
-                        </div>
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_faculty}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Faculty</span>
                     </div>
                     <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
                 </div>
 
-                <!-- Group End Date -->
-                <div class="flex items-center justify-between py-2.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-white dark:bg-gray-600 rounded-full flex items-center justify-center shadow-sm">
-                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Group End Date</p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">@{{ group_end_date }}</p>
-                        </div>
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_programme}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Programme</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_programme_short}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Programme code</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_email}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Email</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${student_phone}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Phone</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <!-- WBL & Group Section -->
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider pt-3">WBL & Group</p>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${wbl_duration}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Training duration</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${current_date}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Current date</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${group_name}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Group name</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${group_start_date}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Start date</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${group_end_date}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">End date</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <!-- WBL Coordinator Section -->
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider pt-3">WBL Coordinator</p>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${wbl_coordinator_name}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Coordinator name</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${wbl_coordinator_email}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Coordinator email</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${wbl_coordinator_phone}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Coordinator phone</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <!-- Company Section -->
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider pt-3">Company Information</p>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${company_name}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Company name</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${company_address}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Address</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${company_pic_name}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">PIC name</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${company_pic_position}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">PIC position</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${company_email}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Company email</span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <code class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">${company_phone}</code>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Company phone</span>
                     </div>
                     <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">Auto</span>
                 </div>

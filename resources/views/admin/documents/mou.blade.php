@@ -2,6 +2,34 @@
 
 @section('title', 'Template MoU - Documents')
 
+@push('styles')
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-track {
+        background: #374151;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #4b5563;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="max-w-5xl mx-auto">
     <!-- Success Message -->
@@ -198,8 +226,8 @@
         </div>
 
         <!-- Manual Input Variables -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-            <div class="flex items-center gap-2 mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col" style="max-height: 520px;">
+            <div class="flex items-center gap-2 mb-4 flex-shrink-0">
                 <div class="w-8 h-8 bg-[#00A86B]/10 dark:bg-[#00A86B]/20 rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-[#00A86B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -211,7 +239,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('admin.documents.mou.update') }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.documents.mou.update') }}" method="POST" class="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar" style="scrollbar-width: thin;">
                 @csrf
                 @method('PUT')
 

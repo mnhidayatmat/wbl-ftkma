@@ -93,6 +93,9 @@ class CompanyAgreementController extends Controller
             'staff_pic_name' => ['nullable', 'string', 'max:255'],
             'staff_pic_phone' => ['nullable', 'string', 'max:20'],
             'document' => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10MB max
+            'mom_mentioned' => ['sometimes', 'boolean'],
+            'mom_date' => ['nullable', 'date'],
+            'mom_document' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         // Check for duplicate
@@ -108,15 +111,23 @@ class CompanyAgreementController extends Controller
                 ->withInput();
         }
 
-        // Handle file upload
+        // Handle agreement document upload
         $documentPath = null;
         if ($request->hasFile('document')) {
             $documentPath = $request->file('document')->store('agreements', 'public');
         }
 
+        // Handle MoM document upload
+        $momDocumentPath = null;
+        if ($request->hasFile('mom_document')) {
+            $momDocumentPath = $request->file('mom_document')->store('agreements/mom', 'public');
+        }
+
         CompanyAgreement::create([
             ...$validated,
             'document_path' => $documentPath,
+            'mom_mentioned' => $request->boolean('mom_mentioned'),
+            'mom_document_path' => $momDocumentPath,
             'created_by' => auth()->id(),
             'updated_by' => auth()->id(),
         ]);
@@ -165,6 +176,10 @@ class CompanyAgreementController extends Controller
             'staff_pic_name' => ['nullable', 'string', 'max:255'],
             'staff_pic_phone' => ['nullable', 'string', 'max:20'],
             'document' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'mom_mentioned' => ['sometimes', 'boolean'],
+            'mom_date' => ['nullable', 'date'],
+            'mom_document' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'remove_mom_document' => ['sometimes', 'boolean'],
         ]);
 
         // Check for duplicate (excluding current record)
@@ -181,7 +196,7 @@ class CompanyAgreementController extends Controller
                 ->withInput();
         }
 
-        // Handle file upload
+        // Handle agreement document upload
         if ($request->hasFile('document')) {
             // Delete old file
             if ($agreement->document_path) {
@@ -190,8 +205,26 @@ class CompanyAgreementController extends Controller
             $validated['document_path'] = $request->file('document')->store('agreements', 'public');
         }
 
+        // Handle MoM document upload
+        if ($request->hasFile('mom_document')) {
+            // Delete old MoM file
+            if ($agreement->mom_document_path) {
+                Storage::disk('public')->delete($agreement->mom_document_path);
+            }
+            $validated['mom_document_path'] = $request->file('mom_document')->store('agreements/mom', 'public');
+        }
+
+        // Handle MoM document removal
+        if ($request->boolean('remove_mom_document')) {
+            if ($agreement->mom_document_path) {
+                Storage::disk('public')->delete($agreement->mom_document_path);
+            }
+            $validated['mom_document_path'] = null;
+        }
+
         $agreement->update([
             ...$validated,
+            'mom_mentioned' => $request->boolean('mom_mentioned'),
             'updated_by' => auth()->id(),
         ]);
 
@@ -207,6 +240,11 @@ class CompanyAgreementController extends Controller
         // Delete document file
         if ($agreement->document_path) {
             Storage::disk('public')->delete($agreement->document_path);
+        }
+
+        // Delete MoM document file
+        if ($agreement->mom_document_path) {
+            Storage::disk('public')->delete($agreement->mom_document_path);
         }
 
         $agreement->delete();

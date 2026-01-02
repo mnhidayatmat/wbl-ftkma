@@ -2,8 +2,81 @@
 
 @section('title', 'PPE Coordinator Dashboard')
 
+@push('styles')
+<style>
+    .coordinator-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 25%, #3b82a0 50%, #4a9eb8 75%, #1e3a5f 100%);
+        background-size: 400% 400%;
+        animation: elegantGradient 20s ease infinite;
+    }
+
+    @keyframes elegantGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .icon-float {
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .dark .glass-card {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="min-h-screen space-y-6">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 dark:from-gray-900 dark:via-indigo-950/20 dark:to-purple-950/20 space-y-6">
+
+    <!-- Elegant Coordinator Header -->
+    <div class="coordinator-hero rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative z-10">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center icon-float">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">PPE Coordinator Dashboard</h1>
+                        <p class="text-white/80">Professional Practice Evaluation Management</p>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-3">
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Total Students</p>
+                        <p class="text-xl font-bold">{{ $stats['total_students'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Active Groups</p>
+                        <p class="text-xl font-bold">{{ $stats['total_groups'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Completion</p>
+                        <p class="text-xl font-bold">{{ $stats['assessment_completion_rate'] }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Project Milestone Timeline -->
     <x-coordinator.milestone-timeline
         module="ppe"

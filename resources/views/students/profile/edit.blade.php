@@ -55,8 +55,15 @@ use Illuminate\Support\Facades\Storage;
                     <!-- Programme -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Programme *</label>
-                        <input type="text" name="programme" value="{{ old('programme', $student->programme) }}" required
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                        <select name="programme" required
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                            <option value="">Select Programme</option>
+                            @foreach($programmes as $programme)
+                                <option value="{{ $programme->name }}" {{ old('programme', $student->programme) == $programme->name ? 'selected' : '' }}>
+                                    {{ $programme->name }}
+                                </option>
+                            @endforeach
+                        </select>
                         @error('programme') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -268,13 +275,9 @@ use Illuminate\Support\Facades\Storage;
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                             </svg>
                             Academic Advisor
-                            @can('manage-settings')
-                                <span class="ml-2 text-xs text-gray-500">(Admin can change)</span>
-                            @endcan
                         </label>
                         <select name="academic_advisor_id"
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white"
-                                @cannot('manage-settings') disabled @endcannot>
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
                             <option value="">Select Academic Advisor</option>
                             @foreach($academicAdvisorOptions as $advisor)
                                 <option value="{{ $advisor->id }}" {{ old('academic_advisor_id', $student->academic_advisor_id) == $advisor->id ? 'selected' : '' }}>
@@ -282,9 +285,6 @@ use Illuminate\Support\Facades\Storage;
                                 </option>
                             @endforeach
                         </select>
-                        @if(auth()->user()->cannot('manage-settings'))
-                            <p class="text-xs text-gray-500 mt-1">Contact admin to change academic advisor</p>
-                        @endif
                         @error('academic_advisor_id') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 

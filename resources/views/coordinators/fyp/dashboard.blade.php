@@ -2,6 +2,42 @@
 
 @section('title', 'FYP Coordinator Dashboard')
 
+@push('styles')
+<style>
+    .coordinator-hero {
+        background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 25%, #7c3aed 50%, #8b5cf6 75%, #4c1d95 100%);
+        background-size: 400% 400%;
+        animation: elegantGradient 20s ease infinite;
+    }
+
+    @keyframes elegantGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .icon-float {
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .dark .glass-card {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+@endpush
+
 @section('content')
 @php
     // Calculate summary statistics
@@ -14,7 +50,44 @@
     $qualityScore = min(100, max(0, 100 - ((count($atRiskStudents) ?? 0) * 5)));
 @endphp
 
-<div class="space-y-6">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/30 dark:from-gray-900 dark:via-purple-950/20 dark:to-indigo-950/20 space-y-6">
+
+    <!-- Elegant Coordinator Header -->
+    <div class="coordinator-hero rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative z-10">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center icon-float">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">FYP Coordinator Dashboard</h1>
+                        <p class="text-white/80">Final Year Project Management</p>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-3">
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Total Students</p>
+                        <p class="text-xl font-bold">{{ $stats['total_students'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Active Groups</p>
+                        <p class="text-xl font-bold">{{ $stats['total_groups'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Progress</p>
+                        <p class="text-xl font-bold">{{ $overallProgress }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Project Milestone Timeline -->
     <x-coordinator.milestone-timeline
         module="fyp"

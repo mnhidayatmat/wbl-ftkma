@@ -121,7 +121,7 @@
                 @php
                     // Define clean step labels with icons
                     $journeySteps = [
-                        1 => ['icon' => '📄', 'label' => 'Resume Preparation'],
+                        1 => ['icon' => '📄', 'label' => 'Preparation'],
                         2 => ['icon' => '📋', 'label' => 'SAL Released'],
                         3 => ['icon' => '📤', 'label' => 'Applications Sent'],
                         4 => ['icon' => '💼', 'label' => 'Interviews'],
@@ -447,50 +447,255 @@
 
                 <div class="space-y-4">
                     @if($tracking->status === 'NOT_APPLIED')
-                        {{-- Resume Preparation Stage --}}
+                        {{-- Preparation Stage --}}
                         <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-500">
-                            <p class="text-xs font-bold text-blue-800 dark:text-blue-200 mb-1">📍 Current Stage</p>
-                            <p class="text-sm text-blue-700 dark:text-blue-300">Complete resume inspection to proceed</p>
+                            <p class="text-xs font-bold text-blue-800 dark:text-blue-200 mb-1">📍 Current Stage: Preparation</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Complete your profile and resume inspection</p>
                         </div>
 
-                        @if(!$canApply)
-                            <div class="space-y-2">
-                                <a href="{{ route('student.resume.index') }}"
-                                   class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
-                                    📄 Go to Resume Inspection
-                                </a>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Submit your resume and posters for approval</p>
+                        {{-- RESUME STATUS SECTION --}}
+                        <div class="bg-white dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    Resume Status
+                                </h4>
+                                @if($canApply)
+                                    <span class="px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-xs font-bold rounded-full">
+                                        ✓ Recommended
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 text-xs font-bold rounded-full">
+                                        Pending Review
+                                    </span>
+                                @endif
                             </div>
 
-                            {{-- Checklist --}}
-                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-xs">
-                                <p class="font-semibold text-gray-700 dark:text-gray-300 mb-2">📋 Required Steps:</p>
-                                <ul class="space-y-1 text-gray-600 dark:text-gray-400">
-                                    <li class="flex items-start gap-2">
-                                        <span class="text-red-500">○</span>
-                                        <span>Upload merged PDF (Resume + Posters)</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <span class="text-red-500">○</span>
-                                        <span>Wait for coordinator approval</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        @else
-                            <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <div>
-                                        <p class="text-sm font-semibold text-green-800 dark:text-green-200">Resume Approved!</p>
-                                        <p class="text-xs text-green-700 dark:text-green-300 mt-1">Waiting for admin to release SAL</p>
+                            @if(!$canApply)
+                                <div class="space-y-3">
+                                    <a href="{{ route('student.resume.index') }}"
+                                       class="block px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] text-center text-sm shadow-md">
+                                        📄 Go to Resume Inspection
+                                    </a>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Submit your resume and posters for approval</p>
+                                </div>
+                            @else
+                                <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <p class="text-sm text-green-800 dark:text-green-200">Your resume has been approved! Waiting for SAL release.</p>
                                     </div>
                                 </div>
+                            @endif
+                        </div>
+
+                        {{-- YOUR PREFERENCES SECTION --}}
+                        @if(isset($isStudentView) && $isStudentView && (!isset($readOnly) || !$readOnly))
+                        @php
+                            $hasPreferencesPrep = ($student->skills && count($student->skills) > 0) || $student->interests || $student->preferred_industry || $student->preferred_location;
+                        @endphp
+                        <div class="bg-gradient-to-r {{ $hasPreferencesPrep ? 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-300 dark:border-green-700' : 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-orange-300 dark:border-orange-700' }} rounded-lg p-4 border-2">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-bold {{ $hasPreferencesPrep ? 'text-green-800 dark:text-green-200' : 'text-orange-800 dark:text-orange-200' }} flex items-center gap-2">
+                                    @if($hasPreferencesPrep)
+                                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    @else
+                                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    @endif
+                                    Your Preferences
+                                </h4>
+                                <button type="button" onclick="togglePrepPreferencesForm()" class="px-3 py-1 {{ $hasPreferencesPrep ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-500 hover:bg-orange-600' }} text-white text-xs font-semibold rounded-lg transition-colors">
+                                    {{ $hasPreferencesPrep ? 'Edit' : 'Fill In Now' }}
+                                </button>
                             </div>
 
-                            <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
-                                <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 What's Next?</p>
-                                <p class="text-xs text-yellow-700 dark:text-yellow-300">Once SAL is released, you can start applying to companies</p>
+                            @if(!$hasPreferencesPrep)
+                            <p class="text-xs text-orange-700 dark:text-orange-300 mb-3">
+                                <strong>Important:</strong> Fill in your preferences to help coordinators match you with suitable companies.
+                            </p>
+                            @endif
+
+                            {{-- Display current preferences --}}
+                            <div id="prepPreferencesDisplay" class="{{ $hasPreferencesPrep ? '' : 'hidden' }}">
+                                @if($hasPreferencesPrep)
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    @if($student->skills && count($student->skills) > 0)
+                                    <div class="col-span-2">
+                                        <span class="font-semibold text-gray-600 dark:text-gray-400">Skills:</span>
+                                        <div class="flex flex-wrap gap-1 mt-1">
+                                            @foreach(array_slice($student->skills, 0, 4) as $skill)
+                                                @php
+                                                    $skillDisplay = str_starts_with($skill, 'other:')
+                                                        ? str_replace('other:', '', $skill)
+                                                        : (config("placement_preferences.skills.{$skill}") ?? $skill);
+                                                @endphp
+                                                <span class="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">{{ Str::limit($skillDisplay, 15) }}</span>
+                                            @endforeach
+                                            @if(count($student->skills) > 4)
+                                                <span class="text-gray-500">+{{ count($student->skills) - 4 }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endif
+                                    @if($student->preferred_industry)
+                                    <div>
+                                        <span class="font-semibold text-gray-600 dark:text-gray-400">Industry:</span>
+                                        @php
+                                            $industryDisplay = str_starts_with($student->preferred_industry, 'other:')
+                                                ? str_replace('other:', '', $student->preferred_industry)
+                                                : (config("placement_preferences.preferred_industry.{$student->preferred_industry}") ?? $student->preferred_industry);
+                                        @endphp
+                                        <span class="text-gray-800 dark:text-gray-200 block mt-1">{{ Str::limit($industryDisplay, 25) }}</span>
+                                    </div>
+                                    @endif
+                                    @if($student->preferred_location)
+                                    <div>
+                                        <span class="font-semibold text-gray-600 dark:text-gray-400">Location:</span>
+                                        @php
+                                            $locationDisplay = str_starts_with($student->preferred_location, 'other:')
+                                                ? str_replace('other:', '', $student->preferred_location)
+                                                : (config("placement_preferences.preferred_location.{$student->preferred_location}") ?? $student->preferred_location);
+                                        @endphp
+                                        <span class="text-gray-800 dark:text-gray-200 block mt-1">{{ Str::limit($locationDisplay, 25) }}</span>
+                                    </div>
+                                    @endif
+                                </div>
+                                @endif
                             </div>
+
+                            {{-- Preferences Form --}}
+                            <div id="prepPreferencesForm" class="{{ $hasPreferencesPrep ? 'hidden' : '' }}">
+                                <form action="{{ route('student.placement.preferences.update') }}" method="POST" class="space-y-3">
+                                    @csrf
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {{-- Skills --}}
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Skills <span class="text-red-500">*</span></label>
+                                            <div class="max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-white dark:bg-gray-700">
+                                                @foreach($preferencesOptions['skills'] as $key => $label)
+                                                    @if($key !== 'other')
+                                                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 p-1 rounded">
+                                                        <input type="checkbox" name="skills[]" value="{{ $key }}"
+                                                               {{ $student->skills && in_array($key, $student->skills) ? 'checked' : '' }}
+                                                               class="w-3 h-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                                                        <span class="text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        {{-- Interests --}}
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
+                                            <div class="max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-white dark:bg-gray-700">
+                                                @php
+                                                    $currentInterestsPrep = [];
+                                                    if ($student->interests) {
+                                                        $interestParts = array_map('trim', explode(',', $student->interests));
+                                                        foreach ($interestParts as $part) {
+                                                            $foundKey = array_search($part, config('placement_preferences.interests', []));
+                                                            if ($foundKey) {
+                                                                $currentInterestsPrep[] = $foundKey;
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                @foreach($preferencesOptions['interests'] as $key => $label)
+                                                    @if($key !== 'other')
+                                                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 p-1 rounded">
+                                                        <input type="checkbox" name="interests[]" value="{{ $key }}"
+                                                               {{ in_array($key, $currentInterestsPrep) ? 'checked' : '' }}
+                                                               class="w-3 h-3 text-green-600 rounded border-gray-300 focus:ring-green-500">
+                                                        <span class="text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        {{-- Preferred Industry --}}
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Preferred Industry <span class="text-red-500">*</span></label>
+                                            <select name="preferred_industry" id="prepPreferredIndustrySelect" onchange="togglePrepOtherInput('industry')" required class="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white">
+                                                <option value="">Select Industry...</option>
+                                                @foreach($preferencesOptions['preferred_industry'] as $key => $label)
+                                                    @if($key !== 'other')
+                                                    <option value="{{ $key }}" {{ $student->preferred_industry === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                                    @endif
+                                                @endforeach
+                                                <option value="other" {{ str_starts_with($student->preferred_industry ?? '', 'other:') ? 'selected' : '' }}>Other (please specify)</option>
+                                            </select>
+                                            <div id="prepIndustryOtherContainer" class="{{ str_starts_with($student->preferred_industry ?? '', 'other:') ? '' : 'hidden' }} mt-1">
+                                                <input type="text" name="preferred_industry_other" placeholder="Please specify..."
+                                                       value="{{ str_starts_with($student->preferred_industry ?? '', 'other:') ? str_replace('other:', '', $student->preferred_industry) : '' }}"
+                                                       class="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white">
+                                            </div>
+                                        </div>
+
+                                        {{-- Preferred Location --}}
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Preferred Location <span class="text-red-500">*</span></label>
+                                            <select name="preferred_location" id="prepPreferredLocationSelect" onchange="togglePrepOtherInput('location')" required class="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white">
+                                                <option value="">Select Location...</option>
+                                                @foreach($preferencesOptions['preferred_location'] as $key => $label)
+                                                    @if($key !== 'other')
+                                                    <option value="{{ $key }}" {{ $student->preferred_location === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                                    @endif
+                                                @endforeach
+                                                <option value="other" {{ str_starts_with($student->preferred_location ?? '', 'other:') ? 'selected' : '' }}>Other (please specify)</option>
+                                            </select>
+                                            <div id="prepLocationOtherContainer" class="{{ str_starts_with($student->preferred_location ?? '', 'other:') ? '' : 'hidden' }} mt-1">
+                                                <input type="text" name="preferred_location_other" placeholder="Please specify..."
+                                                       value="{{ str_starts_with($student->preferred_location ?? '', 'other:') ? str_replace('other:', '', $student->preferred_location) : '' }}"
+                                                       class="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex gap-2 pt-2">
+                                        <button type="submit" class="flex-1 px-3 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white text-xs font-semibold rounded-lg transition-colors">
+                                            Save Preferences
+                                        </button>
+                                        @if($hasPreferencesPrep)
+                                        <button type="button" onclick="togglePrepPreferencesForm()" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-lg transition-colors">
+                                            Cancel
+                                        </button>
+                                        @endif
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <script>
+                            function togglePrepPreferencesForm() {
+                                const display = document.getElementById('prepPreferencesDisplay');
+                                const form = document.getElementById('prepPreferencesForm');
+                                display.classList.toggle('hidden');
+                                form.classList.toggle('hidden');
+                            }
+
+                            function togglePrepOtherInput(type) {
+                                if (type === 'industry') {
+                                    const select = document.getElementById('prepPreferredIndustrySelect');
+                                    const container = document.getElementById('prepIndustryOtherContainer');
+                                    container.classList.toggle('hidden', select.value !== 'other');
+                                } else if (type === 'location') {
+                                    const select = document.getElementById('prepPreferredLocationSelect');
+                                    const container = document.getElementById('prepLocationOtherContainer');
+                                    container.classList.toggle('hidden', select.value !== 'other');
+                                }
+                            }
+                        </script>
+                        @endif
+
+                        {{-- What's Next --}}
+                        @if($canApply)
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border-l-4 border-yellow-500">
+                            <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 What's Next?</p>
+                            <p class="text-xs text-yellow-700 dark:text-yellow-300">Once SAL is released by coordinator, you can start applying to companies</p>
+                        </div>
                         @endif
 
                     @elseif($tracking->status === 'SAL_RELEASED')
@@ -527,6 +732,17 @@
                             <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">💡 Pro Tip</p>
                             <p class="text-xs text-yellow-700 dark:text-yellow-300">Apply to 5-10 companies to increase your chances</p>
                         </div>
+
+                        {{-- Go Back Button --}}
+                        <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                            @csrf
+                            <input type="hidden" name="status" value="NOT_APPLIED">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-all text-sm"
+                                    onclick="return confirm('Are you sure you want to go back to Preparation stage?')">
+                                ← Go Back to Preparation
+                            </button>
+                        </form>
 
                     @elseif($tracking->status === 'APPLIED')
                         {{-- Applied - Managing Applications --}}
@@ -1267,6 +1483,17 @@
                                 <li>• Stay in touch with coordinator</li>
                             </ul>
                         </div>
+
+                        {{-- Go Back Button --}}
+                        <form action="{{ route('student.placement.status.update') }}" method="POST" class="w-full">
+                            @csrf
+                            <input type="hidden" name="status" value="ACCEPTED">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-all text-sm"
+                                    onclick="return confirm('Are you sure you want to go back to Offer Accepted stage?')">
+                                ← Go Back to Offer Accepted
+                            </button>
+                        </form>
                     @endif
                 </div>
             </div>
@@ -1322,7 +1549,7 @@
                 <div class="space-y-2 text-sm text-blue-900 dark:text-blue-200">
                     @if($tracking->status === 'NOT_APPLIED')
                         @if(!$canApply)
-                            <p>✓ Complete resume inspection</p>
+                            <p>○ Complete resume inspection</p>
                             <p class="opacity-75">→ Wait for SAL release</p>
                         @else
                             <p>✓ Resume approved</p>
@@ -1414,6 +1641,268 @@
                     <li>• Check with admin if you have questions</li>
                 </ul>
             </div>
+
+            {{-- PLACEMENT PREFERENCES CARD --}}
+            @if(isset($isStudentView) && $isStudentView)
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase flex items-center gap-2">
+                        <svg class="w-5 h-5 text-[#0084C5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        My Preferences
+                    </h3>
+                    @if(!isset($readOnly) || !$readOnly)
+                    <button type="button" onclick="togglePreferencesForm()" class="text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">
+                        {{ ($student->skills && count($student->skills) > 0) || ($student->interests && count($student->interests) > 0) || ($student->preferred_industry && count($student->preferred_industry) > 0) || ($student->preferred_location && count($student->preferred_location) > 0) ? 'Edit' : 'Add' }}
+                    </button>
+                    @endif
+                </div>
+
+                {{-- Current Preferences Display --}}
+                @php
+                    $hasPreferences = ($student->skills && count($student->skills) > 0) ||
+                                     ($student->interests && count($student->interests) > 0) ||
+                                     ($student->preferred_industry && count($student->preferred_industry) > 0) ||
+                                     ($student->preferred_location && count($student->preferred_location) > 0);
+                @endphp
+                <div id="preferencesDisplay" class="space-y-3 text-sm">
+                    @if($hasPreferences)
+                        @if($student->skills && count($student->skills) > 0)
+                        <div>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Skills</p>
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($student->skills as $skill)
+                                    @php
+                                        $skillDisplay = str_starts_with($skill, 'other:')
+                                            ? str_replace('other:', '', $skill)
+                                            : (config("placement_preferences.skills.{$skill}") ?? $skill);
+                                    @endphp
+                                    <span class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">{{ Str::limit($skillDisplay, 25) }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($student->interests && count($student->interests) > 0)
+                        <div>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Interests</p>
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($student->interests as $interest)
+                                    @php
+                                        $interestDisplay = str_starts_with($interest, 'other:')
+                                            ? str_replace('other:', '', $interest)
+                                            : (config("placement_preferences.interests.{$interest}") ?? $interest);
+                                    @endphp
+                                    <span class="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">{{ Str::limit($interestDisplay, 25) }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($student->preferred_industry && count($student->preferred_industry) > 0)
+                        <div>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Preferred Industries</p>
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($student->preferred_industry as $industry)
+                                    @php
+                                        $industryDisplay = str_starts_with($industry, 'other:')
+                                            ? str_replace('other:', '', $industry)
+                                            : (config("placement_preferences.preferred_industry.{$industry}") ?? $industry);
+                                    @endphp
+                                    <span class="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-full">{{ Str::limit($industryDisplay, 25) }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($student->preferred_location && count($student->preferred_location) > 0)
+                        <div>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Preferred Locations</p>
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($student->preferred_location as $location)
+                                    @php
+                                        $locationDisplay = str_starts_with($location, 'other:')
+                                            ? str_replace('other:', '', $location)
+                                            : (config("placement_preferences.preferred_location.{$location}") ?? $location);
+                                    @endphp
+                                    <span class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">{{ Str::limit($locationDisplay, 25) }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    @else
+                        <div class="text-center py-4">
+                            <svg class="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">No preferences set yet</p>
+                            @if(!isset($readOnly) || !$readOnly)
+                            <button type="button" onclick="togglePreferencesForm()" class="mt-2 text-xs text-[#0084C5] hover:text-[#003A6C] font-medium">
+                                + Add your preferences
+                            </button>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Preferences Form (Hidden by default) --}}
+                @if(!isset($readOnly) || !$readOnly)
+                <div id="preferencesForm" class="hidden">
+                    <form action="{{ route('student.placement.preferences.update') }}" method="POST" class="space-y-4">
+                        @csrf
+
+                        {{-- Skills (Multi-select) --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <span class="text-blue-600">●</span> Skills <span class="text-gray-400 font-normal">(Select multiple)</span>
+                            </label>
+                            <div class="max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-gray-50 dark:bg-gray-700/50">
+                                @foreach($preferencesOptions['skills'] as $key => $label)
+                                    @if($key !== 'other')
+                                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded">
+                                        <input type="checkbox" name="skills[]" value="{{ $key }}"
+                                               {{ $student->skills && in_array($key, $student->skills) ? 'checked' : '' }}
+                                               class="w-3.5 h-3.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                                        <span class="text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                    </label>
+                                    @endif
+                                @endforeach
+                                <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
+                                    <input type="checkbox" name="skills[]" value="other" id="skillsOtherCheckbox"
+                                           onchange="toggleOtherInput('skills')"
+                                           {{ $student->skills && collect($student->skills)->contains(fn($s) => str_starts_with($s, 'other:')) ? 'checked' : '' }}
+                                           class="w-3.5 h-3.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                                    <span class="text-gray-700 dark:text-gray-300">Other (Please specify)</span>
+                                </label>
+                            </div>
+                            <div id="skillsOtherContainer" class="{{ $student->skills && collect($student->skills)->contains(fn($s) => str_starts_with($s, 'other:')) ? '' : 'hidden' }} mt-2">
+                                <input type="text" name="skills_other" placeholder="Specify other skill..."
+                                       value="{{ $student->skills ? (collect($student->skills)->first(fn($s) => str_starts_with($s, 'other:')) ? str_replace('other:', '', collect($student->skills)->first(fn($s) => str_starts_with($s, 'other:'))) : '') : '' }}"
+                                       class="w-full px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+
+                        {{-- Interests (Multi-select) --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <span class="text-green-600">●</span> Interests <span class="text-gray-400 font-normal">(Select multiple)</span>
+                            </label>
+                            <div class="max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-gray-50 dark:bg-gray-700/50">
+                                @foreach($preferencesOptions['interests'] as $key => $label)
+                                    @if($key !== 'other')
+                                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded">
+                                        <input type="checkbox" name="interests[]" value="{{ $key }}"
+                                               {{ $student->interests && in_array($key, $student->interests) ? 'checked' : '' }}
+                                               class="w-3.5 h-3.5 text-green-600 rounded border-gray-300 focus:ring-green-500">
+                                        <span class="text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                    </label>
+                                    @endif
+                                @endforeach
+                                <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
+                                    <input type="checkbox" name="interests[]" value="other" id="interestsOtherCheckbox"
+                                           onchange="toggleOtherInput('interests')"
+                                           {{ $student->interests && collect($student->interests)->contains(fn($i) => str_starts_with($i, 'other:')) ? 'checked' : '' }}
+                                           class="w-3.5 h-3.5 text-green-600 rounded border-gray-300 focus:ring-green-500">
+                                    <span class="text-gray-700 dark:text-gray-300">Other (Please specify)</span>
+                                </label>
+                            </div>
+                            <div id="interestsOtherContainer" class="{{ $student->interests && collect($student->interests)->contains(fn($i) => str_starts_with($i, 'other:')) ? '' : 'hidden' }} mt-2">
+                                <input type="text" name="interests_other" placeholder="Specify other interest..."
+                                       value="{{ $student->interests ? (collect($student->interests)->first(fn($i) => str_starts_with($i, 'other:')) ? str_replace('other:', '', collect($student->interests)->first(fn($i) => str_starts_with($i, 'other:'))) : '') : '' }}"
+                                       class="w-full px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+
+                        {{-- Preferred Industry (Multi-select) --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <span class="text-orange-600">●</span> Preferred Industries <span class="text-gray-400 font-normal">(Select multiple)</span>
+                            </label>
+                            <div class="max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-gray-50 dark:bg-gray-700/50">
+                                @foreach($preferencesOptions['preferred_industry'] as $key => $label)
+                                    @if($key !== 'other')
+                                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded">
+                                        <input type="checkbox" name="preferred_industry[]" value="{{ $key }}"
+                                               {{ $student->preferred_industry && in_array($key, $student->preferred_industry) ? 'checked' : '' }}
+                                               class="w-3.5 h-3.5 text-orange-600 rounded border-gray-300 focus:ring-orange-500">
+                                        <span class="text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                    </label>
+                                    @endif
+                                @endforeach
+                                <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
+                                    <input type="checkbox" name="preferred_industry[]" value="other" id="industryOtherCheckbox"
+                                           onchange="toggleOtherInput('industry')"
+                                           {{ $student->preferred_industry && collect($student->preferred_industry)->contains(fn($i) => str_starts_with($i, 'other:')) ? 'checked' : '' }}
+                                           class="w-3.5 h-3.5 text-orange-600 rounded border-gray-300 focus:ring-orange-500">
+                                    <span class="text-gray-700 dark:text-gray-300">Other (Please specify)</span>
+                                </label>
+                            </div>
+                            <div id="industryOtherContainer" class="{{ $student->preferred_industry && collect($student->preferred_industry)->contains(fn($i) => str_starts_with($i, 'other:')) ? '' : 'hidden' }} mt-2">
+                                <input type="text" name="preferred_industry_other" placeholder="Specify other industry..."
+                                       value="{{ $student->preferred_industry ? (collect($student->preferred_industry)->first(fn($i) => str_starts_with($i, 'other:')) ? str_replace('other:', '', collect($student->preferred_industry)->first(fn($i) => str_starts_with($i, 'other:'))) : '') : '' }}"
+                                       class="w-full px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+
+                        {{-- Preferred Location (Multi-select) --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <span class="text-purple-600">●</span> Preferred Locations <span class="text-gray-400 font-normal">(Select multiple)</span>
+                            </label>
+                            <div class="max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-gray-50 dark:bg-gray-700/50">
+                                @foreach($preferencesOptions['preferred_location'] as $key => $label)
+                                    @if($key !== 'other')
+                                    <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded">
+                                        <input type="checkbox" name="preferred_location[]" value="{{ $key }}"
+                                               {{ $student->preferred_location && in_array($key, $student->preferred_location) ? 'checked' : '' }}
+                                               class="w-3.5 h-3.5 text-purple-600 rounded border-gray-300 focus:ring-purple-500">
+                                        <span class="text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                    </label>
+                                    @endif
+                                @endforeach
+                                <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
+                                    <input type="checkbox" name="preferred_location[]" value="other" id="locationOtherCheckbox"
+                                           onchange="toggleOtherInput('location')"
+                                           {{ $student->preferred_location && collect($student->preferred_location)->contains(fn($l) => str_starts_with($l, 'other:')) ? 'checked' : '' }}
+                                           class="w-3.5 h-3.5 text-purple-600 rounded border-gray-300 focus:ring-purple-500">
+                                    <span class="text-gray-700 dark:text-gray-300">Other (Please specify)</span>
+                                </label>
+                            </div>
+                            <div id="locationOtherContainer" class="{{ $student->preferred_location && collect($student->preferred_location)->contains(fn($l) => str_starts_with($l, 'other:')) ? '' : 'hidden' }} mt-2">
+                                <input type="text" name="preferred_location_other" placeholder="Specify other location..."
+                                       value="{{ $student->preferred_location ? (collect($student->preferred_location)->first(fn($l) => str_starts_with($l, 'other:')) ? str_replace('other:', '', collect($student->preferred_location)->first(fn($l) => str_starts_with($l, 'other:'))) : '') : '' }}"
+                                       class="w-full px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+
+                        {{-- Form Actions --}}
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" class="flex-1 px-3 py-2 bg-[#0084C5] hover:bg-[#003A6C] text-white text-xs font-semibold rounded-lg transition-colors">
+                                Save Preferences
+                            </button>
+                            <button type="button" onclick="togglePreferencesForm()" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-lg transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <script>
+                    function togglePreferencesForm() {
+                        const display = document.getElementById('preferencesDisplay');
+                        const form = document.getElementById('preferencesForm');
+                        display.classList.toggle('hidden');
+                        form.classList.toggle('hidden');
+                    }
+
+                    function toggleOtherInput(type) {
+                        const checkbox = document.getElementById(type === 'industry' ? 'industryOtherCheckbox' : type === 'location' ? 'locationOtherCheckbox' : type + 'OtherCheckbox');
+                        const container = document.getElementById(type + 'OtherContainer');
+                        if (checkbox && container) {
+                            container.classList.toggle('hidden', !checkbox.checked);
+                        }
+                    }
+                </script>
+                @endif
+            </div>
+            @endif
         </div>
     </div>
 

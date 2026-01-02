@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\DocumentTemplate;
+use App\Models\Programme;
 use App\Models\Student;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -823,8 +824,14 @@ class DocumentTemplateController extends Controller
         $salReleaseDate = $template->settings['sal_release_date'] ?? now()->format('Y-m-d');
         $salReferenceNumber = $template->settings['sal_reference_number'] ?? '';
 
-        // Get WBL Coordinator based on student's programme
+        // Get WBL Coordinator data from Programme table first, fallback to User model
+        $programme = Programme::where('name', $student->programme)->first();
         $wblCoordinator = Student::getWblCoordinator($student->programme);
+
+        // Use programme's WBL coordinator data if available, otherwise fallback to User model
+        $wblCoordinatorName = $programme?->wbl_coordinator_name ?? $wblCoordinator?->name ?? '';
+        $wblCoordinatorEmail = $programme?->wbl_coordinator_email ?? $wblCoordinator?->email ?? '';
+        $wblCoordinatorPhone = $programme?->wbl_coordinator_phone ?? $wblCoordinator?->phone ?? '';
 
         // Get company information if student has a company assigned
         $company = $student->company;
@@ -846,9 +853,9 @@ class DocumentTemplateController extends Controller
             'group_end_date' => $groupEndDate ? \Carbon\Carbon::parse($groupEndDate)->format('d F Y') : '',
             'sal_release_date' => $salReleaseDate ? \Carbon\Carbon::parse($salReleaseDate)->format('d F Y') : '',
             'sal_reference_number' => $salReferenceNumber,
-            'wbl_coordinator_name' => $wblCoordinator?->name ?? '',
-            'wbl_coordinator_email' => $wblCoordinator?->email ?? '',
-            'wbl_coordinator_phone' => $wblCoordinator?->phone ?? '',
+            'wbl_coordinator_name' => $wblCoordinatorName,
+            'wbl_coordinator_email' => $wblCoordinatorEmail,
+            'wbl_coordinator_phone' => $wblCoordinatorPhone,
             'director_name' => $template->settings['director_name'] ?? '',
             'company_name' => $company?->company_name ?? '',
             'company_address' => $company?->address ?? '',

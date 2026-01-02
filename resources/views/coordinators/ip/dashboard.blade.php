@@ -2,6 +2,42 @@
 
 @section('title', 'IP Coordinator Dashboard')
 
+@push('styles')
+<style>
+    .coordinator-hero {
+        background: linear-gradient(135deg, #065f46 0%, #059669 25%, #10b981 50%, #34d399 75%, #065f46 100%);
+        background-size: 400% 400%;
+        animation: elegantGradient 20s ease infinite;
+    }
+
+    @keyframes elegantGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .icon-float {
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .dark .glass-card {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+@endpush
+
 @section('content')
 @php
     // Calculate summary statistics
@@ -14,7 +50,44 @@
     $qualityScore = min(100, max(0, 100 - ((count($atRiskStudents) ?? 0) * 5)));
 @endphp
 
-<div class="space-y-6">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/30 dark:from-gray-900 dark:via-emerald-950/20 dark:to-teal-950/20 space-y-6">
+
+    <!-- Elegant Coordinator Header -->
+    <div class="coordinator-hero rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative z-10">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center icon-float">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">IP Coordinator Dashboard</h1>
+                        <p class="text-white/80">Industrial Project Management</p>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-3">
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Total Students</p>
+                        <p class="text-xl font-bold">{{ $stats['total_students'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Active Groups</p>
+                        <p class="text-xl font-bold">{{ $stats['total_groups'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Progress</p>
+                        <p class="text-xl font-bold">{{ $overallProgress }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Project Milestone Timeline -->
     <x-coordinator.milestone-timeline
         module="ip"

@@ -28,8 +28,15 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Programme *</label>
-                            <input type="text" name="programme" value="{{ old('programme') }}" required
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                            <select name="programme" required
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#0084C5] focus:border-[#0084C5] dark:bg-gray-700 dark:text-white">
+                                <option value="">Select Programme</option>
+                                @foreach($programmes as $programme)
+                                    <option value="{{ $programme->name }}" {{ old('programme') == $programme->name ? 'selected' : '' }}>
+                                        {{ $programme->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                             @error('programme') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                         </div>
 

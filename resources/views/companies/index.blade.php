@@ -230,7 +230,7 @@
         </div>
     </div>
 
-    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-4 pb-8">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-8">
         @if(session('success'))
         <div class="mb-4 glass-card bg-green-50/90 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-xl flex items-center gap-3">
             <div class="p-2 bg-green-100 dark:bg-green-800/50 rounded-lg">

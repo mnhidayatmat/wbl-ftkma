@@ -997,7 +997,8 @@ class StudentPlacementController extends Controller
         }
 
         // Return a simple object with output() method to match Dompdf interface
-        return new class($pdfContent) {
+        return new class($pdfContent)
+        {
             private string $content;
 
             public function __construct(string $content)
@@ -1407,7 +1408,10 @@ class StudentPlacementController extends Controller
             $readOnly = true;
         }
 
-        return view('placement.student.index', compact('student', 'tracking', 'statuses', 'currentStep', 'canApply', 'resumeInspection', 'step1Label', 'isStudentView', 'readOnly', 'isInCompletedGroup'));
+        // Get placement preferences options
+        $preferencesOptions = self::getPreferencesOptions();
+
+        return view('placement.student.index', compact('student', 'tracking', 'statuses', 'currentStep', 'canApply', 'resumeInspection', 'step1Label', 'isStudentView', 'readOnly', 'isInCompletedGroup', 'preferencesOptions'));
     }
 
     /**
@@ -1476,10 +1480,10 @@ class StudentPlacementController extends Controller
             $oldIndex = array_search($oldStatus, $statusOrder);
             $newIndex = array_search($validated['status'], $statusOrder);
 
-            // Students cannot go back to NOT_APPLIED (admin-controlled status)
-            if ($validated['status'] === 'NOT_APPLIED') {
+            // Students can only go back to NOT_APPLIED from SAL_RELEASED
+            if ($validated['status'] === 'NOT_APPLIED' && $oldStatus !== 'SAL_RELEASED') {
                 return redirect()->back()->withErrors([
-                    'status' => 'You cannot go back to this status as it is controlled by the administrator.',
+                    'status' => 'You can only go back to Preparation stage from SAL Released stage.',
                 ]);
             }
 
@@ -1490,10 +1494,10 @@ class StudentPlacementController extends Controller
                 ]);
             }
 
-            // Students cannot go back from SCL_RELEASED (final status)
-            if ($oldStatus === 'SCL_RELEASED') {
+            // Students can only go back from SCL_RELEASED to ACCEPTED
+            if ($oldStatus === 'SCL_RELEASED' && $validated['status'] !== 'ACCEPTED') {
                 return redirect()->back()->withErrors([
-                    'status' => 'Your placement journey is complete. You cannot change your status.',
+                    'status' => 'From SCL Released stage, you can only go back to Offer Accepted stage.',
                 ]);
             }
 
@@ -2814,5 +2818,92 @@ class StudentPlacementController extends Controller
         return response(Storage::get($tracking->medical_checkup_path))
             ->header('Content-Type', $mimeType)
             ->header('Content-Disposition', 'inline; filename="medical_checkup_'.$student->matric_no.'"');
+    }
+
+    /**
+     * Update student placement preferences (skills, interests, preferred industry, location).
+     */
+    public function updatePreferences(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        if (! $user->isStudent()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $student = $user->student;
+        if (! $student) {
+            abort(404, 'Student profile not found.');
+        }
+
+        // Prevent updates for students in completed groups
+        if ($student->isInCompletedGroup()) {
+            return redirect()->back()->with('error', 'Your WBL group has been completed. You can no longer update your preferences.');
+        }
+
+        $validated = $request->validate([
+            'skills' => ['nullable', 'array'],
+            'skills.*' => ['string'],
+            'skills_other' => ['nullable', 'string', 'max:255'],
+            'interests' => ['nullable', 'array'],
+            'interests.*' => ['string'],
+            'interests_other' => ['nullable', 'string', 'max:255'],
+            'preferred_industry' => ['nullable', 'array'],
+            'preferred_industry.*' => ['string'],
+            'preferred_industry_other' => ['nullable', 'string', 'max:255'],
+            'preferred_location' => ['nullable', 'array'],
+            'preferred_location.*' => ['string'],
+            'preferred_location_other' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        // Process skills - add "other" value if provided
+        $skills = $validated['skills'] ?? [];
+        if (! empty($validated['skills_other']) && in_array('other', $skills)) {
+            $skills = array_filter($skills, fn ($s) => $s !== 'other');
+            $skills[] = 'other:'.trim($validated['skills_other']);
+        }
+
+        // Process interests - add "other" value if provided
+        $interests = $validated['interests'] ?? [];
+        if (! empty($validated['interests_other']) && in_array('other', $interests)) {
+            $interests = array_filter($interests, fn ($i) => $i !== 'other');
+            $interests[] = 'other:'.trim($validated['interests_other']);
+        }
+
+        // Process preferred industry - add "other" value if provided
+        $preferredIndustry = $validated['preferred_industry'] ?? [];
+        if (! empty($validated['preferred_industry_other']) && in_array('other', $preferredIndustry)) {
+            $preferredIndustry = array_filter($preferredIndustry, fn ($i) => $i !== 'other');
+            $preferredIndustry[] = 'other:'.trim($validated['preferred_industry_other']);
+        }
+
+        // Process preferred location - add "other" value if provided
+        $preferredLocation = $validated['preferred_location'] ?? [];
+        if (! empty($validated['preferred_location_other']) && in_array('other', $preferredLocation)) {
+            $preferredLocation = array_filter($preferredLocation, fn ($l) => $l !== 'other');
+            $preferredLocation[] = 'other:'.trim($validated['preferred_location_other']);
+        }
+
+        // Update student record
+        $student->update([
+            'skills' => array_values($skills),
+            'interests' => array_values($interests),
+            'preferred_industry' => array_values($preferredIndustry),
+            'preferred_location' => array_values($preferredLocation),
+        ]);
+
+        return redirect()->back()->with('success', 'Your placement preferences have been updated successfully.');
+    }
+
+    /**
+     * Get placement preferences options for views.
+     */
+    public static function getPreferencesOptions(): array
+    {
+        return [
+            'skills' => config('placement_preferences.skills', []),
+            'interests' => config('placement_preferences.interests', []),
+            'preferred_industry' => config('placement_preferences.preferred_industry', []),
+            'preferred_location' => config('placement_preferences.preferred_location', []),
+        ];
     }
 }

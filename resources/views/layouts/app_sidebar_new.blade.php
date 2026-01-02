@@ -213,6 +213,21 @@
         <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Manage Students</span>
     </a>
 
+    <!-- Programmes (Admin Only) -->
+    @if($isAdmin)
+    <a href="{{ route('admin.programmes.index') }}"
+       class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('admin.programmes.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+       :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+       :title="isSidebarCollapsed ? 'Programmes' : ''">
+        <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+        </div>
+        <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Programmes</span>
+    </a>
+    @endif
+
     <!-- Documents Section (Admin Only) -->
     <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">

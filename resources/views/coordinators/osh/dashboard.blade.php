@@ -2,6 +2,42 @@
 
 @section('title', 'OSH Coordinator Dashboard')
 
+@push('styles')
+<style>
+    .coordinator-hero {
+        background: linear-gradient(135deg, #c2410c 0%, #ea580c 25%, #f97316 50%, #fb923c 75%, #c2410c 100%);
+        background-size: 400% 400%;
+        animation: elegantGradient 20s ease infinite;
+    }
+
+    @keyframes elegantGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .icon-float {
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .dark .glass-card {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+@endpush
+
 @section('content')
 @php
     // Calculate summary statistics
@@ -14,7 +50,44 @@
     $qualityScore = min(100, max(0, 100 - ((count($atRiskStudents) ?? 0) * 5)));
 @endphp
 
-<div class="space-y-6">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/30 dark:from-gray-900 dark:via-orange-950/20 dark:to-amber-950/20 space-y-6">
+
+    <!-- Elegant Coordinator Header -->
+    <div class="coordinator-hero rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative z-10">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center icon-float">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">OSH Coordinator Dashboard</h1>
+                        <p class="text-white/80">Occupational Safety & Health Management</p>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-3">
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Total Students</p>
+                        <p class="text-xl font-bold">{{ $stats['total_students'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Active Groups</p>
+                        <p class="text-xl font-bold">{{ $stats['total_groups'] }}</p>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                        <p class="text-xs text-white/70">Progress</p>
+                        <p class="text-xl font-bold">{{ $overallProgress }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Project Milestone Timeline -->
     <x-coordinator.milestone-timeline
         module="osh"

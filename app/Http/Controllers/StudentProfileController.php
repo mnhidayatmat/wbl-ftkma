@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LecturerCourseAssignment;
+use App\Models\Programme;
 use App\Models\Student;
 use App\Models\StudentCourseAssignment;
 use App\Models\User;
@@ -83,8 +84,9 @@ class StudentProfileController extends Controller
     {
         $groups = WblGroup::orderBy('name')->get();
         $industryCoaches = User::where('role', 'industry')->orderBy('name')->get();
+        $programmes = Programme::active()->ordered()->get();
 
-        return view('students.profile.create', compact('groups', 'industryCoaches'));
+        return view('students.profile.create', compact('groups', 'industryCoaches', 'programmes'));
     }
 
     /**
@@ -194,6 +196,9 @@ class StudentProfileController extends Controller
         // Load resume inspection relationship
         $student->load('resumeInspection');
 
+        // Get active programmes for dropdown
+        $programmes = Programme::active()->ordered()->get();
+
         return view('students.profile.edit', compact(
             'student',
             'groups',
@@ -204,7 +209,8 @@ class StudentProfileController extends Controller
             'academicAdvisorOptions',
             'ipLecturers',
             'oshLecturers',
-            'ppeLecturers'
+            'ppeLecturers',
+            'programmes'
         ));
     }
 
