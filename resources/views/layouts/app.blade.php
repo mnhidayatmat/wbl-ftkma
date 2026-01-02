@@ -8,6 +8,17 @@ use Illuminate\Support\Facades\Route;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#003A6C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WBL System">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/icons/icon-72x72.png">
+    <link rel="shortcut icon" href="/images/icons/icon-72x72.png">
+
     <title>{{ config('app.name', 'WBL Management System') }}</title>
 
     <!-- Fonts -->
@@ -729,5 +740,228 @@ use Illuminate\Support\Facades\Route;
         });
     </script>
     @stack('scripts')
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
+
+    <!-- PWA Install Prompt -->
+    <div id="pwa-install-prompt" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg p-4 z-[9999] transform translate-y-full transition-transform duration-300 ease-out" style="display: none;">
+        <div class="max-w-lg mx-auto flex items-center gap-4">
+            <img src="/images/icons/icon-72x72.png" alt="WBL App" class="w-12 h-12 rounded-xl shadow">
+            <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-gray-900 dark:text-white text-sm">Install WBL System</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" id="pwa-install-description">Add to your home screen for quick access</p>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <button id="pwa-install-dismiss" class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    Later
+                </button>
+                <button id="pwa-install-button" class="px-4 py-2 text-sm font-medium text-white bg-[#003A6C] hover:bg-[#002a4f] rounded-lg transition-colors">
+                    Install
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- iOS Install Instructions Modal -->
+    <div id="ios-install-modal" class="fixed inset-0 bg-black/50 z-[10000] flex items-end justify-center" style="display: none;">
+        <div class="bg-white dark:bg-gray-800 rounded-t-2xl w-full max-w-lg p-6 transform transition-transform duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Install WBL System</h3>
+                <button id="ios-modal-close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#003A6C] text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                    <p class="text-gray-700 dark:text-gray-300">Tap the <span class="inline-flex items-center"><svg class="w-5 h-5 mx-1 text-[#007AFF]" fill="currentColor" viewBox="0 0 24 24"><path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V10c0-1.1.9-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .9 2 2z"/></svg></span> Share button</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#003A6C] text-white rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                    <p class="text-gray-700 dark:text-gray-300">Scroll down and tap <strong>"Add to Home Screen"</strong></p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#003A6C] text-white rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <p class="text-gray-700 dark:text-gray-300">Tap <strong>"Add"</strong> to install</p>
+                </div>
+            </div>
+            <button id="ios-modal-ok" class="w-full mt-6 px-4 py-3 text-sm font-medium text-white bg-[#003A6C] hover:bg-[#002a4f] rounded-lg transition-colors">
+                Got it!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Check if running as installed PWA (standalone mode)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isStandalone) {
+                // User is using the installed app - no need to prompt
+                return;
+            }
+
+            const promptEl = document.getElementById('pwa-install-prompt');
+            const installBtn = document.getElementById('pwa-install-button');
+            const dismissBtn = document.getElementById('pwa-install-dismiss');
+            const description = document.getElementById('pwa-install-description');
+            const iosModal = document.getElementById('ios-install-modal');
+            const iosModalClose = document.getElementById('ios-modal-close');
+            const iosModalOk = document.getElementById('ios-modal-ok');
+
+            let deferredPrompt = null;
+
+            // Detect iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+
+            // Detect mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            // Check if user dismissed prompt recently (within 7 days)
+            function wasRecentlyDismissed() {
+                const dismissedAt = localStorage.getItem('pwa-prompt-dismissed');
+                if (dismissedAt && (Date.now() - parseInt(dismissedAt)) < 7 * 24 * 60 * 60 * 1000) {
+                    return true;
+                }
+                return false;
+            }
+
+            function showPrompt() {
+                if (!promptEl || wasRecentlyDismissed()) return;
+                promptEl.style.display = 'block';
+                setTimeout(() => {
+                    promptEl.classList.remove('translate-y-full');
+                }, 10);
+            }
+
+            function hidePrompt() {
+                if (!promptEl) return;
+                promptEl.classList.add('translate-y-full');
+                setTimeout(() => {
+                    promptEl.style.display = 'none';
+                }, 300);
+            }
+
+            function showIOSModal() {
+                if (!iosModal) return;
+                iosModal.style.display = 'flex';
+            }
+
+            function hideIOSModal() {
+                if (!iosModal) return;
+                iosModal.style.display = 'none';
+            }
+
+            // Listen for beforeinstallprompt (Android/Chrome)
+            // This event ONLY fires when the app is NOT installed
+            // If user uninstalls and visits again, this event will fire again
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+
+                // Clear any previous installed flag since browser says it's installable
+                // This handles the case where user uninstalled the app
+                localStorage.removeItem('pwa-installed');
+
+                // Show prompt after short delay
+                setTimeout(showPrompt, 2000);
+            });
+
+            // For iOS Safari - check if should show prompt
+            // iOS doesn't have beforeinstallprompt, so we use a different approach
+            if (isIOS && isSafari && isMobile) {
+                // Check if iOS user marked as "installed" (followed instructions)
+                const iosInstalled = localStorage.getItem('pwa-ios-installed');
+
+                if (!iosInstalled && !wasRecentlyDismissed()) {
+                    description.textContent = 'Tap Install to see how to add this app';
+                    setTimeout(showPrompt, 3000);
+                }
+            }
+
+            // Install button click
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        // Android/Chrome - trigger native prompt
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                            localStorage.setItem('pwa-installed', 'true');
+                        }
+                        deferredPrompt = null;
+                        hidePrompt();
+                    } else if (isIOS) {
+                        // iOS - show instructions modal
+                        hidePrompt();
+                        showIOSModal();
+                    }
+                });
+            }
+
+            // Dismiss button click
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
+                    hidePrompt();
+                });
+            }
+
+            // iOS modal close
+            if (iosModalClose) {
+                iosModalClose.addEventListener('click', hideIOSModal);
+            }
+            if (iosModalOk) {
+                iosModalOk.addEventListener('click', () => {
+                    // Mark iOS as "installed" when user acknowledges instructions
+                    localStorage.setItem('pwa-ios-installed', 'true');
+                    localStorage.setItem('pwa-ios-installed-at', Date.now().toString());
+                    hideIOSModal();
+                });
+            }
+
+            // Close iOS modal on backdrop click
+            if (iosModal) {
+                iosModal.addEventListener('click', (e) => {
+                    if (e.target === iosModal) {
+                        localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
+                        hideIOSModal();
+                    }
+                });
+            }
+
+            // Listen for successful install
+            window.addEventListener('appinstalled', () => {
+                localStorage.setItem('pwa-installed', 'true');
+                hidePrompt();
+                console.log('PWA installed successfully');
+            });
+
+            // Check periodically if iOS app was uninstalled
+            // Reset iOS installed flag after 30 days to re-prompt if they deleted it
+            if (isIOS) {
+                const iosInstalledAt = localStorage.getItem('pwa-ios-installed-at');
+                if (iosInstalledAt && (Date.now() - parseInt(iosInstalledAt)) > 30 * 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem('pwa-ios-installed');
+                    localStorage.removeItem('pwa-ios-installed-at');
+                }
+            }
+        })();
+    </script>
 </body>
 </html>

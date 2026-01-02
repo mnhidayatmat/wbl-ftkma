@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#003A6C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WBL System">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/icons/icon-72x72.png">
+    <link rel="shortcut icon" href="/images/icons/icon-72x72.png">
+
     <title>{{ config('app.name', 'WBL Management System') }} - @yield('title')</title>
 
     <!-- Fonts -->
@@ -99,6 +110,21 @@
         }
     </script>
     @stack('scripts')
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
 
