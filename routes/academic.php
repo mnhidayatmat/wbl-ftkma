@@ -707,5 +707,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
         Route::get('ppe/overview', [\App\Http\Controllers\Student\StudentPpeOverviewController::class, 'index'])
             ->name('ppe.overview');
+        Route::get('ppe/submissions', [\App\Http\Controllers\Student\StudentModuleSubmissionController::class, 'ppe'])
+            ->name('ppe.submissions');
     });
 });

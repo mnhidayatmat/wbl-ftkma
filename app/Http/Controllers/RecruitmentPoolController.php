@@ -60,37 +60,18 @@ class RecruitmentPoolController extends Controller
             }
         }
 
-        // Filter by placement status
-        if ($request->filled('placement_status')) {
-            if ($request->placement_status === 'ready') {
-                // SAL released + Resume approved
-                $query->whereHas('placementTracking', function ($q) {
-                    $q->whereNotNull('sal_released_at');
-                })->whereHas('resumeInspection', function ($q) {
-                    $q->where('status', 'RECOMMENDED');
-                });
-            } elseif ($request->placement_status === 'not_applied') {
-                $query->whereHas('placementTracking', function ($q) {
-                    $q->where('status', 'SAL_RELEASED');
-                });
-            } elseif ($request->placement_status === 'applied') {
-                $query->whereHas('placementTracking', function ($q) {
-                    $q->whereIn('status', ['APPLIED', 'INTERVIEWED', 'OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED']);
-                });
-            } elseif ($request->placement_status === 'offer_received') {
-                // Students who received job offers
-                $query->whereHas('placementTracking', function ($q) {
-                    $q->whereIn('status', ['OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED']);
-                });
-            } elseif ($request->placement_status === 'no_offer') {
-                // Students who have NOT received offers yet
-                $query->where(function ($q) {
-                    $q->whereDoesntHave('placementTracking')
-                        ->orWhereHas('placementTracking', function ($subQ) {
-                            $subQ->whereIn('status', ['NOT_APPLIED', 'SAL_RELEASED', 'APPLIED', 'INTERVIEWED']);
-                        });
-                });
-            }
+        // Filter by exclude_offers toggle (defaults to ON - exclude students with offers)
+        // When exclude_offers is '1' or not set, exclude students who received offers
+        // When exclude_offers is '0', show all students
+        $excludeOffers = $request->input('exclude_offers', '1');
+        if ($excludeOffers === '1') {
+            // Exclude students with OFFER_RECEIVED, ACCEPTED, or SCL_RELEASED status
+            $query->where(function ($q) {
+                $q->whereDoesntHave('placementTracking')
+                    ->orWhereHas('placementTracking', function ($subQ) {
+                        $subQ->whereNotIn('status', ['OFFER_RECEIVED', 'ACCEPTED', 'SCL_RELEASED']);
+                    });
+            });
         }
 
         // Filter by interests (match any)
@@ -361,8 +342,8 @@ class RecruitmentPoolController extends Controller
         if ($request->filled('resume_status')) {
             $filters['Resume Status'] = ucfirst(str_replace('_', ' ', $request->resume_status));
         }
-        if ($request->filled('placement_status')) {
-            $filters['Placement Status'] = ucfirst(str_replace('_', ' ', $request->placement_status));
+        if ($request->input('exclude_offers', '1') === '1') {
+            $filters['Availability'] = 'Excluding students with offers';
         }
 
         return $filters;

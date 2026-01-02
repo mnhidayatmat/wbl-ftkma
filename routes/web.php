@@ -210,4 +210,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{assessment}', [\App\Http\Controllers\Student\StudentSubmissionController::class, 'store'])->name('store');
         Route::get('/{submission}/download', [\App\Http\Controllers\Student\StudentSubmissionController::class, 'download'])->name('download');
     });
+
+    // Evaluator Submissions Routes
+    Route::get('/evaluator/submissions/{submission}/download', [\App\Http\Controllers\Academic\EvaluatorSubmissionController::class, 'download'])
+        ->name('evaluator.submissions.download');
+    Route::get('/evaluator/submissions/{submission}/preview', [\App\Http\Controllers\Academic\EvaluatorSubmissionController::class, 'preview'])
+        ->name('evaluator.submissions.preview');
 });

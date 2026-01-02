@@ -25,8 +25,10 @@ Route::middleware(['auth', 'role:supervisor_li,admin'])->group(function () {
     // });
 });
 
-// Student LI Overview
+// Student LI Routes
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('student/li/overview', [\App\Http\Controllers\Student\StudentLiOverviewController::class, 'index'])
         ->name('student.li.overview');
+    Route::get('student/li/submissions', [\App\Http\Controllers\Student\StudentModuleSubmissionController::class, 'li'])
+        ->name('student.li.submissions');
 });

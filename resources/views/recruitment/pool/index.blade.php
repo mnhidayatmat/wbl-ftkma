@@ -96,17 +96,19 @@
                         </select>
                     </div>
 
-                    <!-- Placement Status Filter -->
+                    <!-- Exclude Students with Offers Toggle -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Placement Status</label>
-                        <select name="placement_status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
-                            <option value="">All</option>
-                            <option value="ready" {{ request('placement_status') === 'ready' ? 'selected' : '' }}>Ready for Placement</option>
-                            <option value="not_applied" {{ request('placement_status') === 'not_applied' ? 'selected' : '' }}>Not Applied</option>
-                            <option value="applied" {{ request('placement_status') === 'applied' ? 'selected' : '' }}>Applied</option>
-                            <option value="no_offer" {{ request('placement_status') === 'no_offer' ? 'selected' : '' }}>Not Received Offers</option>
-                            <option value="offer_received" {{ request('placement_status') === 'offer_received' ? 'selected' : '' }}>Offer Received</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Availability</label>
+                        <div class="flex items-center h-[42px]">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="hidden" name="exclude_offers" value="0">
+                                <input type="checkbox" name="exclude_offers" value="1"
+                                       {{ request('exclude_offers', '1') === '1' ? 'checked' : '' }}
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-umpsa-primary/30 dark:peer-focus:ring-umpsa-secondary/30 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-umpsa-primary"></div>
+                                <span class="ms-3 text-sm font-medium text-gray-700 dark:text-gray-300">Exclude students with offers</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 

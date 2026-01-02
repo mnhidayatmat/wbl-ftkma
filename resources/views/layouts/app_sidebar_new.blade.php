@@ -979,25 +979,123 @@
                             </svg>
                             <span>Project Proposal</span>
                         </a>
+                        <a href="{{ Route::has('student.fyp.submissions') ? route('student.fyp.submissions') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.fyp.submissions') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Assessment Submission</span>
+                        </a>
                     </div>
                 </div>
 
-                <a href="{{ Route::has('student.ip.overview') ? route('student.ip.overview') : '#' }}"
-                   class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.ip.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <span class="text-sm">IP</span>
-                </a>
-                <a href="{{ Route::has('student.osh.overview') ? route('student.osh.overview') : '#' }}"
-                   class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.osh.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <span class="text-sm">OSH</span>
-                </a>
-                <a href="{{ Route::has('student.ppe.overview') ? route('student.ppe.overview') : '#' }}"
-                   class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.ppe.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <span class="text-sm">PPE</span>
-                </a>
-                <a href="{{ Route::has('student.li.overview') ? route('student.li.overview') : '#' }}"
-                   class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.li.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <span class="text-sm">Industrial Training</span>
-                </a>
+                <!-- IP Nested Dropdown -->
+                <div x-data="{ ipMenuOpen: {{ request()->routeIs('student.ip.*') ? 'true' : 'false' }} }">
+                    <button @click="ipMenuOpen = !ipMenuOpen"
+                            class="flex items-center justify-between w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.ip.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <span class="text-sm">IP</span>
+                        <svg :class="{'rotate-180': ipMenuOpen}" class="w-3 h-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="ipMenuOpen" x-transition class="ml-4 mt-1 space-y-1">
+                        <a href="{{ Route::has('student.ip.overview') ? route('student.ip.overview') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.ip.overview') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Overview</span>
+                        </a>
+                        <a href="{{ Route::has('student.ip.submissions') ? route('student.ip.submissions') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.ip.submissions') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Assessment Submission</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- OSH Nested Dropdown -->
+                <div x-data="{ oshMenuOpen: {{ request()->routeIs('student.osh.*') ? 'true' : 'false' }} }">
+                    <button @click="oshMenuOpen = !oshMenuOpen"
+                            class="flex items-center justify-between w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.osh.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <span class="text-sm">OSH</span>
+                        <svg :class="{'rotate-180': oshMenuOpen}" class="w-3 h-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="oshMenuOpen" x-transition class="ml-4 mt-1 space-y-1">
+                        <a href="{{ Route::has('student.osh.overview') ? route('student.osh.overview') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.osh.overview') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Overview</span>
+                        </a>
+                        <a href="{{ Route::has('student.osh.submissions') ? route('student.osh.submissions') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.osh.submissions') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Assessment Submission</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PPE Nested Dropdown -->
+                <div x-data="{ ppeMenuOpen: {{ request()->routeIs('student.ppe.*') ? 'true' : 'false' }} }">
+                    <button @click="ppeMenuOpen = !ppeMenuOpen"
+                            class="flex items-center justify-between w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.ppe.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <span class="text-sm">PPE</span>
+                        <svg :class="{'rotate-180': ppeMenuOpen}" class="w-3 h-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="ppeMenuOpen" x-transition class="ml-4 mt-1 space-y-1">
+                        <a href="{{ Route::has('student.ppe.overview') ? route('student.ppe.overview') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.ppe.overview') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Overview</span>
+                        </a>
+                        <a href="{{ Route::has('student.ppe.submissions') ? route('student.ppe.submissions') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.ppe.submissions') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Assessment Submission</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- LI (Industrial Training) Nested Dropdown -->
+                <div x-data="{ liMenuOpen: {{ request()->routeIs('student.li.*') ? 'true' : 'false' }} }">
+                    <button @click="liMenuOpen = !liMenuOpen"
+                            class="flex items-center justify-between w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out {{ request()->routeIs('student.li.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <span class="text-sm">Industrial Training</span>
+                        <svg :class="{'rotate-180': liMenuOpen}" class="w-3 h-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="liMenuOpen" x-transition class="ml-4 mt-1 space-y-1">
+                        <a href="{{ Route::has('student.li.overview') ? route('student.li.overview') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.li.overview') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Overview</span>
+                        </a>
+                        <a href="{{ Route::has('student.li.submissions') ? route('student.li.submissions') : '#' }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.li.submissions') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Assessment Submission</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
         

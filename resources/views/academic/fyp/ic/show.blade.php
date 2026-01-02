@@ -168,11 +168,14 @@
             </div>
             <div class="mt-4">
                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div class="bg-gradient-to-r from-[#0084C5] to-[#00A86B] h-3 rounded-full transition-all duration-500" 
+                    <div class="bg-gradient-to-r from-[#0084C5] to-[#00A86B] h-3 rounded-full transition-all duration-500"
                          style="width: {{ min($progressPercent, 100) }}%"></div>
                 </div>
             </div>
         </div>
+
+        <!-- Student Submissions Section -->
+        @include('academic.assessments.partials.evaluator-submissions', ['student' => $student, 'courseCode' => 'FYP'])
 
         <!-- Assessment Cards Grid -->
         @php
@@ -305,6 +308,7 @@
                                     </div>
 
                                     <div class="p-5">
+                                        <!-- Assessment Title -->
                                         <div class="mb-4">
                                             <h4 class="font-semibold text-[#003A6C] dark:text-[#0084C5] pr-16 leading-tight">
                                                 {{ $baseName }}
@@ -319,7 +323,16 @@
                                             </div>
                                         </div>
 
-                                        <div class="flex items-center justify-between mb-4">
+                                        <!-- Student Submission Section -->
+                                        @php $firstAssessment = $assessmentsInGroup->first(); @endphp
+                                        @if($firstAssessment->allow_submission)
+                                            <div class="mb-4">
+                                                <x-submission-viewer :assessment="$firstAssessment" :student="$student" :compact="true" />
+                                            </div>
+                                        @endif
+
+                                        <!-- Progress & Contribution -->
+                                        <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                             <div>
                                                 <span class="text-xs text-gray-500 dark:text-gray-400 block">Progress</span>
                                                 <span class="text-xl font-bold text-gray-900 dark:text-white">{{ $completedInGroup }}/{{ $assessmentsInGroup->count() }}</span>
@@ -331,13 +344,14 @@
                                             </div>
                                         </div>
 
+                                        <!-- Evaluate Button -->
                                         @if($canEdit)
-                                        <button @click="showModal = true" 
-                                                class="w-full py-2.5 px-4 bg-[#0084C5] hover:bg-[#003A6C] text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button @click="showModal = true"
+                                                class="w-full py-3 px-4 bg-gradient-to-r from-[#0084C5] to-[#003A6C] hover:from-[#003A6C] hover:to-[#002850] text-white font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
-                                            {{ $isCompleted ? 'Edit Scores' : 'Enter Scores' }}
+                                            {{ $isCompleted ? 'Edit Evaluation' : 'Start Evaluation' }}
                                         </button>
                                         @else
                                         <div class="w-full py-2.5 px-4 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium rounded-lg text-center text-sm">
@@ -630,6 +644,7 @@
                                     </div>
 
                                     <div class="p-5">
+                                        <!-- Assessment Title -->
                                         <div class="mb-4">
                                             <h4 class="font-semibold text-[#003A6C] dark:text-[#0084C5] pr-16 leading-tight">
                                                 {{ $baseName }}
@@ -644,7 +659,15 @@
                                             </div>
                                         </div>
 
-                                        <div class="flex items-center justify-between mb-4">
+                                        <!-- Student Submission Section -->
+                                        @if($assessment->allow_submission)
+                                            <div class="mb-4">
+                                                <x-submission-viewer :assessment="$assessment" :student="$student" :compact="true" />
+                                            </div>
+                                        @endif
+
+                                        <!-- Score & Contribution -->
+                                        <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                             <div>
                                                 <span class="text-xs text-gray-500 dark:text-gray-400 block">Score</span>
                                                 @if($isSingleCompleted)
@@ -661,13 +684,14 @@
                                             </div>
                                         </div>
 
+                                        <!-- Evaluate Button -->
                                         @if($canEdit)
-                                        <button @click="showModal = true" 
-                                                class="w-full py-2.5 px-4 bg-[#0084C5] hover:bg-[#003A6C] text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button @click="showModal = true"
+                                                class="w-full py-3 px-4 bg-gradient-to-r from-[#0084C5] to-[#003A6C] hover:from-[#003A6C] hover:to-[#002850] text-white font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
-                                            {{ $isSingleCompleted ? 'Edit Score' : 'Enter Score' }}
+                                            {{ $isSingleCompleted ? 'Edit Evaluation' : 'Start Evaluation' }}
                                         </button>
                                         @else
                                         <div class="w-full py-2.5 px-4 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium rounded-lg text-center text-sm">

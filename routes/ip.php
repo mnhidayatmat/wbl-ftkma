@@ -22,9 +22,11 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('summary', [IpSummaryController::class, 'index'])->name('summary.index');
     });
 
-    // Student routes for IP overview
+    // Student routes for IP
     Route::middleware('role:student')->prefix('student/ip')->name('student.ip.')->group(function () {
         Route::get('overview', [\App\Http\Controllers\Student\StudentIpOverviewController::class, 'index'])
             ->name('overview');
+        Route::get('submissions', [\App\Http\Controllers\Student\StudentModuleSubmissionController::class, 'ip'])
+            ->name('submissions');
     });
 });

@@ -22,9 +22,11 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('summary', [OshSummaryController::class, 'index'])->name('summary.index');
     });
 
-    // Student routes for OSH overview
+    // Student routes for OSH
     Route::middleware('role:student')->prefix('student/osh')->name('student.osh.')->group(function () {
         Route::get('overview', [\App\Http\Controllers\Student\StudentOshOverviewController::class, 'index'])
             ->name('overview');
+        Route::get('submissions', [\App\Http\Controllers\Student\StudentModuleSubmissionController::class, 'osh'])
+            ->name('submissions');
     });
 });

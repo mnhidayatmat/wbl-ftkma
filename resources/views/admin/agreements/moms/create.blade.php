@@ -159,10 +159,10 @@
 
             <!-- Submit Buttons -->
             <div class="flex items-center justify-end gap-4">
-                <a href="{{ route('admin.agreements.moms.index') }}"
+                <button type="button" onclick="history.back()"
                    class="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-colors">
                     Cancel
-                </a>
+                </button>
                 <button type="submit"
                         class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

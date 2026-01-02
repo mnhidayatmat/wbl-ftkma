@@ -153,11 +153,14 @@
             </div>
             <div class="mt-4">
                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div class="bg-gradient-to-r from-[#00A86B] to-[#0084C5] h-3 rounded-full transition-all duration-500" 
+                    <div class="bg-gradient-to-r from-[#00A86B] to-[#0084C5] h-3 rounded-full transition-all duration-500"
                          style="width: {{ min($progressPercent, 100) }}%"></div>
                 </div>
             </div>
         </div>
+
+        <!-- Student Submissions Section -->
+        @include('academic.assessments.partials.evaluator-submissions', ['student' => $student, 'courseCode' => 'FYP'])
 
         <!-- Assessment Cards Grid -->
         @php

@@ -25,8 +25,10 @@ Route::middleware(['auth', 'role:at,admin'])->group(function () {
     // });
 });
 
-// Student FYP Overview
+// Student FYP Routes
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('student/fyp/overview', [\App\Http\Controllers\Student\StudentFypOverviewController::class, 'index'])
         ->name('student.fyp.overview');
+    Route::get('student/fyp/submissions', [\App\Http\Controllers\Student\StudentModuleSubmissionController::class, 'fyp'])
+        ->name('student.fyp.submissions');
 });

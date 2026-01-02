@@ -152,10 +152,13 @@ class AgreementMomController extends Controller
             Storage::disk('public')->delete($mom->document_path);
         }
 
+        // Detach companies first (for safety, even though cascade should handle it)
+        $mom->companies()->detach();
+
         $mom->delete();
 
         return redirect()
-            ->route('admin.agreements.moms.index')
+            ->back()
             ->with('success', 'Minute of Meeting deleted successfully.');
     }
 

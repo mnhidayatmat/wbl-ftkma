@@ -144,8 +144,9 @@
                             </div>
 
                             <div class="p-6 flex-1 flex flex-col">
+                                <!-- Assessment Title -->
                                 <div class="mb-4">
-                                    <h4 class="font-bold text-[#003A6C] dark:text-[#0084C5] pr-16 leading-tight min-h-[40px] text-base group-hover:text-[#0084C5] transition-colors">
+                                    <h4 class="font-bold text-[#003A6C] dark:text-[#0084C5] pr-16 leading-tight text-base group-hover:text-[#0084C5] transition-colors">
                                         {{ $assessment->assessment_name }}
                                     </h4>
                                     <div class="flex items-center gap-2 mt-2">
@@ -155,7 +156,15 @@
                                     </div>
                                 </div>
 
+                                <!-- Student Submission Section -->
+                                @if($assessment->allow_submission)
+                                    <div class="mb-4">
+                                        <x-submission-viewer :assessment="$assessment" :student="$student" :compact="true" />
+                                    </div>
+                                @endif
+
                                 <div class="mt-auto">
+                                    <!-- Score & Contribution -->
                                     <div class="flex items-center justify-between mb-4 bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl">
                                         <div>
                                             <span class="text-[10px] text-gray-500 dark:text-gray-400 block font-bold uppercase tracking-widest">Score</span>
@@ -172,13 +181,14 @@
                                         </div>
                                     </div>
 
+                                    <!-- Evaluate Button -->
                                     @can('edit-supervisor-li-marks', $student)
-                                        <button @click="showModal = true" 
-                                                class="w-full py-3 px-4 bg-[#0084C5] hover:bg-[#003A6C] text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-95">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button @click="showModal = true"
+                                                class="w-full py-3 px-4 bg-gradient-to-r from-[#0084C5] to-[#003A6C] hover:from-[#003A6C] hover:to-[#002850] text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-xl active:scale-95">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
-                                            {{ $isCompleted ? 'Edit Evaluation' : 'Evaluate Now' }}
+                                            {{ $isCompleted ? 'Edit Evaluation' : 'Start Evaluation' }}
                                         </button>
                                     @else
                                          <div class="w-full py-3 px-4 bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold rounded-xl text-center text-xs uppercase tracking-widest">

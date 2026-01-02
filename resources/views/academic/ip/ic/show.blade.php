@@ -268,8 +268,9 @@
                             </div>
 
                             <div class="p-6">
+                                <!-- Assessment Title -->
                                 <div class="mb-5">
-                                    <h4 class="font-bold text-[#003A6C] dark:text-[#0084C5] pr-16 leading-tight group-hover:text-[#0084C5] transition-colors text-lg min-h-[3rem]">
+                                    <h4 class="font-bold text-[#003A6C] dark:text-[#0084C5] pr-16 leading-tight group-hover:text-[#0084C5] transition-colors text-lg">
                                         {{ $assessment->assessment_name }}
                                     </h4>
                                     <div class="flex items-center gap-2 mt-3">
@@ -282,6 +283,14 @@
                                     </div>
                                 </div>
 
+                                <!-- Student Submission Section -->
+                                @if($assessment->allow_submission)
+                                    <div class="mb-5">
+                                        <x-submission-viewer :assessment="$assessment" :student="$student" :compact="true" />
+                                    </div>
+                                @endif
+
+                                <!-- Score & Contribution -->
                                 <div class="flex items-center justify-between mb-6 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
                                     <div>
                                         <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">Score</span>
@@ -294,13 +303,14 @@
                                     </div>
                                 </div>
 
+                                <!-- Evaluate Button -->
                                 @if($canEdit)
-                                    <button @click="showModal = true" 
-                                            class="w-full py-3 px-4 bg-[#0084C5] hover:bg-[#003A6C] text-white font-bold rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+                                    <button @click="showModal = true"
+                                            class="w-full py-3 px-4 bg-gradient-to-r from-[#0084C5] to-[#003A6C] hover:from-[#003A6C] hover:to-[#002850] text-white font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
-                                        {{ $isCompleted ? 'Edit Score' : 'Enter Score' }}
+                                        {{ $isCompleted ? 'Edit Evaluation' : 'Start Evaluation' }}
                                     </button>
                                 @else
                                      <button @click="showModal = true"
