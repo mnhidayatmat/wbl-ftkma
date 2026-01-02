@@ -1037,7 +1037,7 @@ class DashboardController extends Controller
         });
 
         // Fetch workplace issues for this student
-        $workplaceIssues = \App\Models\WorkplaceIssue::where('student_id', $student->id)->get();
+        $workplaceIssues = \App\Models\WorkplaceIssueReport::where('student_id', $student->id)->get();
         $workplaceIssueStats = [
             'total' => $workplaceIssues->count(),
             'new' => $workplaceIssues->where('status', 'new')->count(),

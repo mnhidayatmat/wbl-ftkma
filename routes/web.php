@@ -203,4 +203,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Role Switch
     Route::post('/role/switch', [\App\Http\Controllers\RoleSwitchController::class, 'switch'])->name('role.switch');
+
+    // Student Submissions Routes
+    Route::middleware('role:student')->prefix('student/submissions')->name('student.submissions.')->group(function () {
+        Route::get('/{assessment}/create', [\App\Http\Controllers\Student\StudentSubmissionController::class, 'create'])->name('create');
+        Route::post('/{assessment}', [\App\Http\Controllers\Student\StudentSubmissionController::class, 'store'])->name('store');
+        Route::get('/{submission}/download', [\App\Http\Controllers\Student\StudentSubmissionController::class, 'download'])->name('download');
+    });
 });

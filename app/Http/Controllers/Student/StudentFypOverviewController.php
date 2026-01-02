@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assessment;
 use App\Models\FYP\FypProjectProposal;
 use App\Models\FYP\FypRubricTemplate;
 use App\Models\FYP\FypRubricEvaluation;
 use App\Models\FYP\FypRubricOverallFeedback;
 use App\Models\FypLogbookEvaluation;
 use App\Models\FYP\FypAssessmentWindow;
+use App\Models\StudentSubmission;
 use Illuminate\Http\Request;
 
 class StudentFypOverviewController extends Controller
@@ -50,6 +52,34 @@ class StudentFypOverviewController extends Controller
         // Get assessment windows
         $assessmentWindows = FypAssessmentWindow::all();
 
+        // Fetch assessments requiring submission for FYP
+        $submissionAssessments = Assessment::where('course_code', 'FYP')
+            ->where('requires_submission', true)
+            ->where('is_active', true)
+            ->orderBy('submission_deadline')
+            ->get()
+            ->map(function ($assessment) use ($student) {
+                // Get student's submissions for this assessment
+                $submissions = StudentSubmission::where('assessment_id', $assessment->id)
+                    ->where('student_id', $student->id)
+                    ->orderBy('attempt_number', 'desc')
+                    ->get();
+
+                $latestSubmission = $submissions->first();
+                $attemptCount = $submissions->count();
+
+                return [
+                    'assessment' => $assessment,
+                    'submissions' => $submissions,
+                    'latest_submission' => $latestSubmission,
+                    'attempt_count' => $attemptCount,
+                    'can_submit' => $attemptCount < $assessment->max_attempts &&
+                                   ($assessment->isSubmissionOpen() || $assessment->acceptsLateSubmission()),
+                    'is_late' => $assessment->isLateSubmission(),
+                    'status' => $this->getSubmissionStatus($assessment, $latestSubmission, $attemptCount),
+                ];
+            });
+
         // Calculate total FYP score from rubric evaluations
         $totalScore = $this->calculateTotalScore($evaluations, $templates);
 
@@ -70,6 +100,7 @@ class StudentFypOverviewController extends Controller
             'overallFeedback',
             'logbooks',
             'assessmentWindows',
+            'submissionAssessments',
             'totalScore',
             'evaluationSummary',
             'radarChartData',
@@ -169,5 +200,31 @@ class StudentFypOverviewController extends Controller
         $components['logbook'] = ($logbooks->count() / 6) * 20;
 
         return array_sum($components);
+    }
+
+    /**
+     * Get submission status for display
+     */
+    private function getSubmissionStatus($assessment, $latestSubmission, $attemptCount): array
+    {
+        if ($latestSubmission) {
+            if ($latestSubmission->status === 'evaluated') {
+                return ['label' => 'Evaluated', 'color' => 'green'];
+            }
+            if ($latestSubmission->is_late) {
+                return ['label' => 'Submitted (Late)', 'color' => 'yellow'];
+            }
+            return ['label' => 'Submitted', 'color' => 'blue'];
+        }
+
+        if (!$assessment->isSubmissionOpen() && !$assessment->acceptsLateSubmission()) {
+            return ['label' => 'Closed', 'color' => 'gray'];
+        }
+
+        if ($assessment->isLateSubmission()) {
+            return ['label' => 'Overdue', 'color' => 'red'];
+        }
+
+        return ['label' => 'Not Submitted', 'color' => 'orange'];
     }
 }

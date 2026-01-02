@@ -164,6 +164,18 @@ class AssessmentController extends Controller
             'clos' => ['required', 'array', 'min:1'],
             'clos.*.clo_code' => ['required', 'string'],
             'clos.*.weight_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
+            // Submission Settings
+            'requires_submission' => ['nullable', 'boolean'],
+            'submission_deadline' => ['nullable', 'date'],
+            'allowed_file_types' => ['nullable', 'array'],
+            'allowed_file_types.*' => ['in:pdf,docx,doc,pptx,ppt,xlsx,xls,zip,jpg,jpeg,png'],
+            'max_file_size_mb' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'max_attempts' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'allow_late_submission' => ['nullable', 'boolean'],
+            'late_penalty_per_day' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'max_late_days' => ['nullable', 'integer', 'min:1', 'max:30'],
+            'require_declaration' => ['nullable', 'boolean'],
+            'submission_instructions' => ['nullable', 'string', 'max:2000'],
         ]);
 
         // Validate CLO codes
@@ -223,6 +235,17 @@ class AssessmentController extends Controller
             'evaluator_role' => $firstEvaluator['role'], // Use first evaluator for backward compatibility
             'is_active' => $request->has('is_active') ? true : false,
             'created_by' => auth()->id(),
+            // Submission Settings
+            'requires_submission' => $request->boolean('requires_submission'),
+            'submission_deadline' => $request->input('submission_deadline'),
+            'allowed_file_types' => $request->input('allowed_file_types', []),
+            'max_file_size_mb' => $request->input('max_file_size_mb', 10),
+            'max_attempts' => $request->input('max_attempts', 1),
+            'allow_late_submission' => $request->boolean('allow_late_submission'),
+            'late_penalty_per_day' => $request->input('late_penalty_per_day'),
+            'max_late_days' => $request->input('max_late_days'),
+            'require_declaration' => $request->boolean('require_declaration', true),
+            'submission_instructions' => $request->input('submission_instructions'),
         ]);
 
         // Save multiple CLOs
@@ -371,6 +394,18 @@ class AssessmentController extends Controller
             'clos' => ['required', 'array', 'min:1'],
             'clos.*.clo_code' => ['required', 'string'],
             'clos.*.weight_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
+            // Submission Settings
+            'requires_submission' => ['nullable', 'boolean'],
+            'submission_deadline' => ['nullable', 'date'],
+            'allowed_file_types' => ['nullable', 'array'],
+            'allowed_file_types.*' => ['in:pdf,docx,doc,pptx,ppt,xlsx,xls,zip,jpg,jpeg,png'],
+            'max_file_size_mb' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'max_attempts' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'allow_late_submission' => ['nullable', 'boolean'],
+            'late_penalty_per_day' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'max_late_days' => ['nullable', 'integer', 'min:1', 'max:30'],
+            'require_declaration' => ['nullable', 'boolean'],
+            'submission_instructions' => ['nullable', 'string', 'max:2000'],
         ]);
 
         // Validate CLO codes
@@ -417,6 +452,17 @@ class AssessmentController extends Controller
             'weight_percentage' => $totalWeight, // Total weight for backward compatibility
             'evaluator_role' => $firstEvaluator['role'], // Use first evaluator for backward compatibility
             'is_active' => $request->has('is_active') ? true : false,
+            // Submission Settings
+            'requires_submission' => $request->boolean('requires_submission'),
+            'submission_deadline' => $request->input('submission_deadline'),
+            'allowed_file_types' => $request->input('allowed_file_types', []),
+            'max_file_size_mb' => $request->input('max_file_size_mb', 10),
+            'max_attempts' => $request->input('max_attempts', 1),
+            'allow_late_submission' => $request->boolean('allow_late_submission'),
+            'late_penalty_per_day' => $request->input('late_penalty_per_day'),
+            'max_late_days' => $request->input('max_late_days'),
+            'require_declaration' => $request->boolean('require_declaration', true),
+            'submission_instructions' => $request->input('submission_instructions'),
         ]);
 
         // Save multiple CLOs

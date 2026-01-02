@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Assessment extends Model
@@ -21,11 +23,93 @@ class Assessment extends Model
         'evaluator_role',
         'is_active',
         'created_by',
+        // Submission Settings
+        'requires_submission',
+        'submission_deadline',
+        'allowed_file_types',
+        'max_file_size_mb',
+        'max_attempts',
+        'allow_late_submission',
+        'late_penalty_per_day',
+        'max_late_days',
+        'require_declaration',
+        'submission_instructions',
     ];
 
     protected $casts = [
         'weight_percentage' => 'decimal:2',
         'is_active' => 'boolean',
+        // Submission Settings Casts
+        'requires_submission' => 'boolean',
+        'submission_deadline' => 'datetime',
+        'allowed_file_types' => 'array',
+        'max_file_size_mb' => 'integer',
+        'max_attempts' => 'integer',
+        'allow_late_submission' => 'boolean',
+        'late_penalty_per_day' => 'decimal:2',
+        'max_late_days' => 'integer',
+        'require_declaration' => 'boolean',
+    ];
+
+    /**
+     * Default submission presets by assessment type.
+     */
+    public const SUBMISSION_PRESETS = [
+        'Assignment' => [
+            'requires_submission' => true,
+            'allowed_file_types' => ['pdf', 'docx', 'doc', 'zip'],
+            'max_file_size_mb' => 10,
+        ],
+        'Report' => [
+            'requires_submission' => true,
+            'allowed_file_types' => ['pdf', 'docx', 'doc'],
+            'max_file_size_mb' => 25,
+        ],
+        'Presentation' => [
+            'requires_submission' => true,
+            'allowed_file_types' => ['pptx', 'ppt', 'pdf'],
+            'max_file_size_mb' => 50,
+        ],
+        'Project' => [
+            'requires_submission' => true,
+            'allowed_file_types' => ['pdf', 'docx', 'doc', 'zip'],
+            'max_file_size_mb' => 50,
+        ],
+        'Oral' => [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ],
+        'Rubric' => [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ],
+        'Logbook' => [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ],
+        'Observation' => [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ],
+        'Quiz' => [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ],
+        'Test' => [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ],
+        'Final Exam' => [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ],
     ];
 
     /**
@@ -82,6 +166,153 @@ class Assessment extends Model
     public function rubricReport(): HasOne
     {
         return $this->hasOne(AssessmentRubricReport::class);
+    }
+
+    /**
+     * Get all student submissions for this assessment.
+     */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(StudentSubmission::class);
+    }
+
+    /**
+     * Check if this assessment requires student submission.
+     */
+    public function requiresSubmission(): bool
+    {
+        return (bool) $this->requires_submission;
+    }
+
+    /**
+     * Check if submission window is currently open.
+     */
+    public function isSubmissionOpen(): bool
+    {
+        if (! $this->requires_submission) {
+            return false;
+        }
+
+        if (! $this->submission_deadline) {
+            return true; // No deadline means always open
+        }
+
+        return now()->lt($this->submission_deadline);
+    }
+
+    /**
+     * Check if a submission at given time would be late.
+     */
+    public function isLateSubmission(?Carbon $submittedAt = null): bool
+    {
+        if (! $this->submission_deadline) {
+            return false;
+        }
+
+        $submittedAt = $submittedAt ?? now();
+
+        return $submittedAt->gt($this->submission_deadline);
+    }
+
+    /**
+     * Calculate late penalty percentage for a submission.
+     */
+    public function calculateLatePenalty(?Carbon $submittedAt = null): float
+    {
+        if (! $this->allow_late_submission || ! $this->late_penalty_per_day) {
+            return 0;
+        }
+
+        if (! $this->isLateSubmission($submittedAt)) {
+            return 0;
+        }
+
+        $submittedAt = $submittedAt ?? now();
+        $daysLate = (int) ceil($submittedAt->diffInHours($this->submission_deadline) / 24);
+
+        // Cap at max late days if set
+        if ($this->max_late_days && $daysLate > $this->max_late_days) {
+            return 100; // 100% penalty = no marks
+        }
+
+        $penalty = $daysLate * (float) $this->late_penalty_per_day;
+
+        return min($penalty, 100); // Cap at 100%
+    }
+
+    /**
+     * Check if late submissions are still accepted.
+     */
+    public function acceptsLateSubmission(): bool
+    {
+        if (! $this->allow_late_submission) {
+            return false;
+        }
+
+        if (! $this->max_late_days || ! $this->submission_deadline) {
+            return true;
+        }
+
+        $maxLateDate = $this->submission_deadline->copy()->addDays($this->max_late_days);
+
+        return now()->lt($maxLateDate);
+    }
+
+    /**
+     * Get allowed file extensions as array.
+     */
+    public function getAllowedExtensions(): array
+    {
+        return $this->allowed_file_types ?? [];
+    }
+
+    /**
+     * Get allowed MIME types based on file extensions.
+     */
+    public function getAllowedMimeTypes(): array
+    {
+        $mimeMap = [
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'ppt' => 'application/vnd.ms-powerpoint',
+            'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'xls' => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'zip' => 'application/zip',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+        ];
+
+        $mimes = [];
+        foreach ($this->getAllowedExtensions() as $ext) {
+            if (isset($mimeMap[$ext])) {
+                $mimes[] = $mimeMap[$ext];
+            }
+        }
+
+        return array_unique($mimes);
+    }
+
+    /**
+     * Get max file size in bytes.
+     */
+    public function getMaxFileSizeBytes(): int
+    {
+        return ($this->max_file_size_mb ?? 10) * 1024 * 1024;
+    }
+
+    /**
+     * Get submission preset for an assessment type.
+     */
+    public static function getSubmissionPreset(string $type): array
+    {
+        return self::SUBMISSION_PRESETS[$type] ?? [
+            'requires_submission' => false,
+            'allowed_file_types' => [],
+            'max_file_size_mb' => 10,
+        ];
     }
 
     /**

@@ -87,6 +87,9 @@
                     @enderror
                 </div>
 
+                {{-- Student Submission Settings --}}
+                @include('academic.assessments.partials.submission-settings')
+
                 <!-- Multiple CLOs Section -->
                 <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg p-5 bg-white dark:bg-gray-800 shadow-sm">
                     <div class="flex items-center justify-between mb-5">
