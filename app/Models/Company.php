@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Company extends Model
@@ -187,5 +188,15 @@ class Company extends Model
     public function getIndustryCoachesCountAttribute(): int
     {
         return $this->industryCoaches()->count();
+    }
+
+    /**
+     * Get the MoMs (Minute of Meetings) that mention this company.
+     */
+    public function moms(): BelongsToMany
+    {
+        return $this->belongsToMany(AgreementMom::class, 'agreement_mom_company')
+            ->withTimestamps()
+            ->orderBy('meeting_date', 'desc');
     }
 }

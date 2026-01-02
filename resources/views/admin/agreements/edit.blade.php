@@ -40,6 +40,12 @@
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
     }
 
+    .dark .glass-card {
+        background: rgba(31, 41, 55, 0.98);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    }
+
     .section-header {
         position: relative;
         padding-left: 1rem;
@@ -61,6 +67,12 @@
         border: 2px solid #e5e7eb;
     }
 
+    .dark .form-input {
+        border-color: #4b5563;
+        background-color: #374151;
+        color: #f3f4f6;
+    }
+
     .form-input:focus {
         border-color: #8b5cf6;
         box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
@@ -70,6 +82,12 @@
     .form-select {
         transition: all 0.3s ease;
         border: 2px solid #e5e7eb;
+    }
+
+    .dark .form-select {
+        border-color: #4b5563;
+        background-color: #374151;
+        color: #f3f4f6;
     }
 
     .form-select:focus {
@@ -83,6 +101,11 @@
         border: 2px solid #e5e7eb;
     }
 
+    .dark .radio-card {
+        border-color: #4b5563;
+        background-color: #374151;
+    }
+
     .radio-card:hover {
         border-color: #c4b5fd;
         transform: translateY(-2px);
@@ -92,6 +115,10 @@
     .radio-card.selected {
         border-color: #8b5cf6;
         background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(109, 40, 217, 0.05));
+    }
+
+    .dark .radio-card.selected {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(109, 40, 217, 0.15));
     }
 
     .radio-card.selected .radio-indicator {
@@ -119,6 +146,10 @@
         position: relative;
         flex-shrink: 0;
         transition: all 0.3s ease;
+    }
+
+    .dark .radio-indicator {
+        border-color: #6b7280;
     }
 
     .btn-gradient-primary {
@@ -153,10 +184,19 @@
         transition: all 0.3s ease;
     }
 
+    .dark .btn-outline {
+        border-color: #4b5563;
+        color: #d1d5db;
+    }
+
     .btn-outline:hover {
         border-color: #8b5cf6;
         background: rgba(139, 92, 246, 0.05);
         transform: translateY(-2px);
+    }
+
+    .dark .btn-outline:hover {
+        background: rgba(139, 92, 246, 0.15);
     }
 
     .file-upload-area {
@@ -164,9 +204,18 @@
         transition: all 0.3s ease;
     }
 
+    .dark .file-upload-area {
+        border-color: #4b5563;
+        background-color: #374151;
+    }
+
     .file-upload-area:hover {
         border-color: #8b5cf6;
         background: rgba(139, 92, 246, 0.02);
+    }
+
+    .dark .file-upload-area:hover {
+        background: rgba(139, 92, 246, 0.1);
     }
 
     .file-upload-area.dragover {
@@ -174,9 +223,18 @@
         background: rgba(139, 92, 246, 0.05);
     }
 
+    .dark .file-upload-area.dragover {
+        background: rgba(139, 92, 246, 0.15);
+    }
+
     .current-document {
         background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(22, 163, 74, 0.05));
         border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .dark .current-document {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1));
+        border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
     .current-document:hover {
@@ -196,7 +254,7 @@
 @endpush
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
     <!-- Elegant Hero Header -->
     <div class="form-hero py-8 mb-8">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -224,15 +282,15 @@
         <div class="absolute bottom-0 left-0 right-0">
             <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-8">
                 <path d="M0 60V30C240 50 480 10 720 30C960 50 1200 10 1440 30V60H0Z" fill="white" fill-opacity="0.1"/>
-                <path d="M0 60V40C240 55 480 25 720 40C960 55 1200 25 1440 40V60H0Z" fill="#f8fafc"/>
+                <path d="M0 60V40C240 55 480 25 720 40C960 55 1200 25 1440 40V60H0Z" class="fill-slate-50 dark:fill-gray-900"/>
             </svg>
         </div>
     </div>
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         @if(session('error'))
-        <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
-            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl flex items-center gap-3">
+            <svg class="w-5 h-5 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             {{ session('error') }}
@@ -245,17 +303,17 @@
 
             <!-- Agreement Details Section -->
             <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-gray-100">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700 dark:border-gray-700">
                     <div class="section-header">
-                        <h2 class="text-lg font-bold text-gray-800">Agreement Details</h2>
-                        <p class="text-sm text-gray-500 mt-1">Company and agreement type information</p>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white dark:text-white">Agreement Details</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Company and agreement type information</p>
                     </div>
                 </div>
 
                 <div class="p-6 space-y-6">
                     <!-- Company Selection -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                             Company <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
@@ -286,7 +344,7 @@
 
                     <!-- Agreement Type -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                             Agreement Type <span class="text-red-500">*</span>
                         </label>
                         <div class="grid grid-cols-3 gap-4" x-data="{ selectedType: '{{ old('agreement_type', $agreement->agreement_type) }}' }">
@@ -300,8 +358,8 @@
                                 <div class="flex flex-col items-center gap-2">
                                     <div class="radio-indicator"></div>
                                     <div>
-                                        <span class="block font-bold text-gray-800">{{ $type }}</span>
-                                        <span class="text-xs text-gray-500">{{ $label }}</span>
+                                        <span class="block font-bold text-gray-800 dark:text-white">{{ $type }}</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $label }}</span>
                                     </div>
                                 </div>
                             </label>
@@ -314,7 +372,7 @@
 
                     <!-- Agreement Title -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Agreement Title</label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Agreement Title</label>
                         <input type="text" name="agreement_title" value="{{ old('agreement_title', $agreement->agreement_title) }}"
                                placeholder="e.g., Industrial Training Collaboration"
                                class="form-input w-full px-4 py-3 rounded-xl bg-white text-gray-900 @error('agreement_title') border-red-500 @enderror">
@@ -325,7 +383,7 @@
 
                     <!-- Reference Number -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Reference Number</label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Reference Number</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,10 +403,10 @@
 
             <!-- Dates & Status Section -->
             <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-gray-100">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                     <div class="section-header">
-                        <h2 class="text-lg font-bold text-gray-800">Dates & Status</h2>
-                        <p class="text-sm text-gray-500 mt-1">Agreement timeline and current status</p>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Dates & Status</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Agreement timeline and current status</p>
                     </div>
                 </div>
 
@@ -356,7 +414,7 @@
                     <!-- Dates Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 <svg class="w-4 h-4 inline mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
@@ -369,7 +427,7 @@
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 <svg class="w-4 h-4 inline mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
@@ -382,7 +440,7 @@
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 <svg class="w-4 h-4 inline mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                 </svg>
@@ -398,7 +456,7 @@
 
                     <!-- Status -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                             Status <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
@@ -414,7 +472,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mt-2 flex items-center gap-1">
                             <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -429,10 +487,10 @@
 
             <!-- Additional Details Section -->
             <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-gray-100">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                     <div class="section-header">
-                        <h2 class="text-lg font-bold text-gray-800">Additional Details</h2>
-                        <p class="text-sm text-gray-500 mt-1">Faculty, programme, and contact information</p>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Additional Details</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Faculty, programme, and contact information</p>
                     </div>
                 </div>
 
@@ -440,7 +498,7 @@
                     <!-- Faculty & Programme -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Faculty</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Faculty</label>
                             <input type="text" name="faculty" value="{{ old('faculty', $agreement->faculty) }}"
                                    placeholder="e.g., Faculty of Technology"
                                    class="form-input w-full px-4 py-3 rounded-xl bg-white text-gray-900 @error('faculty') border-red-500 @enderror">
@@ -449,7 +507,7 @@
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Programme</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Programme</label>
                             <input type="text" name="programme" value="{{ old('programme', $agreement->programme) }}"
                                    placeholder="e.g., Bachelor of Computer Science"
                                    class="form-input w-full px-4 py-3 rounded-xl bg-white text-gray-900 @error('programme') border-red-500 @enderror">
@@ -462,7 +520,7 @@
                     <!-- Staff PIC -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Staff PIC Name</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Staff PIC Name</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -478,7 +536,7 @@
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Staff PIC Phone</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Staff PIC Phone</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -497,7 +555,7 @@
 
                     <!-- Remarks -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Remarks</label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
                         <textarea name="remarks" rows="3"
                                   placeholder="Additional notes or comments..."
                                   class="form-input w-full px-4 py-3 rounded-xl bg-white text-gray-900 resize-none @error('remarks') border-red-500 @enderror">{{ old('remarks', $agreement->remarks) }}</textarea>
@@ -510,10 +568,10 @@
 
             <!-- Document Section -->
             <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-gray-100">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                     <div class="section-header">
-                        <h2 class="text-lg font-bold text-gray-800">Document</h2>
-                        <p class="text-sm text-gray-500 mt-1">View or replace the agreement document</p>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Document</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">View or replace the agreement document</p>
                     </div>
                 </div>
 
@@ -521,7 +579,7 @@
                     <!-- Current Document -->
                     @if($agreement->document_path)
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">Current Document</label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Current Document</label>
                         <div class="current-document rounded-xl p-5 flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-100 to-red-50 flex items-center justify-center">
@@ -531,7 +589,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-800">PDF Document</p>
+                                    <p class="font-semibold text-gray-800 dark:text-white">PDF Document</p>
                                     <p class="text-sm text-gray-500">{{ basename($agreement->document_path) }}</p>
                                 </div>
                             </div>
@@ -550,7 +608,7 @@
 
                     <!-- Upload New Document -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                             {{ $agreement->document_path ? 'Replace Document (PDF)' : 'Upload Document (PDF)' }}
                         </label>
                         <div class="file-upload-area rounded-xl p-8 text-center" id="dropZone">
@@ -560,8 +618,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                     </svg>
                                 </div>
-                                <p class="text-gray-700 font-medium mb-1">Drop your PDF file here, or <label for="document" class="text-purple-600 hover:text-purple-700 cursor-pointer underline">browse</label></p>
-                                <p class="text-sm text-gray-500">Maximum file size: 10MB. {{ $agreement->document_path ? 'Leave empty to keep current document.' : '' }}</p>
+                                <p class="text-gray-700 dark:text-gray-300 font-medium mb-1">Drop your PDF file here, or <label for="document" class="text-purple-600 hover:text-purple-700 cursor-pointer underline">browse</label></p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Maximum file size: 10MB. {{ $agreement->document_path ? 'Leave empty to keep current document.' : '' }}</p>
                                 <input type="file" name="document" id="document" accept=".pdf" class="hidden">
                                 <p id="fileName" class="text-sm text-purple-600 font-medium mt-3 hidden"></p>
                             </div>
@@ -575,10 +633,10 @@
 
             <!-- Minute of Meeting (MoM) Section -->
             <div class="glass-card rounded-2xl overflow-hidden" x-data="{ momMentioned: {{ old('mom_mentioned', $agreement->mom_mentioned) ? 'true' : 'false' }} }">
-                <div class="p-6 border-b border-gray-100">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                     <div class="section-header">
-                        <h2 class="text-lg font-bold text-gray-800">Minute of Meeting (MoM)</h2>
-                        <p class="text-sm text-gray-500 mt-1">Record if this company was discussed in a meeting</p>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Minute of Meeting (MoM)</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Record if this company was discussed in a meeting</p>
                     </div>
                 </div>
 
@@ -590,26 +648,26 @@
                                    x-model="momMentioned"
                                    class="sr-only peer"
                                    {{ old('mom_mentioned', $agreement->mom_mentioned) ? 'checked' : '' }}>
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                         </label>
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-800">Company mentioned in Minute of Meeting</p>
-                            <p class="text-sm text-gray-500 mt-1">Enable this if the company was discussed and approved in a faculty/university meeting</p>
+                            <p class="font-semibold text-gray-800 dark:text-white">Company mentioned in Minute of Meeting</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Enable this if the company was discussed and approved in a faculty/university meeting</p>
                         </div>
                     </div>
 
                     <!-- MoM Details (shown when checkbox is checked) -->
-                    <div x-show="momMentioned" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6 pt-4 border-t border-gray-100">
+                    <div x-show="momMentioned" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <!-- MoM Date -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 <svg class="w-4 h-4 inline mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                                 Meeting Date
                             </label>
                             <input type="date" name="mom_date" value="{{ old('mom_date', $agreement->mom_date?->format('Y-m-d')) }}"
-                                   class="form-input w-full md:w-1/2 px-4 py-3 rounded-xl bg-white text-gray-900 @error('mom_date') border-red-500 @enderror">
+                                   class="form-input w-full md:w-1/2 px-4 py-3 rounded-xl @error('mom_date') border-red-500 @enderror">
                             @error('mom_date')
                             <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
                             @enderror
@@ -618,18 +676,18 @@
                         <!-- Current MoM Document -->
                         @if($agreement->mom_document_path)
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">Current MoM Document</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Current MoM Document</label>
                             <div class="current-document rounded-xl p-4 flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900 dark:to-purple-800 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-500 dark:text-purple-400" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
                                             <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-800 text-sm">MoM Document</p>
-                                        <p class="text-xs text-gray-500">{{ basename($agreement->mom_document_path) }}</p>
+                                        <p class="font-medium text-gray-800 dark:text-white text-sm">MoM Document</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ basename($agreement->mom_document_path) }}</p>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -642,7 +700,7 @@
                                         </svg>
                                         View
                                     </a>
-                                    <label class="flex items-center gap-1 text-xs text-red-600 cursor-pointer hover:text-red-700">
+                                    <label class="flex items-center gap-1 text-xs text-red-600 dark:text-red-400 cursor-pointer hover:text-red-700">
                                         <input type="checkbox" name="remove_mom_document" value="1" class="w-3 h-3 text-red-600 rounded">
                                         Remove
                                     </label>
@@ -653,7 +711,7 @@
 
                         <!-- Upload MoM Document -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 <svg class="w-4 h-4 inline mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
@@ -661,13 +719,13 @@
                             </label>
                             <div class="file-upload-area rounded-xl p-6 text-center" id="momDropZone">
                                 <div class="flex flex-col items-center">
-                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center mb-3">
-                                        <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/50 flex items-center justify-center mb-3">
+                                        <svg class="w-6 h-6 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                         </svg>
                                     </div>
-                                    <p class="text-gray-600 text-sm mb-1">Drop MoM document here, or <label for="mom_document" class="text-purple-600 hover:text-purple-700 cursor-pointer underline">browse</label></p>
-                                    <p class="text-xs text-gray-400">PDF only, max 10MB</p>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-1">Drop MoM document here, or <label for="mom_document" class="text-purple-600 hover:text-purple-700 cursor-pointer underline">browse</label></p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">PDF only, max 10MB</p>
                                     <input type="file" name="mom_document" id="mom_document" accept=".pdf" class="hidden">
                                     <p id="momFileName" class="text-sm text-purple-600 font-medium mt-2 hidden"></p>
                                 </div>
@@ -683,7 +741,7 @@
             <!-- Action Buttons -->
             <div class="flex items-center justify-end gap-4 pt-4">
                 <a href="{{ route('admin.agreements.index') }}"
-                   class="btn-outline px-6 py-3 rounded-xl text-gray-700 font-semibold">
+                   class="btn-outline px-6 py-3 rounded-xl text-gray-700 dark:text-gray-300 font-semibold">
                     Cancel
                 </a>
                 <button type="submit"

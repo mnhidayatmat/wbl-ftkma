@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
+            // Route model bindings
+            \Illuminate\Support\Facades\Route::model('mom', \App\Models\AgreementMom::class);
+
             \Illuminate\Support\Facades\Route::middleware('web')
                 ->group(base_path('routes/academic.php'));
             \Illuminate\Support\Facades\Route::middleware('web')

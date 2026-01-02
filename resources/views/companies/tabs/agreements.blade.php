@@ -166,6 +166,128 @@
     </div>
     @endif
 
+    <!-- Minute of Meetings Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Minute of Meetings</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">MoMs mentioning this company</p>
+                </div>
+            </div>
+            @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
+            <a href="{{ route('admin.agreements.moms.create', ['company_ids' => [$company->id]]) }}"
+               class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors inline-flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Upload MoM
+            </a>
+            @endif
+        </div>
+
+        @if($company->moms && $company->moms->count() > 0)
+        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            @foreach($company->moms as $mom)
+            <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-2 py-1 text-xs font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg">
+                                MoM
+                            </span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                {{ $mom->meeting_date->format('d M Y') }}
+                            </span>
+                        </div>
+                        <h4 class="mt-1 font-semibold text-gray-900 dark:text-white">
+                            {{ $mom->title ?: 'MoM - ' . $mom->meeting_date->format('d M Y') }}
+                        </h4>
+                        @if($mom->remarks)
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ $mom->remarks }}</p>
+                        @endif
+
+                        <!-- Other companies mentioned -->
+                        @if($mom->companies->count() > 1)
+                        <div class="mt-2">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Also mentioned in this MoM:</span>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                @foreach($mom->companies->where('id', '!=', $company->id)->take(5) as $otherCompany)
+                                <a href="{{ route('admin.companies.show', $otherCompany) }}"
+                                   class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    {{ Str::limit($otherCompany->company_name, 25) }}
+                                </a>
+                                @endforeach
+                                @if($mom->companies->count() > 6)
+                                <span class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded">
+                                    +{{ $mom->companies->count() - 6 }} more
+                                </span>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                            Uploaded by {{ $mom->uploader?->name ?? 'System' }} on {{ $mom->created_at->format('d M Y') }}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        @if($mom->document_path)
+                        <a href="{{ route('admin.agreements.moms.download', $mom) }}"
+                           class="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                           title="Download PDF">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </a>
+                        @endif
+                        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
+                        <a href="{{ route('admin.agreements.moms.edit', $mom) }}"
+                           class="p-2 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                           title="Edit">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @else
+        <div class="px-6 py-8 text-center">
+            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <p class="text-sm text-gray-500 dark:text-gray-400">No Minute of Meetings linked to this company yet.</p>
+            @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
+            <a href="{{ route('admin.agreements.moms.create', ['company_ids' => [$company->id]]) }}"
+               class="mt-2 inline-flex items-center text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400">
+                Upload the first MoM →
+            </a>
+            @endif
+        </div>
+        @endif
+
+        @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
+        <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
+            <a href="{{ route('admin.agreements.moms.index') }}"
+               class="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 hover:underline">
+                View all MoMs →
+            </a>
+        </div>
+        @endif
+    </div>
+
     <!-- MoU Template Section -->
     @if(auth()->user()->isAdmin() || auth()->user()->isWblCoordinator())
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">

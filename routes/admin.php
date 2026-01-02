@@ -137,6 +137,17 @@ Route::middleware(['auth', 'role:admin,ip_coordinator,fyp_coordinator,osh_coordi
     Route::post('agreements/import/execute', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'importExecute'])->name('agreements.import.execute');
     Route::get('agreements/template', [\App\Http\Controllers\Admin\CompanyAgreementController::class, 'downloadTemplate'])->name('agreements.template');
 
+    // Minute of Meeting (MoM) Management
+    Route::prefix('agreements/moms')->name('agreements.moms.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AgreementMomController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\AgreementMomController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\AgreementMomController::class, 'store'])->name('store');
+        Route::get('/{mom}/edit', [\App\Http\Controllers\Admin\AgreementMomController::class, 'edit'])->name('edit');
+        Route::put('/{mom}', [\App\Http\Controllers\Admin\AgreementMomController::class, 'update'])->name('update');
+        Route::delete('/{mom}', [\App\Http\Controllers\Admin\AgreementMomController::class, 'destroy'])->name('destroy');
+        Route::get('/{mom}/download', [\App\Http\Controllers\Admin\AgreementMomController::class, 'download'])->name('download');
+    });
+
     // Document Templates (Admin Only)
     Route::middleware('role:admin')->prefix('documents')->name('documents.')->group(function () {
         // SAL Template
