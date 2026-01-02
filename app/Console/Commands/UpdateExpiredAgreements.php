@@ -12,42 +12,55 @@ class UpdateExpiredAgreements extends Command
      *
      * @var string
      */
-    protected $signature = 'agreements:update-expired';
+    protected $signature = 'agreements:update-status';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update status of expired agreements to "Expired"';
+    protected $description = 'Update agreement statuses dynamically based on dates (Active, Near Expiry, Expired, Not Started)';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        $this->info('Checking for expired agreements...');
+        $this->info('Checking agreement statuses based on dates...');
 
-        // Get all active agreements with end dates
-        $activeAgreements = CompanyAgreement::where('status', 'Active')
-            ->whereNotNull('end_date')
+        // Get all agreements that can have dynamic status changes
+        // Exclude Draft, Pending, and Terminated as they are manually managed
+        $agreements = CompanyAgreement::whereNotIn('status', ['Draft', 'Pending', 'Terminated'])
+            ->whereNotNull('start_date')
             ->get();
 
         $updatedCount = 0;
+        $statusChanges = [];
 
-        foreach ($activeAgreements as $agreement) {
-            if ($agreement->isExpired()) {
-                $agreement->update(['status' => 'Expired']);
+        foreach ($agreements as $agreement) {
+            $calculatedStatus = $agreement->calculateDynamicStatus();
+
+            if ($calculatedStatus && $agreement->status !== $calculatedStatus) {
+                $oldStatus = $agreement->status;
+                $agreement->update(['status' => $calculatedStatus]);
                 $updatedCount++;
 
-                $this->line("✓ Updated: {$agreement->company->company_name} - {$agreement->agreement_type} (Expired on {$agreement->end_date->format('Y-m-d')})");
+                $statusChanges[] = [
+                    'company' => $agreement->company->company_name ?? 'N/A',
+                    'type' => $agreement->agreement_type,
+                    'from' => $oldStatus,
+                    'to' => $calculatedStatus,
+                ];
+
+                $this->line("✓ {$agreement->company->company_name} - {$agreement->agreement_type}: {$oldStatus} → {$calculatedStatus}");
             }
         }
 
         if ($updatedCount > 0) {
-            $this->info("Successfully updated {$updatedCount} expired agreement(s).");
+            $this->newLine();
+            $this->info("Successfully updated {$updatedCount} agreement(s).");
         } else {
-            $this->info('No expired agreements found.');
+            $this->info('All agreement statuses are up to date.');
         }
 
         return Command::SUCCESS;

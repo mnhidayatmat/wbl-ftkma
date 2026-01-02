@@ -414,6 +414,12 @@
                                 </svg>
                             </div>
                         </div>
+                        <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Status is auto-calculated: Not Started (future start), Active, Near Expiry (30 days before end), Expired. Draft/Pending/Terminated are manual.
+                        </p>
                         @error('status')
                         <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
                         @enderror
@@ -567,6 +573,113 @@
                 </div>
             </div>
 
+            <!-- Minute of Meeting (MoM) Section -->
+            <div class="glass-card rounded-2xl overflow-hidden" x-data="{ momMentioned: {{ old('mom_mentioned', $agreement->mom_mentioned) ? 'true' : 'false' }} }">
+                <div class="p-6 border-b border-gray-100">
+                    <div class="section-header">
+                        <h2 class="text-lg font-bold text-gray-800">Minute of Meeting (MoM)</h2>
+                        <p class="text-sm text-gray-500 mt-1">Record if this company was discussed in a meeting</p>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <!-- MoM Checkbox -->
+                    <div class="flex items-start gap-4">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="mom_mentioned" value="1"
+                                   x-model="momMentioned"
+                                   class="sr-only peer"
+                                   {{ old('mom_mentioned', $agreement->mom_mentioned) ? 'checked' : '' }}>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800">Company mentioned in Minute of Meeting</p>
+                            <p class="text-sm text-gray-500 mt-1">Enable this if the company was discussed and approved in a faculty/university meeting</p>
+                        </div>
+                    </div>
+
+                    <!-- MoM Details (shown when checkbox is checked) -->
+                    <div x-show="momMentioned" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6 pt-4 border-t border-gray-100">
+                        <!-- MoM Date -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <svg class="w-4 h-4 inline mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Meeting Date
+                            </label>
+                            <input type="date" name="mom_date" value="{{ old('mom_date', $agreement->mom_date?->format('Y-m-d')) }}"
+                                   class="form-input w-full md:w-1/2 px-4 py-3 rounded-xl bg-white text-gray-900 @error('mom_date') border-red-500 @enderror">
+                            @error('mom_date')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Current MoM Document -->
+                        @if($agreement->mom_document_path)
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Current MoM Document</label>
+                            <div class="current-document rounded-xl p-4 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
+                                            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800 text-sm">MoM Document</p>
+                                        <p class="text-xs text-gray-500">{{ basename($agreement->mom_document_path) }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ Storage::url($agreement->mom_document_path) }}"
+                                       target="_blank"
+                                       class="btn-view-pdf px-4 py-2 rounded-lg text-white text-sm font-medium flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        View
+                                    </a>
+                                    <label class="flex items-center gap-1 text-xs text-red-600 cursor-pointer hover:text-red-700">
+                                        <input type="checkbox" name="remove_mom_document" value="1" class="w-3 h-3 text-red-600 rounded">
+                                        Remove
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Upload MoM Document -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <svg class="w-4 h-4 inline mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                {{ $agreement->mom_document_path ? 'Replace MoM Document (PDF)' : 'Upload MoM Document (PDF)' }}
+                            </label>
+                            <div class="file-upload-area rounded-xl p-6 text-center" id="momDropZone">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center mb-3">
+                                        <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mb-1">Drop MoM document here, or <label for="mom_document" class="text-purple-600 hover:text-purple-700 cursor-pointer underline">browse</label></p>
+                                    <p class="text-xs text-gray-400">PDF only, max 10MB</p>
+                                    <input type="file" name="mom_document" id="mom_document" accept=".pdf" class="hidden">
+                                    <p id="momFileName" class="text-sm text-purple-600 font-medium mt-2 hidden"></p>
+                                </div>
+                            </div>
+                            @error('mom_document')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="flex items-center justify-end gap-4 pt-4">
                 <a href="{{ route('admin.agreements.index') }}"
@@ -619,6 +732,43 @@
     function showFileName(name) {
         fileNameDisplay.textContent = 'Selected: ' + name;
         fileNameDisplay.classList.remove('hidden');
+    }
+
+    // MoM file upload handling
+    const momDropZone = document.getElementById('momDropZone');
+    const momFileInput = document.getElementById('mom_document');
+    const momFileNameDisplay = document.getElementById('momFileName');
+
+    if (momDropZone) {
+        momDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            momDropZone.classList.add('dragover');
+        });
+
+        momDropZone.addEventListener('dragleave', () => {
+            momDropZone.classList.remove('dragover');
+        });
+
+        momDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            momDropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                momFileInput.files = files;
+                showMomFileName(files[0].name);
+            }
+        });
+
+        momFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                showMomFileName(e.target.files[0].name);
+            }
+        });
+    }
+
+    function showMomFileName(name) {
+        momFileNameDisplay.textContent = 'Selected: ' + name;
+        momFileNameDisplay.classList.remove('hidden');
     }
 </script>
 @endsection

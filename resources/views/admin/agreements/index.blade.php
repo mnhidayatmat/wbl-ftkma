@@ -162,7 +162,7 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-8">
         @if(session('success'))
         <div class="mb-4 glass-card bg-green-50/90 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-xl flex items-center gap-3">
             <div class="p-2 bg-green-100 dark:bg-green-800/50 rounded-lg">
@@ -186,7 +186,7 @@
         @endif
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
             <div class="stat-card stat-gradient-mou rounded-xl shadow-lg p-4 text-white text-center relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8"></div>
                 <div class="relative">
@@ -215,6 +215,13 @@
                     <div class="text-xs text-white/80 mt-1 font-medium">Total Active</div>
                 </div>
             </div>
+            <div class="stat-card stat-gradient-warning rounded-xl shadow-lg p-4 text-white text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8"></div>
+                <div class="relative">
+                    <div class="text-3xl font-bold alert-icon-pulse">{{ $stats['total_near_expiry'] ?? 0 }}</div>
+                    <div class="text-xs text-white/80 mt-1 font-medium">Near Expiry</div>
+                </div>
+            </div>
             <div class="stat-card stat-gradient-expired rounded-xl shadow-lg p-4 text-white text-center relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8"></div>
                 <div class="relative">
@@ -222,14 +229,14 @@
                     <div class="text-xs text-white/80 mt-1 font-medium">Expired</div>
                 </div>
             </div>
-            <div class="stat-card stat-gradient-warning rounded-xl shadow-lg p-4 text-white text-center relative overflow-hidden">
+            <div class="stat-card stat-gradient-alert rounded-xl shadow-lg p-4 text-white text-center relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8"></div>
                 <div class="relative">
-                    <div class="text-3xl font-bold alert-icon-pulse">{{ $stats['expiring_3_months'] }}</div>
+                    <div class="text-3xl font-bold">{{ $stats['expiring_3_months'] }}</div>
                     <div class="text-xs text-white/80 mt-1 font-medium">Expiring 3mo</div>
                 </div>
             </div>
-            <div class="stat-card stat-gradient-alert rounded-xl shadow-lg p-4 text-white text-center relative overflow-hidden">
+            <div class="stat-card bg-gradient-to-r from-slate-500 to-slate-600 rounded-xl shadow-lg p-4 text-white text-center relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8"></div>
                 <div class="relative">
                     <div class="text-3xl font-bold">{{ $stats['expiring_6_months'] }}</div>
@@ -265,6 +272,7 @@
                     <option value="Draft" {{ request('status') == 'Draft' ? 'selected' : '' }}>Draft</option>
                     <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
                     <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                    <option value="Near Expiry" {{ request('status') == 'Near Expiry' ? 'selected' : '' }}>Near Expiry</option>
                     <option value="Expired" {{ request('status') == 'Expired' ? 'selected' : '' }}>Expired</option>
                     <option value="Terminated" {{ request('status') == 'Terminated' ? 'selected' : '' }}>Terminated</option>
                 </select>
@@ -358,6 +366,7 @@
                             <td class="px-6 py-4 text-center">
                                 <span class="px-3 py-1.5 text-xs font-bold rounded-xl shadow-sm
                                     {{ $agreement->status == 'Active' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : '' }}
+                                    {{ $agreement->status == 'Near Expiry' ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white animate-pulse' : '' }}
                                     {{ $agreement->status == 'Expired' ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white' : '' }}
                                     {{ $agreement->status == 'Terminated' ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white' : '' }}
                                     {{ $agreement->status == 'Pending' ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white' : '' }}
@@ -365,6 +374,11 @@
                                     {{ $agreement->status == 'Not Started' ? 'bg-gradient-to-r from-slate-400 to-gray-400 text-white' : '' }}">
                                     {{ $agreement->status }}
                                 </span>
+                                @if($agreement->status == 'Near Expiry' && $agreement->days_until_expiry !== null)
+                                <div class="text-xs text-orange-600 dark:text-orange-400 mt-1 font-medium">
+                                    {{ $agreement->days_until_expiry }} days left
+                                </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <div class="flex items-center justify-center gap-1">

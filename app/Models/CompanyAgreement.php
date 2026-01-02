@@ -25,6 +25,9 @@ class CompanyAgreement extends Model
         'staff_pic_name',
         'staff_pic_phone',
         'document_path',
+        'mom_mentioned',
+        'mom_document_path',
+        'mom_date',
         'created_by',
         'updated_by',
     ];
@@ -33,26 +36,71 @@ class CompanyAgreement extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'signed_date' => 'date',
+        'mom_date' => 'date',
+        'mom_mentioned' => 'boolean',
     ];
 
     /**
-     * Boot method to automatically update expired agreements.
+     * Boot method to automatically update agreement status based on dates.
      */
     protected static function booted(): void
     {
         // Check and update status when agreement is retrieved from database
         static::retrieved(function (CompanyAgreement $agreement) {
-            if ($agreement->status === 'Active' && $agreement->isExpired()) {
-                $agreement->updateQuietly(['status' => 'Expired']);
+            $calculatedStatus = $agreement->calculateDynamicStatus();
+            if ($calculatedStatus && $agreement->status !== $calculatedStatus) {
+                $agreement->updateQuietly(['status' => $calculatedStatus]);
             }
         });
 
         // Check and update status before saving
         static::saving(function (CompanyAgreement $agreement) {
-            if ($agreement->status === 'Active' && $agreement->isExpired()) {
-                $agreement->status = 'Expired';
+            $calculatedStatus = $agreement->calculateDynamicStatus();
+            if ($calculatedStatus && $agreement->status !== $calculatedStatus) {
+                $agreement->status = $calculatedStatus;
             }
         });
+    }
+
+    /**
+     * Calculate dynamic status based on start_date and end_date.
+     * Returns null if status should not be auto-calculated (e.g., Draft, Pending, Terminated).
+     */
+    public function calculateDynamicStatus(): ?string
+    {
+        // Only auto-calculate for certain statuses
+        // Draft, Pending, and Terminated are manually set and should not change automatically
+        if (in_array($this->status, ['Draft', 'Pending', 'Terminated'])) {
+            return null;
+        }
+
+        $today = now()->startOfDay();
+
+        // If no start_date, don't auto-calculate
+        if (! $this->start_date) {
+            return null;
+        }
+
+        // If start_date is in the future → Not Started
+        if ($this->start_date->startOfDay()->isAfter($today)) {
+            return 'Not Started';
+        }
+
+        // If end_date exists and is in the past → Expired
+        if ($this->end_date && $this->end_date->startOfDay()->isBefore($today)) {
+            return 'Expired';
+        }
+
+        // If end_date exists and is within NEAR_EXPIRY_DAYS → Near Expiry
+        if ($this->end_date) {
+            $daysUntilExpiry = $today->diffInDays($this->end_date->startOfDay(), false);
+            if ($daysUntilExpiry >= 0 && $daysUntilExpiry <= self::NEAR_EXPIRY_DAYS) {
+                return 'Near Expiry';
+            }
+        }
+
+        // If start_date is today or past and end_date is in the future → Active
+        return 'Active';
     }
 
     /**
@@ -72,9 +120,15 @@ class CompanyAgreement extends Model
         'Draft' => 'Draft',
         'Pending' => 'Pending',
         'Active' => 'Active',
+        'Near Expiry' => 'Near Expiry',
         'Expired' => 'Expired',
         'Terminated' => 'Terminated',
     ];
+
+    /**
+     * Days before expiry to trigger "Near Expiry" status.
+     */
+    public const NEAR_EXPIRY_DAYS = 30;
 
     /**
      * Get the company that owns the agreement.
@@ -122,6 +176,14 @@ class CompanyAgreement extends Model
     public function scopeExpired($query)
     {
         return $query->where('status', 'Expired');
+    }
+
+    /**
+     * Scope to filter near expiry agreements.
+     */
+    public function scopeNearExpiry($query)
+    {
+        return $query->where('status', 'Near Expiry');
     }
 
     /**
@@ -185,10 +247,12 @@ class CompanyAgreement extends Model
     {
         return match ($this->status) {
             'Active' => 'green',
+            'Near Expiry' => 'orange',
             'Expired' => 'red',
             'Terminated' => 'gray',
             'Pending' => 'yellow',
             'Draft' => 'blue',
+            'Not Started' => 'slate',
             default => 'gray',
         };
     }
@@ -228,6 +292,7 @@ class CompanyAgreement extends Model
             'expiring_3_months' => self::expiringWithin(3)->count(),
             'expiring_6_months' => self::expiringWithin(6)->count(),
             'total_active' => self::active()->count(),
+            'total_near_expiry' => self::nearExpiry()->count(),
             'total_expired' => self::expired()->count(),
         ];
     }
