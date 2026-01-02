@@ -200,164 +200,421 @@
     @endif
 
     @if($student)
-    <!-- Priority Actions Section - Vibrant Cards -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Resume Submission Card -->
-        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-l-4 {{ $resumeInspection && $resumeInspection->isApproved() ? 'border-emerald-500' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'border-rose-500' : 'border-amber-500') }} relative overflow-hidden">
-            <!-- Decorative background -->
-            <div class="absolute top-0 right-0 w-24 h-24 {{ $resumeInspection && $resumeInspection->isApproved() ? 'bg-emerald-500/10' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'bg-rose-500/10' : 'bg-amber-500/10') }} rounded-full -translate-y-1/2 translate-x-1/2"></div>
+    <!-- Resume & Poster Submission Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
 
-            <div class="relative">
-                <div class="flex items-start justify-between mb-5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl {{ $resumeInspection && $resumeInspection->isApproved() ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'bg-gradient-to-br from-rose-400 to-pink-500' : 'bg-gradient-to-br from-amber-400 to-orange-500') }} flex items-center justify-center shadow-lg float-animation">
-                            <span class="text-2xl">📄</span>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Resume</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Step 1: Get it approved!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-5">
-                    @if($resumeInspection && $resumeInspection->isApproved())
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md">
-                            <span>✅</span> Approved
-                        </span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Awesome! Your resume is approved. Start applying now! 🎉</p>
-                    @elseif($resumeInspection && $resumeInspection->isRevisionRequired())
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md">
-                            <span>🔄</span> Needs Revision
-                        </span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Check the feedback and make it even better! 💪</p>
-                    @elseif($resumeInspection && $resumeInspection->resume_file_path)
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md pulse-soft">
-                            <span>⏳</span> Under Review
-                        </span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Hang tight! Your resume is being reviewed.</p>
-                    @else
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md">
-                            <span>📝</span> Not Submitted
-                        </span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Upload your resume to kick off your journey!</p>
-                    @endif
-                </div>
-
-                <a href="{{ route('student.resume.index') }}" class="inline-flex items-center justify-center w-full px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg">
-                    <span class="mr-2">{{ $resumeInspection && $resumeInspection->resume_file_path ? '👀 View Status' : '📤 Submit Resume' }}</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Placement Tracking Card -->
-        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-l-4 {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'border-emerald-500' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'border-blue-500' : 'border-violet-500') }} relative overflow-hidden">
-            <!-- Decorative background -->
-            <div class="absolute top-0 right-0 w-24 h-24 {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'bg-emerald-500/10' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'bg-blue-500/10' : 'bg-violet-500/10') }} rounded-full -translate-y-1/2 translate-x-1/2"></div>
-
-            <div class="relative">
-                <div class="flex items-start justify-between mb-5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl {{ $placementTracking && $placementTracking->status === 'SCL_RELEASED' ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : ($placementTracking && in_array($placementTracking->status, ['ACCEPTED', 'OFFER_RECEIVED', 'INTERVIEWED']) ? 'bg-gradient-to-br from-blue-400 to-indigo-500' : 'bg-gradient-to-br from-violet-400 to-purple-500') }} flex items-center justify-center shadow-lg float-animation">
-                            <span class="text-2xl">💼</span>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Placement</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Step 2: Land that role!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-5">
-                    @php
-                        $statusLabels = [
-                            'NOT_APPLIED' => ['label' => 'Not Started', 'emoji' => '🎯', 'gradient' => 'from-violet-500 to-purple-500'],
-                            'SAL_RELEASED' => ['label' => 'SAL Released', 'emoji' => '📋', 'gradient' => 'from-blue-500 to-indigo-500'],
-                            'APPLIED' => ['label' => 'Applied', 'emoji' => '📨', 'gradient' => 'from-blue-500 to-cyan-500'],
-                            'INTERVIEWED' => ['label' => 'Interviewed', 'emoji' => '🎤', 'gradient' => 'from-indigo-500 to-purple-500'],
-                            'OFFER_RECEIVED' => ['label' => 'Offer Received', 'emoji' => '🎁', 'gradient' => 'from-pink-500 to-rose-500'],
-                            'ACCEPTED' => ['label' => 'Accepted', 'emoji' => '🤝', 'gradient' => 'from-emerald-500 to-teal-500'],
-                            'SCL_RELEASED' => ['label' => 'Completed', 'emoji' => '🏆', 'gradient' => 'from-emerald-500 to-green-500'],
-                        ];
-                        $currentStatus = $placementTracking->status ?? 'NOT_APPLIED';
-                        $statusInfo = $statusLabels[$currentStatus] ?? ['label' => 'Unknown', 'emoji' => '❓', 'gradient' => 'from-gray-500 to-gray-600'];
-                    @endphp
-                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r {{ $statusInfo['gradient'] }} text-white shadow-md">
-                        <span>{{ $statusInfo['emoji'] }}</span> {{ $statusInfo['label'] }}
-                    </span>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
-                        @if(!$resumeInspection || !$resumeInspection->isApproved())
-                            Get your resume approved first! 📄
-                        @elseif($currentStatus === 'NOT_APPLIED')
-                            Time to explore and apply to companies! 🚀
-                        @elseif($currentStatus === 'SCL_RELEASED')
-                            You did it! Placement complete! 🎊
-                        @else
-                            Keep pushing! You're making progress! 💪
-                        @endif
-                    </p>
-                </div>
-
-                <a href="{{ route('student.placement.index') }}" class="inline-flex items-center justify-center w-full px-5 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg {{ !$resumeInspection || !$resumeInspection->isApproved() ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$resumeInspection || !$resumeInspection->isApproved() ? 'disabled' : '' }}>
-                    <span class="mr-2">📊 Track Progress</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Quick Actions Card -->
-        <div class="card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-l-4 border-cyan-500 relative overflow-hidden">
-            <!-- Decorative background -->
-            <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-
-            <div class="relative">
-                <div class="flex items-center gap-4 mb-5">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-lg float-animation">
-                        <span class="text-2xl">⚡</span>
+        <div class="relative">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Quick Access</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Jump to your modules</p>
+                        <h2 class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">Resume & Poster Submission</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Step 1: Get your documents approved before placement</p>
                     </div>
                 </div>
+                <a href="{{ route('student.resume.index') }}" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    {{ $resumeInspection && $resumeInspection->resume_file_path ? 'View Submission' : 'Submit Now' }}
+                </a>
+            </div>
 
-                <div class="space-y-2">
-                    <a href="{{ route('student.fyp.overview') }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-purple-50 dark:from-gray-700 dark:to-purple-900/20 hover:from-purple-100 hover:to-pink-100 dark:hover:from-gray-600 dark:hover:to-purple-800/30 transition-all duration-300 group">
-                        <span class="flex items-center gap-3">
-                            <span class="text-xl">🎓</span>
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">FYP Overview</span>
-                        </span>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-600">
+                        @if($resumeInspection && $resumeInspection->resume_file_path)
+                            1
+                        @else
+                            0
+                        @endif
+                    </div>
+                    <div class="text-xs text-purple-700 dark:text-purple-400">Documents</div>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-blue-600">
+                        @if($resumeInspection && $resumeInspection->isPending())
+                            1
+                        @else
+                            0
+                        @endif
+                    </div>
+                    <div class="text-xs text-blue-700 dark:text-blue-400">Under Review</div>
+                </div>
+                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-orange-600">
+                        @if($resumeInspection && $resumeInspection->isRevisionRequired())
+                            1
+                        @else
+                            0
+                        @endif
+                    </div>
+                    <div class="text-xs text-orange-700 dark:text-orange-400">Needs Revision</div>
+                </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-emerald-600">
+                        @if($resumeInspection && $resumeInspection->isApproved())
+                            1
+                        @else
+                            0
+                        @endif
+                    </div>
+                    <div class="text-xs text-emerald-700 dark:text-emerald-400">Approved</div>
+                </div>
+            </div>
+
+            <!-- Status Card -->
+            <div class="bg-gradient-to-r {{ $resumeInspection && $resumeInspection->isApproved() ? 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-800' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-orange-200 dark:border-orange-800' : ($resumeInspection && $resumeInspection->resume_file_path ? 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800' : 'from-gray-50 to-slate-50 dark:from-gray-700/50 dark:to-slate-700/50 border-gray-200 dark:border-gray-700')) }} rounded-xl p-4 border">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl {{ $resumeInspection && $resumeInspection->isApproved() ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'bg-gradient-to-br from-orange-400 to-amber-500' : ($resumeInspection && $resumeInspection->resume_file_path ? 'bg-gradient-to-br from-blue-400 to-indigo-500' : 'bg-gradient-to-br from-gray-400 to-slate-500')) }} flex items-center justify-center shadow-md">
+                        @if($resumeInspection && $resumeInspection->isApproved())
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        @elseif($resumeInspection && $resumeInspection->isRevisionRequired())
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        @elseif($resumeInspection && $resumeInspection->resume_file_path)
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        @else
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        @endif
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-gray-900 dark:text-white">
+                            @if($resumeInspection && $resumeInspection->isApproved())
+                                Approved - Ready for Placement!
+                            @elseif($resumeInspection && $resumeInspection->isRevisionRequired())
+                                Revision Required
+                            @elseif($resumeInspection && $resumeInspection->resume_file_path)
+                                Under Review
+                            @else
+                                Not Submitted Yet
+                            @endif
+                        </h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            @if($resumeInspection && $resumeInspection->isApproved())
+                                Your resume & poster have been approved. You can now proceed with placement applications.
+                            @elseif($resumeInspection && $resumeInspection->isRevisionRequired())
+                                Please check coordinator feedback and resubmit your revised documents.
+                            @elseif($resumeInspection && $resumeInspection->resume_file_path)
+                                Your submission is being reviewed. This typically takes 3-5 business days.
+                            @else
+                                Upload your merged Resume + Posters (PD3, PD4, PD5) as ONE PDF file.
+                            @endif
+                        </p>
+                    </div>
+                    <span class="px-3 py-1.5 text-xs font-bold rounded-full {{ $resumeInspection && $resumeInspection->isApproved() ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' : ($resumeInspection && $resumeInspection->isRevisionRequired() ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' : ($resumeInspection && $resumeInspection->resume_file_path ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200')) }}">
+                        {{ $resumeInspection ? $resumeInspection->status_display ?? 'Pending' : 'Not Started' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workplace Issues Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+        <div class="relative">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">Workplace Issues</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Report safety, health, or wellbeing concerns</p>
+                    </div>
+                </div>
+                <a href="{{ route('workplace-issues.create') }}" class="px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg inline-flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Report Issue
+                </a>
+            </div>
+
+            <!-- Summary Cards -->
+            @php
+                $workplaceStats = $workplaceIssueStats ?? ['total' => 0, 'new' => 0, 'in_progress' => 0, 'resolved' => 0];
+            @endphp
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-600 dark:text-gray-300">{{ $workplaceStats['total'] }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Total Reports</div>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-600">{{ $workplaceStats['new'] }}</div>
+                    <div class="text-xs text-purple-700 dark:text-purple-400">New</div>
+                </div>
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-yellow-600">{{ $workplaceStats['in_progress'] }}</div>
+                    <div class="text-xs text-yellow-700 dark:text-yellow-400">In Progress</div>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-green-600">{{ $workplaceStats['resolved'] }}</div>
+                    <div class="text-xs text-green-700 dark:text-green-400">Resolved</div>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            @if($workplaceStats['total'] == 0)
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-md">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-900 dark:text-white">No Issues Reported</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                If you encounter any workplace safety, health, or wellbeing concerns during your placement, you can report them here confidentially.
+                            </p>
+                        </div>
+                        <a href="{{ route('workplace-issues.index') }}" class="px-4 py-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-sm">
+                            View All Reports →
+                        </a>
+                    </div>
+                </div>
+            @else
+                <div class="text-center pt-2">
+                    <a href="{{ route('workplace-issues.index') }}" class="text-[#0084C5] hover:underline text-sm font-medium">
+                        View all workplace issue reports →
+                    </a>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- My Courses Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+
+        <div class="relative">
+            <!-- Header -->
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-[#003A6C] dark:text-[#0084C5]">My Courses</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Track your progress across all WBL modules</p>
+                </div>
+            </div>
+
+            <!-- Course Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- PPE Card -->
+                <a href="{{ route('student.ppe.overview') }}" class="card-hover bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-5 border border-violet-200 dark:border-violet-800 hover:shadow-lg transition-all duration-300 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
+                                <span class="text-lg">📊</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">PPE</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Professional Practice</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-violet-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
-                    </a>
-                    <a href="{{ route('student.ppe.overview') }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-blue-50 dark:from-gray-700 dark:to-blue-900/20 hover:from-blue-100 hover:to-cyan-100 dark:hover:from-gray-600 dark:hover:to-blue-800/30 transition-all duration-300 group">
-                        <span class="flex items-center gap-3">
-                            <span class="text-xl">📊</span>
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">PPE Overview</span>
-                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Current Score</span>
+                            <span class="font-bold text-violet-600">{{ number_format($courseScores['PPE']['score'], 1) }}%</span>
+                        </div>
+                        <div class="w-full bg-violet-100 dark:bg-violet-900/30 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-violet-500 to-purple-500 h-2 rounded-full transition-all duration-500" style="width: {{ min($courseScores['PPE']['score'], 100) }}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>AT: {{ number_format($courseScores['PPE']['at_score'], 1) }}%</span>
+                            <span>IC: {{ number_format($courseScores['PPE']['ic_score'], 1) }}%</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- FYP Card -->
+                <a href="{{ route('student.fyp.overview') }}" class="card-hover bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-5 border border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
+                                <span class="text-lg">🎓</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">FYP</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Final Year Project</p>
+                            </div>
+                        </div>
                         <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
-                    </a>
-                    <a href="{{ route('student.li.overview') }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-teal-50 dark:from-gray-700 dark:to-teal-900/20 hover:from-teal-100 hover:to-emerald-100 dark:hover:from-gray-600 dark:hover:to-teal-800/30 transition-all duration-300 group">
-                        <span class="flex items-center gap-3">
-                            <span class="text-xl">🔗</span>
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">LI Overview</span>
-                        </span>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Current Score</span>
+                            <span class="font-bold text-blue-600">{{ number_format($courseScores['FYP']['score'], 1) }}%</span>
+                        </div>
+                        <div class="w-full bg-blue-100 dark:bg-blue-900/30 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500" style="width: {{ min($courseScores['FYP']['score'], 100) }}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            <span>Max: {{ $courseScores['FYP']['max'] }}%</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- IP Card -->
+                <a href="#" class="card-hover bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-xl p-5 border border-cyan-200 dark:border-cyan-800 hover:shadow-lg transition-all duration-300 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center shadow-md">
+                                <span class="text-lg">🏭</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">IP</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Industrial Project</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
-                    </a>
-                    <a href="{{ route('students.profile.edit', $student) }}" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-slate-50 to-pink-50 dark:from-gray-700 dark:to-pink-900/20 hover:from-pink-100 hover:to-rose-100 dark:hover:from-gray-600 dark:hover:to-pink-800/30 transition-all duration-300 group">
-                        <span class="flex items-center gap-3">
-                            <span class="text-xl">👤</span>
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">My Profile</span>
-                        </span>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-pink-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Current Score</span>
+                            <span class="font-bold text-cyan-600">{{ number_format($courseScores['IP']['score'], 1) }}%</span>
+                        </div>
+                        <div class="w-full bg-cyan-100 dark:bg-cyan-900/30 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-cyan-500 to-teal-500 h-2 rounded-full transition-all duration-500" style="width: {{ min($courseScores['IP']['score'], 100) }}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            <span>Max: {{ $courseScores['IP']['max'] }}%</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- OSH Card -->
+                <a href="#" class="card-hover bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl p-5 border border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-300 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-md">
+                                <span class="text-lg">🦺</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">OSH</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Safety & Health</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
-                    </a>
-                </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Current Score</span>
+                            <span class="font-bold text-orange-600">{{ number_format($courseScores['OSH']['score'], 1) }}%</span>
+                        </div>
+                        <div class="w-full bg-orange-100 dark:bg-orange-900/30 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full transition-all duration-500" style="width: {{ min($courseScores['OSH']['score'], 100) }}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            <span>Max: {{ $courseScores['OSH']['max'] }}%</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- LI Card -->
+                <a href="{{ route('student.li.overview') }}" class="card-hover bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-xl p-5 border border-rose-200 dark:border-rose-800 hover:shadow-lg transition-all duration-300 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-md">
+                                <span class="text-lg">🔗</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">LI</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Learning Integration</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-rose-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Current Score</span>
+                            <span class="font-bold text-rose-600">{{ number_format($courseScores['LI']['score'], 1) }}%</span>
+                        </div>
+                        <div class="w-full bg-rose-100 dark:bg-rose-900/30 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-rose-500 to-pink-500 h-2 rounded-full transition-all duration-500" style="width: {{ min($courseScores['LI']['score'], 100) }}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            <span>Max: {{ $courseScores['LI']['max'] }}%</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Placement Card -->
+                <a href="{{ route('student.placement.index') }}" class="card-hover bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800 hover:shadow-lg transition-all duration-300 group {{ !$resumeInspection || !$resumeInspection->isApproved() ? 'opacity-60' : '' }}">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
+                                <span class="text-lg">💼</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">Placement</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Track Applications</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <div class="space-y-2">
+                        @php
+                            $placementStatusLabels = [
+                                'NOT_APPLIED' => ['label' => 'Not Started', 'color' => 'text-gray-600'],
+                                'SAL_RELEASED' => ['label' => 'SAL Released', 'color' => 'text-blue-600'],
+                                'APPLIED' => ['label' => 'Applied', 'color' => 'text-blue-600'],
+                                'INTERVIEWED' => ['label' => 'Interviewed', 'color' => 'text-indigo-600'],
+                                'OFFER_RECEIVED' => ['label' => 'Offer Received', 'color' => 'text-pink-600'],
+                                'ACCEPTED' => ['label' => 'Accepted', 'color' => 'text-emerald-600'],
+                                'SCL_RELEASED' => ['label' => 'Hired', 'color' => 'text-green-600'],
+                            ];
+                            $pStatus = $placementTracking->status ?? 'NOT_APPLIED';
+                            $pStatusInfo = $placementStatusLabels[$pStatus] ?? ['label' => 'Unknown', 'color' => 'text-gray-600'];
+                        @endphp
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Status</span>
+                            <span class="font-bold {{ $pStatusInfo['color'] }}">{{ $pStatusInfo['label'] }}</span>
+                        </div>
+                        @if(!$resumeInspection || !$resumeInspection->isApproved())
+                            <p class="text-xs text-amber-600 dark:text-amber-400">Resume approval required</p>
+                        @else
+                            <p class="text-xs text-emerald-600 dark:text-emerald-400">Ready to track applications</p>
+                        @endif
+                    </div>
+                </a>
             </div>
         </div>
     </div>

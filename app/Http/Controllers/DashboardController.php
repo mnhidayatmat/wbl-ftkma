@@ -1036,6 +1036,15 @@ class DashboardController extends Controller
             };
         });
 
+        // Fetch workplace issues for this student
+        $workplaceIssues = \App\Models\WorkplaceIssue::where('student_id', $student->id)->get();
+        $workplaceIssueStats = [
+            'total' => $workplaceIssues->count(),
+            'new' => $workplaceIssues->where('status', 'new')->count(),
+            'in_progress' => $workplaceIssues->whereIn('status', ['under_review', 'in_progress'])->count(),
+            'resolved' => $workplaceIssues->whereIn('status', ['resolved', 'closed'])->count(),
+        ];
+
         return view('dashboard-student', compact(
             'student',
             'assignedAt',
@@ -1051,7 +1060,8 @@ class DashboardController extends Controller
             'isInCompletedGroup',
             'placementTracking',
             'assessmentWindows',
-            'followUpReminders'
+            'followUpReminders',
+            'workplaceIssueStats'
         ));
     }
 }
