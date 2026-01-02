@@ -1642,8 +1642,8 @@
                 </ul>
             </div>
 
-            {{-- PLACEMENT PREFERENCES CARD --}}
-            @if(isset($isStudentView) && $isStudentView)
+            {{-- PLACEMENT PREFERENCES CARD - Only show from stage 3 onwards --}}
+            @if(isset($isStudentView) && $isStudentView && !in_array($student->placement_status, ['NOT_APPLIED', 'SAL_RELEASED']))
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase flex items-center gap-2">
