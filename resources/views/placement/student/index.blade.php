@@ -583,6 +583,18 @@
                                                     </label>
                                                     @endif
                                                 @endforeach
+                                                <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 p-1 rounded border-t border-gray-200 dark:border-gray-600 pt-2 mt-1">
+                                                    <input type="checkbox" name="skills[]" value="other" id="prepSkillsOtherCheckbox"
+                                                           onchange="togglePrepOtherInput('skills')"
+                                                           {{ $student->skills && collect($student->skills)->contains(fn($s) => str_starts_with($s, 'other:')) ? 'checked' : '' }}
+                                                           class="w-3 h-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                                                    <span class="text-gray-700 dark:text-gray-300">Other (please specify)</span>
+                                                </label>
+                                            </div>
+                                            <div id="prepSkillsOtherContainer" class="{{ $student->skills && collect($student->skills)->contains(fn($s) => str_starts_with($s, 'other:')) ? '' : 'hidden' }} mt-1">
+                                                <input type="text" name="skills_other" placeholder="Please specify other skill..."
+                                                       value="{{ $student->skills ? (collect($student->skills)->first(fn($s) => str_starts_with($s, 'other:')) ? str_replace('other:', '', collect($student->skills)->first(fn($s) => str_starts_with($s, 'other:'))) : '') : '' }}"
+                                                       class="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white">
                                             </div>
                                         </div>
 
@@ -590,28 +602,28 @@
                                         <div>
                                             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
                                             <div class="max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-white dark:bg-gray-700">
-                                                @php
-                                                    $currentInterestsPrep = [];
-                                                    if ($student->interests) {
-                                                        $interestParts = array_map('trim', explode(',', $student->interests));
-                                                        foreach ($interestParts as $part) {
-                                                            $foundKey = array_search($part, config('placement_preferences.interests', []));
-                                                            if ($foundKey) {
-                                                                $currentInterestsPrep[] = $foundKey;
-                                                            }
-                                                        }
-                                                    }
-                                                @endphp
                                                 @foreach($preferencesOptions['interests'] as $key => $label)
                                                     @if($key !== 'other')
                                                     <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 p-1 rounded">
                                                         <input type="checkbox" name="interests[]" value="{{ $key }}"
-                                                               {{ in_array($key, $currentInterestsPrep) ? 'checked' : '' }}
+                                                               {{ $student->interests && in_array($key, $student->interests) ? 'checked' : '' }}
                                                                class="w-3 h-3 text-green-600 rounded border-gray-300 focus:ring-green-500">
                                                         <span class="text-gray-700 dark:text-gray-300">{{ $label }}</span>
                                                     </label>
                                                     @endif
                                                 @endforeach
+                                                <label class="flex items-center gap-2 text-xs cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 p-1 rounded border-t border-gray-200 dark:border-gray-600 pt-2 mt-1">
+                                                    <input type="checkbox" name="interests[]" value="other" id="prepInterestsOtherCheckbox"
+                                                           onchange="togglePrepOtherInput('interests')"
+                                                           {{ $student->interests && collect($student->interests)->contains(fn($i) => str_starts_with($i, 'other:')) ? 'checked' : '' }}
+                                                           class="w-3 h-3 text-green-600 rounded border-gray-300 focus:ring-green-500">
+                                                    <span class="text-gray-700 dark:text-gray-300">Other (please specify)</span>
+                                                </label>
+                                            </div>
+                                            <div id="prepInterestsOtherContainer" class="{{ $student->interests && collect($student->interests)->contains(fn($i) => str_starts_with($i, 'other:')) ? '' : 'hidden' }} mt-1">
+                                                <input type="text" name="interests_other" placeholder="Please specify other interest..."
+                                                       value="{{ $student->interests ? (collect($student->interests)->first(fn($i) => str_starts_with($i, 'other:')) ? str_replace('other:', '', collect($student->interests)->first(fn($i) => str_starts_with($i, 'other:'))) : '') : '' }}"
+                                                       class="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white">
                                             </div>
                                         </div>
 
@@ -685,6 +697,14 @@
                                     const select = document.getElementById('prepPreferredLocationSelect');
                                     const container = document.getElementById('prepLocationOtherContainer');
                                     container.classList.toggle('hidden', select.value !== 'other');
+                                } else if (type === 'skills') {
+                                    const checkbox = document.getElementById('prepSkillsOtherCheckbox');
+                                    const container = document.getElementById('prepSkillsOtherContainer');
+                                    container.classList.toggle('hidden', !checkbox.checked);
+                                } else if (type === 'interests') {
+                                    const checkbox = document.getElementById('prepInterestsOtherCheckbox');
+                                    const container = document.getElementById('prepInterestsOtherContainer');
+                                    container.classList.toggle('hidden', !checkbox.checked);
                                 }
                             }
                         </script>
