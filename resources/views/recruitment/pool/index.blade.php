@@ -33,83 +33,178 @@
     </div>
 
     <!-- Filter Panel -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6"
+         x-data="{ showAdvanced: {{ (request('skills') || request('interests') || request('preferred_industry') || request('preferred_location')) ? 'true' : 'false' }} }">
         <form method="GET" action="{{ route('recruitment.pool.index') }}" id="filter-form">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Programme Filter -->
+            <!-- Row 1: Programme (Compact Pills) + Search + CGPA -->
+            <div class="space-y-4">
+                <!-- Programme Filter - Compact Checkbox Pills -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Programme</label>
-                    <select name="programmes[]" multiple class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary" size="4">
+                    <div class="flex flex-wrap gap-2">
                         @foreach($programmes as $programme)
-                            <option value="{{ $programme }}" {{ in_array($programme, request('programmes', [])) ? 'selected' : '' }}>
-                                {{ \App\Models\Student::getProgrammeShortCode($programme) }}
-                            </option>
+                            @php $shortCode = \App\Models\Student::getProgrammeShortCode($programme); @endphp
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="programmes[]" value="{{ $programme }}"
+                                    {{ in_array($programme, request('programmes', [])) ? 'checked' : '' }}
+                                    class="sr-only peer">
+                                <span class="px-3 py-1.5 text-sm font-medium rounded-full border-2 transition-all
+                                    peer-checked:bg-umpsa-primary peer-checked:text-white peer-checked:border-umpsa-primary
+                                    bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600
+                                    hover:border-umpsa-secondary hover:bg-umpsa-secondary/10">
+                                    {{ $shortCode }}
+                                </span>
+                            </label>
                         @endforeach
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
-                </div>
-
-                <!-- CGPA Range Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">CGPA Range</label>
-                    <div class="flex gap-2 items-center">
-                        <input type="number" name="cgpa_min" step="0.01" min="0" max="4"
-                            value="{{ request('cgpa_min') }}"
-                            placeholder="Min"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
-                        <span class="text-gray-500">to</span>
-                        <input type="number" name="cgpa_max" step="0.01" min="0" max="4"
-                            value="{{ request('cgpa_max') }}"
-                            placeholder="Max"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
                     </div>
                 </div>
 
-                <!-- Skills Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Skills</label>
-                    <input type="text" name="skills[]"
-                        value="{{ implode(', ', request('skills', [])) }}"
-                        placeholder="e.g., Python, JavaScript, SQL"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
-                    <p class="text-xs text-gray-500 mt-1">Comma-separated</p>
+                <!-- Row 2: Search, CGPA Range, Resume Status, Placement Status -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search</label>
+                        <input type="text" name="search"
+                            value="{{ request('search') }}"
+                            placeholder="Name or Matric No"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                    </div>
+
+                    <!-- CGPA Range Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">CGPA Range</label>
+                        <div class="flex gap-2 items-center">
+                            <input type="number" name="cgpa_min" step="0.01" min="0" max="4"
+                                value="{{ request('cgpa_min') }}"
+                                placeholder="Min"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                            <span class="text-gray-500 dark:text-gray-400">-</span>
+                            <input type="number" name="cgpa_max" step="0.01" min="0" max="4"
+                                value="{{ request('cgpa_max') }}"
+                                placeholder="Max"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                        </div>
+                    </div>
+
+                    <!-- Resume Status Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resume Status</label>
+                        <select name="resume_status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                            <option value="">All</option>
+                            <option value="approved" {{ request('resume_status') === 'approved' ? 'selected' : '' }}>Recommended</option>
+                            <option value="with_resume" {{ request('resume_status') === 'with_resume' ? 'selected' : '' }}>Has Resume</option>
+                        </select>
+                    </div>
+
+                    <!-- Placement Status Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Placement Status</label>
+                        <select name="placement_status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                            <option value="">All</option>
+                            <option value="ready" {{ request('placement_status') === 'ready' ? 'selected' : '' }}>Ready for Placement</option>
+                            <option value="not_applied" {{ request('placement_status') === 'not_applied' ? 'selected' : '' }}>Not Applied</option>
+                            <option value="applied" {{ request('placement_status') === 'applied' ? 'selected' : '' }}>Applied</option>
+                            <option value="no_offer" {{ request('placement_status') === 'no_offer' ? 'selected' : '' }}>Not Received Offers</option>
+                            <option value="offer_received" {{ request('placement_status') === 'offer_received' ? 'selected' : '' }}>Offer Received</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Resume Status Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resume Inspection</label>
-                    <select name="resume_status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
-                        <option value="">All</option>
-                        <option value="approved" {{ request('resume_status') === 'approved' ? 'selected' : '' }}>Recommended</option>
-                        <option value="with_resume" {{ request('resume_status') === 'with_resume' ? 'selected' : '' }}>Has Resume</option>
-                    </select>
+                <!-- Toggle Advanced Filters -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <button type="button" @click="showAdvanced = !showAdvanced"
+                        class="text-sm text-umpsa-primary hover:text-umpsa-secondary font-medium inline-flex items-center gap-1">
+                        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': showAdvanced }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                        <span x-text="showAdvanced ? 'Hide Advanced Filters' : 'Show Advanced Filters'"></span>
+                    </button>
                 </div>
 
-                <!-- Placement Status Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Placement Status</label>
-                    <select name="placement_status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
-                        <option value="">All</option>
-                        <option value="ready" {{ request('placement_status') === 'ready' ? 'selected' : '' }}>Ready for Placement</option>
-                        <option value="not_applied" {{ request('placement_status') === 'not_applied' ? 'selected' : '' }}>Not Applied</option>
-                        <option value="applied" {{ request('placement_status') === 'applied' ? 'selected' : '' }}>Applied</option>
-                        <option value="no_offer" {{ request('placement_status') === 'no_offer' ? 'selected' : '' }}>Not Received Offers</option>
-                        <option value="offer_received" {{ request('placement_status') === 'offer_received' ? 'selected' : '' }}>Offer Received</option>
-                    </select>
-                </div>
+                <!-- Advanced Filters Section -->
+                <div x-show="showAdvanced" x-collapse class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Skills Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Skills</label>
+                            <input type="text" name="skills[]"
+                                value="{{ implode(', ', request('skills', [])) }}"
+                                placeholder="e.g., Python, SQL"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Comma-separated</p>
+                        </div>
 
-                <!-- Search -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search</label>
-                    <input type="text" name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Name or Matric No"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                        <!-- Interests Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Interests</label>
+                            @if($allInterests->count() > 0)
+                                <select name="interests[]" multiple class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary" size="3">
+                                    @foreach($allInterests as $interest)
+                                        <option value="{{ $interest }}" {{ in_array($interest, request('interests', [])) ? 'selected' : '' }}>
+                                            {{ $interest }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ctrl/Cmd + click for multiple</p>
+                            @else
+                                <input type="text" name="interests[]"
+                                    value="{{ implode(', ', request('interests', [])) }}"
+                                    placeholder="e.g., Automotive, Manufacturing"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Comma-separated</p>
+                            @endif
+                        </div>
+
+                        <!-- Preferred Industry Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preferred Industry</label>
+                            @if($allIndustries->count() > 0)
+                                <select name="preferred_industry[]" multiple class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary" size="3">
+                                    @foreach($allIndustries as $industry)
+                                        <option value="{{ $industry }}" {{ in_array($industry, request('preferred_industry', [])) ? 'selected' : '' }}>
+                                            {{ $industry }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ctrl/Cmd + click for multiple</p>
+                            @else
+                                <input type="text" name="preferred_industry[]"
+                                    value="{{ implode(', ', request('preferred_industry', [])) }}"
+                                    placeholder="e.g., Oil & Gas, Aerospace"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Comma-separated</p>
+                            @endif
+                        </div>
+
+                        <!-- Preferred Location Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preferred Location</label>
+                            @if($allLocations->count() > 0)
+                                <select name="preferred_location[]" multiple class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary" size="3">
+                                    @foreach($allLocations as $location)
+                                        <option value="{{ $location }}" {{ in_array($location, request('preferred_location', [])) ? 'selected' : '' }}>
+                                            {{ $location }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ctrl/Cmd + click for multiple</p>
+                            @else
+                                <input type="text" name="preferred_location[]"
+                                    value="{{ implode(', ', request('preferred_location', [])) }}"
+                                    placeholder="e.g., Kuala Lumpur, Johor"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-umpsa-primary">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Comma-separated</p>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex gap-2 mt-4">
-                <button type="submit" class="px-4 py-2 bg-umpsa-primary hover:bg-umpsa-secondary text-white font-semibold rounded-lg transition-colors">
+            <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button type="submit" class="px-4 py-2 bg-umpsa-primary hover:bg-umpsa-secondary text-white font-semibold rounded-lg transition-colors inline-flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
                     Apply Filters
                 </button>
                 <a href="{{ route('recruitment.pool.index') }}" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-semibold rounded-lg transition-colors">

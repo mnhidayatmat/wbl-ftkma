@@ -93,6 +93,42 @@ class RecruitmentPoolController extends Controller
             }
         }
 
+        // Filter by interests (match any)
+        if ($request->filled('interests')) {
+            $interests = is_array($request->interests) ? $request->interests : [$request->interests];
+            $query->where(function ($q) use ($interests) {
+                foreach ($interests as $interest) {
+                    if (!empty($interest)) {
+                        $q->orWhereJsonContains('interests', $interest);
+                    }
+                }
+            });
+        }
+
+        // Filter by preferred industry (match any)
+        if ($request->filled('preferred_industry')) {
+            $industries = is_array($request->preferred_industry) ? $request->preferred_industry : [$request->preferred_industry];
+            $query->where(function ($q) use ($industries) {
+                foreach ($industries as $industry) {
+                    if (!empty($industry)) {
+                        $q->orWhereJsonContains('preferred_industry', $industry);
+                    }
+                }
+            });
+        }
+
+        // Filter by preferred location (match any)
+        if ($request->filled('preferred_location')) {
+            $locations = is_array($request->preferred_location) ? $request->preferred_location : [$request->preferred_location];
+            $query->where(function ($q) use ($locations) {
+                foreach ($locations as $location) {
+                    if (!empty($location)) {
+                        $q->orWhereJsonContains('preferred_location', $location);
+                    }
+                }
+            });
+        }
+
         // Search by name or matric
         if ($request->filled('search')) {
             $search = $request->search;
@@ -138,7 +174,37 @@ class RecruitmentPoolController extends Controller
             ->sort()
             ->values();
 
-        return view('recruitment.pool.index', compact('students', 'programmes', 'allSkills'));
+        // Get all unique interests for filter
+        $allInterests = Student::inActiveGroups()
+            ->whereNotNull('interests')
+            ->get()
+            ->pluck('interests')
+            ->flatten()
+            ->unique()
+            ->sort()
+            ->values();
+
+        // Get all unique preferred industries for filter
+        $allIndustries = Student::inActiveGroups()
+            ->whereNotNull('preferred_industry')
+            ->get()
+            ->pluck('preferred_industry')
+            ->flatten()
+            ->unique()
+            ->sort()
+            ->values();
+
+        // Get all unique preferred locations for filter
+        $allLocations = Student::inActiveGroups()
+            ->whereNotNull('preferred_location')
+            ->get()
+            ->pluck('preferred_location')
+            ->flatten()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('recruitment.pool.index', compact('students', 'programmes', 'allSkills', 'allInterests', 'allIndustries', 'allLocations'));
     }
 
     /**
