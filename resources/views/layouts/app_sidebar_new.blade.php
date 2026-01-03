@@ -228,6 +228,21 @@
     </a>
     @endif
 
+    <!-- Learning Materials (Admin, Coordinators, Lecturers) -->
+    @if($isAdmin || $isModuleCoordinator || $isLecturer || $isAt)
+    <a href="{{ route('academic.learning-materials.index') }}"
+       class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('academic.learning-materials.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+       :class="isSidebarCollapsed ? 'justify-center px-0' : 'px-2'"
+       :title="isSidebarCollapsed ? 'Learning Materials' : ''">
+        <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+        </div>
+        <span x-show="sidebarTextVisible" x-transition class="text-sm font-medium">Learning Materials</span>
+    </a>
+    @endif
+
     <!-- Documents Section (Admin Only) -->
     <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <p x-show="sidebarTextVisible" x-transition class="px-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-semibold" :class="isSidebarCollapsed ? 'text-center px-0' : ''">
@@ -402,6 +417,10 @@
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.assign-students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
+                <a href="{{ route('academic.learning-materials.index', ['module' => 'fyp']) }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.learning-materials.*') && request()->get('module') == 'fyp' ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Learning Materials
+                </a>
                 @endif
                 <a href="{{ route('academic.fyp.proposals.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.fyp.proposals.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -507,6 +526,10 @@
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ip.assign-students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
+                <a href="{{ route('academic.learning-materials.index', ['module' => 'ip']) }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.learning-materials.*') && request()->get('module') == 'ip' ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Learning Materials
+                </a>
                 <a href="{{ route('academic.ip.assessments.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ip.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assessments
@@ -606,6 +629,10 @@
                 <a href="{{ route('academic.osh.assign-students.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.assign-students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
+                </a>
+                <a href="{{ route('academic.learning-materials.index', ['module' => 'osh']) }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.learning-materials.*') && request()->get('module') == 'osh' ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Learning Materials
                 </a>
                 <a href="{{ route('academic.osh.assessments.index') }}" 
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.osh.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -709,6 +736,10 @@
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.assign-students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
                 </a>
+                <a href="{{ route('academic.learning-materials.index', ['module' => 'ppe']) }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.learning-materials.*') && request()->get('module') == 'ppe' ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Learning Materials
+                </a>
                 @endif
                 <a href="{{ route('academic.ppe.assessments.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.ppe.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -808,6 +839,10 @@
                 <a href="{{ route('academic.li.assign-students.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.assign-students.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     Assign Students
+                </a>
+                <a href="{{ route('academic.learning-materials.index', ['module' => 'li']) }}"
+                   class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.learning-materials.*') && request()->get('module') == 'li' ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    Learning Materials
                 </a>
                 <a href="{{ route('academic.li.assessments.index') }}"
                    class="block px-3 py-2 text-sm rounded-lg transition-all duration-300 min-h-[44px] flex items-center {{ request()->routeIs('academic.li.assessments.*') ? 'text-[#0084C5] font-medium border-l-2 border-[#00A86B]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
@@ -986,6 +1021,13 @@
                             </svg>
                             <span>Assessment Submission</span>
                         </a>
+                        <a href="{{ route('student.learning-materials.index', ['module' => 'fyp']) }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.learning-materials.*') && request()->get('module') == 'fyp' ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span>Learning Materials</span>
+                        </a>
                     </div>
                 </div>
 
@@ -1012,6 +1054,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                             <span>Assessment Submission</span>
+                        </a>
+                        <a href="{{ route('student.learning-materials.index', ['module' => 'ip']) }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.learning-materials.*') && request()->get('module') == 'ip' ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span>Learning Materials</span>
                         </a>
                     </div>
                 </div>
@@ -1040,6 +1089,13 @@
                             </svg>
                             <span>Assessment Submission</span>
                         </a>
+                        <a href="{{ route('student.learning-materials.index', ['module' => 'osh']) }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.learning-materials.*') && request()->get('module') == 'osh' ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span>Learning Materials</span>
+                        </a>
                     </div>
                 </div>
 
@@ -1066,6 +1122,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                             <span>Assessment Submission</span>
+                        </a>
+                        <a href="{{ route('student.learning-materials.index', ['module' => 'ppe']) }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.learning-materials.*') && request()->get('module') == 'ppe' ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span>Learning Materials</span>
                         </a>
                     </div>
                 </div>
@@ -1094,11 +1157,18 @@
                             </svg>
                             <span>Assessment Submission</span>
                         </a>
+                        <a href="{{ route('student.learning-materials.index', ['module' => 'li']) }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out text-xs {{ request()->routeIs('student.learning-materials.*') && request()->get('module') == 'li' ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span>Learning Materials</span>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Profile -->
         <a href="{{ route('students.profile.show') }}" 
            class="flex items-center gap-1 rounded-lg transition-all duration-300 ease-in-out min-h-[44px] {{ request()->routeIs('students.profile.*') ? 'bg-[#E6F4EF] dark:bg-gray-700/50 text-[#003A6C] dark:text-white border-l-[3px] border-[#00A86B] font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
